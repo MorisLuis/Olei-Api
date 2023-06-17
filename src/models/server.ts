@@ -2,21 +2,27 @@ import express, { Application } from "express";
 import cors from 'cors';
 import { dbConnection } from "../database/connection";
 
+import userRouter from "../routes/userRouter";
 import productRouter from "../routes/productRouter";
+import authRouter from "../routes/authRouter";
 
 
 class Server {
     private app: Application;
     private port: string;
     private paths: {
-        product : string
+        product : string,
+        user : string,
+        auth : string
     }
 
     constructor() {
         this.app = express();
         this.port = process.env.PORT || "5001"
         this.paths = {
-            product : "/api/product"
+            product : "/api/product",
+            user: "/api/user",
+            auth : "/api/auth"
         }
 
         //Connect to database
@@ -43,7 +49,10 @@ class Server {
     }
 
     routes() {
-        this.app.use(this.paths.product, productRouter)
+        this.app.use(this.paths.product, productRouter);
+        this.app.use(this.paths.user, userRouter)
+        this.app.use(this.paths.auth, authRouter)
+
     }
 
     listen() {

@@ -7,4 +7,8 @@ export const querys = {
     getTotalProducts: "SELECT COUNT(*) FROM [OLEIDB1].[dbo].[CLIENTES]",
     updateProductById:
         "UPDATE [OLEIDB1].[dbo].[CLIENTES] SET Almacen = @Id_Almacen , Cliente = @Id_Cliente , Nombre = @Nombre WHERE Id = @id",
+
+
+    getAllUsers : "SELECT TOP(500) * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS]",
+    getUser : "SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS] WHERE Nombre = ?"
 };
