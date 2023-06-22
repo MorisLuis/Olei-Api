@@ -49,7 +49,6 @@ const login = async (req: Request, res: Response) => {
 
         await pool?.close();
 
-        console.log({otherDBServer, otherDBDatabase})
         const otherPool = await dbConnection(otherDBServer, otherDBDatabase);
 
         const otherQuery = `SELECT TOP(10) * FROM [${otherDBDatabase}].[dbo].[PRODUCTOS]`;
