@@ -1,5 +1,5 @@
 export const querys = {
-    getAllProducts: "SELECT TOP(500) * FROM [OLEIDB1].[dbo].[CLIENTES]",
+    getAllProducts: "SELECT TOP(100) * FROM [OLEIDB1].[dbo].[PRODUCTOS]",
     getProducById: "SELECT * FROM CLIENTES Where Id = @Id",
     addNewProduct:
         "INSERT INTO [OLEIDB1].[dbo].[CLIENTES] (Id_Almacen , Id_Cliente , Nombre) VALUES (@Id_Almacen ,@Id_Cliente ,@Nombre);",

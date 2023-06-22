@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.querys = void 0;
+exports.querys = {
+    getAllProducts: "SELECT TOP(100) * FROM [OLEIDB1].[dbo].[PRODUCTOS]",
+    getProducById: "SELECT * FROM CLIENTES Where Id = @Id",
+    addNewProduct: "INSERT INTO [OLEIDB1].[dbo].[CLIENTES] (Id_Almacen , Id_Cliente , Nombre) VALUES (@Id_Almacen ,@Id_Cliente ,@Nombre);",
+    deleteProduct: "DELETE FROM [OLEIDB1].[dbo].[CLIENTES] WHERE Id= @Id",
+    getTotalProducts: "SELECT COUNT(*) FROM [OLEIDB1].[dbo].[CLIENTES]",
+    updateProductById: "UPDATE [OLEIDB1].[dbo].[CLIENTES] SET Almacen = @Id_Almacen , Cliente = @Id_Cliente , Nombre = @Nombre WHERE Id = @id",
+    getAllUsers: "SELECT TOP(500) * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS]",
+    getUser: "SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS] WHERE Nombre = ?"
+};
+//# sourceMappingURL=querys.js.map

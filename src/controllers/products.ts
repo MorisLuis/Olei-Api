@@ -1,13 +1,25 @@
 
-import { request, Request, Response } from 'express'
-import { dbConnection, querys, sql } from '../database';
+import { Request, Response } from 'express'
+import { dbConnection, querys } from '../database';
 
 const getProducts = async (req: Request, res: Response) => {
 
     try {
         const pool = await dbConnection();
-        const result = await pool?.request().query(querys.getAllProducts);
-        res.json(result?.recordset);
+        const getAllProducts = `
+        SELECT TOP(100) P.*, F.*, PR.*, E.*
+        FROM [OLEIDB1].[dbo].[PRODUCTOS] P
+        JOIN [OLEIDB1].[dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
+        JOIN [OLEIDB1].[dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+        JOIN [OLEIDB1].[dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo
+        `;
+        const result = await pool?.request().query(getAllProducts);
+
+        console.log({ result: result?.recordset })
+        res.json({
+            products: result?.recordset
+        });
+
     } catch (error: any) {
         res.status(500);
         res.send(error.message);
@@ -15,34 +27,6 @@ const getProducts = async (req: Request, res: Response) => {
 
 };
 
-const createNewProduct = async (req: Request, res: Response) => {
-
-    const { name, description } = req.body
-    let { quantity } = req.body
-
-    // validating
-    if (description == null || name == null) {
-        return res.status(400).json({ msg: "Bad Request. Please fill all fields" });
-    }
-
-    if (quantity == null) quantity = 0;
-
-
-    try {
-        const pool = await dbConnection()
-        await pool
-            ?.request()
-            .input("name", sql.VarChar, name)
-            .input("description", sql.Text, description)
-            .input("quantity", sql.Int, quantity)
-            .query(querys.addNewProduct)
-
-        res.json({ name, description, quantity })
-    } catch (error: any) {
-        res.status(500)
-        res.send(error.message);
-    }
-}
 
 const getProducById = async (req: Request, res: Response) => {
 
@@ -90,7 +74,7 @@ const getTotalProducts = async (req: Request, res: Response) => {
     res.json(result?.recordset[0][""]);
 };
 
-const updateProduct = async (req: Request, res: Response) => {
+/* const updateProduct = async (req: Request, res: Response) => {
 
     const { name, description } = req.body
     let { quantity } = req.body
@@ -118,13 +102,13 @@ const updateProduct = async (req: Request, res: Response) => {
         res.status(500)
         res.send(error.message);
     }
-}
+} */
 
 export {
     getProducts,
-    createNewProduct,
+    //createNewProduct,
     getProducById,
     deleteProductById,
     getTotalProducts,
-    updateProduct
+    //updateProduct
 }

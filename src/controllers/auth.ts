@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { dbConnection, querys } from '../database';
+import { closeDbConnection, dbConnection } from '../database';
 import moment from 'moment';
 import { generateJWT } from '../helpers/generate-jwt';
 
@@ -47,25 +47,45 @@ const login = async (req: Request, res: Response) => {
         const otherDBServer = user.ServidorSQL.trim();
         const otherDBDatabase = user.BaseSQL.trim();
 
-        await pool?.close();
+        await pool?.close()
 
         const otherPool = await dbConnection(otherDBServer, otherDBDatabase);
 
-        const otherQuery = `SELECT TOP(10) * FROM [${otherDBDatabase}].[dbo].[PRODUCTOS]`;
-        const resultProducts = await otherPool?.request().query(otherQuery);
-        const productos = resultProducts?.recordset;
 
-        console.log({productos})
-    
         res.json({
             user,
-            token
+            token,
+            otherPool
         });
     } catch (error: any) {
         res.status(500).send(error.message);
     }
 };
 
+const logout = async (req: Request, res: Response) => {
+
+    try {
+
+        await closeDbConnection()
+
+        const server = "babs4kdofr.database.windows.net";
+        const database =  "OLEIDB1_CLIENTES";
+        const pool = await dbConnection(server, database);
+
+        const connectionStatus = pool?.connected ? 'Connected' : 'Not Connected';
+
+        res.json({ 
+            status: connectionStatus,
+            pool
+        })
+
+    } catch (error) {
+        console.log({ error })
+    }
+}
+
+
 export {
-    login
+    login,
+    logout
 }

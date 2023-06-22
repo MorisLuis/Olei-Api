@@ -5,11 +5,6 @@ let pool: sql.ConnectionPool | null = null;
 
 export const dbConnection = async (server?: string, database?: string) => {
     try {
-        if (pool) {
-            await pool.close();
-            pool = null;
-        }
-
         const dbSettings = {
             user: config.dbUser,
             password: config.dbPassword,
