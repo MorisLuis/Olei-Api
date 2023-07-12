@@ -15,7 +15,6 @@ const getProducts = async (req: Request, res: Response) => {
         `;
         const result = await pool?.request().query(getAllProducts);
 
-        console.log({ result: result?.recordset })
         res.json({
             products: result?.recordset
         });
