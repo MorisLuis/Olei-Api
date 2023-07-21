@@ -1,30 +1,50 @@
-
 import { Request, Response } from 'express'
 import { dbConnection, querys } from '../database';
 
-const getProducts = async (req: Request, res: Response) => {
 
+const getProducts = async (req: Request, res: Response) => {
     try {
         const pool = await dbConnection();
+
+        if (!pool) {
+            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            return;
+        }
+
         const getAllProducts = `
-        SELECT TOP(100) P.*, F.*, PR.*, E.*
+        SELECT DISTINCT
+            TRIM(P.Descripcion) AS Descripcion,
+            P.Id_Familia,
+            TRIM(P.Codigo) AS CodigoProducto,
+            TRIM(F.Nombre) AS Familia,
+            TRIM(PR.Codigo) AS CodigoPrecio,
+            PR.Precio,
+            TRIM(E.Codigo) AS CodigoExistencia,
+            E.Existencia,
+            E.Id_Almacen,
+            TRIM(M.Nombre) AS Marca,
+            M.Id_Marca,
+            PR.Id_ListaPrecios
         FROM [OLEIDB1].[dbo].[PRODUCTOS] P
         JOIN [OLEIDB1].[dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
         JOIN [OLEIDB1].[dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-        JOIN [OLEIDB1].[dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo
-        `;
-        const result = await pool?.request().query(getAllProducts);
+        JOIN [OLEIDB1].[dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+        JOIN [OLEIDB1].[dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+        WHERE PR.Id_ListaPrecios = 1 AND E.Id_Almacen = 1
+
+    `;
+    
+
+        const result = await pool.request().query(getAllProducts);
 
         res.json({
-            products: result?.recordset
+            products: result.recordset,
         });
-
     } catch (error: any) {
-        res.status(500);
-        res.send(error.message);
+        res.status(500).json({ error: error.message });
     }
-
 };
+
 
 
 const getProducById = async (req: Request, res: Response) => {
@@ -73,41 +93,10 @@ const getTotalProducts = async (req: Request, res: Response) => {
     res.json(result?.recordset[0][""]);
 };
 
-/* const updateProduct = async (req: Request, res: Response) => {
-
-    const { name, description } = req.body
-    let { quantity } = req.body
-
-    // validating
-    if (description == null || name == null) {
-        return res.status(400).json({ msg: "Bad Request. Please fill all fields" });
-    }
-
-    if (quantity == null) quantity = 0;
-
-
-    try {
-        const pool = await dbConnection()
-        await pool
-            ?.request()
-            .input("name", sql.VarChar, name)
-            .input("description", sql.Text, description)
-            .input("quantity", sql.Int, quantity)
-            .input("id", req.params.id)
-            .query(querys.updateProductById)
-
-        res.json({ name, description, quantity })
-    } catch (error: any) {
-        res.status(500)
-        res.send(error.message);
-    }
-} */
 
 export {
     getProducts,
-    //createNewProduct,
     getProducById,
     deleteProductById,
     getTotalProducts,
-    //updateProduct
 }

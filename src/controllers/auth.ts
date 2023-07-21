@@ -11,8 +11,8 @@ const login = async (req: Request, res: Response) => {
         const { email, password } = req.body;
 
         // Buscar el usuario en la base de datos usando el correo electrónico
-        const query_DBUsuariosool = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] WHERE Id_UsuarioOOL = '${email}'`;
-        const result = await pool?.request().query(query_DBUsuariosool);
+        const query_DB = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] WHERE Id_UsuarioOOL = '${email}'`;
+        const result = await pool?.request().query(query_DB);
         const user = result?.recordset[0];
 
         if (!user) {
@@ -84,8 +84,45 @@ const logout = async (req: Request, res: Response) => {
     }
 }
 
+interface Req extends Request {
+    id?: string
+}
+
+const renew = async (req: Req, res: Response) => {
+    const email = req.id?.trim() || ''
+
+    try {
+        closeDbConnection()
+        const pool = await dbConnection();
+        const query_DB = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] WHERE Id_UsuarioOOL = '${email}'`;
+        const result = await pool?.request().query(query_DB);
+        const user = result?.recordset[0];
+
+        // Generar un token JWT para el usuario
+        const token = await generateJWT(user.Id_UsuarioOOL, user.TipoUsuario);
+
+        // Realizar la conexión a otra base de datos
+        const otherDBServer = user.ServidorSQL.trim();
+        const otherDBDatabase = user.BaseSQL.trim();
+
+        await pool?.close()
+
+        const otherPool = await dbConnection(otherDBServer, otherDBDatabase);
+
+        res.json({
+            user,
+            token,
+            otherPool
+        });
+    } catch (error: any) {
+        res.status(500).send(error.message);
+        console.log({error})
+
+    }
+}
 
 export {
     login,
-    logout
+    logout,
+    renew
 }
