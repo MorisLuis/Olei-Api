@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logout = exports.login = void 0;
+exports.renew = exports.logout = exports.login = void 0;
 const database_1 = require("../database");
 const moment_1 = __importDefault(require("moment"));
 const generate_jwt_1 = require("../helpers/generate-jwt");
@@ -21,8 +21,8 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const pool = yield (0, database_1.dbConnection)();
         const { email, password } = req.body;
         // Buscar el usuario en la base de datos usando el correo electrónico
-        const query_DBUsuariosool = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] WHERE Id_UsuarioOOL = '${email}'`;
-        const result = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(query_DBUsuariosool));
+        const query_DB = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] WHERE Id_UsuarioOOL = '${email}'`;
+        const result = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(query_DB));
         const user = result === null || result === void 0 ? void 0 : result.recordset[0];
         if (!user) {
             res.status(404).json({ error: 'Correo no encontrado' });
@@ -78,4 +78,32 @@ const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.logout = logout;
+const renew = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const email = ((_a = req.id) === null || _a === void 0 ? void 0 : _a.trim()) || '';
+    try {
+        (0, database_1.closeDbConnection)();
+        const pool = yield (0, database_1.dbConnection)();
+        const query_DB = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] WHERE Id_UsuarioOOL = '${email}'`;
+        const result = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(query_DB));
+        const user = result === null || result === void 0 ? void 0 : result.recordset[0];
+        // Generar un token JWT para el usuario
+        const token = yield (0, generate_jwt_1.generateJWT)(user.Id_UsuarioOOL, user.TipoUsuario);
+        // Realizar la conexión a otra base de datos
+        const otherDBServer = user.ServidorSQL.trim();
+        const otherDBDatabase = user.BaseSQL.trim();
+        yield (pool === null || pool === void 0 ? void 0 : pool.close());
+        const otherPool = yield (0, database_1.dbConnection)(otherDBServer, otherDBDatabase);
+        res.json({
+            user,
+            token,
+            otherPool
+        });
+    }
+    catch (error) {
+        res.status(500).send(error.message);
+        console.log({ error });
+    }
+});
+exports.renew = renew;
 //# sourceMappingURL=auth.js.map
