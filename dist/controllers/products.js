@@ -12,38 +12,54 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTotalProducts = exports.deleteProductById = exports.getProducById = exports.getProducts = void 0;
 const database_1 = require("../database");
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
-        const getAllProducts = `
-        SELECT DISTINCT
-            TRIM(P.Descripcion) AS Descripcion,
-            P.Id_Familia,
-            TRIM(P.Codigo) AS CodigoProducto,
-            TRIM(F.Nombre) AS Familia,
-            TRIM(PR.Codigo) AS CodigoPrecio,
-            PR.Precio,
-            TRIM(E.Codigo) AS CodigoExistencia,
-            E.Existencia,
-            E.Id_Almacen,
-            TRIM(M.Nombre) AS Marca,
-            M.Id_Marca,
-            PR.Id_ListaPrecios
-        FROM [OLEIDB1].[dbo].[PRODUCTOS] P
-        JOIN [OLEIDB1].[dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
-        JOIN [OLEIDB1].[dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-        JOIN [OLEIDB1].[dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-        JOIN [OLEIDB1].[dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-        WHERE PR.Id_ListaPrecios = 1 AND E.Id_Almacen = 1
-
-    `;
-        const result = yield pool.request().query(getAllProducts);
+        let query = database_1.querys.getAllProducts;
+        if (nombre) {
+            query += ` AND (LOWER(P.Descripcion) LIKE '%' + LOWER('${nombre}') + '%')`;
+        }
+        if (marca) {
+            query += ` AND (LOWER(M.Nombre) LIKE '%' + LOWER('${marca}') + '%')`;
+        }
+        if (familia) {
+            query += ` AND (LOWER(F.Nombre) LIKE '%' + LOWER('${familia}') + '%')`;
+        }
+        if (folio) {
+            query += ` AND (LOWER(P.Codigo) LIKE '%' + LOWER('${folio}') + '%')`;
+        }
+        if (enStock === 'true') {
+            query += ' AND E.Existencia > 0';
+        }
+        let paginationQuery = '';
+        if (page && limit) {
+            const pageNumber = parseInt(page) || 1;
+            const limitNumber = parseInt(limit) || 10;
+            const offset = (pageNumber - 1) * limitNumber;
+            paginationQuery = `
+                SELECT *
+                FROM (
+                    ${query.replace('SELECT DISTINCT', 'SELECT ROW_NUMBER() OVER(ORDER BY P.Codigo) AS RowNum,')}
+                ) AS NumberedResults
+                WHERE RowNum > ${offset}
+                AND RowNum <= ${offset + limitNumber}
+            `;
+        }
+        const finalQuery = paginationQuery || query;
+        const result = yield pool.request().query(finalQuery);
+        // Get the total count without pagination
+        const total = result.recordset.length;
         res.json({
+            total,
+            page: page ? parseInt(page) : 1,
+            limit: limit ? parseInt(limit) : 10,
             products: result.recordset,
         });
+        //await pool.close();
     }
     catch (error) {
         res.status(500).json({ error: error.message });

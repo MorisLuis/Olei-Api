@@ -52,8 +52,6 @@ const getProducts = async (req: Request, res: Response) => {
 
         const finalQuery = paginationQuery || query;
 
-        console.log({ finalQuery })
-
         const result = await pool.request().query(finalQuery);
 
         // Get the total count without pagination
