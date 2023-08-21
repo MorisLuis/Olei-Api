@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { dbConnection, querys } from '../database';
 
 const getProducts = async (req: Request, res: Response) => {
-    const { nombre, marca, familia, folio, enStock } = req.query;
+    const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
 
     try {
         const pool = await dbConnection();
@@ -12,7 +12,6 @@ const getProducts = async (req: Request, res: Response) => {
             return;
         }
 
-        let result;
         let query = querys.getAllProducts;
 
         if (nombre) {
@@ -35,13 +34,35 @@ const getProducts = async (req: Request, res: Response) => {
             query += ' AND E.Existencia > 0';
         }
 
+        let paginationQuery = '';
+        if (page && limit) {
+            const pageNumber = parseInt(page as string) || 1;
+            const limitNumber = parseInt(limit as string) || 10;
+            const offset = (pageNumber - 1) * limitNumber;
 
-        result = await pool.request().query(query);
+            paginationQuery = `
+                SELECT *
+                FROM (
+                    ${query.replace('SELECT DISTINCT', 'SELECT ROW_NUMBER() OVER(ORDER BY P.Codigo) AS RowNum,')}
+                ) AS NumberedResults
+                WHERE RowNum > ${offset}
+                AND RowNum <= ${offset + limitNumber}
+            `;
+        }
 
-        const total = result.recordset.length;
+        const finalQuery = paginationQuery || query;
+
+        console.log({ finalQuery })
+
+        const result = await pool.request().query(finalQuery);
+
+        // Get the total count without pagination
+        const total = result.recordset.length
 
         res.json({
             total,
+            page: page ? parseInt(page as string) : 1,
+            limit: limit ? parseInt(limit as string) : 10,
             products: result.recordset,
         });
 
@@ -50,7 +71,6 @@ const getProducts = async (req: Request, res: Response) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 
 
 

@@ -21,8 +21,6 @@ export const querys = {
     JOIN [OLEIDB1].[dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
     JOIN [OLEIDB1].[dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
     WHERE PR.Id_ListaPrecios = 1 AND E.Id_Almacen = 1
-    ORDER BY Descripcion
-    OFFSET <offset_value> ROWS FETCH NEXT <fetch_value> ROWS ONLY;
     `,
     getProductsBySearch: "SELECT TOP(20) TRIM(P.Descripcion) AS Descripcion FROM [OLEIDB1].[dbo].[PRODUCTOS] P",
 
