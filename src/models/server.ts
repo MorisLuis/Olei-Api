@@ -5,24 +5,27 @@ import { dbConnection } from "../database/connection";
 import userRouter from "../routes/userRouter";
 import productRouter from "../routes/productRouter";
 import authRouter from "../routes/authRouter";
+import searchRouter from "../routes/searchRouter";
 
 
 class Server {
     private app: Application;
     private port: string;
     private paths: {
-        product : string,
-        user : string,
-        auth : string
+        product: string,
+        user: string,
+        auth: string,
+        search: string
     }
 
     constructor() {
         this.app = express();
         this.port = process.env.PORT || "5001"
         this.paths = {
-            product : "/api/product",
+            product: "/api/product",
             user: "/api/user",
-            auth : "/api/auth"
+            auth: "/api/auth",
+            search: "/api/search"
         }
 
         //Connect to database
@@ -37,9 +40,9 @@ class Server {
 
     async connectDB() {
         await dbConnection()
-    } 
+    }
 
-    middlewares(){
+    middlewares() {
         // CORS
         this.app.use(cors());
 
@@ -52,6 +55,7 @@ class Server {
         this.app.use(this.paths.product, productRouter);
         this.app.use(this.paths.user, userRouter)
         this.app.use(this.paths.auth, authRouter)
+        this.app.use(this.paths.search, searchRouter)
 
     }
 
