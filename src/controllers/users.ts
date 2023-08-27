@@ -15,6 +15,8 @@ const getUsers =  async (req: Request, res: Response) => {
             users
         });
 
+        //await pool?.close();
+
     } catch (error: any) {
         res.status(500);
         res.send(error.message);

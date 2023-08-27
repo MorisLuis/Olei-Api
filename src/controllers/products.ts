@@ -18,15 +18,15 @@ const getProducts = async (req: Request, res: Response) => {
             query += ` AND (LOWER(P.Descripcion) LIKE '%' + LOWER('${nombre}') + '%')`;
         }
 
-        if (marca) {
+        if (marca && marca !== "undefined") {
             query += ` AND (LOWER(M.Nombre) LIKE '%' + LOWER('${marca}') + '%')`;
         }
 
-        if (familia) {
+        if (familia && familia !== "undefined") {
             query += ` AND (LOWER(F.Nombre) LIKE '%' + LOWER('${familia}') + '%')`;
         }
 
-        if (folio) {
+        if (folio && folio !== "undefined") {
             query += ` AND (LOWER(P.Codigo) LIKE '%' + LOWER('${folio}') + '%')`;
         }
 
@@ -52,6 +52,7 @@ const getProducts = async (req: Request, res: Response) => {
 
         const finalQuery = paginationQuery || query;
 
+
         const result = await pool.request().query(finalQuery);
 
         // Get the total count without pagination
@@ -64,7 +65,6 @@ const getProducts = async (req: Request, res: Response) => {
             products: result.recordset,
         });
 
-        //await pool.close();
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
@@ -90,27 +90,6 @@ const getProducById = async (req: Request, res: Response) => {
 
 }
 
-
-const deleteProductById = async (req: Request, res: Response) => {
-
-    try {
-        const pool = await dbConnection()
-        const result = await pool
-            ?.request()
-            .input("id", req.params.id)
-            .query(querys.deleteProduct)
-
-        if (result?.rowsAffected[0] === 0) return res.sendStatus(404);
-
-        return res.sendStatus(204);
-
-    } catch (error: any) {
-        res.status(500)
-        res.send(error.message);
-    }
-
-}
-
 const getTotalProducts = async (req: Request, res: Response) => {
     const pool = await dbConnection();
 
@@ -123,6 +102,5 @@ const getTotalProducts = async (req: Request, res: Response) => {
 export {
     getProducts,
     getProducById,
-    deleteProductById,
     getTotalProducts,
 }

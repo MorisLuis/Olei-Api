@@ -1,5 +1,5 @@
 import Router from "express"
-import { deleteProductById, getProducById, getProducts, getTotalProducts } from "../controllers/products";
+import { getProducById, getProducts, getTotalProducts } from "../controllers/products";
 
 
 const router = Router()
@@ -10,7 +10,7 @@ router.get( "/", getProducts)
 
 router.get( "/:id", getProducById)
 
-router.delete( "/:id", deleteProductById)
+//router.delete( "/:id", deleteProductById)
 
 router.get( "/count", getTotalProducts)
 

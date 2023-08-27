@@ -6,6 +6,7 @@ import userRouter from "../routes/userRouter";
 import productRouter from "../routes/productRouter";
 import authRouter from "../routes/authRouter";
 import searchRouter from "../routes/searchRouter";
+import tablesRouter from "../routes/tablesRouter";
 
 
 class Server {
@@ -15,7 +16,8 @@ class Server {
         product: string,
         user: string,
         auth: string,
-        search: string
+        search: string,
+        tables: string
     }
 
     constructor() {
@@ -25,7 +27,8 @@ class Server {
             product: "/api/product",
             user: "/api/user",
             auth: "/api/auth",
-            search: "/api/search"
+            search: "/api/search",
+            tables: "/api/tables"
         }
 
         //Connect to database
@@ -56,6 +59,7 @@ class Server {
         this.app.use(this.paths.user, userRouter)
         this.app.use(this.paths.auth, authRouter)
         this.app.use(this.paths.search, searchRouter)
+        this.app.use(this.paths.tables, tablesRouter)
 
     }
 

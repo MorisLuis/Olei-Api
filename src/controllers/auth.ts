@@ -57,6 +57,7 @@ const login = async (req: Request, res: Response) => {
             token,
             otherPool
         });
+
     } catch (error: any) {
         res.status(500).send(error.message);
     }

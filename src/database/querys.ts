@@ -1,6 +1,5 @@
 export const querys = {
 
-
     getAllProducts: `
     SELECT DISTINCT
     TRIM(P.Descripcion) AS Descripcion,
@@ -22,17 +21,20 @@ export const querys = {
     JOIN [OLEIDB1].[dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
     WHERE PR.Id_ListaPrecios = 1 AND E.Id_Almacen = 1
     `,
-    getProductsBySearch: "SELECT TOP(20) TRIM(P.Descripcion) AS Descripcion FROM [OLEIDB1].[dbo].[PRODUCTOS] P",
+
+    getProductsBySearch: "SELECT TOP(10) TRIM(P.Descripcion) AS Descripcion FROM [OLEIDB1].[dbo].[PRODUCTOS] P",
 
     getProducById: "SELECT  FROM CLIENTES Where Id = @Id",
-    addNewProduct:
-        "INSERT INTO [OLEIDB1].[dbo].[CLIENTES] (Id_Almacen , Id_Cliente , Nombre) VALUES (@Id_Almacen ,@Id_Cliente ,@Nombre);",
-    deleteProduct: "DELETE FROM [OLEIDB1].[dbo].[CLIENTES] WHERE Id= @Id",
-    getTotalProducts: "SELECT COUNT(*) FROM [OLEIDB1].[dbo].[CLIENTES]",
-    updateProductById:
-        "UPDATE [OLEIDB1].[dbo].[CLIENTES] SET Almacen = @Id_Almacen , Cliente = @Id_Cliente , Nombre = @Nombre WHERE Id = @id",
 
+    getTotalProducts: "SELECT COUNT(*) FROM [OLEIDB1].[dbo].[CLIENTES]",
 
     getAllUsers: "SELECT TOP(500) * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS]",
-    getUser: "SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS] WHERE Nombre = ?"
+
+    getUser: "SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS] WHERE Nombre = ?",
+
+    //Tables
+    getFamilias: `SELECT TRIM(F.Nombre) AS Nombre FROM [OLEIDB1].[dbo].[FAMILIAS] F`,
+    getMarcas: `SELECT TRIM(M.Nombre) AS Nombre FROM [OLEIDB1].[dbo].[MARCAS] M`,
+    getFolios: `SELECT TRIM(P.Codigo) AS Codigo FROM [OLEIDB1].[dbo].[PRODUCTOS] P`
+
 };
