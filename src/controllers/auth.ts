@@ -5,6 +5,7 @@ import { generateJWT } from '../helpers/generate-jwt';
 import bcrypt from "bcrypt";
 
 const login = async (req: Request, res: Response) => {
+    
     try {
         const mainPool = await dbConnection();
         if (!mainPool) {
@@ -55,9 +56,14 @@ const login = async (req: Request, res: Response) => {
 
         await mainPool.close()
 
-        const otherPool = await dbConnection(otherDBServer, otherDBDatabase);
+        let otherPool;
 
-        console.log({otherPool})
+        try {
+            otherPool = await dbConnection(otherDBServer, otherDBDatabase);
+        } catch (error:any) {
+            res.status(500).send(error.message);
+            console.log({error})
+        }
 
 
         res.json({
