@@ -2,17 +2,22 @@ import { Request, Response } from 'express'
 import { closeDbConnection, dbConnection } from '../database';
 import moment from 'moment';
 import { generateJWT } from '../helpers/generate-jwt';
-
+import bcrypt from "bcrypt";
 
 const login = async (req: Request, res: Response) => {
     try {
-        const pool = await dbConnection();
+        const mainPool = await dbConnection();
+        if (!mainPool) {
+            res.status(500).json({ error: 'Error en la conexión a la base de datos principal' });
+            return;
+        }
 
         const { email, password } = req.body;
 
         // Buscar el usuario en la base de datos usando el correo electrónico
         const query_DB = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] WHERE Id_UsuarioOOL = '${email}'`;
-        const result = await pool?.request().query(query_DB);
+        const result = await mainPool.request().input('email', email).query(query_DB);
+
         const user = result?.recordset[0];
 
         if (!user) {
@@ -25,9 +30,10 @@ const login = async (req: Request, res: Response) => {
             return;
         }
 
-        // Obtener la fecha de vencimiento de la suscripción del usuario
-        const query_CLIENTES = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[CLIENTES] WHERE Id_Cliente = '${user.Id_ClienteDBCLIENTES}'`;
-        const resultCliente = await pool?.request().query(query_CLIENTES);
+
+        /// Obtener la fecha de vencimiento de la suscripción del usuario
+        const query_CLIENTES = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[CLIENTES] WHERE Id_Cliente = @clienteId`;
+        const resultCliente = await mainPool.request().input('clienteId', user.Id_ClienteDBCLIENTES).query(query_CLIENTES);
         const dueDate = resultCliente?.recordset[0].Vigencia;
 
         // Comparar la fecha de vencimiento con el día de hoy
@@ -47,16 +53,22 @@ const login = async (req: Request, res: Response) => {
         const otherDBServer = user.ServidorSQL.trim();
         const otherDBDatabase = user.BaseSQL.trim();
 
-        await pool?.close()
+        await mainPool.close()
 
         const otherPool = await dbConnection(otherDBServer, otherDBDatabase);
 
+        console.log({otherPool})
+
 
         res.json({
+            otherDBServer,
+            otherDBDatabase,
+            mainPool,
             user,
             token,
             otherPool
         });
+
 
     } catch (error: any) {
         res.status(500).send(error.message);
@@ -70,12 +82,12 @@ const logout = async (req: Request, res: Response) => {
         await closeDbConnection()
 
         const server = "babs4kdofr.database.windows.net";
-        const database =  "OLEIDB1_CLIENTES";
+        const database = "OLEIDB1_CLIENTES";
         const pool = await dbConnection(server, database);
 
         const connectionStatus = pool?.connected ? 'Connected' : 'Not Connected';
 
-        res.json({ 
+        res.json({
             status: connectionStatus,
             pool
         })
@@ -117,7 +129,7 @@ const renew = async (req: Req, res: Response) => {
         });
     } catch (error: any) {
         res.status(500).send(error.message);
-        console.log({error})
+        console.log({ error })
 
     }
 }
