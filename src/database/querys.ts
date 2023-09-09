@@ -16,13 +16,19 @@ export const querys = {
     PR.Id_ListaPrecios
     FROM [OLEIDB1].[dbo].[PRODUCTOS] P
     JOIN [OLEIDB1].[dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
-    JOIN [OLEIDB1].[dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-    JOIN [OLEIDB1].[dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+    JOIN [OLEIDB1].[dbo].[PRECIOS] PR ON TRIM(P.Codigo) = TRIM(PR.Codigo)
+    JOIN [OLEIDB1].[dbo].[EXISTENCIAS] E ON TRIM(P.Codigo) = TRIM(E.Codigo) AND PR.Id_Marca = E.Id_Marca
     JOIN [OLEIDB1].[dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-    WHERE PR.Id_ListaPrecios = 1 AND E.Id_Almacen = 1
-    `,
+    WHERE PR.Id_ListaPrecios = @ListaPrecios AND E.Id_Almacen = @Almacen
+`,
 
-    getProductsBySearch: "SELECT TOP(10) TRIM(P.Descripcion) AS Descripcion FROM [OLEIDB1].[dbo].[PRODUCTOS] P",
+
+    getProductsBySearch: `
+        SELECT DISTINCT TRIM(P.Descripcion) AS Descripcion 
+        FROM [OLEIDB1].[dbo].[PRODUCTOS] P
+        JOIN [OLEIDB1].[dbo].[PRECIOS] PR ON TRIM(P.Codigo) = TRIM(PR.Codigo)
+        JOIN [OLEIDB1].[dbo].[EXISTENCIAS] E ON TRIM(P.Codigo) = TRIM(E.Codigo) AND PR.Id_Marca = E.Id_Marca
+    `,
 
     getProducById: "SELECT  FROM CLIENTES Where Id = @Id",
 

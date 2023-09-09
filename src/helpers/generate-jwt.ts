@@ -1,8 +1,13 @@
 import jwt from 'jsonwebtoken';
 
-const generateJWT = (id: string, rol: Number) => {
+interface Props {
+    id: string,
+    rol: Number
+}
+
+const generateJWT = ({ id, rol }: Props) => {
     return new Promise((resolve, reject) => {
-        const payload = { id, rol }
+        const payload = { id, rol}
         jwt.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
             expiresIn: '8h'
         }, (error, token) => {

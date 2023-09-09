@@ -1,29 +1,65 @@
-import { Request, Response } from 'express'
-import { sharedData } from '../app';
-import { dbConnection, querys } from '../database';
+/* import { Request, Response } from 'express'
 import sql from 'mssql';
 
+import { sharedData } from '../app';
+import { dbConnection, querys } from '../database';
+
+
+// Function to execute a parameterized SQL query and return the result set
+async function executeQuery(pool: sql.ConnectionPool, query: string, params: any) {
+    try {
+        // Execute the query with provided parameters
+        const result = await pool.request()
+            .input('ListaPrecios', sql.Int, params.ListaPrecios)
+            .input('Almacen', sql.Int, params.Almacen)
+            .query(query);
+
+        return result.recordset;
+    } catch (error) {
+        throw error;
+    }
+}
+
+// Function to get the total count of records for a query
+async function getTotalCount(pool: sql.ConnectionPool, query: string) {
+    try {
+        // Execute the query to get the total count
+        const result = await pool.request().query(query);
+
+        return result.recordset.length;
+    } catch (error) {
+        throw error;
+    }
+}
+
+// Controller function to retrieve products based on query parameters
 const getProducts = async (req: Request, res: Response) => {
     const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
 
+    // Get the user information from shared data, including the user's warehouse (Almacen)
     const user = sharedData?.currentUser?.user;
+    const userAlmacen = user?.Id_Almacen || 1; // Default to 1 if user.Id_Almacen is undefined
+
 
     try {
+        // Establish a database connection pool
         const pool = await dbConnection();
 
         if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            res.status(500).json({ error: 'Unable to establish a connection with the database' });
             return;
         }
 
-        // Define the parameters for the SQL query
+        // Define query parameters for the SQL query
         const params = {
-            ListaPrecios: 1,
-            Almacen: user.Id_Almacen || 1,
+            ListaPrecios: 1, // Default ListaPrecios value
+            Almacen: userAlmacen, // User's warehouse
         };
 
+        // Initialize the base SQL query
         let query = querys.getAllProducts;
 
+        // Add conditions to the query based on query parameters
         if (nombre) {
             query += ` AND (LOWER(P.Descripcion) LIKE '%' + LOWER('${nombre}') + '%')`;
         }
@@ -44,12 +80,16 @@ const getProducts = async (req: Request, res: Response) => {
             query += ' AND E.Existencia > 0';
         }
 
+        // Initialize a pagination query
         let paginationQuery = '';
+
+        // Check if pagination parameters are provided
         if (page && limit) {
             const pageNumber = parseInt(page as string) || 1;
             const limitNumber = parseInt(limit as string) || 10;
             const offset = (pageNumber - 1) * limitNumber;
 
+            // Create a pagination query based on the main query
             paginationQuery = `
                 SELECT *
                 FROM (
@@ -60,29 +100,25 @@ const getProducts = async (req: Request, res: Response) => {
             `;
         }
 
+        // Use the pagination query if available; otherwise, use the base query
         const finalQuery = paginationQuery || query;
 
-        // Execute the parameterized query
-        const result = await pool
-            .request()
-            .input('ListaPrecios', sql.Int, params.ListaPrecios)
-            .input('Almacen', sql.Int, params.Almacen)
-            .query(finalQuery);
+        // Execute the main query to retrieve product data
+        const products = await executeQuery(pool, finalQuery, params);
 
-        // Get the total count without pagination
-        const total = result.recordset.length;
+        // Get the total count of records for the main query
+        const total = await getTotalCount(pool, query);
 
         res.json({
             total,
             page: page ? parseInt(page as string) : 1,
             limit: limit ? parseInt(limit as string) : 10,
-            products: result.recordset,
+            products,
         });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
 };
-
 
 
 
@@ -116,4 +152,4 @@ export {
     getProducts,
     getProducById,
     getTotalProducts,
-}
+} */
