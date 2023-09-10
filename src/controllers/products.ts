@@ -24,7 +24,6 @@ const getProducts = async (req: Request, res: Response) => {
     const user = sharedData?.currentUser?.user;
     const userAlmacen = user?.Id_Almacen || 1; // Default to 1 if user.Id_Almacen is undefined
 
-    console.log({ product: { nombre, familia, folio, enStock, marca } })
 
     try {
         const pool = await dbConnection();

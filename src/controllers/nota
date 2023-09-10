@@ -3,7 +3,6 @@ const searchProduct = async (req: Request, res: Response) => {
     const { term, familiar, codigo, enStock, marca } = req.query;
 
 
-    console.log({ term, familiar, codigo, enStock, marca })
     try {
         const pool = await dbConnection();
         let query;
