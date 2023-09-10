@@ -1,155 +1,91 @@
-/* import { Request, Response } from 'express'
-import sql from 'mssql';
-
-import { sharedData } from '../app';
-import { dbConnection, querys } from '../database';
+/* 
+const searchProduct = async (req: Request, res: Response) => {
+    const { term, familiar, codigo, enStock, marca } = req.query;
 
 
-// Function to execute a parameterized SQL query and return the result set
-async function executeQuery(pool: sql.ConnectionPool, query: string, params: any) {
+    console.log({ term, familiar, codigo, enStock, marca })
     try {
-        // Execute the query with provided parameters
-        const result = await pool.request()
-            .input('ListaPrecios', sql.Int, params.ListaPrecios)
-            .input('Almacen', sql.Int, params.Almacen)
-            .query(query);
-
-        return result.recordset;
-    } catch (error) {
-        throw error;
-    }
-}
-
-// Function to get the total count of records for a query
-async function getTotalCount(pool: sql.ConnectionPool, query: string) {
-    try {
-        // Execute the query to get the total count
-        const result = await pool.request().query(query);
-
-        return result.recordset.length;
-    } catch (error) {
-        throw error;
-    }
-}
-
-// Controller function to retrieve products based on query parameters
-const getProducts = async (req: Request, res: Response) => {
-    const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
-
-    // Get the user information from shared data, including the user's warehouse (Almacen)
-    const user = sharedData?.currentUser?.user;
-    const userAlmacen = user?.Id_Almacen || 1; // Default to 1 if user.Id_Almacen is undefined
-
-
-    try {
-        // Establish a database connection pool
         const pool = await dbConnection();
+        let query;
 
         if (!pool) {
-            res.status(500).json({ error: 'Unable to establish a connection with the database' });
+            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
 
-        // Define query parameters for the SQL query
-        const params = {
-            ListaPrecios: 1, // Default ListaPrecios value
-            Almacen: userAlmacen, // User's warehouse
-        };
+        if (typeof term === 'string') {
+            // Dividir el término de búsqueda en palabras separadas
+            const searchTerms = term.split(' ');
 
-        // Initialize the base SQL query
-        let query = querys.getAllProducts;
+            // Construir una matriz de condiciones LIKE
+            const likeConditions = searchTerms.map(word => `LOWER(P.Descripcion) LIKE '%' + LOWER('${word}') + '%'`);
 
-        // Add conditions to the query based on query parameters
-        if (nombre) {
-            query += ` AND (LOWER(P.Descripcion) LIKE '%' + LOWER('${nombre}') + '%')`;
+            // Unir las condiciones con OR para buscar cualquiera de las palabras
+            const whereClause = likeConditions.join(' AND ');
+
+            // Construir la consulta SQL base
+            query = `${querys.getProductsBySearch} WHERE (${whereClause})`;
+
+            // Si el parámetro "codigo" está presente, agregar el JOIN y la condición
+
+            // Combinar todas las condiciones en un solo bloque else if
+            if (codigo || familiar || marca || (enStock === 'true' && codigo === undefined)) {
+
+                if (familiar) {
+                    query += `
+                    JOIN [OLEIDB1].[dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
+                `;
+                }
+
+                if (marca) {
+                    query += `
+                    JOIN [OLEIDB1].[dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+                    `;
+                }
+
+                query += ` WHERE (${whereClause})`;
+
+                if (codigo) {
+                    query += `
+                    AND TRIM(P.Codigo) = TRIM('${codigo}')
+                `;
+                }
+
+                if (familiar) {
+                    query += `
+                    AND LOWER(F.Nombre) = LOWER('${familiar}')
+                `;
+                }
+
+                if (marca) {
+                    query += `
+                    AND LOWER(M.Nombre) = LOWER('${marca}')
+                `;
+                }
+
+                if (enStock === 'true') {
+                    query += ' AND E.Existencia > 0'
+                }
+            }
+
+        } else {
+            query = querys.getProductsBySearch;
         }
 
-        if (marca && marca !== 'undefined') {
-            query += ` AND (LOWER(M.Nombre) LIKE '%' + LOWER('${marca}') + '%')`;
-        }
+        const result = await pool.request().query(query);
 
-        if (familia && familia !== 'undefined') {
-            query += ` AND (LOWER(F.Nombre) LIKE '%' + LOWER('${familia}') + '%')`;
-        }
+        const total = result.recordset.length;
 
-        if (folio && folio !== 'undefined') {
-            query += ` AND (LOWER(P.Codigo) LIKE '%' + LOWER('${folio}') + '%')`;
-        }
-
-        if (enStock === 'true') {
-            query += ' AND E.Existencia > 0';
-        }
-
-        // Initialize a pagination query
-        let paginationQuery = '';
-
-        // Check if pagination parameters are provided
-        if (page && limit) {
-            const pageNumber = parseInt(page as string) || 1;
-            const limitNumber = parseInt(limit as string) || 10;
-            const offset = (pageNumber - 1) * limitNumber;
-
-            // Create a pagination query based on the main query
-            paginationQuery = `
-                SELECT *
-                FROM (
-                    ${query.replace('SELECT DISTINCT', 'SELECT ROW_NUMBER() OVER(ORDER BY P.Codigo) AS RowNum,')}
-                ) AS NumberedResults
-                WHERE RowNum > ${offset}
-                AND RowNum <= ${offset + limitNumber}
-            `;
-        }
-
-        // Use the pagination query if available; otherwise, use the base query
-        const finalQuery = paginationQuery || query;
-
-        // Execute the main query to retrieve product data
-        const products = await executeQuery(pool, finalQuery, params);
-
-        // Get the total count of records for the main query
-        const total = await getTotalCount(pool, query);
+        const descriptions = result.recordset.slice(0, 10).map(product => product.Descripcion);
 
         res.json({
             total,
-            page: page ? parseInt(page as string) : 1,
-            limit: limit ? parseInt(limit as string) : 10,
-            products,
+            products: descriptions
         });
+
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
 };
 
-
-
-const getProducById = async (req: Request, res: Response) => {
-
-    try {
-        const pool = await dbConnection()
-        const result = await pool
-            ?.request()
-            .input("id", req.params.id)
-            .query(querys.getProducById)
-
-        return res.json(result?.recordset[0]);
-    } catch (error: any) {
-        res.status(500)
-        res.send(error.message);
-    }
-
-}
-
-const getTotalProducts = async (req: Request, res: Response) => {
-    const pool = await dbConnection();
-
-    const result = await pool?.request().query(querys.getTotalProducts);
-
-    res.json(result?.recordset[0][""]);
-};
-
-
-export {
-    getProducts,
-    getProducById,
-    getTotalProducts,
-} */
+*/

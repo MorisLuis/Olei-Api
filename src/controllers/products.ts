@@ -3,10 +3,28 @@ import { sharedData } from '../app';
 import { dbConnection, querys } from '../database';
 import sql from 'mssql';
 
+async function executeQuery(pool: sql.ConnectionPool, query: string, params: any) {
+    try {
+        // Execute the query with provided parameters
+        const result = await pool.request()
+            .input('ListaPrecios', sql.Int, params.ListaPrecios)
+            .input('Almacen', sql.Int, params.Almacen)
+            .query(query);
+
+        return result.recordset;
+    } catch (error) {
+        throw error;
+    }
+}
+
 const getProducts = async (req: Request, res: Response) => {
     const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
 
+    // Get the user information from shared data, including the user's warehouse (Almacen)
     const user = sharedData?.currentUser?.user;
+    const userAlmacen = user?.Id_Almacen || 1; // Default to 1 if user.Id_Almacen is undefined
+
+    console.log({ product: { nombre, familia, folio, enStock, marca } })
 
     try {
         const pool = await dbConnection();
@@ -16,10 +34,10 @@ const getProducts = async (req: Request, res: Response) => {
             return;
         }
 
-        // Define the parameters for the SQL query
+        // Define query parameters for the SQL query
         const params = {
-            ListaPrecios: 1,
-            Almacen: user.Id_Almacen || 1,
+            ListaPrecios: 1, // Default ListaPrecios value
+            Almacen: userAlmacen, // User's warehouse
         };
 
         let query = querys.getAllProducts;
@@ -45,9 +63,11 @@ const getProducts = async (req: Request, res: Response) => {
         }
 
         let paginationQuery = '';
+
+        // Check if pagination parameters are provided
         if (page && limit) {
             const pageNumber = parseInt(page as string) || 1;
-            const limitNumber = parseInt(limit as string) || 10;
+            const limitNumber = parseInt(limit as string) || 20;
             const offset = (pageNumber - 1) * limitNumber;
 
             paginationQuery = `
@@ -60,23 +80,21 @@ const getProducts = async (req: Request, res: Response) => {
             `;
         }
 
+        // Use the pagination query if available; otherwise, use the base query
         const finalQuery = paginationQuery || query;
 
         // Execute the parameterized query
-        const result = await pool
-            .request()
-            .input('ListaPrecios', sql.Int, params.ListaPrecios)
-            .input('Almacen', sql.Int, params.Almacen)
-            .query(finalQuery);
+        const products = await executeQuery(pool, finalQuery, params);
+
 
         // Get the total count without pagination
-        const total = result.recordset.length;
+        const total = products.length;
 
         res.json({
             total,
             page: page ? parseInt(page as string) : 1,
-            limit: limit ? parseInt(limit as string) : 10,
-            products: result.recordset,
+            limit: limit ? parseInt(limit as string) : 20,
+            products
         });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
