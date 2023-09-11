@@ -8,7 +8,6 @@ const searchProduct = async (req: Request, res: Response) => {
 
     // Get the user's almacen (storage) ID, default to 1 if not available
     const userAlmacen = sharedData?.currentUser?.user?.Id_Almacen || 1;
-    console.log({ product: { nombre, familia, codigo, enStock, marca } })
 
     try {
         const pool = await dbConnection();
@@ -83,6 +82,35 @@ const searchProduct = async (req: Request, res: Response) => {
 };
 
 
+const searchClient = async (req: Request, res: Response) => {
+
+    const { term } = req.query
+
+    try {
+        const pool = await dbConnection();
+
+        if (!pool) {
+            return res.status(500).json({ error: 'Unable to establish a connection to the database' });
+        }
+
+        let query = querys.getClientBySearch;
+        query += `WHERE LOWER(C.Nombre) LIKE '%' + LOWER('${term}') + '%'`
+
+        // Execute the SQL query
+        const result = await pool.request().query(query);
+        const Clients = result.recordset
+
+
+        res.json({
+            Clients
+        })
+
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
 export {
-    searchProduct
+    searchProduct,
+    searchClient
 }
