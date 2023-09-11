@@ -1,9 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const search_1 = require("../controllers/search");
+const tables_1 = require("../controllers/tables");
 const router = (0, express_1.Router)();
-router.get("/", search_1.searchProduct);
-router.get("/client", search_1.searchClient);
+router.get("/", tables_1.getTables);
 exports.default = router;
-//# sourceMappingURL=searchRouter.js.map
+//# sourceMappingURL=tablesRouter.js.map

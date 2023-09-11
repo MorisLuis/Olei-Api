@@ -21,6 +21,7 @@ const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             total,
             users
         });
+        //await pool?.close();
     }
     catch (error) {
         res.status(500);
