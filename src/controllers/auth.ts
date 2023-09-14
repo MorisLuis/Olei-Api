@@ -8,7 +8,7 @@ import config from '../config';
 const login = async (req: Request, res: Response) => {
 
     try {
-        const mainPool = await dbConnection();
+        const mainPool = await dbConnection(config.dbServer, config.dbDatabase);
 
         if (!mainPool) {
             return res.status(500).json({ error: 'Error connecting to the main database' });

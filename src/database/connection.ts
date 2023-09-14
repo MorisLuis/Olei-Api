@@ -8,7 +8,6 @@ let pool: sql.ConnectionPool | null = null;
 export const dbConnection = async (server?: string, database?: string) => {
     const currenUserConnection = sharedData?.userConnection?.connection;
 
-    //console.log({sharedData: sharedData.userConnection})
     const dbConfig = {
         user: config.dbUser,
         password: config.dbPassword,
@@ -19,6 +18,7 @@ export const dbConnection = async (server?: string, database?: string) => {
             trustServerCertificate: true,
         },
     };
+
 
     try {
         const pool = new sql.ConnectionPool(dbConfig);
@@ -36,8 +36,8 @@ export const closeDbConnection = async () => {
             connection: {
                 user: config.dbUser,
                 password: config.dbPassword,
-                server: null,
-                database: null
+                server: config.dbServer,
+                database: config.dbDatabase
             }
         };
 

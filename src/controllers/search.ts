@@ -1,15 +1,12 @@
 import { Request, Response } from 'express'
 import { sharedData } from '../app';
-import config from '../config';
 import { dbConnection, querys } from '../database';
-
 
 const searchProduct = async (req: Request, res: Response) => {
     const { nombre, familia, codigo, enStock, marca } = req.query;
 
     // Get the user's almacen (storage) ID, default to 1 if not available
     const userAlmacen = sharedData?.currentUser?.user?.Id_Almacen || 1;
-    console.log({user : sharedData?.currentUser?.user})
 
     try {
         const pool = await dbConnection();
@@ -82,7 +79,6 @@ const searchProduct = async (req: Request, res: Response) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 
 const searchClient = async (req: Request, res: Response) => {
 
