@@ -3,7 +3,7 @@ import { closeDbConnection, dbConnection } from '../database';
 import moment from 'moment';
 import { generateJWT } from '../helpers/generate-jwt';
 import { sharedData } from '../app';
-
+import config from '../config';
 
 const login = async (req: Request, res: Response) => {
 
@@ -52,6 +52,16 @@ const login = async (req: Request, res: Response) => {
         const otherDBServer = user.ServidorSQL.trim();
         const otherDBDatabase = user.BaseSQL.trim();
 
+        // Update sharedData.userConnection for global access.
+        sharedData.userConnection = {
+            connection: {
+                user: config.dbUser,
+                password: config.dbPassword,
+                server: otherDBServer,
+                database: otherDBDatabase
+            }
+        };
+
         // Close the connection to the main database.
         await mainPool.close();
 
@@ -59,7 +69,25 @@ const login = async (req: Request, res: Response) => {
 
         // Connect to the user's database.
         try {
-            otherPool = await dbConnection(otherDBServer, otherDBDatabase);
+            const otherPool = await dbConnection(otherDBServer, otherDBDatabase)
+            const otherPoolDatabase = (otherPool as any).config.database
+
+            const query_DB = `
+                    SELECT Id_ListPre
+                    FROM [${otherPoolDatabase}].[dbo].[CLIENTES] 
+                    WHERE Id_Cliente = ${user.Id_Cliente ? user.Id_Cliente : 1}
+                `;
+
+            const idListPreResult = await otherPool.query(query_DB)
+            const Id_ListPre = idListPreResult.recordset[0].Id_ListPre
+
+            sharedData.currentUser = {
+                user: {
+                    ...user,
+                    Id_ListPre
+                }
+            };
+
         } catch (error: any) {
             return res.status(500).send(error.message);
         }
@@ -104,11 +132,11 @@ interface Req extends Request {
 }
 
 const renew = async (req: Req, res: Response) => {
-    const email = req.id?.trim() || ''
 
     const user = sharedData?.currentUser?.user;
 
     try {
+        if (!user) return;
         const token = await generateJWT({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
         res.json({
             user,

@@ -24,6 +24,8 @@ const getProducts = async (req: Request, res: Response) => {
     const user = sharedData?.currentUser?.user;
     const userAlmacen = user?.Id_Almacen || 1; // Default to 1 if user.Id_Almacen is undefined
 
+    // CONDICIONAR SI ES EMPLEADO USAR UN ID_LISTAPRECIOS DEL CLIENTE.
+    // PROVIENE DEL QUERY
 
     try {
         const pool = await dbConnection();

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { sharedData } from '../app';
+import config from '../config';
 import { dbConnection, querys } from '../database';
 
 
@@ -8,6 +9,7 @@ const searchProduct = async (req: Request, res: Response) => {
 
     // Get the user's almacen (storage) ID, default to 1 if not available
     const userAlmacen = sharedData?.currentUser?.user?.Id_Almacen || 1;
+    console.log({user : sharedData?.currentUser?.user})
 
     try {
         const pool = await dbConnection();
