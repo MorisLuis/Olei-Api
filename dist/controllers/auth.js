@@ -17,9 +17,10 @@ const database_1 = require("../database");
 const moment_1 = __importDefault(require("moment"));
 const generate_jwt_1 = require("../helpers/generate-jwt");
 const app_1 = require("../app");
+const config_1 = __importDefault(require("../config"));
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const mainPool = yield (0, database_1.dbConnection)();
+        const mainPool = yield (0, database_1.dbConnection)(config_1.default.dbServer, config_1.default.dbDatabase);
         if (!mainPool) {
             return res.status(500).json({ error: 'Error connecting to the main database' });
         }
@@ -51,12 +52,32 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         // Get user database connection details.
         const otherDBServer = user.ServidorSQL.trim();
         const otherDBDatabase = user.BaseSQL.trim();
+        // Update sharedData.userConnection for global access.
+        app_1.sharedData.userConnection = {
+            connection: {
+                user: config_1.default.dbUser,
+                password: config_1.default.dbPassword,
+                server: otherDBServer,
+                database: otherDBDatabase
+            }
+        };
         // Close the connection to the main database.
         yield mainPool.close();
         let otherPool;
         // Connect to the user's database.
         try {
-            otherPool = yield (0, database_1.dbConnection)(otherDBServer, otherDBDatabase);
+            const otherPool = yield (0, database_1.dbConnection)(otherDBServer, otherDBDatabase);
+            const otherPoolDatabase = otherPool.config.database;
+            const query_DB = `
+                    SELECT Id_ListPre
+                    FROM [${otherPoolDatabase}].[dbo].[CLIENTES] 
+                    WHERE Id_Cliente = ${user.Id_Cliente ? user.Id_Cliente : 1}
+                `;
+            const idListPreResult = yield otherPool.query(query_DB);
+            const Id_ListPre = idListPreResult.recordset[0].Id_ListPre;
+            app_1.sharedData.currentUser = {
+                user: Object.assign(Object.assign({}, user), { Id_ListPre })
+            };
         }
         catch (error) {
             return res.status(500).send(error.message);
@@ -92,10 +113,11 @@ const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.logout = logout;
 const renew = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
-    const email = ((_a = req.id) === null || _a === void 0 ? void 0 : _a.trim()) || '';
-    const user = (_b = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _b === void 0 ? void 0 : _b.user;
+    var _a;
+    const user = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user;
     try {
+        if (!user)
+            return;
         const token = yield (0, generate_jwt_1.generateJWT)({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
         res.json({
             user,

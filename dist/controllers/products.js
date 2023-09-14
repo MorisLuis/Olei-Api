@@ -37,6 +37,8 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     // Get the user information from shared data, including the user's warehouse (Almacen)
     const user = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user;
     const userAlmacen = (user === null || user === void 0 ? void 0 : user.Id_Almacen) || 1; // Default to 1 if user.Id_Almacen is undefined
+    // CONDICIONAR SI ES EMPLEADO USAR UN ID_LISTAPRECIOS DEL CLIENTE.
+    // PROVIENE DEL QUERY
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {

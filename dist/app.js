@@ -12,6 +12,7 @@ dotenv_1.default.config();
 // The objective is to track Id_ListaPrecion & Id_Almacen throughout the entire backend.
 exports.sharedData = {
     currentUser: null,
+    userConnection: null
 };
 const server = new server_1.default();
 server.listen();

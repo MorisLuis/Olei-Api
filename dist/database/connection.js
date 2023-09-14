@@ -14,33 +14,68 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.closeDbConnection = exports.dbConnection = void 0;
 const mssql_1 = __importDefault(require("mssql"));
+const app_1 = require("../app");
 const config_1 = __importDefault(require("../config"));
 let pool = null;
 const dbConnection = (server, database) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const currenUserConnection = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _a === void 0 ? void 0 : _a.connection;
+    const dbConfig = {
+        user: config_1.default.dbUser,
+        password: config_1.default.dbPassword,
+        server: server || (currenUserConnection === null || currenUserConnection === void 0 ? void 0 : currenUserConnection.server) || config_1.default.dbServer,
+        database: database || (currenUserConnection === null || currenUserConnection === void 0 ? void 0 : currenUserConnection.database) || config_1.default.dbDatabase,
+        options: {
+            encrypt: true,
+            trustServerCertificate: true,
+        },
+    };
     try {
-        const dbSettings = {
-            user: config_1.default.dbUser,
-            password: config_1.default.dbPassword,
-            server: server || config_1.default.dbServer,
-            database: database || config_1.default.dbDatabase,
-            options: {
-                encrypt: true,
-                trustServerCertificate: true,
-            },
-        };
-        pool = yield mssql_1.default.connect(dbSettings);
+        const pool = new mssql_1.default.ConnectionPool(dbConfig);
+        yield pool.connect();
         return pool;
     }
     catch (error) {
-        console.error(error);
+        console.error('Error al conectar a la base de datos:', error.message);
+        throw error;
     }
 });
 exports.dbConnection = dbConnection;
 const closeDbConnection = () => __awaiter(void 0, void 0, void 0, function* () {
     if (pool) {
+        app_1.sharedData.userConnection = {
+            connection: {
+                user: config_1.default.dbUser,
+                password: config_1.default.dbPassword,
+                server: config_1.default.dbServer,
+                database: config_1.default.dbDatabase
+            }
+        };
         yield pool.close();
         pool = null;
     }
 });
 exports.closeDbConnection = closeDbConnection;
+/*
+export const dbConnection = async (server?: string, database?: string) => {
+
+    try {
+        const dbSettings = {
+            user: config.dbUser,
+            password: config.dbPassword,
+            server: server || config.dbServer,
+            database: database || config.dbDatabase,
+            options: {
+                encrypt: true,
+                trustServerCertificate: true,
+            },
+        };
+
+        pool = await sql.connect(dbSettings);
+        return pool;
+    } catch (error) {
+        console.error(error);
+    }
+};
+*/ 
 //# sourceMappingURL=connection.js.map
