@@ -7,6 +7,8 @@ import productRouter from "../routes/productRouter";
 import authRouter from "../routes/authRouter";
 import searchRouter from "../routes/searchRouter";
 import tablesRouter from "../routes/tablesRouter";
+import orderRouter from "../routes/orderRouter";
+import orderDetailsRouter from "../routes/orderDetailsRouter";
 
 
 class Server {
@@ -17,7 +19,9 @@ class Server {
         user: string,
         auth: string,
         search: string,
-        tables: string
+        tables: string,
+        order: string,
+        orderDetails: string
     }
 
     constructor() {
@@ -28,7 +32,9 @@ class Server {
             user: "/api/user",
             auth: "/api/auth",
             search: "/api/search",
-            tables: "/api/tables"
+            tables: "/api/tables",
+            order: "/api/order",
+            orderDetails: "/api/orderDetails"
         }
 
         //Connect to database
@@ -56,10 +62,12 @@ class Server {
 
     routes() {
         this.app.use(this.paths.product, productRouter);
-        this.app.use(this.paths.user, userRouter)
-        this.app.use(this.paths.auth, authRouter)
-        this.app.use(this.paths.search, searchRouter)
-        this.app.use(this.paths.tables, tablesRouter)
+        this.app.use(this.paths.user, userRouter);
+        this.app.use(this.paths.auth, authRouter);
+        this.app.use(this.paths.search, searchRouter);
+        this.app.use(this.paths.tables, tablesRouter);
+        this.app.use(this.paths.order, orderRouter);
+        this.app.use(this.paths.orderDetails, orderDetailsRouter);
 
     }
 

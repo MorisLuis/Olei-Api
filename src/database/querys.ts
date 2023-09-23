@@ -4,7 +4,7 @@ export const querys = {
         SELECT DISTINCT
         TRIM(P.Descripcion) AS Descripcion,
         P.Id_Familia,
-        TRIM(P.Codigo) AS CodigoProducto,
+        TRIM(P.Codigo) AS Codigo,
         TRIM(F.Nombre) AS Familia,
         TRIM(PR.Codigo) AS CodigoPrecio,
         PR.Precio,

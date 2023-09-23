@@ -12,5 +12,4 @@ export default interface UserInterface {
     Id_Cliente: number,
     Id_Almacen: number,
     Id_ListPre?: number | null
-
 }

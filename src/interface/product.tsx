@@ -2,7 +2,7 @@ export default interface PorductInterface {
 
     Descripcion: string,
     Id_Familia: number
-    CodigoProducto: string,
+    Codigo: string,
     Familia: string,
     CodigoPrecio: string,
     Precio: number,
