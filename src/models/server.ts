@@ -9,7 +9,7 @@ import searchRouter from "../routes/searchRouter";
 import tablesRouter from "../routes/tablesRouter";
 import orderRouter from "../routes/orderRouter";
 import orderDetailsRouter from "../routes/orderDetailsRouter";
-
+import clientRouter from "../routes/clientRouter";
 
 class Server {
     private app: Application;
@@ -21,7 +21,8 @@ class Server {
         search: string,
         tables: string,
         order: string,
-        orderDetails: string
+        orderDetails: string,
+        client: string
     }
 
     constructor() {
@@ -34,7 +35,8 @@ class Server {
             search: "/api/search",
             tables: "/api/tables",
             order: "/api/order",
-            orderDetails: "/api/orderDetails"
+            orderDetails: "/api/orderDetails",
+            client: "/api/client"
         }
 
         //Connect to database
@@ -68,7 +70,7 @@ class Server {
         this.app.use(this.paths.tables, tablesRouter);
         this.app.use(this.paths.order, orderRouter);
         this.app.use(this.paths.orderDetails, orderDetailsRouter);
-
+        this.app.use(this.paths.client, clientRouter);
     }
 
     listen() {

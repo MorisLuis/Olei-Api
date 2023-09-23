@@ -21,8 +21,11 @@ const getProducts = async (req: Request, res: Response) => {
     const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
 
     // Get the user information from shared data, including the user's warehouse (Almacen)
-    const user = sharedData?.currentUser?.user;
-    const userAlmacen = user?.Id_Almacen || 1; // Default to 1 if user.Id_Almacen is undefined
+    const client = sharedData?.currentClient?.client;
+    const userAlmacen = client?.Id_Almacen;
+    const userListPrice = client?.Id_ListPre;
+
+    console.log({client})
 
     // CONDICIONAR SI ES EMPLEADO USAR UN ID_LISTAPRECIOS DEL CLIENTE.
     // PROVIENE DEL QUERY
@@ -37,7 +40,7 @@ const getProducts = async (req: Request, res: Response) => {
 
         // Define query parameters for the SQL query
         const params = {
-            ListaPrecios: 1, // Default ListaPrecios value
+            ListaPrecios: userListPrice, // Default ListaPrecios value
             Almacen: userAlmacen, // User's warehouse
         };
 
@@ -101,8 +104,6 @@ const getProducts = async (req: Request, res: Response) => {
         res.status(500).json({ error: error.message });
     }
 };
-
-
 
 
 const getProducById = async (req: Request, res: Response) => {

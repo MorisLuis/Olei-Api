@@ -10,16 +10,14 @@ const postOrder = async (req: Request, res: Response) => {
 
     try {
         const postData = req.body;
-        const user = sharedData?.currentUser?.user;
+        const client = sharedData?.currentClient?.client;
         const connection = sharedData?.userConnection?.connection
-
-        //Temporal
-        const Id_Almacen = user?.Id_Almacen;
-        const Id_Cliente = user?.Id_Cliente;
-        const Id_ListPre = user?.Id_ListPre;
+        const Id_Almacen = client?.Id_Almacen;
+        const Id_Cliente = client?.Id_Cliente;
+        const Id_ListPre = client?.Id_ListPre;
         const database = connection?.database;
-        const Id_Usuario = connection?.user
-
+        const Id_Usuario = connection?.user;
+    
         const pool = await dbConnection();
 
         if (!pool) {
@@ -67,9 +65,8 @@ const postOrder = async (req: Request, res: Response) => {
             postData.Id_Cliente = Id_Cliente;
             postData.Id_AlmacenClte = Id_Almacen;
             postData.Fecha = currentDate;
-            postData.Total = postData.Impuesto + postData.Subtotal,
-            postData.Saldo = postData.Impuesto + postData.Subtotal,
-
+            postData.Total = postData.Impuesto + postData.Subtotal;
+            postData.Saldo = postData.Impuesto + postData.Subtotal;
             postData.Id_Descuento = results?.Id_Descuento;
             postData.Id_CondVta = results?.Id_CondVta;
             postData.Id_Vendedor = results?.Id_Vendedor;
@@ -203,10 +200,9 @@ const postOrder = async (req: Request, res: Response) => {
 const getOrder = async (req: Request, res: Response) => {
 
     const { folio } = req.params;
-
-    const user = sharedData?.currentUser?.user;
-    const Id_Cliente = user?.Id_Cliente;
+    const client = sharedData?.currentClient?.client;
     const connection = sharedData?.userConnection?.connection;
+    const Id_Cliente = client?.Id_Cliente;
     const database = connection?.database;
 
     try {
@@ -242,8 +238,8 @@ const getOrder = async (req: Request, res: Response) => {
 
 const getAllOrders = async (req: Request, res: Response) => {
 
-    const user = sharedData?.currentUser?.user;
-    const Id_Cliente = user?.Id_Cliente;
+    const client = sharedData?.currentClient?.client;
+    const Id_Cliente = client?.Id_Cliente;
     const connection = sharedData?.userConnection?.connection
     const database = connection?.database;
 
@@ -272,7 +268,7 @@ const getAllOrders = async (req: Request, res: Response) => {
         res.json(results)
 
     } catch (error) {
-        console.log({error})
+        console.log({ error })
         res.status(500).json({ error: error });
     }
 }

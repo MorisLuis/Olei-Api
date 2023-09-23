@@ -22,7 +22,7 @@ const login = async (req: Request, res: Response) => {
         const user = result?.recordset[0];
 
         // Update sharedData.currentUser for global access.
-        sharedData.currentUser = { user };
+        //sharedData.currentUser = { user };
 
         if (!user) {
             return res.status(404).json({ error: 'Email not found' });
@@ -81,9 +81,19 @@ const login = async (req: Request, res: Response) => {
             const idListPreResult = await otherPool.query(query_DB)
             const Id_ListPre = idListPreResult.recordset[0].Id_ListPre
 
+            // Update sharedData.currentUser for global access.
             sharedData.currentUser = {
                 user: {
                     ...user,
+                    Id_ListPre
+                }
+            };
+
+            // Update sharedData.currentClient for global access.
+            sharedData.currentClient = {
+                client: {
+                    Id_Almacen: user.Id_Almacen,
+                    Id_Cliente: user.Id_Cliente,
                     Id_ListPre
                 }
             };

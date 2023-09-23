@@ -6,7 +6,7 @@ const searchProduct = async (req: Request, res: Response) => {
     const { nombre, familia, codigo, enStock, marca } = req.query;
 
     // Get the user's almacen (storage) ID, default to 1 if not available
-    const userAlmacen = sharedData?.currentUser?.user?.Id_Almacen || 1;
+    const userAlmacen = sharedData?.currentClient?.client?.Id_Almacen;
 
     try {
         const pool = await dbConnection();

@@ -9,14 +9,14 @@ const postOrderDetails = async (req: Request, res: Response) => {
 
     try {
         const postArray = req.body;
-        const user = sharedData?.currentUser?.user;
+        const client = sharedData?.currentClient?.client;
         const connection = sharedData?.userConnection?.connection
 
 
         //Temporal
-        const Id_Almacen = user?.Id_Almacen;
-        const Id_Cliente = user?.Id_Cliente;
-        const Id_ListPre = user?.Id_ListPre;
+        const Id_Almacen = client?.Id_Almacen;
+        const Id_Cliente = client?.Id_Cliente;
+        const Id_ListPre = client?.Id_ListPre;
         const database = connection?.database;
 
         const pool = await dbConnection();
