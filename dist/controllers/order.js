@@ -21,12 +21,11 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
         const postData = req.body;
-        const user = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user;
+        const client = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
         const connection = (_b = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _b === void 0 ? void 0 : _b.connection;
-        //Temporal
-        const Id_Almacen = user === null || user === void 0 ? void 0 : user.Id_Almacen;
-        const Id_Cliente = user === null || user === void 0 ? void 0 : user.Id_Cliente;
-        const Id_ListPre = user === null || user === void 0 ? void 0 : user.Id_ListPre;
+        const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
+        const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
+        const Id_ListPre = client === null || client === void 0 ? void 0 : client.Id_ListPre;
         const database = connection === null || connection === void 0 ? void 0 : connection.database;
         const Id_Usuario = connection === null || connection === void 0 ? void 0 : connection.user;
         const pool = yield (0, database_1.dbConnection)();
@@ -68,9 +67,9 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             postData.Id_Cliente = Id_Cliente;
             postData.Id_AlmacenClte = Id_Almacen;
             postData.Fecha = currentDate;
-            postData.Total = postData.Impuesto + postData.Subtotal,
-                postData.Saldo = postData.Impuesto + postData.Subtotal,
-                postData.Id_Descuento = results === null || results === void 0 ? void 0 : results.Id_Descuento;
+            postData.Total = postData.Impuesto + postData.Subtotal;
+            postData.Saldo = postData.Impuesto + postData.Subtotal;
+            postData.Id_Descuento = results === null || results === void 0 ? void 0 : results.Id_Descuento;
             postData.Id_CondVta = results === null || results === void 0 ? void 0 : results.Id_CondVta;
             postData.Id_Vendedor = results === null || results === void 0 ? void 0 : results.Id_Vendedor;
             postData.Id_FormaPago = results === null || results === void 0 ? void 0 : results.Id_FormaPago;
@@ -199,9 +198,9 @@ exports.postOrder = postOrder;
 const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _c, _d;
     const { folio } = req.params;
-    const user = (_c = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _c === void 0 ? void 0 : _c.user;
-    const Id_Cliente = user === null || user === void 0 ? void 0 : user.Id_Cliente;
+    const client = (_c = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _c === void 0 ? void 0 : _c.client;
     const connection = (_d = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _d === void 0 ? void 0 : _d.connection;
+    const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
     const database = connection === null || connection === void 0 ? void 0 : connection.database;
     try {
         const pool = yield (0, database_1.dbConnection)();
@@ -230,8 +229,8 @@ const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.getOrder = getOrder;
 const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _e, _f;
-    const user = (_e = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _e === void 0 ? void 0 : _e.user;
-    const Id_Cliente = user === null || user === void 0 ? void 0 : user.Id_Cliente;
+    const client = (_e = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _e === void 0 ? void 0 : _e.client;
+    const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
     const connection = (_f = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _f === void 0 ? void 0 : _f.connection;
     const database = connection === null || connection === void 0 ? void 0 : connection.database;
     try {

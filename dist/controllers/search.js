@@ -16,7 +16,7 @@ const searchProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     var _a, _b;
     const { nombre, familia, codigo, enStock, marca } = req.query;
     // Get the user's almacen (storage) ID, default to 1 if not available
-    const userAlmacen = ((_b = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user) === null || _b === void 0 ? void 0 : _b.Id_Almacen) || 1;
+    const userAlmacen = (_b = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client) === null || _b === void 0 ? void 0 : _b.Id_Almacen;
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {

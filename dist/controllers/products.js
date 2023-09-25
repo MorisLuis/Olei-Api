@@ -35,8 +35,10 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     var _a;
     const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
     // Get the user information from shared data, including the user's warehouse (Almacen)
-    const user = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user;
-    const userAlmacen = (user === null || user === void 0 ? void 0 : user.Id_Almacen) || 1; // Default to 1 if user.Id_Almacen is undefined
+    const client = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
+    const userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
+    const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
+    console.log({ client });
     // CONDICIONAR SI ES EMPLEADO USAR UN ID_LISTAPRECIOS DEL CLIENTE.
     // PROVIENE DEL QUERY
     try {
@@ -47,7 +49,7 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         }
         // Define query parameters for the SQL query
         const params = {
-            ListaPrecios: 1,
+            ListaPrecios: userListPrice,
             Almacen: userAlmacen, // User's warehouse
         };
         let query = database_1.querys.getAllProducts;

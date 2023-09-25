@@ -30,7 +30,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const result = yield mainPool.request().input('email', email).query(query_DB);
         const user = result === null || result === void 0 ? void 0 : result.recordset[0];
         // Update sharedData.currentUser for global access.
-        app_1.sharedData.currentUser = { user };
+        //sharedData.currentUser = { user };
         if (!user) {
             return res.status(404).json({ error: 'Email not found' });
         }
@@ -69,14 +69,25 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             const otherPool = yield (0, database_1.dbConnection)(otherDBServer, otherDBDatabase);
             const otherPoolDatabase = otherPool.config.database;
             const query_DB = `
-                    SELECT Id_ListPre
+                    SELECT Id_ListPre, Nombre
                     FROM [${otherPoolDatabase}].[dbo].[CLIENTES] 
                     WHERE Id_Cliente = ${user.Id_Cliente ? user.Id_Cliente : 1}
                 `;
             const idListPreResult = yield otherPool.query(query_DB);
             const Id_ListPre = idListPreResult.recordset[0].Id_ListPre;
+            const Nombre = idListPreResult.recordset[0].Nombre;
+            // Update sharedData.currentUser for global access.
             app_1.sharedData.currentUser = {
-                user: Object.assign(Object.assign({}, user), { Id_ListPre })
+                user: Object.assign(Object.assign({}, user), { Id_ListPre,
+                    Nombre })
+            };
+            // Update sharedData.currentClient for global access.
+            app_1.sharedData.currentClient = {
+                client: {
+                    Id_Almacen: user.Id_Almacen,
+                    Id_Cliente: user.Id_Cliente,
+                    Id_ListPre
+                }
             };
         }
         catch (error) {
@@ -85,7 +96,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.json({
             otherDBServer,
             otherDBDatabase,
-            user,
+            user: app_1.sharedData.currentUser.user,
             token,
             otherPool
         });

@@ -20,12 +20,12 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
     var _a, _b;
     try {
         const postArray = req.body;
-        const user = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user;
+        const client = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
         const connection = (_b = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _b === void 0 ? void 0 : _b.connection;
         //Temporal
-        const Id_Almacen = user === null || user === void 0 ? void 0 : user.Id_Almacen;
-        const Id_Cliente = user === null || user === void 0 ? void 0 : user.Id_Cliente;
-        const Id_ListPre = user === null || user === void 0 ? void 0 : user.Id_ListPre;
+        const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
+        const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
+        const Id_ListPre = client === null || client === void 0 ? void 0 : client.Id_ListPre;
         const database = connection === null || connection === void 0 ? void 0 : connection.database;
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {

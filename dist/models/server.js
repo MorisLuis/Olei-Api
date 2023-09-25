@@ -22,6 +22,7 @@ const searchRouter_1 = __importDefault(require("../routes/searchRouter"));
 const tablesRouter_1 = __importDefault(require("../routes/tablesRouter"));
 const orderRouter_1 = __importDefault(require("../routes/orderRouter"));
 const orderDetailsRouter_1 = __importDefault(require("../routes/orderDetailsRouter"));
+const clientRouter_1 = __importDefault(require("../routes/clientRouter"));
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -33,7 +34,8 @@ class Server {
             search: "/api/search",
             tables: "/api/tables",
             order: "/api/order",
-            orderDetails: "/api/orderDetails"
+            orderDetails: "/api/orderDetails",
+            client: "/api/client"
         };
         //Connect to database
         this.connectDB();
@@ -62,6 +64,7 @@ class Server {
         this.app.use(this.paths.tables, tablesRouter_1.default);
         this.app.use(this.paths.order, orderRouter_1.default);
         this.app.use(this.paths.orderDetails, orderDetailsRouter_1.default);
+        this.app.use(this.paths.client, clientRouter_1.default);
     }
     listen() {
         this.app.listen(this.port, () => {

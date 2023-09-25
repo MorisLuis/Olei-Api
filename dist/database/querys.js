@@ -39,7 +39,7 @@ exports.querys = {
     getFolios: `SELECT TRIM(P.Codigo) AS Codigo FROM [OLEIDB1].[dbo].[PRODUCTOS] P`,
     // Clients
     getClientBySearch: `
-        SELECT TOP(20) TRIM(C.Nombre) AS Nombre, C.Id_Cliente, C.Id_Almacen
+        SELECT TOP(20) TRIM(C.Nombre) AS Nombre, C.Id_Cliente, C.Id_Almacen, C.Id_ListPre
         FROM [OLEIDB1].[dbo].[CLIENTES] C
     `
 };
