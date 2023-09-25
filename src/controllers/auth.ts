@@ -73,19 +73,21 @@ const login = async (req: Request, res: Response) => {
             const otherPoolDatabase = (otherPool as any).config.database
 
             const query_DB = `
-                    SELECT Id_ListPre
+                    SELECT Id_ListPre, Nombre
                     FROM [${otherPoolDatabase}].[dbo].[CLIENTES] 
                     WHERE Id_Cliente = ${user.Id_Cliente ? user.Id_Cliente : 1}
                 `;
 
             const idListPreResult = await otherPool.query(query_DB)
             const Id_ListPre = idListPreResult.recordset[0].Id_ListPre
+            const Nombre = idListPreResult.recordset[0].Nombre
 
             // Update sharedData.currentUser for global access.
             sharedData.currentUser = {
                 user: {
                     ...user,
-                    Id_ListPre
+                    Id_ListPre,
+                    Nombre
                 }
             };
 
@@ -105,7 +107,7 @@ const login = async (req: Request, res: Response) => {
         return res.json({
             otherDBServer,
             otherDBDatabase,
-            user,
+            user: sharedData.currentUser.user,
             token,
             otherPool
         });

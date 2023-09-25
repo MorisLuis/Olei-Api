@@ -4,6 +4,9 @@ export default interface UserInterface {
     //  The identifier for the warehouse where the products are distributed.
     Id_Almacen: number;
 
+    // The name of the user company.
+    Nombre: string;
+
     //  The ID of the price list that defines the prices of the products.
     Id_ListPre?: number | null;
 
