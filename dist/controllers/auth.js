@@ -26,11 +26,14 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         const { email, password } = req.body;
         // Search for the user in the database using their email.
-        const query_DB = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] WHERE Id_UsuarioOOL = @email`;
+        const query_DB = `
+            SELECT U.*, C.Nombre 
+            FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
+            JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] C ON U.Id_ClienteDBCLIENTES = C.Id_Cliente
+            WHERE U.Id_UsuarioOOL =  @email
+        `;
         const result = yield mainPool.request().input('email', email).query(query_DB);
         const user = result === null || result === void 0 ? void 0 : result.recordset[0];
-        // Update sharedData.currentUser for global access.
-        //sharedData.currentUser = { user };
         if (!user) {
             return res.status(404).json({ error: 'Email not found' });
         }
@@ -69,17 +72,16 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             const otherPool = yield (0, database_1.dbConnection)(otherDBServer, otherDBDatabase);
             const otherPoolDatabase = otherPool.config.database;
             const query_DB = `
-                    SELECT Id_ListPre, Nombre
-                    FROM [${otherPoolDatabase}].[dbo].[CLIENTES] 
-                    WHERE Id_Cliente = ${user.Id_Cliente ? user.Id_Cliente : 1}
-                `;
+                SELECT C.Id_ListPre, CS.PrecioIncIVA
+                FROM [${otherPoolDatabase}].[dbo].[CLIENTES] C
+                JOIN [${otherPoolDatabase}].[dbo].[CONFIGSIST] CS ON C.IdOLEI = 1
+                WHERE Id_Cliente = ${user.Id_Cliente ? user.Id_Cliente : 1}
+            `;
             const idListPreResult = yield otherPool.query(query_DB);
             const Id_ListPre = idListPreResult.recordset[0].Id_ListPre;
-            const Nombre = idListPreResult.recordset[0].Nombre;
             // Update sharedData.currentUser for global access.
             app_1.sharedData.currentUser = {
-                user: Object.assign(Object.assign({}, user), { Id_ListPre,
-                    Nombre })
+                user: Object.assign(Object.assign({}, user), { Id_ListPre })
             };
             // Update sharedData.currentClient for global access.
             app_1.sharedData.currentClient = {

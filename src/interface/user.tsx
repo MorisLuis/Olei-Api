@@ -31,6 +31,8 @@ export default interface UserInterface {
     // Represents some privileges associated with the user.
     PrivilegioTipoCliente: number;
 
+    PrecioIncIVA: number;
+
     // This field is currently not in use.
     Id_UsuarioOLEI: number | null;
     PasswordOLEI: number | null;

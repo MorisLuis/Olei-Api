@@ -25,7 +25,6 @@ const getProducts = async (req: Request, res: Response) => {
     const userAlmacen = client?.Id_Almacen;
     const userListPrice = client?.Id_ListPre;
 
-    console.log({client})
 
     // CONDICIONAR SI ES EMPLEADO USAR UN ID_LISTAPRECIOS DEL CLIENTE.
     // PROVIENE DEL QUERY

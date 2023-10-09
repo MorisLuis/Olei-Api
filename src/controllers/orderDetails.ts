@@ -43,18 +43,21 @@ const postOrderDetails = async (req: Request, res: Response) => {
                 postData.Cantidad = postData.Piezas;
 
                 const firstQuery = `
-                SELECT 
-                    (SELECT Folio FROM [${database}].[dbo].[VENTAS] WHERE Folio = (SELECT MAX(Folio) FROM [${database}].[dbo].[VENTAS])) AS Folio,
-                    (SELECT TRIM(SerieActiva) FROM [${database}].[dbo].[DATOSFISCALES] WHERE Id_Almacen = ${Id_Almacen}) AS SerieActiva,
-                    (SELECT Id_Descuento FROM [${database}].[dbo].[CLIENTES] WHERE Id_Cliente = ${Id_Cliente} AND Id_Almacen = ${Id_Almacen}) AS Id_Descuento,
-                    (SELECT Valor FROM [${database}].[dbo].[DESCUENTOS] WHERE Id_Descuento = (SELECT Id_Descuento FROM [${database}].[dbo].[CLIENTES] WHERE Id_Cliente = ${Id_Cliente} AND Id_Almacen = ${Id_Almacen})) AS Valor,
-                    P.SwNs,
-                    TRIM(P.SKU) AS SKU,
-                    P.Id_Unidad AS Id_Unidad
-                FROM [${database}].[dbo].[PRODUCTOS] AS P
-                WHERE TRIM(P.Codigo) = '${postData.Codigo}'
-            `
+                    SELECT 
+                        (SELECT Folio FROM [${database}].[dbo].[VENTAS] WHERE Folio = (SELECT MAX(Folio) FROM [${database}].[dbo].[VENTAS])) AS Folio,
+                        (SELECT Costo FROM [${database}].[dbo].[COSTOS] WHERE TRIM(Codigo) = '${postData.Codigo}' AND Id_Marca = '${postData.Id_Marca}') AS Costo,
+                        (SELECT TRIM(SerieActiva) FROM [${database}].[dbo].[DATOSFISCALES] WHERE Id_Almacen = ${Id_Almacen}) AS SerieActiva,
+                        (SELECT Id_Descuento FROM [${database}].[dbo].[CLIENTES] WHERE Id_Cliente = ${Id_Cliente} AND Id_Almacen = ${Id_Almacen}) AS Id_Descuento,
+                        (SELECT Valor FROM [${database}].[dbo].[DESCUENTOS] WHERE Id_Descuento = (SELECT Id_Descuento FROM [${database}].[dbo].[CLIENTES] WHERE Id_Cliente = ${Id_Cliente} AND Id_Almacen = ${Id_Almacen})) AS Valor,
+                        P.SwNs,
+                        TRIM(P.SKU) AS SKU,
+                        P.Id_Unidad AS Id_Unidad
+                    FROM [${database}].[dbo].[PRODUCTOS] AS P
+                    WHERE TRIM(P.Codigo) = '${postData.Codigo}'
+                `
                 const result = await request.query(firstQuery);
+
+
 
                 // Accede a los resultados
                 const results: any = result.recordset[0];
@@ -74,16 +77,19 @@ const postOrderDetails = async (req: Request, res: Response) => {
                 postData.TasaImpuesto = process.env.PUBLIC_TAX_RATE;
                 postData.SKU = results?.SKU;
                 postData.Partida = count;
-
+                postData.Importe = postData.Precio * postData.Piezas;
+                postData.Impuesto = (postData.Precio * postData.Piezas * ( postData.Impto / 100 ));
+                postData.Costo = results?.Costo
+                
                 // Define la consulta SQL para la inserción de datos
                 const query = `
                         INSERT INTO [OLEIDB1].[dbo].[DETALLEVENTAS]  (
                             Id_Almacen, TipoDoc, Serie, Folio, Codigo, Id_Marca, Id_ListaPrecios, Cantidad,
-                            Precio, Importe, Impuesto, Descripcion, Descuento, Id_Unidad, SwNs, TasaImpuesto, SKU, Partida
+                            Precio, Importe, Impuesto, Descripcion, Descuento, Id_Unidad, SwNs, TasaImpuesto, SKU, Partida, Costo
                         ) 
                         VALUES (
                             @Id_Almacen, @TipoDoc, @Serie, @Folio, @Codigo, @Id_Marca, @Id_ListaPrecios, @Cantidad,
-                            @Precio, @Importe, @Impuesto, @Descripcion, @Descuento, @Id_Unidad, @SwNs, @TasaImpuesto, @SKU, @Partida
+                            @Precio, @Importe, @Impuesto, @Descripcion, @Descuento, @Id_Unidad, @SwNs, @TasaImpuesto, @SKU, @Partida,  @Costo
                         );
                     `;
 
@@ -110,7 +116,8 @@ const postOrderDetails = async (req: Request, res: Response) => {
                     SwNs: { type: sql.Bit, value: postData.SwNs },
                     TasaImpuesto: { type: sql.Money, value: postData.TasaImpuesto },
                     SKU: { type: sql.NChar(20), value: postData.SKU },
-                    Partida: { type: sql.SmallInt, value: postData.Partida }
+                    Partida: { type: sql.SmallInt, value: postData.Partida },
+                    Costo: { type: sql.Decimal(18, 6), value: postData.Costo },
                 }
 
                 // Asigna los parámetros utilizando la función

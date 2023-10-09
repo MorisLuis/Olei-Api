@@ -65,8 +65,10 @@ const postOrder = async (req: Request, res: Response) => {
             postData.Id_Cliente = Id_Cliente;
             postData.Id_AlmacenClte = Id_Almacen;
             postData.Fecha = currentDate;
-            postData.Total = postData.Impuesto + postData.Subtotal;
-            postData.Saldo = postData.Impuesto + postData.Subtotal;
+            postData.Total = postData.Total;
+            postData.Impuesto = postData.Total - postData.Subtotal;
+            postData.Subtotal = postData.Subtotal;
+            postData.Saldo = postData.Total;
             postData.Id_Descuento = results?.Id_Descuento;
             postData.Id_CondVta = results?.Id_CondVta;
             postData.Id_Vendedor = results?.Id_Vendedor;
@@ -80,6 +82,8 @@ const postOrder = async (req: Request, res: Response) => {
             postData.Id_Usuario = Id_Usuario;
             postData.CantDescuento = 0;
             postData.Id_ListPre = Id_ListPre;
+            postData.Id_TipoPago = 1;
+            postData.TipoDocOrigen = 11;
 
             // Define la consulta SQL para la inserción de datos
             const query = `
