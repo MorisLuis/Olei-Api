@@ -18,21 +18,20 @@ const login = async (req: Request, res: Response) => {
 
         // Search for the user in the database using their email.
         const query_DB = `
-            SELECT U.*, C.Nombre 
+            SELECT U.* 
             FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
-            JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] C ON U.Id_ClienteDBCLIENTES = C.Id_Cliente
             WHERE U.Id_UsuarioOOL =  @email
         `;
+
         const result = await mainPool.request().input('email', email).query(query_DB);
         const user = result?.recordset[0];
 
-
         if (!user) {
-            return res.status(404).json({ error: 'Email not found' });
+            return res.status(404).json({ error: 'Correo no encontrada' });
         }
 
         if (user.PasswordOOL.trim() !== password) {
-            return res.status(401).json({ error: 'Incorrect password' });
+            return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
 
         // Get the user's subscription expiration date.
@@ -45,7 +44,7 @@ const login = async (req: Request, res: Response) => {
         const isExpired = moment(dueDate).startOf('day').isBefore(today);
 
         if (isExpired) {
-            return res.status(401).json({ error: 'Subscription has expired' });
+            return res.status(401).json({ error: 'Subscripción ha expirado' });
         }
 
         // Generate a JWT token for the user.
@@ -77,20 +76,23 @@ const login = async (req: Request, res: Response) => {
 
 
             const query_DB = `
-                SELECT C.Id_ListPre, CS.PrecioIncIVA
+                SELECT C.Id_ListPre,  C.Nombre, CS.PrecioIncIVA
                 FROM [${otherPoolDatabase}].[dbo].[CLIENTES] C
                 JOIN [${otherPoolDatabase}].[dbo].[CONFIGSIST] CS ON C.IdOLEI = 1
                 WHERE Id_Cliente = ${user.Id_Cliente ? user.Id_Cliente : 1}
             `;
 
-            const idListPreResult = await otherPool.query(query_DB)
-            const Id_ListPre = idListPreResult.recordset[0].Id_ListPre
+            const idListPreResult = await otherPool.query(query_DB);
+            const Id_ListPre = idListPreResult.recordset[0].Id_ListPre;
+            const Nombre = idListPreResult.recordset[0].Nombre
+
 
             // Update sharedData.currentUser for global access.
             sharedData.currentUser = {
                 user: {
                     ...user,
-                    Id_ListPre
+                    Id_ListPre,
+                    Nombre
                 }
             };
 
