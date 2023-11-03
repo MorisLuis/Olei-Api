@@ -18,13 +18,17 @@ const login = async (req: Request, res: Response) => {
 
         // Search for the user in the database using their email.
         const query_DB = `
-            SELECT U.* 
-            FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
-            WHERE U.Id_UsuarioOOL =  @email
+        SELECT U.*, 
+        TRIM(UC.Nombre) AS Company
+        FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
+        JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] UC on U.Id_ClienteDBCLIENTES = UC.Id_Cliente
+        WHERE U.Id_UsuarioOOL =  @email
         `;
 
         const result = await mainPool.request().input('email', email).query(query_DB);
         const user = result?.recordset[0];
+
+        console.log({user})
 
         if (!user) {
             return res.status(404).json({ error: 'Correo no encontrada' });
@@ -86,6 +90,8 @@ const login = async (req: Request, res: Response) => {
             const Id_ListPre = idListPreResult.recordset[0].Id_ListPre;
             const Nombre = idListPreResult.recordset[0].Nombre
 
+            console.log({user})
+
 
             // Update sharedData.currentUser for global access.
             sharedData.currentUser = {
@@ -95,6 +101,8 @@ const login = async (req: Request, res: Response) => {
                     Nombre
                 }
             };
+
+            console.log('user', sharedData.currentUser)
 
             // Update sharedData.currentClient for global access.
             sharedData.currentClient = {

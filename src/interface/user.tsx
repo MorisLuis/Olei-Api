@@ -7,6 +7,9 @@ export default interface UserInterface {
     // The name of the user company.
     Nombre: string;
 
+    //The name of the company,
+    Company: string,
+
     //  The ID of the price list that defines the prices of the products.
     Id_ListPre?: number | null;
 
