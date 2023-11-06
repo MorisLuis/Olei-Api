@@ -38,7 +38,7 @@ const postOrder = async (req: Request, res: Response) => {
             const result = await request.query(`
                 SELECT 
                     (
-                        SELECT Folio FROM [${database}].[dbo].[VENTAS]
+                        SELECT TOP 1 Folio FROM [${database}].[dbo].[VENTAS]
                         WHERE Folio = (SELECT MAX(Folio) FROM [${database}].[dbo].[VENTAS])
                     ) AS Folio,
                     (

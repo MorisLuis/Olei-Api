@@ -14,7 +14,7 @@ export const querys = {
         TRIM(M.Nombre) AS Marca,
         M.Id_Marca,
         PR.Id_ListaPrecios,
-        CT.Impto
+        CT.Impto AS Impuesto
         FROM [OLEIDB1].[dbo].[PRODUCTOS] P
         JOIN [OLEIDB1].[dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
         JOIN [OLEIDB1].[dbo].[PRECIOS] PR ON TRIM(P.Codigo) = TRIM(PR.Codigo)

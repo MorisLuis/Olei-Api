@@ -12,7 +12,6 @@ const postOrderDetails = async (req: Request, res: Response) => {
         const client = sharedData?.currentClient?.client;
         const connection = sharedData?.userConnection?.connection
 
-
         //Temporal
         const Id_Almacen = client?.Id_Almacen;
         const Id_Cliente = client?.Id_Cliente;
@@ -44,7 +43,7 @@ const postOrderDetails = async (req: Request, res: Response) => {
 
                 const firstQuery = `
                     SELECT 
-                        (SELECT Folio FROM [${database}].[dbo].[VENTAS] WHERE Folio = (SELECT MAX(Folio) FROM [${database}].[dbo].[VENTAS])) AS Folio,
+                        (SELECT TOP 1 Folio FROM [${database}].[dbo].[VENTAS] WHERE Folio = (SELECT TOP 1 Folio FROM [${database}].[dbo].[VENTAS] ORDER BY Folio DESC)) AS Folio,
                         (SELECT Costo FROM [${database}].[dbo].[COSTOS] WHERE TRIM(Codigo) = '${postData.Codigo}' AND Id_Marca = '${postData.Id_Marca}') AS Costo,
                         (SELECT TRIM(SerieActiva) FROM [${database}].[dbo].[DATOSFISCALES] WHERE Id_Almacen = ${Id_Almacen}) AS SerieActiva,
                         (SELECT Id_Descuento FROM [${database}].[dbo].[CLIENTES] WHERE Id_Cliente = ${Id_Cliente} AND Id_Almacen = ${Id_Almacen}) AS Id_Descuento,
@@ -54,10 +53,9 @@ const postOrderDetails = async (req: Request, res: Response) => {
                         P.Id_Unidad AS Id_Unidad
                     FROM [${database}].[dbo].[PRODUCTOS] AS P
                     WHERE TRIM(P.Codigo) = '${postData.Codigo}'
-                `
+                    `
+
                 const result = await request.query(firstQuery);
-
-
 
                 // Accede a los resultados
                 const results: any = result.recordset[0];
