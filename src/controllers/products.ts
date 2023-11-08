@@ -22,6 +22,7 @@ const getProducts = async (req: Request, res: Response) => {
 
     // Get the user information from shared data, including the user's warehouse (Almacen)
     const client = sharedData?.currentClient?.client;
+    const user = sharedData.currentUser?.user
     const userAlmacen = client?.Id_Almacen;
     const userListPrice = client?.Id_ListPre;
 
@@ -65,6 +66,16 @@ const getProducts = async (req: Request, res: Response) => {
             query += ' AND E.Existencia > 0';
         }
 
+        // Dont show products without stock
+        if( !user?.SwSinStock ) {
+            query += ' AND E.Existencia > 0';
+        }
+
+        // Dont show products without price
+        if( !user?.SwsinPrecio ) {
+            query +=  'AND PR.Precio > 0'
+        }
+
         let paginationQuery = '';
 
         // Check if pagination parameters are provided
@@ -89,6 +100,21 @@ const getProducts = async (req: Request, res: Response) => {
         // Execute the parameterized query
         const products = await executeQuery(pool, finalQuery, params);
 
+        // Verify if it will accept images.
+        if(user?.SwImagenes) {
+            // Ahora, para cada producto, agrega la propiedad "imagen"
+            for (const product of products) {
+                // Supongamos que la URL de la imagen se basa en la propiedad "Codigo" del producto
+                const baseSQL = user?.BaseSQL.trim().toLowerCase().split('_')
+    
+                if( baseSQL ) {
+                    const imageDB = baseSQL[baseSQL.length - 1]
+                    const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
+                    product.imagen = imageUrl;
+                }
+            }
+        }
+
 
         // Get the total count without pagination
         const total = products.length;
@@ -99,6 +125,7 @@ const getProducts = async (req: Request, res: Response) => {
             limit: limit ? parseInt(limit as string) : 20,
             products
         });
+
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }

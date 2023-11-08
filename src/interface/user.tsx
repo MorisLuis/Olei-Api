@@ -36,6 +36,15 @@ export default interface UserInterface {
 
     PrecioIncIVA: number;
 
+    //Represent if the images are available (1).
+    SwImagenes: 0 | 1;
+
+    //Represent if show the products without stock (1)
+    SwSinStock: 0 | 1;
+
+    //Represent if show the products without price (1)
+    SwsinPrecio: 0 | 1;
+
     // This field is currently not in use.
     Id_UsuarioOLEI: number | null;
     PasswordOLEI: number | null;

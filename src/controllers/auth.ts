@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+
 import { closeDbConnection, dbConnection } from '../database';
 import moment from 'moment';
 import { generateJWT } from '../helpers/generate-jwt';
@@ -18,11 +19,11 @@ const login = async (req: Request, res: Response) => {
 
         // Search for the user in the database using their email.
         const query_DB = `
-        SELECT U.*, 
-        TRIM(UC.Nombre) AS Company
-        FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
-        JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] UC on U.Id_ClienteDBCLIENTES = UC.Id_Cliente
-        WHERE U.Id_UsuarioOOL =  @email
+            SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio,
+            TRIM(UC.Nombre) AS Company
+            FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
+            JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] UC on U.Id_ClienteDBCLIENTES = UC.Id_Cliente
+            WHERE U.Id_UsuarioOOL = @email
         `;
 
         const result = await mainPool.request().input('email', email).query(query_DB);
@@ -78,7 +79,7 @@ const login = async (req: Request, res: Response) => {
 
 
             const query_DB = `
-                SELECT C.Id_ListPre,  C.Nombre, CS.PrecioIncIVA
+                SELECT C.Id_ListPre, C.Nombre, CS.PrecioIncIVA
                 FROM [${otherPoolDatabase}].[dbo].[CLIENTES] C
                 JOIN [${otherPoolDatabase}].[dbo].[CONFIGSIST] CS ON C.IdOLEI = 1
                 WHERE Id_Cliente = ${user.Id_Cliente ? user.Id_Cliente : 1}
