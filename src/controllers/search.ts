@@ -1,15 +1,25 @@
 import { Request, Response } from 'express'
 import { sharedData } from '../app';
 import { dbConnection, querys } from '../database';
+import sql from 'mssql';
 
 const searchProduct = async (req: Request, res: Response) => {
     const { nombre, familia, codigo, enStock, marca } = req.query;
 
     // Get the user's almacen (storage) ID, default to 1 if not available
     const userAlmacen = sharedData?.currentClient?.client?.Id_Almacen;
+    const user = sharedData.currentUser?.user;
+    const client = sharedData?.currentClient?.client;
+    const userListPrice = client?.Id_ListPre;
 
     try {
         const pool = await dbConnection();
+
+        // Define query parameters for the SQL query
+        const params = {
+            ListaPrecios: userListPrice,
+        };
+
 
         if (!pool) {
             return res.status(500).json({ error: 'Unable to establish a connection to the database' });
@@ -56,12 +66,25 @@ const searchProduct = async (req: Request, res: Response) => {
                 }
             } else {
                 // If no specific parameters are provided, apply the WHERE clause with search terms and default filters
-                query += ` WHERE (${whereClause}) AND PR.Id_ListaPrecios = 1 AND E.Id_Almacen = ${userAlmacen}`;
+                query += ` WHERE (${whereClause}) AND PR.Id_ListaPrecios = @ListaPrecios AND E.Id_Almacen = ${userAlmacen}`;
             }
+
+            // Dont show products without stock
+            if (!user?.SwSinStock) {
+                query += ' AND E.Existencia > 0 ';
+            }
+
+            // Dont show products without price
+            if (!user?.SwsinPrecio) {
+                query += 'AND PR.Precio > 0'
+            }
+
         }
 
         // Execute the SQL query
-        const result = await pool.request().query(query);
+        const result = await pool.request()
+            .input('ListaPrecios', sql.Int, params.ListaPrecios)
+            .query(query);
 
         // Calculate the total number of results
         const total = result.recordset.length;

@@ -44,6 +44,7 @@ const getProducts = async (req: Request, res: Response) => {
             Almacen: userAlmacen, // User's warehouse
         };
 
+
         let query = querys.getAllProducts;
 
         if (nombre) {
@@ -96,7 +97,7 @@ const getProducts = async (req: Request, res: Response) => {
 
         // Use the pagination query if available; otherwise, use the base query
         const finalQuery = paginationQuery || query;
-
+        
         // Execute the parameterized query
         const products = await executeQuery(pool, finalQuery, params);
 
