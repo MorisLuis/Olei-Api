@@ -191,6 +191,8 @@ const getProducById = async (req: Request, res: Response) => {
                         imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}_${attempt}.jpg`;
                     }
 
+                    console.log({imageUrl})
+
                     // Verifica si la imagen existe
                     const imageExists = await checkImageExists(imageUrl);
 
