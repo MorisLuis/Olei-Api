@@ -8,17 +8,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchClient = exports.searchProduct = void 0;
 const app_1 = require("../app");
 const database_1 = require("../database");
+const mssql_1 = __importDefault(require("mssql"));
 const searchProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a, _b, _c, _d;
     const { nombre, familia, codigo, enStock, marca } = req.query;
     // Get the user's almacen (storage) ID, default to 1 if not available
     const userAlmacen = (_b = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client) === null || _b === void 0 ? void 0 : _b.Id_Almacen;
+    const user = (_c = app_1.sharedData.currentUser) === null || _c === void 0 ? void 0 : _c.user;
+    const client = (_d = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _d === void 0 ? void 0 : _d.client;
+    const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
     try {
         const pool = yield (0, database_1.dbConnection)();
+        // Define query parameters for the SQL query
+        const params = {
+            ListaPrecios: userListPrice,
+        };
         if (!pool) {
             return res.status(500).json({ error: 'Unable to establish a connection to the database' });
         }
@@ -55,11 +66,21 @@ const searchProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             }
             else {
                 // If no specific parameters are provided, apply the WHERE clause with search terms and default filters
-                query += ` WHERE (${whereClause}) AND PR.Id_ListaPrecios = 1 AND E.Id_Almacen = ${userAlmacen}`;
+                query += ` WHERE (${whereClause}) AND PR.Id_ListaPrecios = @ListaPrecios AND E.Id_Almacen = ${userAlmacen}`;
+            }
+            // Dont show products without stock
+            if (!(user === null || user === void 0 ? void 0 : user.SwSinStock)) {
+                query += ' AND E.Existencia > 0 ';
+            }
+            // Dont show products without price
+            if (!(user === null || user === void 0 ? void 0 : user.SwsinPrecio)) {
+                query += 'AND PR.Precio > 0';
             }
         }
         // Execute the SQL query
-        const result = yield pool.request().query(query);
+        const result = yield pool.request()
+            .input('ListaPrecios', mssql_1.default.Int, params.ListaPrecios)
+            .query(query);
         // Calculate the total number of results
         const total = result.recordset.length;
         // Extract the descriptions of the first 10 products for response

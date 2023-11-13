@@ -16,7 +16,7 @@ exports.querys = {
         TRIM(M.Nombre) AS Marca,
         M.Id_Marca,
         PR.Id_ListaPrecios,
-        CT.Impto
+        CT.Impto AS Impuesto
         FROM [OLEIDB1].[dbo].[PRODUCTOS] P
         JOIN [OLEIDB1].[dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
         JOIN [OLEIDB1].[dbo].[PRECIOS] PR ON TRIM(P.Codigo) = TRIM(PR.Codigo)
@@ -31,7 +31,30 @@ exports.querys = {
         JOIN [OLEIDB1].[dbo].[PRECIOS] PR ON TRIM(P.Codigo) = TRIM(PR.Codigo)
         JOIN [OLEIDB1].[dbo].[EXISTENCIAS] E ON TRIM(P.Codigo) = TRIM(E.Codigo) AND PR.Id_Marca = E.Id_Marca
     `,
-    getProducById: "SELECT  FROM CLIENTES Where Id = @Id",
+    getProducById: `
+    SELECT
+        TRIM(P.Descripcion) AS Descripcion,
+        P.Id_Familia,
+        TRIM(P.Codigo) AS Codigo,
+        P.Observaciones,
+        TRIM(F.Nombre) AS Familia,
+        TRIM(PR.Codigo) AS CodigoPrecio,
+        PR.Precio,
+        TRIM(E.Codigo) AS CodigoExistencia,
+        E.Existencia,
+        E.Id_Almacen,
+        TRIM(M.Nombre) AS Marca,
+        M.Id_Marca,
+        PR.Id_ListaPrecios,
+        CT.Impto AS Impuesto
+        FROM [OLEIDB1].[dbo].[PRODUCTOS] P
+        JOIN [OLEIDB1].[dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
+        JOIN [OLEIDB1].[dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+        JOIN [OLEIDB1].[dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+        JOIN [OLEIDB1].[dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+        JOIN [OLEIDB1].[dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
+        WHERE P.Codigo = @Codigo AND M.Nombre = @Marca AND PR.Id_ListaPrecios = @ListaPrecios AND E.Id_Almacen = @Almacen
+    `,
     getTotalProducts: "SELECT COUNT(*) FROM [OLEIDB1].[dbo].[CLIENTES]",
     getAllUsers: "SELECT TOP(500) * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS]",
     getUser: "SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS] WHERE Nombre = ?",

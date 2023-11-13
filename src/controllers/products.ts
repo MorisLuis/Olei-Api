@@ -26,7 +26,6 @@ const getProducts = async (req: Request, res: Response) => {
     const userAlmacen = client?.Id_Almacen;
     const userListPrice = client?.Id_ListPre;
 
-
     // CONDICIONAR SI ES EMPLEADO USAR UN ID_LISTAPRECIOS DEL CLIENTE.
     // PROVIENE DEL QUERY
 
@@ -68,13 +67,13 @@ const getProducts = async (req: Request, res: Response) => {
         }
 
         // Dont show products without stock
-        if( !user?.SwSinStock ) {
+        if (!user?.SwSinStock) {
             query += ' AND E.Existencia > 0';
         }
 
         // Dont show products without price
-        if( !user?.SwsinPrecio ) {
-            query +=  'AND PR.Precio > 0'
+        if (!user?.SwsinPrecio) {
+            query += 'AND PR.Precio > 0'
         }
 
         let paginationQuery = '';
@@ -97,25 +96,30 @@ const getProducts = async (req: Request, res: Response) => {
 
         // Use the pagination query if available; otherwise, use the base query
         const finalQuery = paginationQuery || query;
-        
+
         // Execute the parameterized query
         const products = await executeQuery(pool, finalQuery, params);
 
-        // Verify if it will accept images.
-        if(user?.SwImagenes) {
+
+        if (user?.SwImagenes) {
             // Ahora, para cada producto, agrega la propiedad "imagen"
             for (const product of products) {
                 // Supongamos que la URL de la imagen se basa en la propiedad "Codigo" del producto
-                const baseSQL = user?.BaseSQL.trim().toLowerCase().split('_')
-    
-                if( baseSQL ) {
-                    const imageDB = baseSQL[baseSQL.length - 1]
+                const baseSQL = user?.BaseSQL.trim().toLowerCase().split(',');
+
+                if (baseSQL && baseSQL.length > 0) {
+                    const imageDB = baseSQL[baseSQL.length - 1];
                     const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
-                    product.imagen = imageUrl;
+
+                    // Verifica si la imagen existe antes de agregarla al producto
+                    const imageExists = await checkImageExists(imageUrl);
+
+                    if (imageExists) {
+                        product.imagen = [imageUrl];
+                    }
                 }
             }
         }
-
 
         // Get the total count without pagination
         const total = products.length;
@@ -135,18 +139,74 @@ const getProducts = async (req: Request, res: Response) => {
 
 const getProducById = async (req: Request, res: Response) => {
 
-    try {
-        const pool = await dbConnection()
-        const result = await pool
-            ?.request()
-            .input("id", req.params.id)
-            .query(querys.getProducById)
+    const { id } = req.params;
+    const { Marca } = req.query;
 
-        return res.json(result?.recordset[0]);
-    } catch (error: any) {
-        res.status(500)
-        res.send(error.message);
+    const client = sharedData?.currentClient?.client;
+    const userAlmacen = client?.Id_Almacen;
+    const userListPrice = client?.Id_ListPre;
+    const user = sharedData.currentUser?.user
+
+    try {
+        const pool = await dbConnection();
+
+        if (!pool) {
+            return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+        }
+
+        const result = await pool
+            .request()
+            .input("Codigo", id)
+            .input("Marca", Marca)
+            .input("ListaPrecios", userListPrice)
+            .input("Almacen", userAlmacen)
+            .query(querys.getProducById);
+
+        const product = result?.recordset[0];
+
+        if (user?.SwImagenes) {
+            const baseSQL = user?.BaseSQL.trim().toLowerCase().split(',');
+
+            if (baseSQL && baseSQL.length > 0) {
+
+                const imageDB = baseSQL[baseSQL.length - 1];
+
+                // Número máximo de intentos para encontrar la imagen
+                const maxAttempts = 5;
+                let attempt = 0;
+                let images = [];
+
+                while (attempt < maxAttempts) {
+                    let imageUrl;
+                    if (attempt === 0) {
+                        imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
+                    } else {
+                        imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}_${attempt}.jpg`;
+                    }
+
+                    // Verifica si la imagen existe
+                    const imageExists = await checkImageExists(imageUrl);
+
+                    if (imageExists) {
+                        images.push(imageUrl);
+                    }
+
+                    attempt++;
+                }
+
+                if (images.length > 0) {
+                    // Se encontraron imágenes existentes
+                    product.imagen = images;
+                }
+            }
+        }
+
+        return res.json(product);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
     }
+
 
 }
 
@@ -156,6 +216,16 @@ const getTotalProducts = async (req: Request, res: Response) => {
     const result = await pool?.request().query(querys.getTotalProducts);
 
     res.json(result?.recordset[0][""]);
+};
+
+// Utils
+const checkImageExists = async (url: string): Promise<boolean> => {
+    try {
+        const response = await fetch(url, { method: 'HEAD' });
+        return response.ok;
+    } catch (error) {
+        return false;
+    }
 };
 
 

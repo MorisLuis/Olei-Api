@@ -32,10 +32,11 @@ function executeQuery(pool, query, params) {
     });
 }
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _a, _b;
     const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
     // Get the user information from shared data, including the user's warehouse (Almacen)
     const client = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
+    const user = (_b = app_1.sharedData.currentUser) === null || _b === void 0 ? void 0 : _b.user;
     const userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
     const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
     // CONDICIONAR SI ES EMPLEADO USAR UN ID_LISTAPRECIOS DEL CLIENTE.
@@ -67,6 +68,14 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         if (enStock === 'true') {
             query += ' AND E.Existencia > 0';
         }
+        // Dont show products without stock
+        if (!(user === null || user === void 0 ? void 0 : user.SwSinStock)) {
+            query += ' AND E.Existencia > 0';
+        }
+        // Dont show products without price
+        if (!(user === null || user === void 0 ? void 0 : user.SwsinPrecio)) {
+            query += 'AND PR.Precio > 0';
+        }
         let paginationQuery = '';
         // Check if pagination parameters are provided
         if (page && limit) {
@@ -86,6 +95,22 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const finalQuery = paginationQuery || query;
         // Execute the parameterized query
         const products = yield executeQuery(pool, finalQuery, params);
+        if (user === null || user === void 0 ? void 0 : user.SwImagenes) {
+            // Ahora, para cada producto, agrega la propiedad "imagen"
+            for (const product of products) {
+                // Supongamos que la URL de la imagen se basa en la propiedad "Codigo" del producto
+                const baseSQL = user === null || user === void 0 ? void 0 : user.BaseSQL.trim().toLowerCase().split(',');
+                if (baseSQL && baseSQL.length > 0) {
+                    const imageDB = baseSQL[baseSQL.length - 1];
+                    const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
+                    // Verifica si la imagen existe antes de agregarla al producto
+                    const imageExists = yield checkImageExists(imageUrl);
+                    if (imageExists) {
+                        product.imagen = [imageUrl];
+                    }
+                }
+            }
+        }
         // Get the total count without pagination
         const total = products.length;
         res.json({
@@ -101,14 +126,64 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 });
 exports.getProducts = getProducts;
 const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _c, _d;
+    const { id } = req.params;
+    const { Marca } = req.query;
+    const client = (_c = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _c === void 0 ? void 0 : _c.client;
+    const userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
+    const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
+    const user = (_d = app_1.sharedData.currentUser) === null || _d === void 0 ? void 0 : _d.user;
     try {
         const pool = yield (0, database_1.dbConnection)();
-        const result = yield (pool === null || pool === void 0 ? void 0 : pool.request().input("id", req.params.id).query(database_1.querys.getProducById));
-        return res.json(result === null || result === void 0 ? void 0 : result.recordset[0]);
+        if (!pool) {
+            return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+        }
+        const result = yield pool
+            .request()
+            .input("Codigo", id)
+            .input("Marca", Marca)
+            .input("ListaPrecios", userListPrice)
+            .input("Almacen", userAlmacen)
+            .query(database_1.querys.getProducById);
+        const product = result === null || result === void 0 ? void 0 : result.recordset[0];
+        if (user === null || user === void 0 ? void 0 : user.SwImagenes) {
+            const baseSQL = user === null || user === void 0 ? void 0 : user.BaseSQL.trim().toLowerCase().split(',');
+            if (baseSQL && baseSQL.length > 0) {
+                const imageDB = baseSQL[baseSQL.length - 1];
+                // Número máximo de intentos para encontrar la imagen
+                const maxAttempts = 5;
+                let attempt = 0;
+                let images = [];
+                while (attempt < maxAttempts) {
+                    let imageUrl;
+                    if (attempt === 0) {
+                        imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
+                    }
+                    else {
+                        imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}_${attempt}.jpg`;
+                    }
+                    // Verifica si la imagen existe
+                    const imageExists = yield checkImageExists(imageUrl);
+                    if (imageExists) {
+                        images.push(imageUrl);
+                    }
+                    attempt++;
+                }
+                if (images.length > 0) {
+                    // Se encontraron imágenes existentes
+                    product.imagen = images;
+                }
+                else {
+                    // No se encontró ninguna imagen existente
+                    console.warn(`No se encontró ninguna imagen existente para ${product.Codigo.trim()}`);
+                }
+            }
+        }
+        return res.json(product);
     }
     catch (error) {
-        res.status(500);
-        res.send(error.message);
+        console.error(error);
+        return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
     }
 });
 exports.getProducById = getProducById;
@@ -118,4 +193,14 @@ const getTotalProducts = (req, res) => __awaiter(void 0, void 0, void 0, functio
     res.json(result === null || result === void 0 ? void 0 : result.recordset[0][""]);
 });
 exports.getTotalProducts = getTotalProducts;
+// Utils
+const checkImageExists = (url) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield fetch(url, { method: 'HEAD' });
+        return response.ok;
+    }
+    catch (error) {
+        return false;
+    }
+});
 //# sourceMappingURL=products.js.map

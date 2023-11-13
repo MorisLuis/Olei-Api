@@ -7,10 +7,7 @@ const express_1 = __importDefault(require("express"));
 const products_1 = require("../controllers/products");
 const router = (0, express_1.default)();
 router.get("/", products_1.getProducts);
-//router.post( "/", createNewProduct)
 router.get("/:id", products_1.getProducById);
-//router.delete( "/:id", deleteProductById)
 router.get("/count", products_1.getTotalProducts);
-//router.put( "/:id", updateProduct)
 exports.default = router;
 //# sourceMappingURL=productRouter.js.map

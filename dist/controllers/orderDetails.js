@@ -45,7 +45,7 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 postData.Cantidad = postData.Piezas;
                 const firstQuery = `
                     SELECT 
-                        (SELECT Folio FROM [${database}].[dbo].[VENTAS] WHERE Folio = (SELECT MAX(Folio) FROM [${database}].[dbo].[VENTAS])) AS Folio,
+                        (SELECT TOP 1 Folio FROM [${database}].[dbo].[VENTAS] WHERE Folio = (SELECT TOP 1 Folio FROM [${database}].[dbo].[VENTAS] ORDER BY Folio DESC)) AS Folio,
                         (SELECT Costo FROM [${database}].[dbo].[COSTOS] WHERE TRIM(Codigo) = '${postData.Codigo}' AND Id_Marca = '${postData.Id_Marca}') AS Costo,
                         (SELECT TRIM(SerieActiva) FROM [${database}].[dbo].[DATOSFISCALES] WHERE Id_Almacen = ${Id_Almacen}) AS SerieActiva,
                         (SELECT Id_Descuento FROM [${database}].[dbo].[CLIENTES] WHERE Id_Cliente = ${Id_Cliente} AND Id_Almacen = ${Id_Almacen}) AS Id_Descuento,
@@ -55,7 +55,7 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
                         P.Id_Unidad AS Id_Unidad
                     FROM [${database}].[dbo].[PRODUCTOS] AS P
                     WHERE TRIM(P.Codigo) = '${postData.Codigo}'
-                `;
+                    `;
                 const result = yield request.query(firstQuery);
                 // Accede a los resultados
                 const results = result.recordset[0];

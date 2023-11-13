@@ -78,7 +78,6 @@ const searchProduct = async (req: Request, res: Response) => {
             if (!user?.SwsinPrecio) {
                 query += 'AND PR.Precio > 0'
             }
-
         }
 
         // Execute the SQL query

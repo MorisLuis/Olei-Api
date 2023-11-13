@@ -43,7 +43,7 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             const result = yield request.query(`
                 SELECT 
                     (
-                        SELECT Folio FROM [${database}].[dbo].[VENTAS]
+                        SELECT TOP 1 Folio FROM [${database}].[dbo].[VENTAS]
                         WHERE Folio = (SELECT MAX(Folio) FROM [${database}].[dbo].[VENTAS])
                     ) AS Folio,
                     (

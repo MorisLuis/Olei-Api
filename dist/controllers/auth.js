@@ -27,18 +27,19 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const { email, password } = req.body;
         // Search for the user in the database using their email.
         const query_DB = `
-            SELECT U.*, C.Nombre 
+            SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio,
+            TRIM(UC.Nombre) AS Company
             FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
-            JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] C ON U.Id_ClienteDBCLIENTES = C.Id_Cliente
-            WHERE U.Id_UsuarioOOL =  @email
+            JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] UC on U.Id_ClienteDBCLIENTES = UC.Id_Cliente
+            WHERE U.Id_UsuarioOOL = @email
         `;
         const result = yield mainPool.request().input('email', email).query(query_DB);
         const user = result === null || result === void 0 ? void 0 : result.recordset[0];
         if (!user) {
-            return res.status(404).json({ error: 'Email not found' });
+            return res.status(404).json({ error: 'Correo no encontrada' });
         }
         if (user.PasswordOOL.trim() !== password) {
-            return res.status(401).json({ error: 'Incorrect password' });
+            return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
         // Get the user's subscription expiration date.
         const query_CLIENTES = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[CLIENTES] WHERE Id_Cliente = @clienteId`;
@@ -48,7 +49,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const today = (0, moment_1.default)().startOf('day');
         const isExpired = (0, moment_1.default)(dueDate).startOf('day').isBefore(today);
         if (isExpired) {
-            return res.status(401).json({ error: 'Subscription has expired' });
+            return res.status(401).json({ error: 'Subscripción ha expirado' });
         }
         // Generate a JWT token for the user.
         const token = yield (0, generate_jwt_1.generateJWT)({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
@@ -72,16 +73,18 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             const otherPool = yield (0, database_1.dbConnection)(otherDBServer, otherDBDatabase);
             const otherPoolDatabase = otherPool.config.database;
             const query_DB = `
-                SELECT C.Id_ListPre, CS.PrecioIncIVA
+                SELECT C.Id_ListPre, C.Nombre, CS.PrecioIncIVA
                 FROM [${otherPoolDatabase}].[dbo].[CLIENTES] C
                 JOIN [${otherPoolDatabase}].[dbo].[CONFIGSIST] CS ON C.IdOLEI = 1
                 WHERE Id_Cliente = ${user.Id_Cliente ? user.Id_Cliente : 1}
             `;
             const idListPreResult = yield otherPool.query(query_DB);
             const Id_ListPre = idListPreResult.recordset[0].Id_ListPre;
+            const Nombre = idListPreResult.recordset[0].Nombre;
             // Update sharedData.currentUser for global access.
             app_1.sharedData.currentUser = {
-                user: Object.assign(Object.assign({}, user), { Id_ListPre })
+                user: Object.assign(Object.assign({}, user), { Id_ListPre,
+                    Nombre })
             };
             // Update sharedData.currentClient for global access.
             app_1.sharedData.currentClient = {
