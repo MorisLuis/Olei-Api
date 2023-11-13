@@ -196,10 +196,12 @@ const getProducById = async (req: Request, res: Response) => {
 
                 if (images.length > 0) {
                     // Se encontraron imágenes existentes
+                    console.log({images})
                     product.imagen = images;
                 }
             }
         }
+
 
         return res.json(product);
     } catch (error) {
