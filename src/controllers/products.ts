@@ -164,6 +164,8 @@ const getProducById = async (req: Request, res: Response) => {
 
         const product = result?.recordset[0];
 
+        console.log({user})
+
         if (user?.SwImagenes) {
             const baseSQL = user?.BaseSQL.trim().toLowerCase().split(',');
 
