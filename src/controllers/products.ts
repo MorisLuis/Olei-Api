@@ -2,6 +2,8 @@ import { Request, Response } from 'express'
 import { sharedData } from '../app';
 import { dbConnection, querys } from '../database';
 import sql from 'mssql';
+import fetch from 'node-fetch';
+
 
 async function executeQuery(pool: sql.ConnectionPool, query: string, params: any) {
     try {
