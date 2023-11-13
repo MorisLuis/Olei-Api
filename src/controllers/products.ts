@@ -164,18 +164,12 @@ const getProducById = async (req: Request, res: Response) => {
 
         const product = result?.recordset[0];
 
-        console.log({user})
-
         if (user?.SwImagenes) {
             const baseSQL = user?.BaseSQL.trim().toLowerCase().split(',');
-
-            console.log({baseSQL})
 
             if (baseSQL && baseSQL.length > 0) {
 
                 const imageDB = baseSQL[baseSQL.length - 1];
-
-                console.log({imageDB})
 
 
                 // Número máximo de intentos para encontrar la imagen
@@ -184,7 +178,6 @@ const getProducById = async (req: Request, res: Response) => {
                 let images = [];
 
                 while (attempt < maxAttempts) {
-                    console.log({attempt})
                     let imageUrl;
                     if (attempt === 0) {
                         imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
@@ -192,13 +185,8 @@ const getProducById = async (req: Request, res: Response) => {
                         imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}_${attempt}.jpg`;
                     }
 
-                    console.log({imageUrl})
-
                     // Verifica si la imagen existe
                     const imageExists = await checkImageExists(imageUrl);
-
-
-                    console.log({imageExists})
 
                     if (imageExists) {
                         console.log("enter")
@@ -208,7 +196,6 @@ const getProducById = async (req: Request, res: Response) => {
                     attempt++;
                 }
 
-                console.log({images})
                 if (images.length > 0) {
                     // Se encontraron imágenes existentes
                     product.imagen = images;
@@ -238,9 +225,13 @@ const checkImageExists = async (url: string): Promise<boolean> => {
     try {
         console.log({url})
         const response = await fetch(url, { method: 'HEAD' });
+        if (!response.ok) {
+            console.error(`Error ${response.status}: ${response.statusText}`);
+        }
         console.log({response})
         return response.ok;
     } catch (error) {
+        console.error('Error during image check:', error);
         return false;
     }
 };
