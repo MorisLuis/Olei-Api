@@ -169,9 +169,14 @@ const getProducById = async (req: Request, res: Response) => {
         if (user?.SwImagenes) {
             const baseSQL = user?.BaseSQL.trim().toLowerCase().split(',');
 
+            console.log({baseSQL})
+
             if (baseSQL && baseSQL.length > 0) {
 
                 const imageDB = baseSQL[baseSQL.length - 1];
+
+                console.log({imageDB})
+
 
                 // Número máximo de intentos para encontrar la imagen
                 const maxAttempts = 5;
@@ -196,9 +201,9 @@ const getProducById = async (req: Request, res: Response) => {
                     attempt++;
                 }
 
+                console.log({images})
                 if (images.length > 0) {
                     // Se encontraron imágenes existentes
-                    console.log({images})
                     product.imagen = images;
                 }
             }
