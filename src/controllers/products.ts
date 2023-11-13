@@ -215,9 +215,7 @@ const getProducById = async (req: Request, res: Response) => {
                 }
             }
         }
-
         console.log({product})
-
         return res.json(product);
     } catch (error) {
         console.error(error);
@@ -238,7 +236,9 @@ const getTotalProducts = async (req: Request, res: Response) => {
 // Utils
 const checkImageExists = async (url: string): Promise<boolean> => {
     try {
+        console.log({url})
         const response = await fetch(url, { method: 'HEAD' });
+        console.log({response})
         return response.ok;
     } catch (error) {
         return false;

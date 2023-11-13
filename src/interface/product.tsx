@@ -1,5 +1,4 @@
 export default interface PorductInterface {
-
     Descripcion: string;
     Id_Familia: number
     Codigo: string;
