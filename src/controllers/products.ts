@@ -204,6 +204,7 @@ const getProducById = async (req: Request, res: Response) => {
             }
         }
 
+        console.log({product})
 
         return res.json(product);
     } catch (error) {

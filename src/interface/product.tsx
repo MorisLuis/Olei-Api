@@ -14,5 +14,5 @@ export default interface PorductInterface {
     Id_ListaPrecios: number;
     Piezas: number;
     Impto: number;
-    imagen?: string[];
+    imagen: string[];
 }
