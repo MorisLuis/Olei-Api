@@ -117,7 +117,10 @@ const getProducts = async (req: Request, res: Response) => {
                     const imageExists = await checkImageExists(imageUrl);
 
                     if (imageExists) {
-                        product.imagen = [imageUrl];
+                        product.imagen = [{
+                            url: imageUrl,
+                            id: 1
+                        }];
                     }
                 }
             }
@@ -191,8 +194,10 @@ const getProducById = async (req: Request, res: Response) => {
                     const imageExists = await checkImageExists(imageUrl);
 
                     if (imageExists) {
-                        console.log("enter")
-                        images.push(imageUrl);
+                        images.push({
+                            url: imageUrl,
+                            id: attempt
+                        });
                     }
 
                     attempt++;
@@ -204,14 +209,10 @@ const getProducById = async (req: Request, res: Response) => {
                 }
             }
         }
-        console.log({product})
         return res.json(product);
     } catch (error) {
-        console.error(error);
         return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
     }
-
-
 }
 
 const getTotalProducts = async (req: Request, res: Response) => {
@@ -225,12 +226,7 @@ const getTotalProducts = async (req: Request, res: Response) => {
 // Utils
 const checkImageExists = async (url: string): Promise<boolean> => {
     try {
-        console.log({url})
         const response = await fetch(url, { method: 'HEAD' });
-        if (!response.ok) {
-            console.error(`Error ${response.status}: ${response.statusText}`);
-        }
-        console.log({response})
         return response.ok;
     } catch (error) {
         console.error('Error during image check:', error);
