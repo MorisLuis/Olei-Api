@@ -7,10 +7,10 @@ export default interface UserInterface {
     // The name of the user company.
     Nombre: string;
 
-    //The name of the company,
+    // The name of the company.
     Company: string,
 
-    //  The ID of the price list that defines the prices of the products.
+    // The ID of the price list that defines the prices of the products.
     Id_ListPre?: number | null;
 
     // The identifier of the client.
@@ -28,21 +28,21 @@ export default interface UserInterface {
     // The name of the SQL database.
     BaseSQL: string;
 
-    // Represents whether the user is an employee or a direct client.
-    TipoUsuario: string;
+    // Represents whether the user is an employee or a direct client. (1) represent client (2) represent employee
+    TipoUsuario: number;
 
     // Represents some privileges associated with the user.
     PrivilegioTipoCliente: number;
 
     PrecioIncIVA: number;
 
-    //Represent if the images are available (1).
+    //  Represent if the images are available (1).
     SwImagenes: 0 | 1;
 
-    //Represent if show the products without stock (1)
+    //  Represent if show the products without stock (1)
     SwSinStock: 0 | 1;
 
-    //Represent if show the products without price (1)
+    //  Represent if show the products without price (1)
     SwsinPrecio: 0 | 1;
 
     // This field is currently not in use.

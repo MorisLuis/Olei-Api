@@ -16,6 +16,7 @@ exports.getTotalProducts = exports.getProducById = exports.getProducts = void 0;
 const app_1 = require("../app");
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
+const node_fetch_1 = __importDefault(require("node-fetch"));
 function executeQuery(pool, query, params) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -106,7 +107,10 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                     // Verifica si la imagen existe antes de agregarla al producto
                     const imageExists = yield checkImageExists(imageUrl);
                     if (imageExists) {
-                        product.imagen = [imageUrl];
+                        product.imagen = [{
+                                url: imageUrl,
+                                id: 1
+                            }];
                     }
                 }
             }
@@ -165,7 +169,10 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     // Verifica si la imagen existe
                     const imageExists = yield checkImageExists(imageUrl);
                     if (imageExists) {
-                        images.push(imageUrl);
+                        images.push({
+                            url: imageUrl,
+                            id: attempt
+                        });
                     }
                     attempt++;
                 }
@@ -173,16 +180,11 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     // Se encontraron imágenes existentes
                     product.imagen = images;
                 }
-                else {
-                    // No se encontró ninguna imagen existente
-                    console.warn(`No se encontró ninguna imagen existente para ${product.Codigo.trim()}`);
-                }
             }
         }
         return res.json(product);
     }
     catch (error) {
-        console.error(error);
         return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
     }
 });
@@ -196,10 +198,11 @@ exports.getTotalProducts = getTotalProducts;
 // Utils
 const checkImageExists = (url) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield fetch(url, { method: 'HEAD' });
+        const response = yield (0, node_fetch_1.default)(url, { method: 'HEAD' });
         return response.ok;
     }
     catch (error) {
+        console.error('Error during image check:', error);
         return false;
     }
 });

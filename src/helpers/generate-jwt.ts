@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 
 interface Props {
     id: string,
-    rol: string
+    rol: number
 }
 
 const generateJWT = ({ id, rol }: Props) => {
