@@ -89,7 +89,7 @@ const searchProduct = async (req: Request, res: Response) => {
         const total = result.recordset.length;
 
         // Extract the descriptions of the first 10 products for response
-        const descriptions = result.recordset.slice(0, 10).map(product => product.Descripcion);
+        const descriptions : string[]= result.recordset.slice(0, 10).map(product => product.Descripcion);
 
         // Send the response with total results and product descriptions
         res.json({
