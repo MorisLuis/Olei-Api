@@ -20,6 +20,7 @@ const app_1 = require("../app");
 const config_1 = __importDefault(require("../config"));
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        // STEP 1 - LOGIN
         const mainPool = yield (0, database_1.dbConnection)(config_1.default.dbServer, config_1.default.dbDatabase);
         if (!mainPool) {
             return res.status(500).json({ error: 'Error connecting to the main database' });
@@ -27,7 +28,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const { email, password } = req.body;
         // Search for the user in the database using their email.
         const query_DB = `
-            SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio,
+            SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio, UC.TipoDocOO,
             TRIM(UC.Nombre) AS Company
             FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
             JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] UC on U.Id_ClienteDBCLIENTES = UC.Id_Cliente
@@ -68,6 +69,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         // Close the connection to the main database.
         yield mainPool.close();
         let otherPool;
+        // STEP 2 - CONNECT THE COMPANY DATABASE
         // Connect to the user's database.
         try {
             const otherPool = yield (0, database_1.dbConnection)(otherDBServer, otherDBDatabase);

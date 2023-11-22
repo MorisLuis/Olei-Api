@@ -17,11 +17,12 @@ const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const app_1 = require("../app");
 const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a, _b, _c;
     try {
         const postArray = req.body;
         const client = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
         const connection = (_b = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _b === void 0 ? void 0 : _b.connection;
+        const user = (_c = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _c === void 0 ? void 0 : _c.user;
         //Temporal
         const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
         const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
@@ -63,7 +64,7 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
                     return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
                 }
                 postData.Id_Almacen = Id_Almacen;
-                postData.TipoDoc = 3;
+                postData.TipoDoc = user === null || user === void 0 ? void 0 : user.TipoDocOO;
                 postData.Serie = results.SerieActiva ? results.SerieActiva : "";
                 postData.Folio = results.Folio + 1;
                 postData.Id_ListaPrecios = Id_ListPre;
@@ -145,9 +146,9 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
 });
 exports.postOrderDetails = postOrderDetails;
 const getOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _c;
+    var _d;
     const { folio } = req.query;
-    const connection = (_c = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _c === void 0 ? void 0 : _c.connection;
+    const connection = (_d = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _d === void 0 ? void 0 : _d.connection;
     const database = connection === null || connection === void 0 ? void 0 : connection.database;
     if (!folio) {
         res.status(500).json({ error: 'No se envio el folio' });

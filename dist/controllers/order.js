@@ -18,11 +18,12 @@ const mssql_1 = __importDefault(require("mssql"));
 const moment_timezone_1 = __importDefault(require("moment-timezone"));
 const app_1 = require("../app");
 const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a, _b, _c;
     try {
         const postData = req.body;
         const client = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
-        const connection = (_b = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _b === void 0 ? void 0 : _b.connection;
+        const user = (_b = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _b === void 0 ? void 0 : _b.user;
+        const connection = (_c = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _c === void 0 ? void 0 : _c.connection;
         const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
         const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
         const Id_ListPre = client === null || client === void 0 ? void 0 : client.Id_ListPre;
@@ -61,7 +62,7 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             }
             // Modifica la fecha en el objeto postData con el valor deseado
             postData.Id_Almacen = Id_Almacen;
-            postData.TipoDoc = 3;
+            postData.TipoDoc = user === null || user === void 0 ? void 0 : user.TipoDocOO;
             postData.Serie = results.SerieActiva ? results.SerieActiva : "";
             postData.Folio = (results === null || results === void 0 ? void 0 : results.Folio) + 1;
             postData.Id_Cliente = Id_Cliente;
@@ -200,10 +201,10 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.postOrder = postOrder;
 const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _c, _d;
+    var _d, _e;
     const { folio } = req.params;
-    const client = (_c = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _c === void 0 ? void 0 : _c.client;
-    const connection = (_d = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _d === void 0 ? void 0 : _d.connection;
+    const client = (_d = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _d === void 0 ? void 0 : _d.client;
+    const connection = (_e = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _e === void 0 ? void 0 : _e.connection;
     const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
     const database = connection === null || connection === void 0 ? void 0 : connection.database;
     try {
@@ -232,10 +233,10 @@ const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getOrder = getOrder;
 const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _e, _f;
-    const client = (_e = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _e === void 0 ? void 0 : _e.client;
+    var _f, _g;
+    const client = (_f = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _f === void 0 ? void 0 : _f.client;
     const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
-    const connection = (_f = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _f === void 0 ? void 0 : _f.connection;
+    const connection = (_g = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _g === void 0 ? void 0 : _g.connection;
     const database = connection === null || connection === void 0 ? void 0 : connection.database;
     try {
         const pool = yield (0, database_1.dbConnection)();
