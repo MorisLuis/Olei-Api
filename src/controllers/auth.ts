@@ -9,6 +9,7 @@ import config from '../config';
 const login = async (req: Request, res: Response) => {
 
     try {
+        // STEP 1 - LOGIN
         const mainPool = await dbConnection(config.dbServer, config.dbDatabase);
 
         if (!mainPool) {
@@ -19,7 +20,7 @@ const login = async (req: Request, res: Response) => {
 
         // Search for the user in the database using their email.
         const query_DB = `
-            SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio,
+            SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio, UC.TipoDocOO,
             TRIM(UC.Nombre) AS Company
             FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
             JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] UC on U.Id_ClienteDBCLIENTES = UC.Id_Cliente
@@ -72,6 +73,7 @@ const login = async (req: Request, res: Response) => {
 
         let otherPool;
 
+        // STEP 2 - CONNECT THE COMPANY DATABASE
         // Connect to the user's database.
         try {
             const otherPool = await dbConnection(otherDBServer, otherDBDatabase)

@@ -24,7 +24,6 @@ export const querys = {
         WHERE PR.Id_ListaPrecios = @ListaPrecios AND E.Id_Almacen = @Almacen
     `,
 
-
     getProductsBySearch: `
         SELECT DISTINCT TRIM(P.Descripcion) AS Descripcion 
         FROM [OLEIDB1].[dbo].[PRODUCTOS] P

@@ -11,6 +11,7 @@ const postOrder = async (req: Request, res: Response) => {
     try {
         const postData = req.body;
         const client = sharedData?.currentClient?.client;
+        const user = sharedData?.currentUser?.user;
         const connection = sharedData?.userConnection?.connection
         const Id_Almacen = client?.Id_Almacen;
         const Id_Cliente = client?.Id_Cliente;
@@ -59,7 +60,7 @@ const postOrder = async (req: Request, res: Response) => {
 
             // Modifica la fecha en el objeto postData con el valor deseado
             postData.Id_Almacen = Id_Almacen;
-            postData.TipoDoc = 3;
+            postData.TipoDoc = user?.TipoDocOO;
             postData.Serie = results.SerieActiva ? results.SerieActiva : "";
             postData.Folio = results?.Folio + 1;
             postData.Id_Cliente = Id_Cliente;

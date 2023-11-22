@@ -45,6 +45,9 @@ export default interface UserInterface {
     //  Represent if show the products without price (1)
     SwsinPrecio: 0 | 1;
 
+    //
+    TipoDocOO: number;
+
     // This field is currently not in use.
     Id_UsuarioOLEI: number | null;
     PasswordOLEI: number | null;

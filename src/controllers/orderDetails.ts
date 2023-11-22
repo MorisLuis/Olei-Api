@@ -11,6 +11,7 @@ const postOrderDetails = async (req: Request, res: Response) => {
         const postArray = req.body;
         const client = sharedData?.currentClient?.client;
         const connection = sharedData?.userConnection?.connection
+        const user = sharedData?.currentUser?.user;
 
         //Temporal
         const Id_Almacen = client?.Id_Almacen;
@@ -65,7 +66,7 @@ const postOrderDetails = async (req: Request, res: Response) => {
                 }
 
                 postData.Id_Almacen = Id_Almacen;
-                postData.TipoDoc = 3;
+                postData.TipoDoc = user?.TipoDocOO;
                 postData.Serie = results.SerieActiva ? results.SerieActiva : "";
                 postData.Folio = results.Folio + 1;
                 postData.Id_ListaPrecios = Id_ListPre;
