@@ -28,7 +28,7 @@ export default interface UserInterface {
     // The name of the SQL database.
     BaseSQL: string;
 
-    // Represents whether the user is an employee or a direct client. (1) represent client (2) represent employee
+    // Represents whether the user is an employee or a direct client. (1) Represent client and (2) represent employee
     TipoUsuario: number;
 
     // Represents some privileges associated with the user.
@@ -36,13 +36,13 @@ export default interface UserInterface {
 
     PrecioIncIVA: number;
 
-    //  Represent if the images are available (1).
+    // Represent if the images are available (1).
     SwImagenes: 0 | 1;
 
-    //  Represent if show the products without stock (1)
+    // Represent if show the products without stock (1)
     SwSinStock: 0 | 1;
 
-    //  Represent if show the products without price (1)
+    // Represent if show the products without price (1)
     SwsinPrecio: 0 | 1;
 
     //

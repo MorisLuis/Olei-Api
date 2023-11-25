@@ -233,11 +233,13 @@ const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getOrder = getOrder;
 const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _f, _g;
-    const client = (_f = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _f === void 0 ? void 0 : _f.client;
+    var _f, _g, _h;
+    const user = (_f = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _f === void 0 ? void 0 : _f.user;
+    const client = (_g = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _g === void 0 ? void 0 : _g.client;
     const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
-    const connection = (_g = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _g === void 0 ? void 0 : _g.connection;
+    const connection = (_h = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _h === void 0 ? void 0 : _h.connection;
     const database = connection === null || connection === void 0 ? void 0 : connection.database;
+    const TipoDocOO = user === null || user === void 0 ? void 0 : user.TipoDocOO;
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
@@ -249,7 +251,8 @@ const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             FROM [${database}].[dbo].[VENTAS] AS V
             INNER JOIN [${database}].[dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
             INNER JOIN [${database}].[dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
-            WHERE V.Id_Cliente = @Id_Cliente AND TipoDoc = 3
+            WHERE V.Id_Cliente = @Id_Cliente AND TipoDoc = ${TipoDocOO}
+            ORDER BY Fecha DESC
         `;
         const request = pool.request();
         request.input('Id_Cliente', mssql_1.default.Int, Id_Cliente);

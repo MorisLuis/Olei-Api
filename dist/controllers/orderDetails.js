@@ -161,9 +161,10 @@ const getOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function
             return;
         }
         const query = `
-            SELECT D.Precio, D.Cantidad as Piezas, D.Importe, D.Impuesto, D.Id_Marca, D.Id_Almacen, D.Id_ListaPrecios, D.Folio, TRIM(D.Descripcion) AS Descripcion, TRIM(D.Codigo) AS Codigo, E.Existencia
+            SELECT D.Precio, D.Cantidad as Piezas, D.Importe, D.Impuesto, D.Id_Marca, D.Id_Almacen, D.Id_ListaPrecios, D.Folio, TRIM(D.Descripcion) AS Descripcion, TRIM(D.Codigo) AS Codigo, E.Existencia, F.Nombre AS Marca
             FROM [${database}].[dbo].[DETALLEVENTAS] AS D
             INNER JOIN [${database}].[dbo].[EXISTENCIAS] AS E ON D.Codigo = E.Codigo AND D.Id_Marca = E.Id_Marca AND D.Id_Almacen = E.Id_Almacen
+            INNER JOIN [OLEIDB1].[dbo].[MARCAS] AS F ON D.Id_Marca = F.Id_Marca
             WHERE Folio = @folio
             ORDER BY Folio DESC
         `;

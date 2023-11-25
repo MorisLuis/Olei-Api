@@ -18,7 +18,7 @@ const postOrder = async (req: Request, res: Response) => {
         const Id_ListPre = client?.Id_ListPre;
         const database = connection?.database;
         const Id_Usuario = connection?.user;
-    
+
         const pool = await dbConnection();
 
         if (!pool) {
@@ -243,10 +243,12 @@ const getOrder = async (req: Request, res: Response) => {
 
 const getAllOrders = async (req: Request, res: Response) => {
 
+    const user = sharedData?.currentUser?.user;
     const client = sharedData?.currentClient?.client;
     const Id_Cliente = client?.Id_Cliente;
     const connection = sharedData?.userConnection?.connection
     const database = connection?.database;
+    const TipoDocOO = user?.TipoDocOO;
 
     try {
         const pool = await dbConnection();
@@ -261,7 +263,8 @@ const getAllOrders = async (req: Request, res: Response) => {
             FROM [${database}].[dbo].[VENTAS] AS V
             INNER JOIN [${database}].[dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
             INNER JOIN [${database}].[dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
-            WHERE V.Id_Cliente = @Id_Cliente AND TipoDoc = 3
+            WHERE V.Id_Cliente = @Id_Cliente AND TipoDoc = ${TipoDocOO}
+            ORDER BY Fecha DESC
         `
 
         const request = pool.request();
