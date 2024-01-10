@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { dbConnection } from "../database";
+import { dbConnection, querys } from "../database";
 import sql from 'mssql';
 import moment from 'moment-timezone';
 import { sharedData } from "../app";
@@ -27,32 +27,21 @@ const postOrder = async (req: Request, res: Response) => {
         }
 
         const transaction = new sql.Transaction(pool);
-        // Inicia la transacción
         await transaction.begin();
 
-
         try {
-            // Crea una nueva instancia de Request dentro de la transacción
             const request = new sql.Request(transaction);
             const currentDate = moment().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
 
-            const result = await request.query(`
-                SELECT 
-                    (
-                        SELECT TOP 1 Folio FROM [${database}].[dbo].[VENTAS]
-                        WHERE Folio = (SELECT MAX(Folio) FROM [${database}].[dbo].[VENTAS])
-                    ) AS Folio,
-                    (
-                        SELECT SerieActiva FROM [${database}].[dbo].[DATOSFISCALES]
-                        WHERE Id_Almacen = ${Id_Almacen}
-                    ) AS SerieActiva,
-                    Id_Descuento, Id_CondVta, Id_Vendedor, Id_FormaPago, Id_Transporte
-                    FROM [${database}].[dbo].[CLIENTES]
-                    WHERE Id_Cliente = ${Id_Cliente} AND Id_Almacen = ${Id_Almacen};
-            `);
+            const previewDataToPostOrder = await request
+                .input("Id_Almacen", Id_Almacen)
+                .input("Id_Cliente", Id_Cliente)
+                .input("database", database)
+                .query(querys.getPreviewDataToPostOrder)
 
             // Accede a los resultados
-            const results: any = result.recordset[0];
+            const results = previewDataToPostOrder.recordset[0];
+            const { SerieActiva, Folio, Id_Descuento, Id_CondVta, Id_Vendedor, Id_FormaPago, Id_Transporte } = results;
 
             if (!results) {
                 return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
@@ -61,8 +50,8 @@ const postOrder = async (req: Request, res: Response) => {
             // Modifica la fecha en el objeto postData con el valor deseado
             postData.Id_Almacen = Id_Almacen;
             postData.TipoDoc = user?.TipoDocOO;
-            postData.Serie = results.SerieActiva ? results.SerieActiva : "";
-            postData.Folio = results?.Folio + 1;
+            postData.Serie = SerieActiva ? SerieActiva : "";
+            postData.Folio = Folio + 1;
             postData.Id_Cliente = Id_Cliente;
             postData.Id_AlmacenClte = Id_Almacen;
             postData.Fecha = currentDate;
@@ -70,11 +59,11 @@ const postOrder = async (req: Request, res: Response) => {
             postData.Impuesto = postData.Total - postData.Subtotal;
             postData.Subtotal = postData.Subtotal;
             postData.Saldo = postData.Total;
-            postData.Id_Descuento = results?.Id_Descuento;
-            postData.Id_CondVta = results?.Id_CondVta;
-            postData.Id_Vendedor = results?.Id_Vendedor;
-            postData.Id_FormaPago = results?.Id_FormaPago;
-            postData.Id_Transporte = results?.Id_Transporte;
+            postData.Id_Descuento = Id_Descuento;
+            postData.Id_CondVta = Id_CondVta;
+            postData.Id_Vendedor = Id_Vendedor;
+            postData.Id_FormaPago = Id_FormaPago;
+            postData.Id_Transporte = Id_Transporte;
             postData.FechaLiq = postData.Fecha;
             postData.Estado = 1;
             postData.Moneda = 1;
@@ -87,20 +76,7 @@ const postOrder = async (req: Request, res: Response) => {
             postData.TipoDocOrigen = 11;
 
             // Define la consulta SQL para la inserción de datos
-            const query = `
-                INSERT INTO [OLEIDB1].[dbo].[VENTAS]  (
-                    Id_Cliente, Id_Almacen, Id_AlmacenClte, TipoDoc, Serie, Folio, Fecha,
-                    Subtotal, Impuesto, Total, Saldo, Id_Descuento, Id_CondVta, Id_Vendedor, Id_Formapago,
-                    Id_Transporte, FechaLiq, Estado, Piezas, Moneda, Paridad, CantDescuento,
-                    Suma, Id_Usuario, Id_ListPre, CantLetra, FechaEntrega
-                ) 
-                VALUES (
-                    @Id_Cliente, @Id_Almacen, @Id_AlmacenClte, @TipoDoc, @Serie, @Folio, @Fecha,
-                    @Subtotal, @Impuesto, @Total, @Saldo, @Id_Descuento, @Id_CondVta, @Id_Vendedor, @Id_Formapago,
-                    @Id_Transporte, @FechaLiq, @Estado, @Piezas, @Moneda, @Paridad, @CantDescuento,
-                    @Suma, @Id_Usuario, @Id_ListPre, @CantLetra, @FechaEntrega
-                );
-            `;
+            const postOrderQuery = querys.insertOrder;
 
             // Define una función para asignar los parámetros
             const assignParameter = (parameterName: string, sqlType: any, value: any) => {
@@ -179,7 +155,7 @@ const postOrder = async (req: Request, res: Response) => {
             }
 
             // Ejecuta la consulta SQL dentro de la transacción
-            await request.query(query);
+            await request.query(postOrderQuery);
 
             // Confirma la transacción
             await transaction.commit();
@@ -218,23 +194,17 @@ const getOrder = async (req: Request, res: Response) => {
             return;
         }
 
-        const query = `
-            SELECT V.Folio, V.Piezas, V.Subtotal, V.Impuesto, V.Total, V.Fecha, C.Nombre as Cliente, VE.Nombre as Vendedor
-            FROM [${database}].[dbo].[VENTAS] AS V
-            INNER JOIN [${database}].[dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
-            INNER JOIN [${database}].[dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
-            WHERE V.Id_Cliente = @Id_Cliente AND TipoDoc = 3 AND Folio = @folio
-        `
+        const getOrderQuery = querys.getOrder;
 
-        const request = pool.request();
-        request.input('Id_Cliente', sql.Int, Id_Cliente);
-        request.input('folio', sql.Int, folio);
+        const request = await pool.request()
+            .input("database", database)
+            .input('Id_Cliente', sql.Int, Id_Cliente)
+            .input('folio', sql.Int, folio)
+            .query(getOrderQuery);
 
+        let order: OrderInterface = request.recordset[0];
 
-        const consult = await request.query(query);
-        let results: OrderInterface = consult.recordset[0];
-
-        res.json(results)
+        res.json(order)
 
     } catch (error) {
         res.status(500).json({ error: error });
@@ -258,22 +228,17 @@ const getAllOrders = async (req: Request, res: Response) => {
             return;
         }
 
-        const query = `
-            SELECT V.Folio, V.Piezas, V.Subtotal, V.Impuesto, V.Total, V.Fecha ,C.Nombre as Cliente, VE.Nombre as Vendedor
-            FROM [${database}].[dbo].[VENTAS] AS V
-            INNER JOIN [${database}].[dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
-            INNER JOIN [${database}].[dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
-            WHERE V.Id_Cliente = @Id_Cliente AND TipoDoc = ${TipoDocOO}
-            ORDER BY Fecha DESC
-        `
+        const query = querys.getAllOrders;
 
-        const request = pool.request();
-        request.input('Id_Cliente', sql.Int, Id_Cliente);
+        const request = await pool.request()
+            .input('database', database)
+            .input('TipoDocOO', TipoDocOO)
+            .input('Id_Cliente', sql.Int, Id_Cliente)
+            .query(query);
 
-        const consult = await request.query(query);
-        let results: OrderInterface[] = consult.recordset;
+        let allOrders: OrderInterface[] = request.recordset;
 
-        res.json(results)
+        res.json(allOrders);
 
     } catch (error) {
         console.log({ error })

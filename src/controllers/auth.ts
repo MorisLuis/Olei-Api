@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { closeDbConnection, dbConnection } from '../database';
+import { closeDbConnection, dbConnection, querys } from '../database';
 import moment from 'moment';
 import { generateJWT } from '../helpers/generate-jwt';
 import { sharedData } from '../app';
@@ -19,15 +19,12 @@ const login = async (req: Request, res: Response) => {
         const { email, password } = req.body;
 
         // Search for the user in the database using their email.
-        const query_DB = `
-            SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio, UC.TipoDocOO,
-            TRIM(UC.Nombre) AS Company
-            FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
-            JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] UC on U.Id_ClienteDBCLIENTES = UC.Id_Cliente
-            WHERE U.Id_UsuarioOOL = @email
-        `;
+        const query_DB = querys.auth;
 
-        const result = await mainPool.request().input('email', email).query(query_DB);
+        const result = await mainPool.request()
+            .input('email', email)
+            .query(query_DB);
+
         const user = result?.recordset[0];
 
         if (!user) {
@@ -40,7 +37,10 @@ const login = async (req: Request, res: Response) => {
 
         // Get the user's subscription expiration date.
         const query_CLIENTES = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[CLIENTES] WHERE Id_Cliente = @clienteId`;
-        const resultCliente = await mainPool.request().input('clienteId', user.Id_ClienteDBCLIENTES).query(query_CLIENTES);
+        const resultCliente = await mainPool.request()
+            .input('clienteId', user.Id_ClienteDBCLIENTES)
+            .query(query_CLIENTES);
+
         const dueDate = resultCliente?.recordset[0].Vigencia;
 
         // Compare the expiration date with today.
@@ -79,15 +79,12 @@ const login = async (req: Request, res: Response) => {
             const otherPool = await dbConnection(otherDBServer, otherDBDatabase)
             const otherPoolDatabase = (otherPool as any).config.database
 
+            const query_DB = querys.authCompany;
+            const idListPreResult = await otherPool.request()
+                .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
+                .input('database', otherPoolDatabase)
+                .query(query_DB);
 
-            const query_DB = `
-                SELECT C.Id_ListPre, C.Nombre, CS.PrecioIncIVA
-                FROM [${otherPoolDatabase}].[dbo].[CLIENTES] C
-                JOIN [${otherPoolDatabase}].[dbo].[CONFIGSIST] CS ON C.IdOLEI = 1
-                WHERE Id_Cliente = ${user.Id_Cliente ? user.Id_Cliente : 1}
-            `;
-
-            const idListPreResult = await otherPool.query(query_DB);
             const Id_ListPre = idListPreResult.recordset[0].Id_ListPre;
             const Nombre = idListPreResult.recordset[0].Nombre
 

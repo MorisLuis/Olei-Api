@@ -159,8 +159,7 @@ const getProducById = async (req: Request, res: Response) => {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
 
-        const result = await pool
-            .request()
+        const result = await pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)
             .input("ListaPrecios", userListPrice)
@@ -175,7 +174,6 @@ const getProducById = async (req: Request, res: Response) => {
             if (baseSQL && baseSQL.length > 0) {
 
                 const imageDB = baseSQL[baseSQL.length - 1];
-
 
                 // Número máximo de intentos para encontrar la imagen
                 const maxAttempts = 5;

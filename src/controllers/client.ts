@@ -8,7 +8,7 @@ import { getUsers } from './users';
 const selectClient = async (req: Request, res: Response) => {
 
     const { Id_Cliente, Id_Almacen, Id_ListPre } = req.body;
-    const connection = sharedData?.userConnection?.connection;
+    //const connection = sharedData?.userConnection?.connection;
 
     try {
 
