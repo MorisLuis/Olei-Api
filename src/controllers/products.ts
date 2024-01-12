@@ -5,21 +5,8 @@ import sql from 'mssql';
 import fetch from 'node-fetch';
 
 
-async function executeQuery(pool: sql.ConnectionPool, query: string, params: any) {
-    try {
-        // Execute the query with provided parameters
-        const result = await pool.request()
-            .input('ListaPrecios', sql.Int, params.ListaPrecios)
-            .input('Almacen', sql.Int, params.Almacen)
-            .query(query);
-
-        return result.recordset;
-    } catch (error) {
-        throw error;
-    }
-}
-
 const getProducts = async (req: Request, res: Response) => {
+
     const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
 
     // Get the user information from shared data, including the user's warehouse (Almacen)
@@ -141,7 +128,6 @@ const getProducts = async (req: Request, res: Response) => {
     }
 };
 
-
 const getProducById = async (req: Request, res: Response) => {
 
     const { id } = req.params;
@@ -221,6 +207,54 @@ const getTotalProducts = async (req: Request, res: Response) => {
     res.json(result?.recordset[0][""]);
 };
 
+const getProductsByStock = async (req: Request, res: Response) => {
+
+    try {
+        const pool = await dbConnection();
+
+        if (!pool) {
+            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+        }
+
+        let query = querys.getAllProductsByStock;
+
+        const request = await pool.request()
+            .query(query);
+
+        const productsByStock = request.recordset;
+
+        res.json(productsByStock);
+
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
+    const { CodeBar } = req.params;
+
+    console.log({ CodeBar })
+
+    try {
+        const pool = await dbConnection();
+
+        if (!pool) {
+            return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+        }
+
+        let query = querys.getProductByStockAndCodeBar;
+        const request = await pool.request()
+            .input("CodeBar", CodeBar)
+            .query(query);
+
+        const productByStockAndCodeBar = request.recordset;
+
+        res.json(productByStockAndCodeBar)
+
+    } catch (error: any) {
+        return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
+    }
+}
 // Utils
 const checkImageExists = async (url: string): Promise<boolean> => {
     try {
@@ -232,9 +266,25 @@ const checkImageExists = async (url: string): Promise<boolean> => {
     }
 };
 
+async function executeQuery(pool: sql.ConnectionPool, query: string, params: any) {
+    try {
+        // Execute the query with provided parameters
+        const result = await pool.request()
+            .input('ListaPrecios', sql.Int, params.ListaPrecios)
+            .input('Almacen', sql.Int, params.Almacen)
+            .query(query);
+
+        return result.recordset;
+    } catch (error) {
+        throw error;
+    }
+}
+
 
 export {
     getProducts,
     getProducById,
     getTotalProducts,
+    getProductsByStock,
+    getProductByStockAndCodeBar
 }

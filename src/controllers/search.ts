@@ -120,7 +120,6 @@ const searchClient = async (req: Request, res: Response) => {
         const result = await pool.request().query(query);
         const Clients = result.recordset
 
-
         res.json({
             Clients
         })

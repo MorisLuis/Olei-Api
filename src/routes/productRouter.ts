@@ -1,14 +1,26 @@
-import Router from "express"
-import { getProducById, getProducts, getTotalProducts } from "../controllers/products";
+import Router from "express";
+import {
+    getProducById,
+    getProductByStockAndCodeBar,
+    getProducts,
+    getProductsByStock,
+    getTotalProducts
+} from "../controllers/products";
 
 
 const router = Router()
 
-router.get( "/", getProducts)
+router.get("/byStockAndCodeBar/:CodeBar", getProductByStockAndCodeBar)
 
-router.get( "/:id", getProducById)
+router.get("/byStock", getProductsByStock)
 
-router.get( "/count", getTotalProducts)
+router.get("/", getProducts)
+
+router.get("/:id", getProducById)
+
+router.get("/count", getTotalProducts)
+
+
 
 
 

@@ -106,7 +106,7 @@ export const querys = {
         WHERE Id_Cliente = @Id_Cliente AND Id_Almacen = @Id_Almacen
     `,
 
-    getOrder :  ` 
+    getOrder: ` 
         SELECT V.Folio, V.Piezas, V.Subtotal, V.Impuesto, V.Total, V.Fecha, C.Nombre as Cliente, VE.Nombre as Vendedor
         FROM [@database].[dbo].[VENTAS] AS V
         INNER JOIN [@database].[dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
@@ -153,7 +153,7 @@ export const querys = {
         WHERE TRIM(P.Codigo) = '@Codigo'
     `,
 
-    getOrderDetails : `
+    getOrderDetails: `
         SELECT D.Precio, D.Cantidad as Piezas, D.Importe, D.Impuesto, D.Id_Marca, D.Id_Almacen, D.Id_ListaPrecios, D.Folio, TRIM(D.Descripcion) AS Descripcion, TRIM(D.Codigo) AS Codigo, E.Existencia, F.Nombre AS Marca
         FROM [@database].[dbo].[DETALLEVENTAS] AS D
         INNER JOIN [@database].[dbo].[EXISTENCIAS] AS E ON D.Codigo = E.Codigo AND D.Id_Marca = E.Id_Marca AND D.Id_Almacen = E.Id_Almacen
@@ -162,7 +162,7 @@ export const querys = {
         ORDER BY Folio DESC
     `,
 
-    insertOrderDetails:  ` 
+    insertOrderDetails: ` 
         INSERT INTO [OLEIDB1].[dbo].[DETALLEVENTAS]  (
             Id_Almacen, TipoDoc, Serie, Folio, Codigo, Id_Marca, Id_ListaPrecios, Cantidad,
             Precio, Importe, Impuesto, Descripcion, Descuento, Id_Unidad, SwNs, TasaImpuesto, SKU, Partida, Costo
@@ -171,5 +171,43 @@ export const querys = {
             @Id_Almacen, @TipoDoc, @Serie, @Folio, @Codigo, @Id_Marca, @Id_ListaPrecios, @Cantidad,
             @Precio, @Importe, @Impuesto, @Descripcion, @Descuento, @Id_Unidad, @SwNs, @TasaImpuesto, @SKU, @Partida,  @Costo
         );
-    `
+    `,
+
+    // Products by stock
+    getAllProductsByStock: `
+        SELECT TOP(10) TRIM(P.Descripcion) AS Descripcion, TRIM(P.Codigo) AS Codigo, E.Existencia, E.Id_Almacen, E.Id_Marca, TRIM(C.CodBar) AS CodBar, TRIM(M.Nombre) AS Marca
+        FROM [dbo].[PRODUCTOS] P
+        JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo
+        JOIN [dbo].[COSTOS] C ON C.Codigo = P.Codigo
+        JOIN [dbo].[MARCAS] M ON E.Id_Marca = M.Id_Marca
+    `,
+
+    getProductByStockAndCodeBar: `
+        SELECT TRIM(P.Descripcion) AS Descripcion, TRIM(P.Codigo) AS Codigo, E.Existencia, E.Id_Almacen, E.Id_Marca, TRIM(C.CodBar) AS CodBar, TRIM(M.Nombre) AS Marca
+        FROM [dbo].[PRODUCTOS] P
+        JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo
+        JOIN [dbo].[COSTOS] C ON C.Codigo = P.Codigo
+        JOIN [dbo].[MARCAS] M ON E.Id_Marca = M.Id_Marca
+        WHERE C.CodBar = @CodeBar
+    `,
+
+    // Inventory
+    insertInventory: ` 
+        INSERT INTO [OLEIDB1].[dbo].[INVENTARIOS]  (
+            Id_Almacen, Folio, Id_TipoMovInv, Estado, Fecha, Id_AlmacenDest, SwPendiente, Descripcion, Id_Usuario, SwTr, FechaRecepcion, FolioReq, AlmReq
+        ) 
+        OUTPUT 'output' as 'result', Inserted.Id_Almacen, Inserted.Folio, Inserted.Fecha, Inserted.Id_TipoMovInv 
+        VALUES (
+            @Id_Almacen, @Folio, @Id_TipoMovInv, @Estado, @Fecha, @Id_AlmacenDest, @SwPendiente, @Descripcion, @Id_Usuario, @SwTr, @FechaRecepcion, @FolioReq, @AlmReq
+        )
+    `,
+
+    insertInventoryDetails: ` 
+    INSERT INTO [OLEIDB1].[dbo].[DETALLEINVENTARIOS] (
+        Id_Almacen, Folio, Partida, Codigo, Id_Marca, Cantidad, Id_Ubicacion, Diferencia, SwNS, NumsDeSerie, SKU
+    ) 
+    OUTPUT 'output' as 'result', Inserted.Id_Almacen, Inserted.Folio, Inserted.Partida, Inserted.Codigo 
+    VALUES (
+        @Id_Almacen, @Folio, @Partida, @Codigo, @Id_Marca, @Cantidad, @Id_Ubicacion, @Diferencia, @SwNS, @NumsDeSerie, @SKU
+    )`
 };
