@@ -231,9 +231,8 @@ const getProductsByStock = async (req: Request, res: Response) => {
 }
 
 const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
-    const { CodeBar } = req.params;
 
-    console.log({ CodeBar })
+    const { CodeBar } = req.params;
 
     try {
         const pool = await dbConnection();
@@ -255,6 +254,8 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
         return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
     }
 }
+
+
 // Utils
 const checkImageExists = async (url: string): Promise<boolean> => {
     try {

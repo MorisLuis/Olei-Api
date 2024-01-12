@@ -192,6 +192,9 @@ export const querys = {
     `,
 
     // Inventory
+
+    getInventory: `SELECT I.Folio, I.Fecha FROM [OLEIDB1].[dbo].[INVENTARIOS] I WHERE I.Folio = @Folio`,
+
     insertInventory: ` 
         INSERT INTO [OLEIDB1].[dbo].[INVENTARIOS]  (
             Id_Almacen, Folio, Id_TipoMovInv, Estado, Fecha, Id_AlmacenDest, SwPendiente, Descripcion, Id_Usuario, SwTr, FechaRecepcion, FolioReq, AlmReq
@@ -201,6 +204,8 @@ export const querys = {
             @Id_Almacen, @Folio, @Id_TipoMovInv, @Estado, @Fecha, @Id_AlmacenDest, @SwPendiente, @Descripcion, @Id_Usuario, @SwTr, @FechaRecepcion, @FolioReq, @AlmReq
         )
     `,
+
+    getInventoryDetails:`SELECT I.Folio, TRIM(I.Codigo) AS Codigo, I.Cantidad, I.Partida FROM [dbo].[DETALLEINVENTARIOS] I  WHERE I.Folio = @Folio`,
 
     insertInventoryDetails: ` 
     INSERT INTO [OLEIDB1].[dbo].[DETALLEINVENTARIOS] (

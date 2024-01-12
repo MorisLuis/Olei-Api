@@ -69,6 +69,34 @@ const postInventory = async (req: Request, res: Response) => {
     }
 }
 
+const getInventory = async (req: Request, res: Response) => {
+
+    const { Folio } = req.query;
+
+    try {
+        const pool = await dbConnection()
+        if (!pool) {
+            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            return;
+        }
+
+        const getInventoryQuery = querys.getInventory;
+        const request = await pool.request()
+            .input("Folio", Folio)
+            .query(getInventoryQuery)
+
+
+        let inventory = request.recordset[0];
+
+        res.json(inventory)
+
+
+    } catch (error) {
+        console.log({ error })
+        res.status(500).json({ error: error });
+    }
+}
+
 const postInventoryDetails = async (req: Request, res: Response) => {
 
     try {
@@ -139,7 +167,39 @@ const postInventoryDetails = async (req: Request, res: Response) => {
     }
 }
 
+const getInventoryDetails = async (req: Request, res: Response) => {
+
+    const { Folio } = req.query;
+    console.log({ Folio })
+
+    try {
+        const pool = await dbConnection()
+        if (!pool) {
+            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            return;
+        }
+
+        const getInventoryQuery = querys.getInventoryDetails;
+        const request = await pool.request()
+            .input("Folio", Folio)
+            .query(getInventoryQuery)
+
+
+        let inventoryDetails = request.recordset;
+
+        res.json(inventoryDetails)
+
+
+    } catch (error) {
+        console.log({ error })
+        res.status(500).json({ error: error });
+    }
+}
+
+
 export {
     postInventory,
-    postInventoryDetails
+    postInventoryDetails,
+    getInventory,
+    getInventoryDetails
 }
