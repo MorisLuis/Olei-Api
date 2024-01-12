@@ -182,9 +182,7 @@ const getOrder = async (req: Request, res: Response) => {
 
     const { folio } = req.params;
     const client = sharedData?.currentClient?.client;
-    const connection = sharedData?.userConnection?.connection;
     const Id_Cliente = client?.Id_Cliente;
-    const database = connection?.database;
 
     try {
         const pool = await dbConnection();
@@ -197,7 +195,6 @@ const getOrder = async (req: Request, res: Response) => {
         const getOrderQuery = querys.getOrder;
 
         const request = await pool.request()
-            .input("database", database)
             .input('Id_Cliente', sql.Int, Id_Cliente)
             .input('folio', sql.Int, folio)
             .query(getOrderQuery);
@@ -216,10 +213,8 @@ const getAllOrders = async (req: Request, res: Response) => {
     const user = sharedData?.currentUser?.user;
     const client = sharedData?.currentClient?.client;
     const Id_Cliente = client?.Id_Cliente;
-    const connection = sharedData?.userConnection?.connection
-    const database = connection?.database;
     const TipoDocOO = user?.TipoDocOO;
-
+    
     try {
         const pool = await dbConnection();
 
@@ -231,10 +226,11 @@ const getAllOrders = async (req: Request, res: Response) => {
         const query = querys.getAllOrders;
 
         const request = await pool.request()
-            .input('database', database)
             .input('TipoDocOO', TipoDocOO)
             .input('Id_Cliente', sql.Int, Id_Cliente)
             .query(query);
+
+            console.log({request})
 
         let allOrders: OrderInterface[] = request.recordset;
 

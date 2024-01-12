@@ -62,26 +62,26 @@ exports.querys = {
         M.Id_Marca,
         PR.Id_ListaPrecios,
         CT.Impto AS Impuesto
-        FROM [OLEIDB1].[dbo].[PRODUCTOS] P
-        JOIN [OLEIDB1].[dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
-        JOIN [OLEIDB1].[dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-        JOIN [OLEIDB1].[dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-        JOIN [OLEIDB1].[dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-        JOIN [OLEIDB1].[dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
+        FROM [dbo].[PRODUCTOS] P
+        JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
+        JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+        JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+        JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+        JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
         WHERE P.Codigo = @Codigo AND M.Nombre = @Marca AND PR.Id_ListaPrecios = @ListaPrecios AND E.Id_Almacen = @Almacen
     `,
-    getTotalProducts: "SELECT COUNT(*) FROM [OLEIDB1].[dbo].[CLIENTES]",
+    getTotalProducts: "SELECT COUNT(*) FROM [dbo].[CLIENTES]",
     // Users
     getAllUsers: "SELECT TOP(500) * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS]",
     getUser: "SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS] WHERE Nombre = ?",
     // Tables
-    getFamilias: `SELECT TRIM(F.Nombre) AS Nombre FROM [OLEIDB1].[dbo].[FAMILIAS] F`,
-    getMarcas: `SELECT TRIM(M.Nombre) AS Nombre FROM [OLEIDB1].[dbo].[MARCAS] M`,
-    getFolios: `SELECT TRIM(P.Codigo) AS Codigo FROM [OLEIDB1].[dbo].[PRODUCTOS] P`,
+    getFamilias: `SELECT TRIM(F.Nombre) AS Nombre FROM [dbo].[FAMILIAS] F`,
+    getMarcas: `SELECT TRIM(M.Nombre) AS Nombre FROM [dbo].[MARCAS] M`,
+    getFolios: `SELECT TRIM(P.Codigo) AS Codigo FROM [dbo].[PRODUCTOS] P`,
     // Clients
     getClientBySearch: `
         SELECT TOP(20) TRIM(C.Nombre) AS Nombre, C.Id_Cliente, C.Id_Almacen, C.Id_ListPre
-        FROM [OLEIDB1].[dbo].[CLIENTES] C
+        FROM [dbo].[CLIENTES] C
     `,
     // Order
     getPreviewDataToPostOrder: `
@@ -100,16 +100,16 @@ exports.querys = {
     `,
     getOrder: ` 
         SELECT V.Folio, V.Piezas, V.Subtotal, V.Impuesto, V.Total, V.Fecha, C.Nombre as Cliente, VE.Nombre as Vendedor
-        FROM [@database].[dbo].[VENTAS] AS V
-        INNER JOIN [@database].[dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
-        INNER JOIN [@database].[dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
-        WHERE V.Id_Cliente = @Id_Cliente AND TipoDoc = 3 AND Folio = @folio
+        FROM [dbo].[VENTAS] AS V
+        INNER JOIN [dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
+        INNER JOIN [dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
+        WHERE V.Id_Cliente = @Id_Cliente AND V.TipoDoc = 3 AND V.Folio = @folio
     `,
     getAllOrders: `
         SELECT V.Folio, V.Piezas, V.Subtotal, V.Impuesto, V.Total, V.Fecha ,C.Nombre as Cliente, VE.Nombre as Vendedor
-        FROM [@database].[dbo].[VENTAS] AS V
-        INNER JOIN [@database].[dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
-        INNER JOIN [@database].[dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
+        FROM [dbo].[VENTAS] AS V
+        INNER JOIN [dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
+        INNER JOIN [dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
         WHERE V.Id_Cliente = @Id_Cliente AND TipoDoc = @TipoDocOO
         ORDER BY Fecha DESC
     `,
@@ -143,9 +143,9 @@ exports.querys = {
     `,
     getOrderDetails: `
         SELECT D.Precio, D.Cantidad as Piezas, D.Importe, D.Impuesto, D.Id_Marca, D.Id_Almacen, D.Id_ListaPrecios, D.Folio, TRIM(D.Descripcion) AS Descripcion, TRIM(D.Codigo) AS Codigo, E.Existencia, F.Nombre AS Marca
-        FROM [@database].[dbo].[DETALLEVENTAS] AS D
-        INNER JOIN [@database].[dbo].[EXISTENCIAS] AS E ON D.Codigo = E.Codigo AND D.Id_Marca = E.Id_Marca AND D.Id_Almacen = E.Id_Almacen
-        INNER JOIN [OLEIDB1].[dbo].[MARCAS] AS F ON D.Id_Marca = F.Id_Marca
+        FROM [dbo].[DETALLEVENTAS] AS D
+        INNER JOIN [dbo].[EXISTENCIAS] AS E ON D.Codigo = E.Codigo AND D.Id_Marca = E.Id_Marca AND D.Id_Almacen = E.Id_Almacen
+        INNER JOIN [dbo].[MARCAS] AS F ON D.Id_Marca = F.Id_Marca
         WHERE Folio = @folio
         ORDER BY Folio DESC
     `,
@@ -176,6 +176,7 @@ exports.querys = {
         WHERE C.CodBar = @CodeBar
     `,
     // Inventory
+    getInventory: `SELECT I.Folio, I.Fecha FROM [dbo].[INVENTARIOS] I WHERE I.Folio = @Folio`,
     insertInventory: ` 
         INSERT INTO [OLEIDB1].[dbo].[INVENTARIOS]  (
             Id_Almacen, Folio, Id_TipoMovInv, Estado, Fecha, Id_AlmacenDest, SwPendiente, Descripcion, Id_Usuario, SwTr, FechaRecepcion, FolioReq, AlmReq
@@ -185,13 +186,15 @@ exports.querys = {
             @Id_Almacen, @Folio, @Id_TipoMovInv, @Estado, @Fecha, @Id_AlmacenDest, @SwPendiente, @Descripcion, @Id_Usuario, @SwTr, @FechaRecepcion, @FolioReq, @AlmReq
         )
     `,
+    getInventoryDetails: `SELECT I.Folio, TRIM(I.Codigo) AS Codigo, I.Cantidad, I.Partida FROM [dbo].[DETALLEINVENTARIOS] I  WHERE I.Folio = @Folio`,
     insertInventoryDetails: ` 
-    INSERT INTO [OLEIDB1].[dbo].[DETALLEINVENTARIOS] (
-        Id_Almacen, Folio, Partida, Codigo, Id_Marca, Cantidad, Id_Ubicacion, Diferencia, SwNS, NumsDeSerie, SKU
-    ) 
-    OUTPUT 'output' as 'result', Inserted.Id_Almacen, Inserted.Folio, Inserted.Partida, Inserted.Codigo 
-    VALUES (
-        @Id_Almacen, @Folio, @Partida, @Codigo, @Id_Marca, @Cantidad, @Id_Ubicacion, @Diferencia, @SwNS, @NumsDeSerie, @SKU
-    )`
+        INSERT INTO [OLEIDB1].[dbo].[DETALLEINVENTARIOS] (
+            Id_Almacen, Folio, Partida, Codigo, Id_Marca, Cantidad, Id_Ubicacion, Diferencia, SwNS, NumsDeSerie, SKU
+        ) 
+        OUTPUT 'output' as 'result', Inserted.Id_Almacen, Inserted.Folio, Inserted.Partida, Inserted.Codigo 
+        VALUES (
+            @Id_Almacen, @Folio, @Partida, @Codigo, @Id_Marca, @Cantidad, @Id_Ubicacion, @Diferencia, @SwNS, @NumsDeSerie, @SKU
+        )
+    `
 };
 //# sourceMappingURL=querys.js.map

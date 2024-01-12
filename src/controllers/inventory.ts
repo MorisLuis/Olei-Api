@@ -9,15 +9,11 @@ const postInventory = async (req: Request, res: Response) => {
 
     try {
         const postInventoryData = req.body;
-        /*         const client = sharedData?.currentClient?.client;
-                const connection = sharedData?.userConnection?.connection
-                const Id_Almacen = client?.Id_Almacen;
-                const Id_Usuario = connection?.user;
-                const database = connection?.database; */
-
-        const Id_Almacen = 1;
-        const Id_Usuario = "MORADO";
-        const database = "OLEIDB1";
+        const client = sharedData?.currentClient?.client;
+        const connection = sharedData?.userConnection?.connection
+        const Id_Almacen = client?.Id_Almacen;
+        const Id_Usuario = connection?.user;
+        //const database = connection?.database;
 
         const pool = await dbConnection();
 
@@ -101,14 +97,10 @@ const postInventoryDetails = async (req: Request, res: Response) => {
 
     try {
         const postInventoryDataArray: PorductInterface[] = req.body;
-        /* const client = sharedData?.currentClient?.client;
+        const client = sharedData?.currentClient?.client;
         const connection = sharedData?.userConnection?.connection
         const Id_Almacen = client?.Id_Almacen;
-        const database = connection?.database; */
-
-        const Id_Almacen = 1;
-        const Id_Usuario = "MORADO";
-        const database = "OLEIDB1";
+        const database = connection?.database;
 
 
         const pool = await dbConnection();
@@ -170,7 +162,6 @@ const postInventoryDetails = async (req: Request, res: Response) => {
 const getInventoryDetails = async (req: Request, res: Response) => {
 
     const { Folio } = req.query;
-    console.log({ Folio })
 
     try {
         const pool = await dbConnection()

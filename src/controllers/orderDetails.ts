@@ -162,7 +162,6 @@ const getOrderDetails = async (req: Request, res: Response) => {
         const query = querys.getOrderDetails;
 
         const request = await pool.request()
-            .input('database', database)
             .input('folio', sql.Int, folio)
             .query(query);
 

@@ -12,21 +12,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postInventoryDetails = exports.postInventory = void 0;
+exports.getInventoryDetails = exports.getInventory = exports.postInventoryDetails = exports.postInventory = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
+const app_1 = require("../app");
 const moment_1 = __importDefault(require("moment"));
 const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     try {
         const postInventoryData = req.body;
-        /*         const client = sharedData?.currentClient?.client;
-                const connection = sharedData?.userConnection?.connection
-                const Id_Almacen = client?.Id_Almacen;
-                const Id_Usuario = connection?.user;
-                const database = connection?.database; */
-        const Id_Almacen = 1;
-        const Id_Usuario = "MORADO";
-        const database = "OLEIDB1";
+        const client = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
+        const connection = (_b = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _b === void 0 ? void 0 : _b.connection;
+        const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
+        const Id_Usuario = connection === null || connection === void 0 ? void 0 : connection.user;
+        //const database = connection?.database;
         const pool = yield (0, database_1.dbConnection)();
         const transaction = new mssql_1.default.Transaction(pool);
         yield transaction.begin();
@@ -70,16 +69,35 @@ const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.postInventory = postInventory;
+const getInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { Folio } = req.query;
+    try {
+        const pool = yield (0, database_1.dbConnection)();
+        if (!pool) {
+            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            return;
+        }
+        const getInventoryQuery = database_1.querys.getInventory;
+        const request = yield pool.request()
+            .input("Folio", Folio)
+            .query(getInventoryQuery);
+        let inventory = request.recordset[0];
+        res.json(inventory);
+    }
+    catch (error) {
+        console.log({ error });
+        res.status(500).json({ error: error });
+    }
+});
+exports.getInventory = getInventory;
 const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _c, _d;
     try {
         const postInventoryDataArray = req.body;
-        /* const client = sharedData?.currentClient?.client;
-        const connection = sharedData?.userConnection?.connection
-        const Id_Almacen = client?.Id_Almacen;
-        const database = connection?.database; */
-        const Id_Almacen = 1;
-        const Id_Usuario = "MORADO";
-        const database = "OLEIDB1";
+        const client = (_c = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _c === void 0 ? void 0 : _c.client;
+        const connection = (_d = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _d === void 0 ? void 0 : _d.connection;
+        const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
+        const database = connection === null || connection === void 0 ? void 0 : connection.database;
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -125,4 +143,25 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.postInventoryDetails = postInventoryDetails;
+const getInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { Folio } = req.query;
+    try {
+        const pool = yield (0, database_1.dbConnection)();
+        if (!pool) {
+            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            return;
+        }
+        const getInventoryQuery = database_1.querys.getInventoryDetails;
+        const request = yield pool.request()
+            .input("Folio", Folio)
+            .query(getInventoryQuery);
+        let inventoryDetails = request.recordset;
+        res.json(inventoryDetails);
+    }
+    catch (error) {
+        console.log({ error });
+        res.status(500).json({ error: error });
+    }
+});
+exports.getInventoryDetails = getInventoryDetails;
 //# sourceMappingURL=inventory.js.map

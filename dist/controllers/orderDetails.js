@@ -149,7 +149,6 @@ const getOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function
         ;
         const query = database_1.querys.getOrderDetails;
         const request = yield pool.request()
-            .input('database', database)
             .input('folio', mssql_1.default.Int, folio)
             .query(query);
         let orderDetails = request.recordset;
