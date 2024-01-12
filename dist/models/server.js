@@ -23,6 +23,7 @@ const tablesRouter_1 = __importDefault(require("../routes/tablesRouter"));
 const orderRouter_1 = __importDefault(require("../routes/orderRouter"));
 const orderDetailsRouter_1 = __importDefault(require("../routes/orderDetailsRouter"));
 const clientRouter_1 = __importDefault(require("../routes/clientRouter"));
+const inventoryRouter_1 = __importDefault(require("../routes/inventoryRouter"));
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -35,7 +36,8 @@ class Server {
             tables: "/api/tables",
             order: "/api/order",
             orderDetails: "/api/orderDetails",
-            client: "/api/client"
+            client: "/api/client",
+            inventory: "/api/inventory"
         };
         //Connect to database
         this.connectDB();
@@ -65,12 +67,15 @@ class Server {
         this.app.use(this.paths.order, orderRouter_1.default);
         this.app.use(this.paths.orderDetails, orderDetailsRouter_1.default);
         this.app.use(this.paths.client, clientRouter_1.default);
+        this.app.use(this.paths.inventory, inventoryRouter_1.default);
     }
+    ;
     listen() {
         this.app.listen(this.port, () => {
             console.log("Servidor corriendo en puerto " + this.port);
         });
     }
+    ;
 }
 exports.default = Server;
 //# sourceMappingURL=server.js.map

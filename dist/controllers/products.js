@@ -12,26 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTotalProducts = exports.getProducById = exports.getProducts = void 0;
+exports.getProductByStockAndCodeBar = exports.getProductsByStock = exports.getTotalProducts = exports.getProducById = exports.getProducts = void 0;
 const app_1 = require("../app");
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const node_fetch_1 = __importDefault(require("node-fetch"));
-function executeQuery(pool, query, params) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            // Execute the query with provided parameters
-            const result = yield pool.request()
-                .input('ListaPrecios', mssql_1.default.Int, params.ListaPrecios)
-                .input('Almacen', mssql_1.default.Int, params.Almacen)
-                .query(query);
-            return result.recordset;
-        }
-        catch (error) {
-            throw error;
-        }
-    });
-}
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
@@ -142,8 +127,7 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
-        const result = yield pool
-            .request()
+        const result = yield pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)
             .input("ListaPrecios", userListPrice)
@@ -195,6 +179,43 @@ const getTotalProducts = (req, res) => __awaiter(void 0, void 0, void 0, functio
     res.json(result === null || result === void 0 ? void 0 : result.recordset[0][""]);
 });
 exports.getTotalProducts = getTotalProducts;
+const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const pool = yield (0, database_1.dbConnection)();
+        if (!pool) {
+            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+        }
+        let query = database_1.querys.getAllProductsByStock;
+        const request = yield pool.request()
+            .query(query);
+        const productsByStock = request.recordset;
+        res.json(productsByStock);
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+exports.getProductsByStock = getProductsByStock;
+const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { CodeBar } = req.params;
+    console.log({ CodeBar });
+    try {
+        const pool = yield (0, database_1.dbConnection)();
+        if (!pool) {
+            return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+        }
+        let query = database_1.querys.getProductByStockAndCodeBar;
+        const request = yield pool.request()
+            .input("CodeBar", CodeBar)
+            .query(query);
+        const productByStockAndCodeBar = request.recordset;
+        res.json(productByStockAndCodeBar);
+    }
+    catch (error) {
+        return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
+    }
+});
+exports.getProductByStockAndCodeBar = getProductByStockAndCodeBar;
 // Utils
 const checkImageExists = (url) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -206,4 +227,19 @@ const checkImageExists = (url) => __awaiter(void 0, void 0, void 0, function* ()
         return false;
     }
 });
+function executeQuery(pool, query, params) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // Execute the query with provided parameters
+            const result = yield pool.request()
+                .input('ListaPrecios', mssql_1.default.Int, params.ListaPrecios)
+                .input('Almacen', mssql_1.default.Int, params.Almacen)
+                .query(query);
+            return result.recordset;
+        }
+        catch (error) {
+            throw error;
+        }
+    });
+}
 //# sourceMappingURL=products.js.map

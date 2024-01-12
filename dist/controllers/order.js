@@ -35,36 +35,26 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return;
         }
         const transaction = new mssql_1.default.Transaction(pool);
-        // Inicia la transacción
         yield transaction.begin();
         try {
-            // Crea una nueva instancia de Request dentro de la transacción
             const request = new mssql_1.default.Request(transaction);
             const currentDate = (0, moment_timezone_1.default)().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
-            const result = yield request.query(`
-                SELECT 
-                    (
-                        SELECT TOP 1 Folio FROM [${database}].[dbo].[VENTAS]
-                        WHERE Folio = (SELECT MAX(Folio) FROM [${database}].[dbo].[VENTAS])
-                    ) AS Folio,
-                    (
-                        SELECT SerieActiva FROM [${database}].[dbo].[DATOSFISCALES]
-                        WHERE Id_Almacen = ${Id_Almacen}
-                    ) AS SerieActiva,
-                    Id_Descuento, Id_CondVta, Id_Vendedor, Id_FormaPago, Id_Transporte
-                    FROM [${database}].[dbo].[CLIENTES]
-                    WHERE Id_Cliente = ${Id_Cliente} AND Id_Almacen = ${Id_Almacen};
-            `);
+            const previewDataToPostOrder = yield request
+                .input("Id_Almacen", Id_Almacen)
+                .input("Id_Cliente", Id_Cliente)
+                .input("database", database)
+                .query(database_1.querys.getPreviewDataToPostOrder);
             // Accede a los resultados
-            const results = result.recordset[0];
+            const results = previewDataToPostOrder.recordset[0];
+            const { SerieActiva, Folio, Id_Descuento, Id_CondVta, Id_Vendedor, Id_FormaPago, Id_Transporte } = results;
             if (!results) {
                 return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
             }
             // Modifica la fecha en el objeto postData con el valor deseado
             postData.Id_Almacen = Id_Almacen;
             postData.TipoDoc = user === null || user === void 0 ? void 0 : user.TipoDocOO;
-            postData.Serie = results.SerieActiva ? results.SerieActiva : "";
-            postData.Folio = (results === null || results === void 0 ? void 0 : results.Folio) + 1;
+            postData.Serie = SerieActiva ? SerieActiva : "";
+            postData.Folio = Folio + 1;
             postData.Id_Cliente = Id_Cliente;
             postData.Id_AlmacenClte = Id_Almacen;
             postData.Fecha = currentDate;
@@ -72,11 +62,11 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             postData.Impuesto = postData.Total - postData.Subtotal;
             postData.Subtotal = postData.Subtotal;
             postData.Saldo = postData.Total;
-            postData.Id_Descuento = results === null || results === void 0 ? void 0 : results.Id_Descuento;
-            postData.Id_CondVta = results === null || results === void 0 ? void 0 : results.Id_CondVta;
-            postData.Id_Vendedor = results === null || results === void 0 ? void 0 : results.Id_Vendedor;
-            postData.Id_FormaPago = results === null || results === void 0 ? void 0 : results.Id_FormaPago;
-            postData.Id_Transporte = results === null || results === void 0 ? void 0 : results.Id_Transporte;
+            postData.Id_Descuento = Id_Descuento;
+            postData.Id_CondVta = Id_CondVta;
+            postData.Id_Vendedor = Id_Vendedor;
+            postData.Id_FormaPago = Id_FormaPago;
+            postData.Id_Transporte = Id_Transporte;
             postData.FechaLiq = postData.Fecha;
             postData.Estado = 1;
             postData.Moneda = 1;
@@ -88,20 +78,7 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             postData.Id_TipoPago = 1;
             postData.TipoDocOrigen = 11;
             // Define la consulta SQL para la inserción de datos
-            const query = `
-                INSERT INTO [OLEIDB1].[dbo].[VENTAS]  (
-                    Id_Cliente, Id_Almacen, Id_AlmacenClte, TipoDoc, Serie, Folio, Fecha,
-                    Subtotal, Impuesto, Total, Saldo, Id_Descuento, Id_CondVta, Id_Vendedor, Id_Formapago,
-                    Id_Transporte, FechaLiq, Estado, Piezas, Moneda, Paridad, CantDescuento,
-                    Suma, Id_Usuario, Id_ListPre, CantLetra, FechaEntrega
-                ) 
-                VALUES (
-                    @Id_Cliente, @Id_Almacen, @Id_AlmacenClte, @TipoDoc, @Serie, @Folio, @Fecha,
-                    @Subtotal, @Impuesto, @Total, @Saldo, @Id_Descuento, @Id_CondVta, @Id_Vendedor, @Id_Formapago,
-                    @Id_Transporte, @FechaLiq, @Estado, @Piezas, @Moneda, @Paridad, @CantDescuento,
-                    @Suma, @Id_Usuario, @Id_ListPre, @CantLetra, @FechaEntrega
-                );
-            `;
+            const postOrderQuery = database_1.querys.insertOrder;
             // Define una función para asignar los parámetros
             const assignParameter = (parameterName, sqlType, value) => {
                 request.input(parameterName, sqlType, value);
@@ -176,7 +153,7 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 }
             }
             // Ejecuta la consulta SQL dentro de la transacción
-            yield request.query(query);
+            yield request.query(postOrderQuery);
             // Confirma la transacción
             yield transaction.commit();
             res.status(201).json({
@@ -213,19 +190,14 @@ const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
-        const query = `
-            SELECT V.Folio, V.Piezas, V.Subtotal, V.Impuesto, V.Total, V.Fecha, C.Nombre as Cliente, VE.Nombre as Vendedor
-            FROM [${database}].[dbo].[VENTAS] AS V
-            INNER JOIN [${database}].[dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
-            INNER JOIN [${database}].[dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
-            WHERE V.Id_Cliente = @Id_Cliente AND TipoDoc = 3 AND Folio = @folio
-        `;
-        const request = pool.request();
-        request.input('Id_Cliente', mssql_1.default.Int, Id_Cliente);
-        request.input('folio', mssql_1.default.Int, folio);
-        const consult = yield request.query(query);
-        let results = consult.recordset[0];
-        res.json(results);
+        const getOrderQuery = database_1.querys.getOrder;
+        const request = yield pool.request()
+            .input("database", database)
+            .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
+            .input('folio', mssql_1.default.Int, folio)
+            .query(getOrderQuery);
+        let order = request.recordset[0];
+        res.json(order);
     }
     catch (error) {
         res.status(500).json({ error: error });
@@ -246,19 +218,14 @@ const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
-        const query = `
-            SELECT V.Folio, V.Piezas, V.Subtotal, V.Impuesto, V.Total, V.Fecha ,C.Nombre as Cliente, VE.Nombre as Vendedor
-            FROM [${database}].[dbo].[VENTAS] AS V
-            INNER JOIN [${database}].[dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
-            INNER JOIN [${database}].[dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
-            WHERE V.Id_Cliente = @Id_Cliente AND TipoDoc = ${TipoDocOO}
-            ORDER BY Fecha DESC
-        `;
-        const request = pool.request();
-        request.input('Id_Cliente', mssql_1.default.Int, Id_Cliente);
-        const consult = yield request.query(query);
-        let results = consult.recordset;
-        res.json(results);
+        const query = database_1.querys.getAllOrders;
+        const request = yield pool.request()
+            .input('database', database)
+            .input('TipoDocOO', TipoDocOO)
+            .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
+            .query(query);
+        let allOrders = request.recordset;
+        res.json(allOrders);
     }
     catch (error) {
         console.log({ error });

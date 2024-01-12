@@ -12,9 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.selectClient = void 0;
 const app_1 = require("../app");
 const selectClient = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     const { Id_Cliente, Id_Almacen, Id_ListPre } = req.body;
-    const connection = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _a === void 0 ? void 0 : _a.connection;
+    //const connection = sharedData?.userConnection?.connection;
     try {
         app_1.sharedData.currentClient = {
             client: {

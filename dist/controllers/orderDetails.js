@@ -44,50 +44,36 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 count++;
                 postData.Codigo = postData.Codigo;
                 postData.Cantidad = postData.Piezas;
-                const firstQuery = `
-                    SELECT 
-                        (SELECT TOP 1 Folio FROM [${database}].[dbo].[VENTAS] WHERE Folio = (SELECT TOP 1 Folio FROM [${database}].[dbo].[VENTAS] ORDER BY Folio DESC)) AS Folio,
-                        (SELECT Costo FROM [${database}].[dbo].[COSTOS] WHERE TRIM(Codigo) = '${postData.Codigo}' AND Id_Marca = '${postData.Id_Marca}') AS Costo,
-                        (SELECT TRIM(SerieActiva) FROM [${database}].[dbo].[DATOSFISCALES] WHERE Id_Almacen = ${Id_Almacen}) AS SerieActiva,
-                        (SELECT Id_Descuento FROM [${database}].[dbo].[CLIENTES] WHERE Id_Cliente = ${Id_Cliente} AND Id_Almacen = ${Id_Almacen}) AS Id_Descuento,
-                        (SELECT Valor FROM [${database}].[dbo].[DESCUENTOS] WHERE Id_Descuento = (SELECT Id_Descuento FROM [${database}].[dbo].[CLIENTES] WHERE Id_Cliente = ${Id_Cliente} AND Id_Almacen = ${Id_Almacen})) AS Valor,
-                        P.SwNs,
-                        TRIM(P.SKU) AS SKU,
-                        P.Id_Unidad AS Id_Unidad
-                    FROM [${database}].[dbo].[PRODUCTOS] AS P
-                    WHERE TRIM(P.Codigo) = '${postData.Codigo}'
-                    `;
-                const result = yield request.query(firstQuery);
+                const previewDataToPostOrderDetails = database_1.querys.getPreviewDataToPostOrderDetails;
+                const result = yield request
+                    .input("database", database)
+                    .input("Codigo", postData.Codigo)
+                    .input("Id_Marca", postData.Id_Marca)
+                    .input("Id_Almacen", Id_Almacen)
+                    .input("Id_Cliente", Id_Cliente)
+                    .query(previewDataToPostOrderDetails);
                 // Accede a los resultados
                 const results = result.recordset[0];
+                const { SerieActiva, Folio, Valor, Id_Unidad, SwNs, SKU, Costo } = results;
                 if (!results) {
                     return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
                 }
                 postData.Id_Almacen = Id_Almacen;
                 postData.TipoDoc = user === null || user === void 0 ? void 0 : user.TipoDocOO;
-                postData.Serie = results.SerieActiva ? results.SerieActiva : "";
-                postData.Folio = results.Folio + 1;
+                postData.Serie = SerieActiva ? SerieActiva : "";
+                postData.Folio = Folio + 1;
                 postData.Id_ListaPrecios = Id_ListPre;
-                postData.Descuento = results === null || results === void 0 ? void 0 : results.Valor;
-                postData.Id_Unidad = results === null || results === void 0 ? void 0 : results.Id_Unidad;
-                postData.SwNs = results === null || results === void 0 ? void 0 : results.SwNs;
+                postData.Descuento = Valor;
+                postData.Id_Unidad = Id_Unidad;
+                postData.SwNs = SwNs;
                 postData.TasaImpuesto = process.env.PUBLIC_TAX_RATE;
-                postData.SKU = results === null || results === void 0 ? void 0 : results.SKU;
+                postData.SKU = SKU;
                 postData.Partida = count;
                 postData.Importe = postData.Precio * postData.Piezas;
                 postData.Impuesto = (postData.Precio * postData.Piezas * (postData.Impto / 100));
-                postData.Costo = results === null || results === void 0 ? void 0 : results.Costo;
+                postData.Costo = Costo;
                 // Define la consulta SQL para la inserción de datos
-                const query = `
-                        INSERT INTO [OLEIDB1].[dbo].[DETALLEVENTAS]  (
-                            Id_Almacen, TipoDoc, Serie, Folio, Codigo, Id_Marca, Id_ListaPrecios, Cantidad,
-                            Precio, Importe, Impuesto, Descripcion, Descuento, Id_Unidad, SwNs, TasaImpuesto, SKU, Partida, Costo
-                        ) 
-                        VALUES (
-                            @Id_Almacen, @TipoDoc, @Serie, @Folio, @Codigo, @Id_Marca, @Id_ListaPrecios, @Cantidad,
-                            @Precio, @Importe, @Impuesto, @Descripcion, @Descuento, @Id_Unidad, @SwNs, @TasaImpuesto, @SKU, @Partida,  @Costo
-                        );
-                    `;
+                const postOrderDetailsQuery = database_1.querys.insertOrderDetails;
                 // Define una función para asignar los parámetros
                 const assignParameter = (parameterName, sqlType, value) => {
                     request.input(parameterName, sqlType, value);
@@ -121,7 +107,7 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
                     }
                 }
                 // Ejecuta la consulta SQL dentro de la transacción
-                yield request.query(query);
+                yield request.query(postOrderDetailsQuery);
             }
             // Confirma la transacción
             yield transaction.commit();
@@ -160,19 +146,14 @@ const getOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
-        const query = `
-            SELECT D.Precio, D.Cantidad as Piezas, D.Importe, D.Impuesto, D.Id_Marca, D.Id_Almacen, D.Id_ListaPrecios, D.Folio, TRIM(D.Descripcion) AS Descripcion, TRIM(D.Codigo) AS Codigo, E.Existencia, F.Nombre AS Marca
-            FROM [${database}].[dbo].[DETALLEVENTAS] AS D
-            INNER JOIN [${database}].[dbo].[EXISTENCIAS] AS E ON D.Codigo = E.Codigo AND D.Id_Marca = E.Id_Marca AND D.Id_Almacen = E.Id_Almacen
-            INNER JOIN [OLEIDB1].[dbo].[MARCAS] AS F ON D.Id_Marca = F.Id_Marca
-            WHERE Folio = @folio
-            ORDER BY Folio DESC
-        `;
-        const request = pool.request();
-        request.input('folio', mssql_1.default.Int, folio);
-        const consult = yield request.query(query);
-        let results = consult.recordset;
-        res.json(results);
+        ;
+        const query = database_1.querys.getOrderDetails;
+        const request = yield pool.request()
+            .input('database', database)
+            .input('folio', mssql_1.default.Int, folio)
+            .query(query);
+        let orderDetails = request.recordset;
+        res.json(orderDetails);
     }
     catch (error) {
         res.status(500).json({ error: error });
