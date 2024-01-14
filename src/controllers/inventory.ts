@@ -13,7 +13,6 @@ const postInventory = async (req: Request, res: Response) => {
         const connection = sharedData?.userConnection?.connection
         const Id_Almacen = client?.Id_Almacen;
         const Id_Usuario = connection?.user;
-        //const database = connection?.database;
 
         const pool = await dbConnection();
 
@@ -98,10 +97,7 @@ const postInventoryDetails = async (req: Request, res: Response) => {
     try {
         const postInventoryDataArray: PorductInterface[] = req.body;
         const client = sharedData?.currentClient?.client;
-        const connection = sharedData?.userConnection?.connection
         const Id_Almacen = client?.Id_Almacen;
-        const database = connection?.database;
-
 
         const pool = await dbConnection();
 
@@ -123,12 +119,23 @@ const postInventoryDetails = async (req: Request, res: Response) => {
             // Get last Folio
             const Folio = await pool.request().query('SELECT MAX(FOLIO) AS Folio FROM [dbo].[DETALLEINVENTARIOS]');
 
+
+            //UPDATE 'EXISTENCIAS' Table
+            const existenceUpdated = await request
+                .input('Cantidad_Existence', postInventoryData.Piezas)
+                .input('Codigo_Existence', postInventoryData.Codigo)
+                .input('Id_Marca_Existence', postInventoryData.Id_Marca)
+                .input('Id_Almacen_Existence', Id_Almacen)
+                .query(querys.updateExistenceTable);
+
+            const { Existencia, ExistenciaAnt } = existenceUpdated.recordset[0];
+
             // Get data default.
             const Id_Ubicacion = 0;
             const SwNS = null;
             const NumsDeSerie = null;
             const SKU = null;
-            const Diferencia = 0; // PENDING
+            const Diferencia = Existencia - ExistenciaAnt;
 
             const postIntentoryDetailsQuery = querys.insertInventoryDetails;
 
