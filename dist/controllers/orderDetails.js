@@ -17,17 +17,14 @@ const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const app_1 = require("../app");
 const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c;
+    var _a, _b;
     try {
         const postArray = req.body;
         const client = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
-        const connection = (_b = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _b === void 0 ? void 0 : _b.connection;
-        const user = (_c = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _c === void 0 ? void 0 : _c.user;
-        //Temporal
+        const user = (_b = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _b === void 0 ? void 0 : _b.user;
         const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
         const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
         const Id_ListPre = client === null || client === void 0 ? void 0 : client.Id_ListPre;
-        const database = connection === null || connection === void 0 ? void 0 : connection.database;
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -35,24 +32,21 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
         }
         const transaction = new mssql_1.default.Transaction(pool);
         try {
-            // Inicia la transacción
             yield transaction.begin();
             const request = new mssql_1.default.Request(transaction);
             let count = 0;
+            const orderDetails = []; // Store every orderDetails from the for.
             for (const postData of postArray) {
                 const request = new mssql_1.default.Request(transaction);
                 count++;
-                postData.Codigo = postData.Codigo;
                 postData.Cantidad = postData.Piezas;
                 const previewDataToPostOrderDetails = database_1.querys.getPreviewDataToPostOrderDetails;
                 const result = yield request
-                    .input("database", database)
-                    .input("Codigo", postData.Codigo)
-                    .input("Id_Marca", postData.Id_Marca)
-                    .input("Id_Almacen", Id_Almacen)
-                    .input("Id_Cliente", Id_Cliente)
+                    .input("Codigo_Preview", postData.Codigo)
+                    .input("Id_Marca_Preview", postData.Id_Marca)
+                    .input("Id_Almacen_Preview", Id_Almacen)
+                    .input("Id_Cliente_Preview", Id_Cliente)
                     .query(previewDataToPostOrderDetails);
-                // Accede a los resultados
                 const results = result.recordset[0];
                 const { SerieActiva, Folio, Valor, Id_Unidad, SwNs, SKU, Costo } = results;
                 if (!results) {
@@ -72,50 +66,35 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 postData.Importe = postData.Precio * postData.Piezas;
                 postData.Impuesto = (postData.Precio * postData.Piezas * (postData.Impto / 100));
                 postData.Costo = Costo;
-                // Define la consulta SQL para la inserción de datos
                 const postOrderDetailsQuery = database_1.querys.insertOrderDetails;
-                // Define una función para asignar los parámetros
-                const assignParameter = (parameterName, sqlType, value) => {
-                    request.input(parameterName, sqlType, value);
-                };
-                const parameters = {
-                    Id_Almacen: { type: mssql_1.default.Int, value: Id_Almacen },
-                    TipoDoc: { type: mssql_1.default.SmallInt, value: 3 },
-                    Serie: { type: mssql_1.default.NChar(10), value: postData.Serie },
-                    Folio: { type: mssql_1.default.Int, value: postData.Folio },
-                    Codigo: { type: mssql_1.default.NChar(20), value: postData.Codigo },
-                    Id_Marca: { type: mssql_1.default.Int, value: postData.Id_Marca },
-                    Id_ListaPrecios: { type: mssql_1.default.Int, value: postData.Id_ListaPrecios },
-                    Cantidad: { type: mssql_1.default.Decimal(18, 6), value: postData.Cantidad },
-                    Precio: { type: mssql_1.default.Decimal(18, 6), value: postData.Precio },
-                    Importe: { type: mssql_1.default.Decimal(18, 6), value: postData.Importe },
-                    Impuesto: { type: mssql_1.default.Decimal(18, 6), value: postData.Impuesto },
-                    Descripcion: { type: mssql_1.default.VarChar(4000), value: postData.Descripcion },
-                    Descuento: { type: mssql_1.default.Decimal(18, 6), value: postData.Descuento },
-                    Id_Unidad: { type: mssql_1.default.Int, value: postData.Id_Unidad },
-                    SwNs: { type: mssql_1.default.Bit, value: postData.SwNs },
-                    TasaImpuesto: { type: mssql_1.default.Money, value: postData.TasaImpuesto },
-                    SKU: { type: mssql_1.default.NChar(20), value: postData.SKU },
-                    Partida: { type: mssql_1.default.SmallInt, value: postData.Partida },
-                    Costo: { type: mssql_1.default.Decimal(18, 6), value: postData.Costo },
-                };
-                // Asigna los parámetros utilizando la función
-                for (const parameterName in parameters) {
-                    if (Object.prototype.hasOwnProperty.call(parameters, parameterName)) {
-                        const parameter = parameters[parameterName];
-                        assignParameter(parameterName, parameter.type, parameter.value);
-                    }
-                }
-                // Ejecuta la consulta SQL dentro de la transacción
-                yield request.query(postOrderDetailsQuery);
+                const resultOrderPost = yield request
+                    .input("Id_Almacen", mssql_1.default.Int, Id_Almacen)
+                    .input("TipoDoc", mssql_1.default.SmallInt, 3)
+                    .input("Serie", mssql_1.default.NChar(10), postData.Serie)
+                    .input("Folio", mssql_1.default.Int, postData.Folio)
+                    .input("Codigo", mssql_1.default.NChar(20), postData.Codigo)
+                    .input("Id_Marca", mssql_1.default.Int, postData.Id_Marca)
+                    .input("Id_ListaPrecios", mssql_1.default.Int, postData.Id_ListaPrecios)
+                    .input("Cantidad", mssql_1.default.Decimal(18, 6), postData.Cantidad)
+                    .input("Precio", mssql_1.default.Decimal(18, 6), postData.Precio)
+                    .input("Importe", mssql_1.default.Decimal(18, 6), postData.Importe)
+                    .input("Impuesto", mssql_1.default.Decimal(18, 6), postData.Impuesto)
+                    .input("Descripcion", mssql_1.default.VarChar(4000), postData.Descripcion)
+                    .input("Descuento", mssql_1.default.Decimal(18, 6), postData.Descuento)
+                    .input("Id_Unidad", mssql_1.default.Int, postData.Id_Unidad)
+                    .input("SwNs", mssql_1.default.Bit, postData.SwNs)
+                    .input("TasaImpuesto", mssql_1.default.Money, postData.TasaImpuesto)
+                    .input("SKU", mssql_1.default.NChar(20), postData.SKU)
+                    .input("Partida", mssql_1.default.SmallInt, postData.Partida)
+                    .input("Costo", mssql_1.default.Decimal(18, 6), postData.Costo)
+                    .query(postOrderDetailsQuery);
+                orderDetails.push(resultOrderPost.recordset[0]);
             }
-            // Confirma la transacción
             yield transaction.commit();
-            res.status(201).json({
-                orderDetails: request.parameters
-            });
+            res.json(orderDetails);
         }
         catch (error) {
+            console.log({ error });
             yield transaction.rollback();
             throw error;
         }
@@ -132,10 +111,7 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
 });
 exports.postOrderDetails = postOrderDetails;
 const getOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _d;
     const { folio } = req.query;
-    const connection = (_d = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _d === void 0 ? void 0 : _d.connection;
-    const database = connection === null || connection === void 0 ? void 0 : connection.database;
     if (!folio) {
         res.status(500).json({ error: 'No se envio el folio' });
         return;

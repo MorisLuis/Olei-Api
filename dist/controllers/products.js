@@ -25,7 +25,6 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     const user = (_b = app_1.sharedData.currentUser) === null || _b === void 0 ? void 0 : _b.user;
     const userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
     const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
-    console.log({ client, user, userAlmacen, userListPrice });
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
@@ -78,7 +77,6 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         }
         // Use the pagination query if available; otherwise, use the base query
         const finalQuery = paginationQuery || query;
-        console.log({ finalQuery });
         // Execute the parameterized query
         const products = yield executeQuery(pool, finalQuery, params);
         if (user === null || user === void 0 ? void 0 : user.SwImagenes) {

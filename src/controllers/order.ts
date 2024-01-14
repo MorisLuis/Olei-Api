@@ -16,7 +16,6 @@ const postOrder = async (req: Request, res: Response) => {
         const Id_Almacen = client?.Id_Almacen;
         const Id_Cliente = client?.Id_Cliente;
         const Id_ListPre = client?.Id_ListPre;
-        const database = connection?.database;
         const Id_Usuario = connection?.user;
 
         const pool = await dbConnection();
@@ -39,7 +38,6 @@ const postOrder = async (req: Request, res: Response) => {
                 .input("Id_Cliente_Preview", Id_Cliente)
                 .query(querys.getPreviewDataToPostOrder)
 
-            // Accede a los resultados
             const results = previewDataToPostOrder.recordset[0];
             const { SerieActiva, Folio, Id_Descuento, Id_CondVta, Id_Vendedor, Id_FormaPago, Id_Transporte } = results;
 
@@ -47,7 +45,6 @@ const postOrder = async (req: Request, res: Response) => {
                 return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
             }
 
-            // Modifica la fecha en el objeto postData con el valor deseado
             postData.TipoDoc = user?.TipoDocOO;
             postData.Serie = SerieActiva ? SerieActiva : "";
             postData.Folio = Folio + 1;
@@ -74,10 +71,8 @@ const postOrder = async (req: Request, res: Response) => {
             postData.Id_TipoPago = 1;
             postData.TipoDocOrigen = 11;
 
-            // Define la consulta SQL para la inserción de datos
             const postOrderQuery = querys.insertOrder;
 
-            // Ejecuta la consulta SQL dentro de la transacción
             const result = await request
                 .input("Id_Almacen", sql.Int, Id_Almacen)
                 .input("TipoDoc", sql.SmallInt, postData.TipoDoc)
@@ -140,14 +135,12 @@ const postOrder = async (req: Request, res: Response) => {
                 .input("FechaEntrega", sql.DateTime, postData.FechaEntrega)
                 .query(postOrderQuery);
 
-            // Confirma la transacción
             await transaction.commit();
             const order = result.recordset[0];
             res.status(201).json(order);
 
         } catch (error) {
             await transaction.rollback();
-            console.log({ error })
             throw error;
         } finally {
             if (pool) {

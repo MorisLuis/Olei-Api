@@ -142,16 +142,16 @@ export const querys = {
     // Order Details
     getPreviewDataToPostOrderDetails: `
         SELECT 
-            (SELECT TOP 1 Folio FROM [@database].[dbo].[VENTAS] WHERE Folio = (SELECT TOP 1 Folio FROM [@database].[dbo].[VENTAS] ORDER BY Folio DESC)) AS Folio,
-            (SELECT Costo FROM [@database].[dbo].[COSTOS] WHERE TRIM(Codigo) = '@Codigo' AND Id_Marca = '@Id_Marca') AS Costo,
-            (SELECT TRIM(SerieActiva) FROM [@database].[dbo].[DATOSFISCALES] WHERE Id_Almacen = @Id_Almacen) AS SerieActiva,
-            (SELECT Id_Descuento FROM [@database].[dbo].[CLIENTES] WHERE Id_Cliente = @Id_Cliente AND Id_Almacen = @Id_Almacen) AS Id_Descuento,
-            (SELECT Valor FROM [@database].[dbo].[DESCUENTOS] WHERE Id_Descuento = (SELECT Id_Descuento FROM [@database].[dbo].[CLIENTES] WHERE Id_Cliente = @Id_Cliente AND Id_Almacen = @Id_Almacen)) AS Valor,
+            (SELECT TOP 1 Folio FROM [dbo].[VENTAS] WHERE Folio = (SELECT TOP 1 Folio FROM [dbo].[VENTAS] ORDER BY Folio DESC)) AS Folio,
+            (SELECT Costo FROM [dbo].[COSTOS] WHERE TRIM(Codigo) = @Codigo_Preview AND Id_Marca = @Id_Marca_Preview) AS Costo,
+            (SELECT TRIM(SerieActiva) FROM [dbo].[DATOSFISCALES] WHERE Id_Almacen = @Id_Almacen_Preview) AS SerieActiva,
+            (SELECT Id_Descuento FROM [dbo].[CLIENTES] WHERE Id_Cliente = @Id_Cliente_Preview AND Id_Almacen = @Id_Almacen_Preview) AS Id_Descuento,
+            (SELECT Valor FROM [dbo].[DESCUENTOS] WHERE Id_Descuento = (SELECT Id_Descuento FROM [dbo].[CLIENTES] WHERE Id_Cliente = @Id_Cliente_Preview AND Id_Almacen = @Id_Almacen_Preview)) AS Valor,
             P.SwNs,
             TRIM(P.SKU) AS SKU,
             P.Id_Unidad AS Id_Unidad
-        FROM [@database].[dbo].[PRODUCTOS] AS P
-        WHERE TRIM(P.Codigo) = '@Codigo'
+        FROM [dbo].[PRODUCTOS] AS P
+        WHERE TRIM(P.Codigo) = @Codigo_Preview
     `,
 
     getOrderDetails: `
@@ -164,10 +164,11 @@ export const querys = {
     `,
 
     insertOrderDetails: ` 
-        INSERT INTO [OLEIDB1].[dbo].[DETALLEVENTAS]  (
+        INSERT INTO [dbo].[DETALLEVENTAS]  (
             Id_Almacen, TipoDoc, Serie, Folio, Codigo, Id_Marca, Id_ListaPrecios, Cantidad,
             Precio, Importe, Impuesto, Descripcion, Descuento, Id_Unidad, SwNs, TasaImpuesto, SKU, Partida, Costo
         ) 
+        OUTPUT 'OrderDetails' as 'result', Inserted.Id_Almacen, Inserted.Folio, TRIM(Inserted.Codigo) AS Codigo, Inserted.Cantidad 
         VALUES (
             @Id_Almacen, @TipoDoc, @Serie, @Folio, @Codigo, @Id_Marca, @Id_ListaPrecios, @Cantidad,
             @Precio, @Importe, @Impuesto, @Descripcion, @Descuento, @Id_Unidad, @SwNs, @TasaImpuesto, @SKU, @Partida,  @Costo
@@ -197,7 +198,7 @@ export const querys = {
     getInventory: `SELECT I.Folio, I.Fecha FROM [dbo].[INVENTARIOS] I WHERE I.Folio = @Folio`,
 
     insertInventory: ` 
-        INSERT INTO [OLEIDB1].[dbo].[INVENTARIOS]  (
+        INSERT INTO [dbo].[INVENTARIOS]  (
             Id_Almacen, Folio, Id_TipoMovInv, Estado, Fecha, Id_AlmacenDest, SwPendiente, Descripcion, Id_Usuario, SwTr, FechaRecepcion, FolioReq, AlmReq
         ) 
         OUTPUT 'Inventory' as 'result', Inserted.Id_Almacen, Inserted.Folio, Inserted.Fecha, Inserted.Id_TipoMovInv 
@@ -209,7 +210,7 @@ export const querys = {
     getInventoryDetails:`SELECT I.Folio, TRIM(I.Codigo) AS Codigo, I.Cantidad, I.Partida FROM [dbo].[DETALLEINVENTARIOS] I  WHERE I.Folio = @Folio`,
 
     insertInventoryDetails: ` 
-        INSERT INTO [OLEIDB1].[dbo].[DETALLEINVENTARIOS] (
+        INSERT INTO [dbo].[DETALLEINVENTARIOS] (
             Id_Almacen, Folio, Partida, Codigo, Id_Marca, Cantidad, Id_Ubicacion, Diferencia, SwNS, NumsDeSerie, SKU
         ) 
         OUTPUT 'output' as 'result', Inserted.Id_Almacen, Inserted.Folio, Inserted.Partida, Inserted.Codigo 
