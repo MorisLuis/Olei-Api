@@ -15,7 +15,6 @@ const getProducts = async (req: Request, res: Response) => {
     const userAlmacen = client?.Id_Almacen;
     const userListPrice = client?.Id_ListPre;
 
-    console.log({client, user, userAlmacen, userListPrice})
     try {
         const pool = await dbConnection();
 
@@ -84,7 +83,6 @@ const getProducts = async (req: Request, res: Response) => {
         // Use the pagination query if available; otherwise, use the base query
         const finalQuery = paginationQuery || query;
 
-        console.log({finalQuery})
 
         // Execute the parameterized query
         const products = await executeQuery(pool, finalQuery, params);

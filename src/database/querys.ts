@@ -32,20 +32,20 @@ export const querys = {
         M.Id_Marca,
         PR.Id_ListaPrecios,
         CT.Impto AS Impuesto
-        FROM [OLEIDB1].[dbo].[PRODUCTOS] P
-        JOIN [OLEIDB1].[dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
-        JOIN [OLEIDB1].[dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-        JOIN [OLEIDB1].[dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-        JOIN [OLEIDB1].[dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-        JOIN [OLEIDB1].[dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
+        FROM [dbo].[PRODUCTOS] P
+        JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
+        JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+        JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+        JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+        JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
         WHERE PR.Id_ListaPrecios = @ListaPrecios AND E.Id_Almacen = @Almacen
     `,
 
     getProductsBySearch: `
         SELECT DISTINCT TRIM(P.Descripcion) AS Descripcion 
-        FROM [OLEIDB1].[dbo].[PRODUCTOS] P
-        JOIN [OLEIDB1].[dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-        JOIN [OLEIDB1].[dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+        FROM [dbo].[PRODUCTOS] P
+        JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+        JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
     `,
 
     getProducById: `
@@ -94,16 +94,16 @@ export const querys = {
     getPreviewDataToPostOrder: `
         SELECT 
         (
-            SELECT TOP 1 Folio FROM [@database].[dbo].[VENTAS]
-            WHERE Folio = (SELECT MAX(Folio) FROM [@database].[dbo].[VENTAS])
+            SELECT TOP 1 Folio FROM [dbo].[VENTAS]
+            WHERE Folio = (SELECT MAX(Folio) FROM [dbo].[VENTAS])
         ) AS Folio,
         (
-            SELECT SerieActiva FROM [@database].[dbo].[DATOSFISCALES]
-            WHERE Id_Almacen = @Id_Almacen
+            SELECT SerieActiva FROM [dbo].[DATOSFISCALES]
+            WHERE Id_Almacen = @Id_Almacen_Preview
         ) AS SerieActiva,
         Id_Descuento, Id_CondVta, Id_Vendedor, Id_FormaPago, Id_Transporte
-        FROM [@database].[dbo].[CLIENTES]
-        WHERE Id_Cliente = @Id_Cliente AND Id_Almacen = @Id_Almacen
+        FROM [dbo].[CLIENTES]
+        WHERE Id_Cliente = @Id_Cliente_Preview AND Id_Almacen = @Id_Almacen_Preview
     `,
 
     getOrder: ` 
@@ -124,12 +124,13 @@ export const querys = {
     `,
 
     insertOrder: ` 
-        INSERT INTO [OLEIDB1].[dbo].[VENTAS]  (
+        INSERT INTO [dbo].[VENTAS]  (
             Id_Cliente, Id_Almacen, Id_AlmacenClte, TipoDoc, Serie, Folio, Fecha,
             Subtotal, Impuesto, Total, Saldo, Id_Descuento, Id_CondVta, Id_Vendedor, Id_Formapago,
             Id_Transporte, FechaLiq, Estado, Piezas, Moneda, Paridad, CantDescuento,
             Suma, Id_Usuario, Id_ListPre, CantLetra, FechaEntrega
         ) 
+        OUTPUT 'Order' as 'result', Inserted.Id_Almacen, Inserted.Folio, Inserted.Fecha, Inserted.Id_Cliente 
         VALUES (
             @Id_Cliente, @Id_Almacen, @Id_AlmacenClte, @TipoDoc, @Serie, @Folio, @Fecha,
             @Subtotal, @Impuesto, @Total, @Saldo, @Id_Descuento, @Id_CondVta, @Id_Vendedor, @Id_Formapago,
@@ -199,7 +200,7 @@ export const querys = {
         INSERT INTO [OLEIDB1].[dbo].[INVENTARIOS]  (
             Id_Almacen, Folio, Id_TipoMovInv, Estado, Fecha, Id_AlmacenDest, SwPendiente, Descripcion, Id_Usuario, SwTr, FechaRecepcion, FolioReq, AlmReq
         ) 
-        OUTPUT 'output' as 'result', Inserted.Id_Almacen, Inserted.Folio, Inserted.Fecha, Inserted.Id_TipoMovInv 
+        OUTPUT 'Inventory' as 'result', Inserted.Id_Almacen, Inserted.Folio, Inserted.Fecha, Inserted.Id_TipoMovInv 
         VALUES (
             @Id_Almacen, @Folio, @Id_TipoMovInv, @Estado, @Fecha, @Id_AlmacenDest, @SwPendiente, @Descripcion, @Id_Usuario, @SwTr, @FechaRecepcion, @FolioReq, @AlmReq
         )
