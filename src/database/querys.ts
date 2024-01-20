@@ -177,16 +177,26 @@ export const querys = {
 
     // Products by stock
     getAllProductsByStock: `
-        SELECT TOP(10) TRIM(P.Descripcion) AS Descripcion, TRIM(P.Codigo) AS Codigo, E.Existencia, E.Id_Almacen, E.Id_Marca, TRIM(C.CodBar) AS CodBar, TRIM(M.Nombre) AS Marca
+        SELECT
+        TRIM(P.Descripcion) AS Descripcion,
+        TRIM(P.Codigo) AS Codigo,
+        E.Existencia,
+        E.Id_Almacen,
+        C.Id_Marca,
+        TRIM(C.CodBar) AS CodBar,
+        TRIM(M.Nombre) AS Marca
         FROM [dbo].[PRODUCTOS] P
         JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo
         JOIN [dbo].[COSTOS] C ON C.Codigo = P.Codigo
         JOIN [dbo].[MARCAS] M ON E.Id_Marca = M.Id_Marca
+        ORDER BY P.Codigo
+        OFFSET (@PageNumber - 1) * @PageSize ROWS
+        FETCH NEXT @PageSize ROWS ONLY
     `,
 
     getProductByStockAndCodeBar: `
-        SELECT TRIM(P.Descripcion) AS Descripcion, TRIM(P.Codigo) AS Codigo, E.Existencia, E.Id_Almacen, E.Id_Marca, TRIM(C.CodBar) AS CodBar, TRIM(M.Nombre) AS Marca
-        FROM [dbo].[PRODUCTOS] P
+    SELECT TRIM(P.Descripcion) AS Descripcion, TRIM(P.Codigo) AS Codigo, E.Existencia, E.Id_Almacen, C.Id_Marca, TRIM(C.CodBar) AS CodBar, TRIM(M.Nombre) AS Marca
+    FROM [dbo].[PRODUCTOS] P
         JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo
         JOIN [dbo].[COSTOS] C ON C.Codigo = P.Codigo
         JOIN [dbo].[MARCAS] M ON E.Id_Marca = M.Id_Marca

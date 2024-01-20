@@ -94,6 +94,8 @@ const getInventory = async (req: Request, res: Response) => {
 
 const postInventoryDetails = async (req: Request, res: Response) => {
 
+    //Receive products and with that create inventory Details.
+
     try {
         const postInventoryDataArray: PorductInterface[] = req.body;
         const client = sharedData?.currentClient?.client;

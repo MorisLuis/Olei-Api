@@ -207,6 +207,9 @@ const getTotalProducts = async (req: Request, res: Response) => {
 
 const getProductsByStock = async (req: Request, res: Response) => {
 
+    const { PageNumber, PageSize } = req.query;
+    console.log({PageNumber, PageSize})
+
     try {
         const pool = await dbConnection();
 
@@ -217,13 +220,18 @@ const getProductsByStock = async (req: Request, res: Response) => {
         let query = querys.getAllProductsByStock;
 
         const request = await pool.request()
+            .input('PageSize', Number(PageSize))
+            .input('PageNumber', PageNumber)
             .query(query);
 
         const productsByStock = request.recordset;
 
+        console.log({productsByStock})
+
         res.json(productsByStock);
 
     } catch (error: any) {
+        console.log({error})
         res.status(500).json({ error: error.message });
     }
 }
