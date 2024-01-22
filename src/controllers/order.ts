@@ -17,6 +17,7 @@ const postOrder = async (req: Request, res: Response) => {
         const Id_Cliente = client?.Id_Cliente;
         const Id_ListPre = client?.Id_ListPre;
         const Id_Usuario = connection?.user;
+        const TipoDocOO = user?.TipoDocOO;
 
         const pool = await dbConnection();
 
@@ -45,7 +46,7 @@ const postOrder = async (req: Request, res: Response) => {
                 return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
             }
 
-            postData.TipoDoc = user?.TipoDocOO;
+            postData.TipoDoc = TipoDocOO;
             postData.Serie = SerieActiva ? SerieActiva : "";
             postData.Folio = Folio + 1;
             postData.Id_Cliente = Id_Cliente;
@@ -158,6 +159,8 @@ const getOrder = async (req: Request, res: Response) => {
     const { folio } = req.params;
     const client = sharedData?.currentClient?.client;
     const Id_Cliente = client?.Id_Cliente;
+    const user = sharedData?.currentUser?.user;
+    const TipoDocOO = user?.TipoDocOO;
 
     try {
         const pool = await dbConnection();
@@ -172,6 +175,7 @@ const getOrder = async (req: Request, res: Response) => {
         const request = await pool.request()
             .input('Id_Cliente', sql.Int, Id_Cliente)
             .input('folio', sql.Int, folio)
+            .input('TipoDocOO', TipoDocOO)
             .query(getOrderQuery);
 
         let order: OrderInterface = request.recordset[0];
@@ -190,6 +194,7 @@ const getAllOrders = async (req: Request, res: Response) => {
     const Id_Cliente = client?.Id_Cliente;
     const TipoDocOO = user?.TipoDocOO;
 
+
     try {
         const pool = await dbConnection();
 
@@ -205,7 +210,6 @@ const getAllOrders = async (req: Request, res: Response) => {
             .input('Id_Cliente', sql.Int, Id_Cliente)
             .query(query);
 
-        console.log({ request })
 
         let allOrders: OrderInterface[] = request.recordset;
 

@@ -208,7 +208,6 @@ const getTotalProducts = async (req: Request, res: Response) => {
 const getProductsByStock = async (req: Request, res: Response) => {
 
     const { PageNumber, PageSize } = req.query;
-    console.log({PageNumber, PageSize})
 
     try {
         const pool = await dbConnection();
@@ -225,8 +224,6 @@ const getProductsByStock = async (req: Request, res: Response) => {
             .query(query);
 
         const productsByStock = request.recordset;
-
-        console.log({productsByStock})
 
         res.json(productsByStock);
 

@@ -25,7 +25,6 @@ const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const connection = (_b = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _b === void 0 ? void 0 : _b.connection;
         const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
         const Id_Usuario = connection === null || connection === void 0 ? void 0 : connection.user;
-        //const database = connection?.database;
         const pool = yield (0, database_1.dbConnection)();
         const transaction = new mssql_1.default.Transaction(pool);
         yield transaction.begin();
@@ -91,13 +90,12 @@ const getInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.getInventory = getInventory;
 const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _c, _d;
+    //Receive products and with that create inventory Details.
+    var _c;
     try {
         const postInventoryDataArray = req.body;
         const client = (_c = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _c === void 0 ? void 0 : _c.client;
-        const connection = (_d = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _d === void 0 ? void 0 : _d.connection;
         const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
-        const database = connection === null || connection === void 0 ? void 0 : connection.database;
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -112,12 +110,20 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
             countPartida++;
             // Get last Folio
             const Folio = yield pool.request().query('SELECT MAX(FOLIO) AS Folio FROM [dbo].[DETALLEINVENTARIOS]');
+            //UPDATE 'EXISTENCIAS' Table
+            const existenceUpdated = yield request
+                .input('Cantidad_Existence', postInventoryData.Piezas)
+                .input('Codigo_Existence', postInventoryData.Codigo)
+                .input('Id_Marca_Existence', postInventoryData.Id_Marca)
+                .input('Id_Almacen_Existence', Id_Almacen)
+                .query(database_1.querys.updateExistenceTable);
+            const { Existencia, ExistenciaAnt } = existenceUpdated.recordset[0];
             // Get data default.
             const Id_Ubicacion = 0;
             const SwNS = null;
             const NumsDeSerie = null;
             const SKU = null;
-            const Diferencia = 0; // PENDING
+            const Diferencia = Existencia - ExistenciaAnt;
             const postIntentoryDetailsQuery = database_1.querys.insertInventoryDetails;
             const result = yield request
                 .input('Id_Almacen', mssql_1.default.Int, Id_Almacen)

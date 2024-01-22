@@ -28,6 +28,7 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
         const Id_ListPre = client === null || client === void 0 ? void 0 : client.Id_ListPre;
         const Id_Usuario = connection === null || connection === void 0 ? void 0 : connection.user;
+        const TipoDocOO = user === null || user === void 0 ? void 0 : user.TipoDocOO;
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -47,7 +48,7 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             if (!results) {
                 return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
             }
-            postData.TipoDoc = user === null || user === void 0 ? void 0 : user.TipoDocOO;
+            postData.TipoDoc = TipoDocOO;
             postData.Serie = SerieActiva ? SerieActiva : "";
             postData.Folio = Folio + 1;
             postData.Id_Cliente = Id_Cliente;
@@ -155,10 +156,12 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.postOrder = postOrder;
 const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _d;
+    var _d, _e;
     const { folio } = req.params;
     const client = (_d = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _d === void 0 ? void 0 : _d.client;
     const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
+    const user = (_e = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _e === void 0 ? void 0 : _e.user;
+    const TipoDocOO = user === null || user === void 0 ? void 0 : user.TipoDocOO;
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
@@ -169,6 +172,7 @@ const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const request = yield pool.request()
             .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
             .input('folio', mssql_1.default.Int, folio)
+            .input('TipoDocOO', TipoDocOO)
             .query(getOrderQuery);
         let order = request.recordset[0];
         res.json(order);
@@ -179,9 +183,9 @@ const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getOrder = getOrder;
 const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _e, _f;
-    const user = (_e = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _e === void 0 ? void 0 : _e.user;
-    const client = (_f = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _f === void 0 ? void 0 : _f.client;
+    var _f, _g;
+    const user = (_f = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _f === void 0 ? void 0 : _f.user;
+    const client = (_g = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _g === void 0 ? void 0 : _g.client;
     const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
     const TipoDocOO = user === null || user === void 0 ? void 0 : user.TipoDocOO;
     try {
@@ -195,7 +199,6 @@ const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             .input('TipoDocOO', TipoDocOO)
             .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
             .query(query);
-        console.log({ request });
         let allOrders = request.recordset;
         res.json(allOrders);
     }

@@ -11,8 +11,8 @@ export const querys = {
 
     authCompany: ` 
         SELECT C.Id_ListPre, C.Nombre, CS.PrecioIncIVA
-        FROM [@database].[dbo].[CLIENTES] C
-        JOIN [@database].[dbo].[CONFIGSIST] CS ON C.IdOLEI = 1
+        FROM [dbo].[CLIENTES] C
+        JOIN [dbo].[CONFIGSIST] CS ON C.IdOLEI = 1
         WHERE Id_Cliente = @Id_Cliente
     ` ,
 
@@ -111,7 +111,7 @@ export const querys = {
         FROM [dbo].[VENTAS] AS V
         INNER JOIN [dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
         INNER JOIN [dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
-        WHERE V.Id_Cliente = @Id_Cliente AND V.TipoDoc = 3 AND V.Folio = @folio
+        WHERE V.Id_Cliente = @Id_Cliente AND V.TipoDoc = @TipoDocOO AND V.Folio = @folio
     `,
 
     getAllOrders: `

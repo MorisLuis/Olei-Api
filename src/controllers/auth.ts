@@ -79,6 +79,7 @@ const login = async (req: Request, res: Response) => {
             const otherPool = await dbConnection(otherDBServer, otherDBDatabase)
             const otherPoolDatabase = (otherPool as any).config.database
 
+
             const query_DB = querys.authCompany;
             const idListPreResult = await otherPool.request()
                 .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)

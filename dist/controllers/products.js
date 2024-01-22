@@ -178,6 +178,7 @@ const getTotalProducts = (req, res) => __awaiter(void 0, void 0, void 0, functio
 });
 exports.getTotalProducts = getTotalProducts;
 const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { PageNumber, PageSize } = req.query;
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
@@ -185,11 +186,14 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
         }
         let query = database_1.querys.getAllProductsByStock;
         const request = yield pool.request()
+            .input('PageSize', Number(PageSize))
+            .input('PageNumber', PageNumber)
             .query(query);
         const productsByStock = request.recordset;
         res.json(productsByStock);
     }
     catch (error) {
+        console.log({ error });
         res.status(500).json({ error: error.message });
     }
 });
