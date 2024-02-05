@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchClient = exports.searchProduct = void 0;
+exports.searchProductInventory = exports.searchClient = exports.searchProduct = void 0;
 const app_1 = require("../app");
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
@@ -118,4 +118,25 @@ const searchClient = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.searchClient = searchClient;
+const searchProductInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { searchTerm } = req.query;
+    try {
+        const pool = yield (0, database_1.dbConnection)();
+        if (!pool) {
+            return res.status(500).json({ error: 'Unable to establish a connection to the database' });
+        }
+        const query = database_1.querys.getProductsBySearchInventory;
+        const result = yield pool.request()
+            .input("searchTerm", searchTerm)
+            .query(query);
+        const products = result.recordset;
+        res.json({
+            products
+        });
+    }
+    catch (error) {
+        console.log({ error });
+    }
+});
+exports.searchProductInventory = searchProductInventory;
 //# sourceMappingURL=search.js.map

@@ -20,18 +20,20 @@ export const querys = {
     getAllProducts: `
         SELECT DISTINCT
         TRIM(P.Descripcion) AS Descripcion,
-        P.Id_Familia,
         TRIM(P.Codigo) AS Codigo,
+        E.Existencia,
+        E.Id_Almacen,
+        M.Id_Marca,
+        TRIM(M.Nombre) AS Marca,
+        PR.Id_ListaPrecios,
+
+        P.Id_Familia,
         TRIM(F.Nombre) AS Familia,
         TRIM(PR.Codigo) AS CodigoPrecio,
         PR.Precio,
         TRIM(E.Codigo) AS CodigoExistencia,
-        E.Existencia,
-        E.Id_Almacen,
-        TRIM(M.Nombre) AS Marca,
-        M.Id_Marca,
-        PR.Id_ListaPrecios,
         CT.Impto AS Impuesto
+
         FROM [dbo].[PRODUCTOS] P
         JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
         JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
@@ -48,22 +50,50 @@ export const querys = {
         JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
     `,
 
+    getProductsBySearchInventory: `
+    SELECT
+        TRIM(P.Descripcion) AS Descripcion,
+        TRIM(P.Codigo) AS Codigo,
+        E.Existencia,
+        E.Id_Almacen,
+        M.Id_Marca,
+        TRIM(M.Nombre) AS Marca,
+        PR.Id_ListaPrecios,
+        P.Observaciones AS Observaciones,
+        P.Id_Familia AS Id_Familia,
+        TRIM(F.Nombre) AS Familia,
+        TRIM(PR.Codigo) AS CodigoPrecio,
+        PR.Precio AS Precio,
+        TRIM(E.Codigo) AS CodigoExistencia,
+        C.Impto AS Impuesto,
+        TRIM(C.CodBar) AS CodBar
+    FROM [dbo].[PRODUCTOS] P
+    JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
+    JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+    JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+    JOIN [dbo].[COSTOS] C ON P.Codigo = C.Codigo AND PR.Id_Marca = C.Id_Marca
+    JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+    WHERE LOWER(P.Descripcion) LIKE '%' + LOWER(@searchTerm) + '%'
+    `,
+
     getProducById: `
     SELECT
         TRIM(P.Descripcion) AS Descripcion,
-        P.Id_Familia,
         TRIM(P.Codigo) AS Codigo,
-        P.Observaciones,
+        E.Existencia,
+        E.Id_Almacen,
+        M.Id_Marca,
+        TRIM(M.Nombre) AS Marca,
+        PR.Id_ListaPrecios,
+
+        P.Id_Familia,
         TRIM(F.Nombre) AS Familia,
         TRIM(PR.Codigo) AS CodigoPrecio,
         PR.Precio,
         TRIM(E.Codigo) AS CodigoExistencia,
-        E.Existencia,
-        E.Id_Almacen,
-        TRIM(M.Nombre) AS Marca,
-        M.Id_Marca,
-        PR.Id_ListaPrecios,
         CT.Impto AS Impuesto
+        P.Observaciones,
+
         FROM [dbo].[PRODUCTOS] P
         JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
         JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
@@ -177,19 +207,24 @@ export const querys = {
 
     // Products by stock
     getAllProductsByStock: `
-        SELECT
-        TRIM(P.Descripcion) AS Descripcion,
-        TRIM(P.Codigo) AS Codigo,
-        E.Existencia,
-        E.Id_Almacen,
-        C.Id_Marca,
-        TRIM(C.CodBar) AS CodBar,
-        TRIM(M.Nombre) AS Marca
-        FROM [dbo].[PRODUCTOS] P
-        JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo
-        JOIN [dbo].[COSTOS] C ON C.Codigo = P.Codigo
-        JOIN [dbo].[MARCAS] M ON E.Id_Marca = M.Id_Marca
-        ORDER BY P.Codigo
+    SELECT
+    TRIM(P.Descripcion) AS Descripcion,
+    TRIM(P.Codigo) AS Codigo,
+    E.Existencia,
+    E.Id_Almacen,
+    M.Id_Marca,
+    TRIM(M.Nombre) AS Marca,
+    PR.Id_ListaPrecios 
+
+    TRIM(C.CodBar) AS CodBar,
+
+FROM [dbo].[PRODUCTOS] P
+    JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
+    JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+    JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+    JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+    JOIN [dbo].[COSTOS] C ON P.Codigo = C.Codigo AND PR.Id_Marca = C.Id_Marca
+    ORDER BY P.Codigo
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY
     `,
@@ -217,7 +252,7 @@ export const querys = {
         )
     `,
 
-    getInventoryDetails:`SELECT I.Folio, TRIM(I.Codigo) AS Codigo, I.Cantidad, I.Partida FROM [dbo].[DETALLEINVENTARIOS] I  WHERE I.Folio = @Folio`,
+    getInventoryDetails: `SELECT I.Folio, TRIM(I.Codigo) AS Codigo, I.Cantidad, I.Partida FROM [dbo].[DETALLEINVENTARIOS] I  WHERE I.Folio = @Folio`,
 
     insertInventoryDetails: ` 
         INSERT INTO [dbo].[DETALLEINVENTARIOS] (
@@ -229,7 +264,7 @@ export const querys = {
         )
     `,
 
-    updateExistenceTable:  ` 
+    updateExistenceTable: ` 
         DECLARE @UpdatedData TABLE (
             Id_Almacen INT,
             ExistenciaAnt INT,

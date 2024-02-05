@@ -131,6 +131,8 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             .input("ListaPrecios", userListPrice)
             .input("Almacen", userAlmacen)
             .query(database_1.querys.getProducById);
+        console.log({ result });
+        console.log({ id, Marca, userListPrice, userAlmacen });
         const product = result === null || result === void 0 ? void 0 : result.recordset[0];
         if (user === null || user === void 0 ? void 0 : user.SwImagenes) {
             const baseSQL = user === null || user === void 0 ? void 0 : user.BaseSQL.trim().toLowerCase().split(',');
