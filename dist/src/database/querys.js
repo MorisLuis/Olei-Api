@@ -1,5 +1,7 @@
-export const querys = {
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.querys = void 0;
+exports.querys = {
     //Auth
     auth: ` 
         SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio, UC.TipoDocOO,
@@ -8,14 +10,12 @@ export const querys = {
         JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] UC on U.Id_ClienteDBCLIENTES = UC.Id_Cliente
         WHERE U.Id_UsuarioOOL = @email
     `,
-
     authCompany: ` 
         SELECT C.Id_ListPre, C.Nombre, CS.PrecioIncIVA
         FROM [dbo].[CLIENTES] C
         JOIN [dbo].[CONFIGSIST] CS ON C.IdOLEI = 1
         WHERE Id_Cliente = @Id_Cliente
-    ` ,
-
+    `,
     // Products
     getAllProducts: `
         SELECT DISTINCT
@@ -42,14 +42,12 @@ export const querys = {
         JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
         WHERE PR.Id_ListaPrecios = @ListaPrecios AND E.Id_Almacen = @Almacen
     `,
-
     getProductsBySearch: `
         SELECT DISTINCT TRIM(P.Descripcion) AS Descripcion 
         FROM [dbo].[PRODUCTOS] P
         JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
         JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
     `,
-
     getProductsBySearchInventory: `
         SELECT TOP(20)
             TRIM(P.Descripcion) AS Descripcion,
@@ -72,7 +70,6 @@ export const querys = {
         WHERE LOWER(P.Descripcion) LIKE '%' + LOWER(@searchTerm) + '%'
         ORDER BY P.Codigo
     `,
-
     getProducById: `
         SELECT
             TRIM(P.Descripcion) AS Descripcion,
@@ -98,24 +95,19 @@ export const querys = {
             JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
             WHERE P.Codigo = @Codigo AND M.Nombre = @Marca AND PR.Id_ListaPrecios = @ListaPrecios AND E.Id_Almacen = @Almacen
     `,
-
     getTotalProducts: "SELECT COUNT(*) FROM [dbo].[CLIENTES]",
-
     // Users
     getAllUsers: "SELECT TOP(500) * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS]",
     getUser: "SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS] WHERE Nombre = ?",
-
     // Tables
     getFamilias: `SELECT TRIM(F.Nombre) AS Nombre FROM [dbo].[FAMILIAS] F`,
     getMarcas: `SELECT TRIM(M.Nombre) AS Nombre FROM [dbo].[MARCAS] M`,
     getFolios: `SELECT TRIM(P.Codigo) AS Codigo FROM [dbo].[PRODUCTOS] P`,
-
     // Clients
     getClientBySearch: `
         SELECT TOP(20) TRIM(C.Nombre) AS Nombre, C.Id_Cliente, C.Id_Almacen, C.Id_ListPre
         FROM [dbo].[CLIENTES] C
     `,
-
     // Order
     getPreviewDataToPostOrder: `
         SELECT 
@@ -131,7 +123,6 @@ export const querys = {
         FROM [dbo].[CLIENTES]
         WHERE Id_Cliente = @Id_Cliente_Preview AND Id_Almacen = @Id_Almacen_Preview
     `,
-
     getOrder: ` 
         SELECT V.Folio, V.Piezas, V.Subtotal, V.Impuesto, V.Total, V.Fecha, C.Nombre as Cliente, VE.Nombre as Vendedor
         FROM [dbo].[VENTAS] AS V
@@ -139,7 +130,6 @@ export const querys = {
         INNER JOIN [dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
         WHERE V.Id_Cliente = @Id_Cliente AND V.TipoDoc = @TipoDocOO AND V.Folio = @folio
     `,
-
     getAllOrders: `
         SELECT V.Folio, V.Piezas, V.Subtotal, V.Impuesto, V.Total, V.Fecha ,C.Nombre as Cliente, VE.Nombre as Vendedor
         FROM [dbo].[VENTAS] AS V
@@ -148,7 +138,6 @@ export const querys = {
         WHERE V.Id_Cliente = @Id_Cliente AND TipoDoc = @TipoDocOO
         ORDER BY Fecha DESC
     `,
-
     insertOrder: ` 
         INSERT INTO [dbo].[VENTAS]  (
             Id_Cliente, Id_Almacen, Id_AlmacenClte, TipoDoc, Serie, Folio, Fecha,
@@ -164,7 +153,6 @@ export const querys = {
             @Suma, @Id_Usuario, @Id_ListPre, @CantLetra, @FechaEntrega
         )
     `,
-
     // Order Details
     getPreviewDataToPostOrderDetails: `
         SELECT 
@@ -179,7 +167,6 @@ export const querys = {
         FROM [dbo].[PRODUCTOS] AS P
         WHERE TRIM(P.Codigo) = @Codigo_Preview
     `,
-
     getOrderDetails: `
         SELECT D.Precio, D.Cantidad as Piezas, D.Importe, D.Impuesto, D.Id_Marca, D.Id_Almacen, D.Id_ListaPrecios, D.Folio, TRIM(D.Descripcion) AS Descripcion, TRIM(D.Codigo) AS Codigo, E.Existencia, F.Nombre AS Marca
         FROM [dbo].[DETALLEVENTAS] AS D
@@ -188,7 +175,6 @@ export const querys = {
         WHERE Folio = @folio
         ORDER BY Folio DESC
     `,
-
     insertOrderDetails: ` 
         INSERT INTO [dbo].[DETALLEVENTAS]  (
             Id_Almacen, TipoDoc, Serie, Folio, Codigo, Id_Marca, Id_ListaPrecios, Cantidad,
@@ -200,7 +186,6 @@ export const querys = {
             @Precio, @Importe, @Impuesto, @Descripcion, @Descuento, @Id_Unidad, @SwNs, @TasaImpuesto, @SKU, @Partida,  @Costo
         );
     `,
-
     // Products by stock
     getAllProductsByStock: `
         SELECT
@@ -222,7 +207,6 @@ export const querys = {
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY
     `,
-
     getProductByStockAndCodeBar: `
     SELECT TRIM(P.Descripcion) AS Descripcion, TRIM(P.Codigo) AS Codigo, E.Existencia, E.Id_Almacen, C.Id_Marca, TRIM(C.CodBar) AS CodBar, TRIM(M.Nombre) AS Marca
     FROM [dbo].[PRODUCTOS] P
@@ -231,11 +215,8 @@ export const querys = {
         JOIN [dbo].[MARCAS] M ON E.Id_Marca = M.Id_Marca
         WHERE C.CodBar = @CodeBar
     `,
-
     // Inventory
-
     getInventory: `SELECT I.Folio, I.Fecha FROM [dbo].[INVENTARIOS] I WHERE I.Folio = @Folio`,
-
     insertInventory: ` 
         INSERT INTO [dbo].[INVENTARIOS]  (
             Id_Almacen, Folio, Id_TipoMovInv, Estado, Fecha, Id_AlmacenDest, SwPendiente, Descripcion, Id_Usuario, SwTr, FechaRecepcion, FolioReq, AlmReq
@@ -245,9 +226,7 @@ export const querys = {
             @Id_Almacen, @Folio, @Id_TipoMovInv, @Estado, @Fecha, @Id_AlmacenDest, @SwPendiente, @Descripcion, @Id_Usuario, @SwTr, @FechaRecepcion, @FolioReq, @AlmReq
         )
     `,
-
     getInventoryDetails: `SELECT I.Folio, TRIM(I.Codigo) AS Codigo, I.Cantidad, I.Partida FROM [dbo].[DETALLEINVENTARIOS] I  WHERE I.Folio = @Folio`,
-
     insertInventoryDetails: ` 
         INSERT INTO [dbo].[DETALLEINVENTARIOS] (
             Id_Almacen, Folio, Partida, Codigo, Id_Marca, Cantidad, Id_Ubicacion, Diferencia, SwNS, NumsDeSerie, SKU
@@ -257,7 +236,6 @@ export const querys = {
             @Id_Almacen, @Folio, @Partida, @Codigo, @Id_Marca, @Cantidad, @Id_Ubicacion, @Diferencia, @SwNS, @NumsDeSerie, @SKU
         )
     `,
-
     updateExistenceTable: ` 
         DECLARE @UpdatedData TABLE (
             Id_Almacen INT,
@@ -272,3 +250,4 @@ export const querys = {
         SELECT * FROM @UpdatedData;
     `,
 };
+//# sourceMappingURL=querys.js.map

@@ -138,6 +138,8 @@ const getProducById = async (req: Request, res: Response) => {
 
     try {
 
+        console.log({id, Marca, userListPrice, userAlmacen})
+
         const pool = await dbConnection();
 
         if (!pool) {
@@ -153,7 +155,6 @@ const getProducById = async (req: Request, res: Response) => {
 
             console.log({result})
 
-            console.log({id, Marca, userListPrice, userAlmacen})
 
         const product = result?.recordset[0];
 
@@ -198,6 +199,7 @@ const getProducById = async (req: Request, res: Response) => {
         }
         return res.json(product);
     } catch (error) {
+        console.log({error})
         return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
     }
 }
