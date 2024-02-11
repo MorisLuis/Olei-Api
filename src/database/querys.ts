@@ -82,14 +82,14 @@ export const querys = {
             M.Id_Marca,
             TRIM(M.Nombre) AS Marca,
             PR.Id_ListaPrecios,
-
             P.Id_Familia,
             TRIM(F.Nombre) AS Familia,
             TRIM(PR.Codigo) AS CodigoPrecio,
             PR.Precio,
             TRIM(E.Codigo) AS CodigoExistencia,
             CT.Impto AS Impuesto,
-            P.Observaciones
+            P.Observaciones,
+            TRIM(CT.CodBar) AS CodBar
             FROM [dbo].[PRODUCTOS] P
             JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
             JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo

@@ -1,3 +1,4 @@
+/* 
 import { Request, Response } from 'express';
 
 import { closeDbConnection, dbConnection, querys } from '../database';
@@ -16,10 +17,10 @@ const login = async (req: Request, res: Response) => {
             return res.status(500).json({ error: 'Error connecting to the main database' });
         }
 
-
-        // Search for the user in the database using their email.
         const { email, password } = req.body;
+        // Search for the user in the database using their email.
         const user = await getUserByEmail(mainPool, email);
+
 
         if (!user) {
             return res.status(404).json({ error: 'Correo no encontrada' });
@@ -34,13 +35,13 @@ const login = async (req: Request, res: Response) => {
         if (isSubscriptionExpired(dueDate)) {
             return res.status(401).json({ error: 'Subscripción ha expirado' });
         }
-        const token = await generateJWT({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
 
+        // Generate a JWT token for the user.
+        const token = await generateJWT({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
 
         // Get user database connection details.
         const otherDBServer = user.ServidorSQL.trim();
         const otherDBDatabase = user.BaseSQL.trim();
-
 
         // Update sharedData.userConnection for global access.
         sharedData.userConnection = {
@@ -51,27 +52,22 @@ const login = async (req: Request, res: Response) => {
                 database: otherDBDatabase
             }
         };
-        await mainPool.close();
 
+        await mainPool.close();
 
         // STEP 2 - CONNECT THE COMPANY DATABASE
         // Connect to the user's database.
         const otherDBConnection = await connectToUserDatabase(user);
 
-        console.log({
-            otherDBConnection: otherDBConnection.pool
-        })
-
         return res.json({
-            otherDBServer,
-            otherDBDatabase,
+            otherDBServer: otherDBConnection.server,
+            otherDBDatabase: otherDBConnection.database,
             user: otherDBConnection.currentUser,
             token,
-            //otherPool: otherDBConnection.pool
+            otherPool: otherDBConnection.pool
         });
 
     } catch (error: any) {
-        console.log({ error })
         return res.status(500).send(error.message);
     }
 };
@@ -144,10 +140,8 @@ const connectToUserDatabase = async (user: any) => {
     const otherPoolDatabase = (otherPool as any).config.database;
 
     const query_DB = querys.authCompany;
-    const idListPreResult = await otherPool.request()
-        .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
-        .input('database', otherPoolDatabase)
-        .query(query_DB);
+    const idListPreResult = await otherPool.request().input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
+        .input('database', otherPoolDatabase).query(query_DB);
 
     const Id_ListPre = idListPreResult.recordset[0].Id_ListPre;
     const Nombre = idListPreResult.recordset[0].Nombre;
@@ -181,3 +175,4 @@ export {
     logout,
     renew
 }
+*/

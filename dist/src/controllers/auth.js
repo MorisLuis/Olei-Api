@@ -25,13 +25,9 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (!mainPool) {
             return res.status(500).json({ error: 'Error connecting to the main database' });
         }
-        const { email, password } = req.body;
         // Search for the user in the database using their email.
-        const query_DB = database_1.querys.auth;
-        const result = yield mainPool.request()
-            .input('email', email)
-            .query(query_DB);
-        const user = result === null || result === void 0 ? void 0 : result.recordset[0];
+        const { email, password } = req.body;
+        const user = yield getUserByEmail(mainPool, email);
         if (!user) {
             return res.status(404).json({ error: 'Correo no encontrada' });
         }
@@ -39,18 +35,10 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
         // Get the user's subscription expiration date.
-        const query_CLIENTES = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[CLIENTES] WHERE Id_Cliente = @clienteId`;
-        const resultCliente = yield mainPool.request()
-            .input('clienteId', user.Id_ClienteDBCLIENTES)
-            .query(query_CLIENTES);
-        const dueDate = resultCliente === null || resultCliente === void 0 ? void 0 : resultCliente.recordset[0].Vigencia;
-        // Compare the expiration date with today.
-        const today = (0, moment_1.default)().startOf('day');
-        const isExpired = (0, moment_1.default)(dueDate).startOf('day').isBefore(today);
-        if (isExpired) {
+        const dueDate = yield getUserSubscriptionDueDate(mainPool, user.Id_ClienteDBCLIENTES);
+        if (isSubscriptionExpired(dueDate)) {
             return res.status(401).json({ error: 'Subscripción ha expirado' });
         }
-        // Generate a JWT token for the user.
         const token = yield (0, generate_jwt_1.generateJWT)({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
         // Get user database connection details.
         const otherDBServer = user.ServidorSQL.trim();
@@ -64,47 +52,23 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 database: otherDBDatabase
             }
         };
-        // Close the connection to the main database.
         yield mainPool.close();
-        let otherPool;
         // STEP 2 - CONNECT THE COMPANY DATABASE
         // Connect to the user's database.
-        try {
-            const otherPool = yield (0, database_1.dbConnection)(otherDBServer, otherDBDatabase);
-            const otherPoolDatabase = otherPool.config.database;
-            const query_DB = database_1.querys.authCompany;
-            const idListPreResult = yield otherPool.request()
-                .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
-                .input('database', otherPoolDatabase)
-                .query(query_DB);
-            const Id_ListPre = idListPreResult.recordset[0].Id_ListPre;
-            const Nombre = idListPreResult.recordset[0].Nombre;
-            // Update sharedData.currentUser for global access.
-            app_1.sharedData.currentUser = {
-                user: Object.assign(Object.assign({}, user), { Id_ListPre,
-                    Nombre })
-            };
-            // Update sharedData.currentClient for global access.
-            app_1.sharedData.currentClient = {
-                client: {
-                    Id_Almacen: user.Id_Almacen,
-                    Id_Cliente: user.Id_Cliente,
-                    Id_ListPre
-                }
-            };
-        }
-        catch (error) {
-            return res.status(500).send(error.message);
-        }
+        const otherDBConnection = yield connectToUserDatabase(user);
+        console.log({
+            otherDBConnection: otherDBConnection.pool
+        });
         return res.json({
             otherDBServer,
             otherDBDatabase,
-            user: app_1.sharedData.currentUser.user,
+            user: otherDBConnection.currentUser,
             token,
-            otherPool
+            //otherPool: otherDBConnection.pool
         });
     }
     catch (error) {
+        console.log({ error });
         return res.status(500).send(error.message);
     }
 });
@@ -144,4 +108,48 @@ const renew = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.renew = renew;
+// Utils
+const getUserByEmail = (mainPool, email) => __awaiter(void 0, void 0, void 0, function* () {
+    const query_DB = database_1.querys.auth;
+    const result = yield mainPool.request().input('email', email).query(query_DB);
+    return result === null || result === void 0 ? void 0 : result.recordset[0];
+});
+const getUserSubscriptionDueDate = (mainPool, clientId) => __awaiter(void 0, void 0, void 0, function* () {
+    const query_CLIENTES = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[CLIENTES] WHERE Id_Cliente = @clienteId`;
+    const resultCliente = yield mainPool.request().input('clienteId', clientId).query(query_CLIENTES);
+    return resultCliente === null || resultCliente === void 0 ? void 0 : resultCliente.recordset[0].Vigencia;
+});
+const isSubscriptionExpired = (dueDate) => {
+    const today = (0, moment_1.default)().startOf('day');
+    const isExpired = (0, moment_1.default)(dueDate).startOf('day').isBefore(today);
+    return isExpired;
+};
+const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, function* () {
+    const otherPool = yield (0, database_1.dbConnection)(user.ServidorSQL.trim(), user.BaseSQL.trim());
+    const otherPoolDatabase = otherPool.config.database;
+    const query_DB = database_1.querys.authCompany;
+    const idListPreResult = yield otherPool.request()
+        .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
+        .input('database', otherPoolDatabase)
+        .query(query_DB);
+    const Id_ListPre = idListPreResult.recordset[0].Id_ListPre;
+    const Nombre = idListPreResult.recordset[0].Nombre;
+    app_1.sharedData.currentUser = {
+        user: Object.assign(Object.assign({}, user), { Id_ListPre,
+            Nombre })
+    };
+    app_1.sharedData.currentClient = {
+        client: {
+            Id_Almacen: user.Id_Almacen,
+            Id_Cliente: user.Id_Cliente,
+            Id_ListPre
+        }
+    };
+    return {
+        server: user.ServidorSQL.trim(),
+        database: user.BaseSQL.trim(),
+        pool: otherPool,
+        currentUser: app_1.sharedData.currentUser.user
+    };
+});
 //# sourceMappingURL=auth.js.map
