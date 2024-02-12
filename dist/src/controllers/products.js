@@ -24,8 +24,7 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     const client = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
     const user = (_b = app_1.sharedData.currentUser) === null || _b === void 0 ? void 0 : _b.user;
     const userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
-    //const userListPrice = client?.Id_ListPre;
-    const userListPrice = 1;
+    const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
