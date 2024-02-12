@@ -13,7 +13,9 @@ const getProducts = async (req: Request, res: Response) => {
     const client = sharedData?.currentClient?.client;
     const user = sharedData.currentUser?.user
     const userAlmacen = client?.Id_Almacen;
-    const userListPrice = client?.Id_ListPre;
+    //const userListPrice = client?.Id_ListPre;
+    const userListPrice = 1;
+
 
     try {
 
@@ -134,7 +136,9 @@ const getProducById = async (req: Request, res: Response) => {
 
     const client = sharedData?.currentClient?.client;
     const userAlmacen = client?.Id_Almacen;
-    const userListPrice = client?.Id_ListPre;
+    //const userListPrice = client?.Id_ListPre;
+    const userListPrice = 1;
+
     const user = sharedData.currentUser?.user
 
     console.log({

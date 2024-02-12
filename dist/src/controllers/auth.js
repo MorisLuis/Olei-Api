@@ -121,7 +121,7 @@ const isSubscriptionExpired = (dueDate) => {
     return isExpired;
 };
 const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b, _c;
+    var _b;
     try {
         const otherPool = yield (0, database_1.dbConnection)(user.ServidorSQL.trim(), user.BaseSQL.trim());
         const query_DB = database_1.querys.authCompany;
@@ -129,8 +129,9 @@ const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, functi
             .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
             .input("IdOLEI", user.IdOLEI)
             .query(query_DB);
-        const Id_ListPre = (_b = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _b === void 0 ? void 0 : _b.Id_ListPre;
-        const Nombre = (_c = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _c === void 0 ? void 0 : _c.Nombre;
+        //const Id_ListPre = idListPreResult?.recordset[0]?.Id_ListPre;
+        const Id_ListPre = 1;
+        const Nombre = (_b = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _b === void 0 ? void 0 : _b.Nombre;
         app_1.sharedData.currentUser = {
             user: Object.assign(Object.assign({}, user), { Id_ListPre,
                 Nombre })
