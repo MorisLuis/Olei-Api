@@ -135,40 +135,44 @@ const isSubscriptionExpired = (dueDate: string) => {
 };
 
 const connectToUserDatabase = async (user: UserInterface) => {
+    try {
+        const otherPool = await dbConnection(user.ServidorSQL.trim(), user.BaseSQL.trim());
+        const query_DB = querys.authCompany;
+        const idListPreResult = await otherPool.request()
+            .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
+            .input("IdOLEI", user.IdOLEI)
+            .query(query_DB);
 
-    const otherPool = await dbConnection(user.ServidorSQL.trim(), user.BaseSQL.trim());
-    const query_DB = querys.authCompany;
-    const idListPreResult = await otherPool.request()
-        .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
-        .input("IdOLEI", user.IdOLEI)
-        .query(query_DB);
+        const Id_ListPre = idListPreResult?.recordset[0]?.Id_ListPre;
+        const Nombre = idListPreResult?.recordset[0]?.Nombre;
 
-    const Id_ListPre = idListPreResult?.recordset[0]?.Id_ListPre;
-    const Nombre = idListPreResult?.recordset[0]?.Nombre;
+        sharedData.currentUser = {
+            user: {
+                ...user,
+                Id_ListPre,
+                Nombre
+            }
+        };
 
-    sharedData.currentUser = {
-        user: {
-            ...user,
-            Id_ListPre,
-            Nombre
-        }
-    };
+        sharedData.currentClient = {
+            client: {
+                Id_Almacen: user.Id_Almacen,
+                Id_Cliente: user.Id_Cliente,
+                Id_ListPre
+            }
+        };
 
-    sharedData.currentClient = {
-        client: {
-            Id_Almacen: user.Id_Almacen,
-            Id_Cliente: user.Id_Cliente,
-            Id_ListPre
-        }
-    };
-
-    return {
-        server: user.ServidorSQL.trim(),
-        database: user.BaseSQL.trim(),
-        pool: otherPool,
-        currentUser: sharedData.currentUser.user
-    };
-
+        return {
+            server: user.ServidorSQL.trim(),
+            database: user.BaseSQL.trim(),
+            pool: otherPool,
+            currentUser: sharedData.currentUser.user
+        };
+    } catch (error) {
+        // Aquí puedes manejar el error, ya sea registrándolo, lanzando una excepción diferente o realizando alguna otra acción.
+        console.error("Error en connectToUserDatabase:", error);
+        throw error; // Puedes relanzar el error si quieres que la función que llamó a esta también lo maneje.
+    }
 };
 
 export {

@@ -122,30 +122,37 @@ const isSubscriptionExpired = (dueDate) => {
 };
 const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, function* () {
     var _b, _c;
-    const otherPool = yield (0, database_1.dbConnection)(user.ServidorSQL.trim(), user.BaseSQL.trim());
-    const query_DB = database_1.querys.authCompany;
-    const idListPreResult = yield otherPool.request()
-        .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
-        .input("IdOLEI", user.IdOLEI)
-        .query(query_DB);
-    const Id_ListPre = (_b = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _b === void 0 ? void 0 : _b.Id_ListPre;
-    const Nombre = (_c = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _c === void 0 ? void 0 : _c.Nombre;
-    app_1.sharedData.currentUser = {
-        user: Object.assign(Object.assign({}, user), { Id_ListPre,
-            Nombre })
-    };
-    app_1.sharedData.currentClient = {
-        client: {
-            Id_Almacen: user.Id_Almacen,
-            Id_Cliente: user.Id_Cliente,
-            Id_ListPre
-        }
-    };
-    return {
-        server: user.ServidorSQL.trim(),
-        database: user.BaseSQL.trim(),
-        pool: otherPool,
-        currentUser: app_1.sharedData.currentUser.user
-    };
+    try {
+        const otherPool = yield (0, database_1.dbConnection)(user.ServidorSQL.trim(), user.BaseSQL.trim());
+        const query_DB = database_1.querys.authCompany;
+        const idListPreResult = yield otherPool.request()
+            .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
+            .input("IdOLEI", user.IdOLEI)
+            .query(query_DB);
+        const Id_ListPre = (_b = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _b === void 0 ? void 0 : _b.Id_ListPre;
+        const Nombre = (_c = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _c === void 0 ? void 0 : _c.Nombre;
+        app_1.sharedData.currentUser = {
+            user: Object.assign(Object.assign({}, user), { Id_ListPre,
+                Nombre })
+        };
+        app_1.sharedData.currentClient = {
+            client: {
+                Id_Almacen: user.Id_Almacen,
+                Id_Cliente: user.Id_Cliente,
+                Id_ListPre
+            }
+        };
+        return {
+            server: user.ServidorSQL.trim(),
+            database: user.BaseSQL.trim(),
+            pool: otherPool,
+            currentUser: app_1.sharedData.currentUser.user
+        };
+    }
+    catch (error) {
+        // Aquí puedes manejar el error, ya sea registrándolo, lanzando una excepción diferente o realizando alguna otra acción.
+        console.error("Error en connectToUserDatabase:", error);
+        throw error; // Puedes relanzar el error si quieres que la función que llamó a esta también lo maneje.
+    }
 });
 //# sourceMappingURL=auth.js.map
