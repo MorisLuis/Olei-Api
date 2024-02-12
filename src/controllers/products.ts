@@ -159,6 +159,8 @@ const getProducById = async (req: Request, res: Response) => {
             .input("Almacen", userAlmacen)
             .query(querys.getProducById);
 
+
+
         const product = result?.recordset[0];
 
         /* if (user?.SwImagenes) {
@@ -201,11 +203,11 @@ const getProducById = async (req: Request, res: Response) => {
             }
         } */
 
-        
+
         return res.json(product);
     } catch (error) {
         console.log({error})
-        return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
+        return res.status(500).json({ error: error });
     }
 }
 
