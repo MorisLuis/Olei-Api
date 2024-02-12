@@ -10,13 +10,13 @@ import {
 
 const router = Router()
 
+router.get("/:id", getProducById)
 router.get("/byStockAndCodeBar/:CodeBar", getProductByStockAndCodeBar)
 
 router.get("/byStock", getProductsByStock)
 router.get("/", getProducts)
 
 
-router.get("/:id", getProducById)
 
 router.get("/count", getTotalProducts)
 
