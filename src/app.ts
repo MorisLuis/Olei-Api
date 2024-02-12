@@ -16,7 +16,7 @@ export interface ConnectionInterface {
 
 export interface ClientInterface {
     Id_Almacen: number,
-    Id_ListPre: number,
+    Id_ListPre?: number | null,
     Id_Cliente: number,
 }
 

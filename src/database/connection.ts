@@ -19,10 +19,6 @@ export const dbConnection = async (server?: string, database?: string) => {
         },
     };
 
-    console.log({
-        dbConfig
-    })
-
 
     try {
         const pool = new sql.ConnectionPool(dbConfig);

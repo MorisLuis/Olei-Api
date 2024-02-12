@@ -30,9 +30,6 @@ const dbConnection = (server, database) => __awaiter(void 0, void 0, void 0, fun
             trustServerCertificate: true,
         },
     };
-    console.log({
-        dbConfig
-    });
     try {
         const pool = new mssql_1.default.ConnectionPool(dbConfig);
         yield pool.connect();

@@ -120,6 +120,11 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
     const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
     const user = (_d = app_1.sharedData.currentUser) === null || _d === void 0 ? void 0 : _d.user;
+    console.log({
+        Marca,
+        userListPrice,
+        userAlmacen
+    });
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {

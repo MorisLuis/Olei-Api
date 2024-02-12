@@ -137,6 +137,12 @@ const getProducById = async (req: Request, res: Response) => {
     const userListPrice = client?.Id_ListPre;
     const user = sharedData.currentUser?.user
 
+    console.log({
+        Marca,
+        userListPrice,
+        userAlmacen
+    })
+
     try {
         const pool = await dbConnection();
 
