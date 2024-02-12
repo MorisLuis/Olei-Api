@@ -169,6 +169,7 @@ const connectToUserDatabase = async (user: UserInterface) => {
         pool: otherPool,
         currentUser: sharedData.currentUser.user
     };
+
 };
 
 export {
