@@ -180,7 +180,7 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
     catch (error) {
         console.log({ error });
-        return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
+        return res.status(500).json({ error });
     }
 });
 exports.getProducById = getProducById;
