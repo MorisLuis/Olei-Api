@@ -16,7 +16,11 @@ const getProducts = async (req: Request, res: Response) => {
     const userListPrice = client?.Id_ListPre;
 
     try {
-        const pool = await dbConnection();
+
+        //const pool = await dbConnection();
+        const server = "serverolei01.database.windows.net";
+        const database = "OLEIDB1_MXNL00181";
+        const pool = await dbConnection(server, database);
 
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
