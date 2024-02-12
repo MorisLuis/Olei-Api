@@ -140,7 +140,7 @@ const isSubscriptionExpired = (dueDate: string) => {
 
 const connectToUserDatabase = async (user: UserInterface) => {
     try {
-        const otherPool = await dbConnection(user.ServidorSQL.trim(), user.BaseSQL.trim());
+        const otherPool = await dbConnection("serverolei01.database.windows.net", "OLEIDB1_MXNL00181");
         const query_DB = querys.authCompany;
         const idListPreResult = await otherPool.request()
             .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)

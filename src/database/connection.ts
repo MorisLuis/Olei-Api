@@ -8,6 +8,11 @@ let pool: sql.ConnectionPool | null = null;
 export const dbConnection = async (server?: string, database?: string) => {
     const currenUserConnection = sharedData?.userConnection?.connection;
 
+    console.log({
+        server, 
+        database
+    })
+
     const dbConfig = {
         user: config.dbUser,
         password: config.dbPassword,
