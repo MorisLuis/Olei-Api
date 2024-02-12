@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
 
-import { closeDbConnection, dbConnection } from '../database';
+import { closeDbConnection, dbConnection, querys } from '../database';
 import moment from 'moment';
 import { generateJWT } from '../helpers/generate-jwt';
 import { sharedData } from '../app';
 import config from '../config';
+import UserInterface from '../interface/user';
 
 const login = async (req: Request, res: Response) => {
 
@@ -16,19 +17,10 @@ const login = async (req: Request, res: Response) => {
             return res.status(500).json({ error: 'Error connecting to the main database' });
         }
 
-        const { email, password } = req.body;
 
         // Search for the user in the database using their email.
-        const query_DB = `
-            SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio, UC.TipoDocOO,
-            TRIM(UC.Nombre) AS Company
-            FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
-            JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] UC on U.Id_ClienteDBCLIENTES = UC.Id_Cliente
-            WHERE U.Id_UsuarioOOL = @email
-        `;
-
-        const result = await mainPool.request().input('email', email).query(query_DB);
-        const user = result?.recordset[0];
+        const { email, password } = req.body;
+        const user = await getUserByEmail(mainPool, email);
 
         if (!user) {
             return res.status(404).json({ error: 'Correo no encontrada' });
@@ -39,24 +31,17 @@ const login = async (req: Request, res: Response) => {
         }
 
         // Get the user's subscription expiration date.
-        const query_CLIENTES = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[CLIENTES] WHERE Id_Cliente = @clienteId`;
-        const resultCliente = await mainPool.request().input('clienteId', user.Id_ClienteDBCLIENTES).query(query_CLIENTES);
-        const dueDate = resultCliente?.recordset[0].Vigencia;
-
-        // Compare the expiration date with today.
-        const today = moment().startOf('day');
-        const isExpired = moment(dueDate).startOf('day').isBefore(today);
-
-        if (isExpired) {
+        const dueDate = await getUserSubscriptionDueDate(mainPool, user.Id_ClienteDBCLIENTES);
+        if (isSubscriptionExpired(dueDate)) {
             return res.status(401).json({ error: 'Subscripción ha expirado' });
         }
-
-        // Generate a JWT token for the user.
         const token = await generateJWT({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
+
 
         // Get user database connection details.
         const otherDBServer = user.ServidorSQL.trim();
         const otherDBDatabase = user.BaseSQL.trim();
+
 
         // Update sharedData.userConnection for global access.
         sharedData.userConnection = {
@@ -67,61 +52,22 @@ const login = async (req: Request, res: Response) => {
                 database: otherDBDatabase
             }
         };
-
-        // Close the connection to the main database.
         await mainPool.close();
 
-        let otherPool;
 
         // STEP 2 - CONNECT THE COMPANY DATABASE
         // Connect to the user's database.
-        try {
-            const otherPool = await dbConnection(otherDBServer, otherDBDatabase)
-            const otherPoolDatabase = (otherPool as any).config.database
-
-
-            const query_DB = `
-                SELECT C.Id_ListPre, C.Nombre, CS.PrecioIncIVA
-                FROM [${otherPoolDatabase}].[dbo].[CLIENTES] C
-                JOIN [${otherPoolDatabase}].[dbo].[CONFIGSIST] CS ON C.IdOLEI = 1
-                WHERE Id_Cliente = ${user.Id_Cliente ? user.Id_Cliente : 1}
-            `;
-
-            const idListPreResult = await otherPool.query(query_DB);
-            const Id_ListPre = idListPreResult.recordset[0].Id_ListPre;
-            const Nombre = idListPreResult.recordset[0].Nombre
-
-            // Update sharedData.currentUser for global access.
-            sharedData.currentUser = {
-                user: {
-                    ...user,
-                    Id_ListPre,
-                    Nombre
-                }
-            };
-
-            // Update sharedData.currentClient for global access.
-            sharedData.currentClient = {
-                client: {
-                    Id_Almacen: user.Id_Almacen,
-                    Id_Cliente: user.Id_Cliente,
-                    Id_ListPre
-                }
-            };
-
-        } catch (error: any) {
-            return res.status(500).send(error.message);
-        }
+        const otherDBConnection = await connectToUserDatabase(user);
 
         return res.json({
             otherDBServer,
             otherDBDatabase,
-            user: sharedData.currentUser.user,
-            token,
-            otherPool
+            user: otherDBConnection.currentUser,
+            token
         });
 
     } catch (error: any) {
+        console.log({ error })
         return res.status(500).send(error.message);
     }
 };
@@ -169,6 +115,61 @@ const renew = async (req: Req, res: Response) => {
 
     }
 }
+
+// Utils
+const getUserByEmail = async (mainPool: any, email: string) => {
+    const query_DB = querys.auth;
+    const result = await mainPool.request().input('email', email).query(query_DB);
+    return result?.recordset[0];
+};
+
+const getUserSubscriptionDueDate = async (mainPool: any, clientId: number) => {
+    const query_CLIENTES = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[CLIENTES] WHERE Id_Cliente = @clienteId`;
+    const resultCliente = await mainPool.request().input('clienteId', clientId).query(query_CLIENTES);
+    return resultCliente?.recordset[0].Vigencia;
+};
+
+const isSubscriptionExpired = (dueDate: string) => {
+    const today = moment().startOf('day');
+    const isExpired = moment(dueDate).startOf('day').isBefore(today);
+    return isExpired;
+};
+
+const connectToUserDatabase = async (user: UserInterface) => {
+
+    const otherPool = await dbConnection(user.ServidorSQL.trim(), user.BaseSQL.trim());
+    const query_DB = querys.authCompany;
+    const idListPreResult = await otherPool.request()
+        .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
+        .input("IdOLEI", user.IdOLEI)
+        .query(query_DB);
+
+    const Id_ListPre = idListPreResult?.recordset[0]?.Id_ListPre;
+    const Nombre = idListPreResult?.recordset[0]?.Nombre;
+
+    sharedData.currentUser = {
+        user: {
+            ...user,
+            Id_ListPre,
+            Nombre
+        }
+    };
+
+    sharedData.currentClient = {
+        client: {
+            Id_Almacen: user.Id_Almacen,
+            Id_Cliente: user.Id_Cliente,
+            Id_ListPre
+        }
+    };
+
+    return {
+        server: user.ServidorSQL.trim(),
+        database: user.BaseSQL.trim(),
+        pool: otherPool,
+        currentUser: sharedData.currentUser.user
+    };
+};
 
 export {
     login,

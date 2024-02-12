@@ -89,7 +89,7 @@ const searchProduct = async (req: Request, res: Response) => {
         const total = result.recordset.length;
 
         // Extract the descriptions of the first 10 products for response
-        const descriptions : string[]= result.recordset.slice(0, 10).map(product => product.Descripcion);
+        const descriptions: string[] = result.recordset.slice(0, 10).map(product => product.Descripcion);
 
         // Send the response with total results and product descriptions
         res.json({
@@ -120,7 +120,6 @@ const searchClient = async (req: Request, res: Response) => {
         const result = await pool.request().query(query);
         const Clients = result.recordset
 
-
         res.json({
             Clients
         })
@@ -128,9 +127,35 @@ const searchClient = async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
+};
+
+const searchProductInventory = async (req: Request, res: Response) => {
+    const { searchTerm } = req.query;
+
+    try {
+        const pool = await dbConnection();
+
+        if (!pool) {
+            return res.status(500).json({ error: 'Unable to establish a connection to the database' });
+        }
+
+        const query = querys.getProductsBySearchInventory;
+        const result = await pool.request()
+            .input("searchTerm", searchTerm)
+            .query(query);
+
+        const products = result.recordset
+
+        res.json(products)
+
+
+    } catch (error) {
+        console.log({ error })
+    }
 }
 
 export {
     searchProduct,
-    searchClient
+    searchClient,
+    searchProductInventory
 }

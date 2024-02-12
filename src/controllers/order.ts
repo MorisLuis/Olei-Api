@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { dbConnection } from "../database";
+import { dbConnection, querys } from "../database";
 import sql from 'mssql';
 import moment from 'moment-timezone';
 import { sharedData } from "../app";
@@ -16,8 +16,8 @@ const postOrder = async (req: Request, res: Response) => {
         const Id_Almacen = client?.Id_Almacen;
         const Id_Cliente = client?.Id_Cliente;
         const Id_ListPre = client?.Id_ListPre;
-        const database = connection?.database;
         const Id_Usuario = connection?.user;
+        const TipoDocOO = user?.TipoDocOO;
 
         const pool = await dbConnection();
 
@@ -27,42 +27,28 @@ const postOrder = async (req: Request, res: Response) => {
         }
 
         const transaction = new sql.Transaction(pool);
-        // Inicia la transacción
         await transaction.begin();
 
-
         try {
-            // Crea una nueva instancia de Request dentro de la transacción
             const request = new sql.Request(transaction);
             const currentDate = moment().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
 
-            const result = await request.query(`
-                SELECT 
-                    (
-                        SELECT TOP 1 Folio FROM [${database}].[dbo].[VENTAS]
-                        WHERE Folio = (SELECT MAX(Folio) FROM [${database}].[dbo].[VENTAS])
-                    ) AS Folio,
-                    (
-                        SELECT SerieActiva FROM [${database}].[dbo].[DATOSFISCALES]
-                        WHERE Id_Almacen = ${Id_Almacen}
-                    ) AS SerieActiva,
-                    Id_Descuento, Id_CondVta, Id_Vendedor, Id_FormaPago, Id_Transporte
-                    FROM [${database}].[dbo].[CLIENTES]
-                    WHERE Id_Cliente = ${Id_Cliente} AND Id_Almacen = ${Id_Almacen};
-            `);
 
-            // Accede a los resultados
-            const results: any = result.recordset[0];
+            const previewDataToPostOrder = await request
+                .input("Id_Almacen_Preview", Id_Almacen)
+                .input("Id_Cliente_Preview", Id_Cliente)
+                .query(querys.getPreviewDataToPostOrder)
+
+            const results = previewDataToPostOrder.recordset[0];
+            const { SerieActiva, Folio, Id_Descuento, Id_CondVta, Id_Vendedor, Id_FormaPago, Id_Transporte } = results;
 
             if (!results) {
                 return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
             }
 
-            // Modifica la fecha en el objeto postData con el valor deseado
-            postData.Id_Almacen = Id_Almacen;
-            postData.TipoDoc = user?.TipoDocOO;
-            postData.Serie = results.SerieActiva ? results.SerieActiva : "";
-            postData.Folio = results?.Folio + 1;
+            postData.TipoDoc = TipoDocOO;
+            postData.Serie = SerieActiva ? SerieActiva : "";
+            postData.Folio = Folio + 1;
             postData.Id_Cliente = Id_Cliente;
             postData.Id_AlmacenClte = Id_Almacen;
             postData.Fecha = currentDate;
@@ -70,11 +56,11 @@ const postOrder = async (req: Request, res: Response) => {
             postData.Impuesto = postData.Total - postData.Subtotal;
             postData.Subtotal = postData.Subtotal;
             postData.Saldo = postData.Total;
-            postData.Id_Descuento = results?.Id_Descuento;
-            postData.Id_CondVta = results?.Id_CondVta;
-            postData.Id_Vendedor = results?.Id_Vendedor;
-            postData.Id_FormaPago = results?.Id_FormaPago;
-            postData.Id_Transporte = results?.Id_Transporte;
+            postData.Id_Descuento = Id_Descuento;
+            postData.Id_CondVta = Id_CondVta;
+            postData.Id_Vendedor = Id_Vendedor;
+            postData.Id_FormaPago = Id_FormaPago;
+            postData.Id_Transporte = Id_Transporte;
             postData.FechaLiq = postData.Fecha;
             postData.Estado = 1;
             postData.Moneda = 1;
@@ -86,110 +72,76 @@ const postOrder = async (req: Request, res: Response) => {
             postData.Id_TipoPago = 1;
             postData.TipoDocOrigen = 11;
 
-            // Define la consulta SQL para la inserción de datos
-            const query = `
-                INSERT INTO [OLEIDB1].[dbo].[VENTAS]  (
-                    Id_Cliente, Id_Almacen, Id_AlmacenClte, TipoDoc, Serie, Folio, Fecha,
-                    Subtotal, Impuesto, Total, Saldo, Id_Descuento, Id_CondVta, Id_Vendedor, Id_Formapago,
-                    Id_Transporte, FechaLiq, Estado, Piezas, Moneda, Paridad, CantDescuento,
-                    Suma, Id_Usuario, Id_ListPre, CantLetra, FechaEntrega
-                ) 
-                VALUES (
-                    @Id_Cliente, @Id_Almacen, @Id_AlmacenClte, @TipoDoc, @Serie, @Folio, @Fecha,
-                    @Subtotal, @Impuesto, @Total, @Saldo, @Id_Descuento, @Id_CondVta, @Id_Vendedor, @Id_Formapago,
-                    @Id_Transporte, @FechaLiq, @Estado, @Piezas, @Moneda, @Paridad, @CantDescuento,
-                    @Suma, @Id_Usuario, @Id_ListPre, @CantLetra, @FechaEntrega
-                );
-            `;
+            const postOrderQuery = querys.insertOrder;
 
-            // Define una función para asignar los parámetros
-            const assignParameter = (parameterName: string, sqlType: any, value: any) => {
-                request.input(parameterName, sqlType, value);
-            };
+            const result = await request
+                .input("Id_Almacen", sql.Int, Id_Almacen)
+                .input("TipoDoc", sql.SmallInt, postData.TipoDoc)
+                .input("Serie", sql.NChar(10), postData.Serie)
+                .input("Folio", sql.Int, postData.Folio)
+                .input("Id_Cliente", sql.Int, postData.Id_Cliente)
+                .input("Id_AlmacenClte", sql.Int, postData.Id_AlmacenClte)
+                .input("Fecha", sql.DateTime, postData.Fecha)
+                .input("Subtotal", sql.Money, postData.Subtotal)
+                .input("Impuesto", sql.Decimal(18, 6), postData.Impuesto)
+                .input("Total", sql.Money, postData.Total)
+                .input("Saldo", sql.Money, postData.Saldo)
+                .input("Id_Descuento", sql.Int, postData.Id_Descuento)
+                .input("Id_CondVta", sql.Int, postData.Id_CondVta)
+                .input("Id_Vendedor", sql.Int, postData.Id_Vendedor)
+                .input("Id_Formapago", sql.Int, postData.Id_Formapago)
+                .input("Id_Transporte", sql.Int, postData.Id_Transporte)
+                .input("FechaLiq", sql.DateTime, postData.FechaLiq)
+                .input("Estado", sql.SmallInt, postData.Estado)
+                .input("Notas", sql.VarChar(4000), postData.Notas)
+                .input("DocsOrigen", sql.VarChar(4000), postData.DocsOrigen)
+                .input("DocsDestino", sql.VarChar(4000), postData.DocsDestino)
+                .input("TipoDocOrigen", sql.SmallInt, postData.TipoDocOrigen)
+                .input("TipoDocDestino", sql.SmallInt, postData.TipoDocDestino)
+                .input("Piezas", sql.Numeric(18, 2), postData.Piezas)
+                .input("Retencion", sql.Decimal(18, 6), postData.Retencion)
+                .input("RetencionIVA", sql.Decimal(18, 6), postData.RetencionIVA)
+                .input("Moneda", sql.Int, postData.Moneda)
+                .input("Paridad", sql.Decimal(18, 6), postData.Paridad)
+                .input("TipoEntrega", sql.SmallInt, postData.TipoEntrega)
+                .input("DatoOB1", sql.NChar(100), postData.DatoOB1)
+                .input("DatoOB2", sql.NChar(100), postData.DatoOB2)
+                .input("DatoOB3", sql.NChar(100), postData.DatoOB3)
+                .input("NumCtaPago", sql.NChar(30), postData.NumCtaPago)
+                .input("Suma", sql.Decimal(18, 6), postData.Suma)
+                .input("SwImpOrg", sql.Bit, postData.SwImpOrg)
+                .input("SwPag", sql.Bit, postData.SwPag)
+                .input("Id_Usuario", sql.NChar(50), postData.Id_Usuario)
+                .input("CantDescuento", sql.Decimal(18, 6), postData.CantDescuento)
+                .input("Id_ListPre", sql.Int, postData.Id_ListPre)
+                .input("CantLetra", sql.VarChar(200), postData.CantLetra)
+                .input("Id_TipoPago", sql.Int, postData.Id_TipoPago)
+                .input("Id_Uso", sql.Int, postData.Id_Uso)
+                .input("ClaveConfirm", sql.NChar(20), postData.ClaveConfirm)
+                .input("SwAnticipo", sql.Bit, postData.SwAnticipo)
+                .input("SaldoAnticipo", sql.Decimal(18, 6), postData.SaldoAnticipo)
+                .input("DocsRel", sql.VarChar(200), postData.DocsRel)
+                .input("SwNotaAnticipo", sql.Bit, postData.SwNotaAnticipo)
+                .input("ImporteNotaAnticipo", sql.Decimal(18, 6), postData.ImporteNotaAnticipo)
+                .input("TipoRel", sql.Int, postData.TipoRel)
+                .input("Id_FormaPago2", sql.Int, postData.Id_FormaPago2)
+                .input("Id_FormaPago3", sql.Int, postData.Id_FormaPago3)
+                .input("Pago1", sql.Decimal(18, 6), postData.Pago1)
+                .input("Pago2", sql.Decimal(18, 6), postData.Pago2)
+                .input("Pago3", sql.Decimal(18, 6), postData.Pago3)
+                .input("Cambio", sql.Decimal(18, 6), postData.Cambio)
+                .input("SwPagada", sql.Bit, postData.SwPagada)
+                .input("FolioCaja", sql.Int, postData.FolioCaja)
+                .input("Id_Chofer", sql.Int, postData.Id_Chofer)
+                .input("FechaEntrega", sql.DateTime, postData.FechaEntrega)
+                .query(postOrderQuery);
 
-            // Define un objeto con los nombres de los parámetros y sus tipos de datos y valores
-            const parameters = {
-                Id_Almacen: { type: sql.Int, value: postData.Id_Almacen },
-                TipoDoc: { type: sql.SmallInt, value: postData.TipoDoc },
-                Serie: { type: sql.NChar(10), value: postData.Serie },
-                Folio: { type: sql.Int, value: postData.Folio },
-                Id_Cliente: { type: sql.Int, value: postData.Id_Cliente },
-                Id_AlmacenClte: { type: sql.Int, value: postData.Id_AlmacenClte },
-                Fecha: { type: sql.DateTime, value: postData.Fecha },
-                Subtotal: { type: sql.Money, value: postData.Subtotal },
-                Impuesto: { type: sql.Decimal(18, 6), value: postData.Impuesto },
-                Total: { type: sql.Money, value: postData.Total },
-                Saldo: { type: sql.Money, value: postData.Saldo },
-                Id_Descuento: { type: sql.Int, value: postData.Id_Descuento },
-                Id_CondVta: { type: sql.Int, value: postData.Id_CondVta },
-                Id_Vendedor: { type: sql.Int, value: postData.Id_Vendedor },
-                Id_Formapago: { type: sql.Int, value: postData.Id_Formapago },
-                Id_Transporte: { type: sql.Int, value: postData.Id_Transporte },
-                FechaLiq: { type: sql.DateTime, value: postData.FechaLiq },
-                Estado: { type: sql.SmallInt, value: postData.Estado },
-                Notas: { type: sql.VarChar(4000), value: postData.Notas },
-                DocsOrigen: { type: sql.VarChar(4000), value: postData.DocsOrigen },
-                DocsDestino: { type: sql.VarChar(4000), value: postData.DocsDestino },
-                TipoDocOrigen: { type: sql.SmallInt, value: postData.TipoDocOrigen },
-                TipoDocDestino: { type: sql.SmallInt, value: postData.TipoDocDestino },
-                Piezas: { type: sql.Numeric(18, 2), value: postData.Piezas },
-                Retencion: { type: sql.Decimal(18, 6), value: postData.Retencion },
-                RetencionIVA: { type: sql.Decimal(18, 6), value: postData.RetencionIVA },
-                Moneda: { type: sql.Int, value: postData.Moneda },
-                Paridad: { type: sql.Decimal(18, 6), value: postData.Paridad },
-                TipoEntrega: { type: sql.SmallInt, value: postData.TipoEntrega },
-                DatoOB1: { type: sql.NChar(100), value: postData.DatoOB1 },
-                DatoOB2: { type: sql.NChar(100), value: postData.DatoOB2 },
-                DatoOB3: { type: sql.NChar(100), value: postData.DatoOB3 },
-                NumCtaPago: { type: sql.NChar(30), value: postData.NumCtaPago },
-                Suma: { type: sql.Decimal(18, 6), value: postData.Suma },
-                SwImpOrg: { type: sql.Bit, value: postData.SwImpOrg },
-                SwPag: { type: sql.Bit, value: postData.SwPag },
-                Id_Usuario: { type: sql.NChar(50), value: postData.Id_Usuario },
-                CantDescuento: { type: sql.Decimal(18, 6), value: postData.CantDescuento },
-                Id_ListPre: { type: sql.Int, value: postData.Id_ListPre },
-                CantLetra: { type: sql.VarChar(200), value: postData.CantLetra },
-                Id_TipoPago: { type: sql.Int, value: postData.Id_TipoPago },
-                Id_Uso: { type: sql.Int, value: postData.Id_Uso },
-                ClaveConfirm: { type: sql.NChar(20), value: postData.ClaveConfirm },
-                SwAnticipo: { type: sql.Bit, value: postData.SwAnticipo },
-                SaldoAnticipo: { type: sql.Decimal(18, 6), value: postData.SaldoAnticipo },
-                DocsRel: { type: sql.VarChar(200), value: postData.DocsRel },
-                SwNotaAnticipo: { type: sql.Bit, value: postData.SwNotaAnticipo },
-                ImporteNotaAnticipo: { type: sql.Decimal(18, 6), value: postData.ImporteNotaAnticipo },
-                TipoRel: { type: sql.Int, value: postData.TipoRel },
-                Id_FormaPago2: { type: sql.Int, value: postData.Id_FormaPago2 },
-                Id_FormaPago3: { type: sql.Int, value: postData.Id_FormaPago3 },
-                Pago1: { type: sql.Decimal(18, 6), value: postData.Pago1 },
-                Pago2: { type: sql.Decimal(18, 6), value: postData.Pago2 },
-                Pago3: { type: sql.Decimal(18, 6), value: postData.Pago3 },
-                Cambio: { type: sql.Decimal(18, 6), value: postData.Cambio },
-                SwPagada: { type: sql.Bit, value: postData.SwPagada },
-                FolioCaja: { type: sql.Int, value: postData.FolioCaja },
-                Id_Chofer: { type: sql.Int, value: postData.Id_Chofer },
-                FechaEntrega: { type: sql.DateTime, value: postData.FechaEntrega },
-            };
-
-            // Asigna los parámetros utilizando la función
-            for (const parameterName in parameters) {
-                if (Object.prototype.hasOwnProperty.call(parameters, parameterName)) {
-                    const parameter = parameters[parameterName as keyof typeof parameters];
-                    assignParameter(parameterName, parameter.type, parameter.value);
-                }
-            }
-
-            // Ejecuta la consulta SQL dentro de la transacción
-            await request.query(query);
-
-            // Confirma la transacción
             await transaction.commit();
+            const order = result.recordset[0];
+            res.status(201).json(order);
 
-            res.status(201).json({
-                order: request.parameters
-            });
         } catch (error) {
             await transaction.rollback();
-            console.log({ error })
             throw error;
         } finally {
             if (pool) {
@@ -206,9 +158,9 @@ const getOrder = async (req: Request, res: Response) => {
 
     const { folio } = req.params;
     const client = sharedData?.currentClient?.client;
-    const connection = sharedData?.userConnection?.connection;
     const Id_Cliente = client?.Id_Cliente;
-    const database = connection?.database;
+    const user = sharedData?.currentUser?.user;
+    const TipoDocOO = user?.TipoDocOO;
 
     try {
         const pool = await dbConnection();
@@ -218,23 +170,17 @@ const getOrder = async (req: Request, res: Response) => {
             return;
         }
 
-        const query = `
-            SELECT V.Folio, V.Piezas, V.Subtotal, V.Impuesto, V.Total, V.Fecha, C.Nombre as Cliente, VE.Nombre as Vendedor
-            FROM [${database}].[dbo].[VENTAS] AS V
-            INNER JOIN [${database}].[dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
-            INNER JOIN [${database}].[dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
-            WHERE V.Id_Cliente = @Id_Cliente AND TipoDoc = 3 AND Folio = @folio
-        `
+        const getOrderQuery = querys.getOrder;
 
-        const request = pool.request();
-        request.input('Id_Cliente', sql.Int, Id_Cliente);
-        request.input('folio', sql.Int, folio);
+        const request = await pool.request()
+            .input('Id_Cliente', sql.Int, Id_Cliente)
+            .input('folio', sql.Int, folio)
+            .input('TipoDocOO', TipoDocOO)
+            .query(getOrderQuery);
 
+        let order: OrderInterface = request.recordset[0];
 
-        const consult = await request.query(query);
-        let results: OrderInterface = consult.recordset[0];
-
-        res.json(results)
+        res.json(order)
 
     } catch (error) {
         res.status(500).json({ error: error });
@@ -246,9 +192,8 @@ const getAllOrders = async (req: Request, res: Response) => {
     const user = sharedData?.currentUser?.user;
     const client = sharedData?.currentClient?.client;
     const Id_Cliente = client?.Id_Cliente;
-    const connection = sharedData?.userConnection?.connection
-    const database = connection?.database;
     const TipoDocOO = user?.TipoDocOO;
+
 
     try {
         const pool = await dbConnection();
@@ -258,22 +203,17 @@ const getAllOrders = async (req: Request, res: Response) => {
             return;
         }
 
-        const query = `
-            SELECT V.Folio, V.Piezas, V.Subtotal, V.Impuesto, V.Total, V.Fecha ,C.Nombre as Cliente, VE.Nombre as Vendedor
-            FROM [${database}].[dbo].[VENTAS] AS V
-            INNER JOIN [${database}].[dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
-            INNER JOIN [${database}].[dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
-            WHERE V.Id_Cliente = @Id_Cliente AND TipoDoc = ${TipoDocOO}
-            ORDER BY Fecha DESC
-        `
+        const query = querys.getAllOrders;
 
-        const request = pool.request();
-        request.input('Id_Cliente', sql.Int, Id_Cliente);
+        const request = await pool.request()
+            .input('TipoDocOO', TipoDocOO)
+            .input('Id_Cliente', sql.Int, Id_Cliente)
+            .query(query);
 
-        const consult = await request.query(query);
-        let results: OrderInterface[] = consult.recordset;
 
-        res.json(results)
+        let allOrders: OrderInterface[] = request.recordset;
+
+        res.json(allOrders);
 
     } catch (error) {
         console.log({ error })

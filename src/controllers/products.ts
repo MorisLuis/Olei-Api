@@ -5,21 +5,8 @@ import sql from 'mssql';
 import fetch from 'node-fetch';
 
 
-async function executeQuery(pool: sql.ConnectionPool, query: string, params: any) {
-    try {
-        // Execute the query with provided parameters
-        const result = await pool.request()
-            .input('ListaPrecios', sql.Int, params.ListaPrecios)
-            .input('Almacen', sql.Int, params.Almacen)
-            .query(query);
-
-        return result.recordset;
-    } catch (error) {
-        throw error;
-    }
-}
-
 const getProducts = async (req: Request, res: Response) => {
+
     const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
 
     // Get the user information from shared data, including the user's warehouse (Almacen)
@@ -27,9 +14,6 @@ const getProducts = async (req: Request, res: Response) => {
     const user = sharedData.currentUser?.user
     const userAlmacen = client?.Id_Almacen;
     const userListPrice = client?.Id_ListPre;
-
-    // CONDICIONAR SI ES EMPLEADO USAR UN ID_LISTAPRECIOS DEL CLIENTE.
-    // PROVIENE DEL QUERY
 
     try {
         const pool = await dbConnection();
@@ -99,6 +83,7 @@ const getProducts = async (req: Request, res: Response) => {
         // Use the pagination query if available; otherwise, use the base query
         const finalQuery = paginationQuery || query;
 
+
         // Execute the parameterized query
         const products = await executeQuery(pool, finalQuery, params);
 
@@ -141,7 +126,6 @@ const getProducts = async (req: Request, res: Response) => {
     }
 };
 
-
 const getProducById = async (req: Request, res: Response) => {
 
     const { id } = req.params;
@@ -159,8 +143,7 @@ const getProducById = async (req: Request, res: Response) => {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
 
-        const result = await pool
-            .request()
+        const result = await pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)
             .input("ListaPrecios", userListPrice)
@@ -175,7 +158,6 @@ const getProducById = async (req: Request, res: Response) => {
             if (baseSQL && baseSQL.length > 0) {
 
                 const imageDB = baseSQL[baseSQL.length - 1];
-
 
                 // Número máximo de intentos para encontrar la imagen
                 const maxAttempts = 5;
@@ -211,6 +193,7 @@ const getProducById = async (req: Request, res: Response) => {
         }
         return res.json(product);
     } catch (error) {
+        console.log({error})
         return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
     }
 }
@@ -223,6 +206,60 @@ const getTotalProducts = async (req: Request, res: Response) => {
     res.json(result?.recordset[0][""]);
 };
 
+const getProductsByStock = async (req: Request, res: Response) => {
+
+    const { PageNumber, PageSize } = req.query;
+
+    try {
+        const pool = await dbConnection();
+
+        if (!pool) {
+            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+        }
+
+        let query = querys.getAllProductsByStock;
+
+        const request = await pool.request()
+            .input('PageSize', Number(PageSize))
+            .input('PageNumber', PageNumber)
+            .query(query);
+
+        const productsByStock = request.recordset;
+
+        res.json(productsByStock);
+
+    } catch (error: any) {
+        console.log({error})
+        res.status(500).json({ error: error.message });
+    }
+}
+
+const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
+
+    const { CodeBar } = req.params;
+
+    try {
+        const pool = await dbConnection();
+
+        if (!pool) {
+            return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+        }
+
+        let query = querys.getProductByStockAndCodeBar;
+        const request = await pool.request()
+            .input("CodeBar", CodeBar)
+            .query(query);
+
+        const productByStockAndCodeBar = request.recordset;
+
+        res.json(productByStockAndCodeBar)
+
+    } catch (error: any) {
+        return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
+    }
+}
+
+
 // Utils
 const checkImageExists = async (url: string): Promise<boolean> => {
     try {
@@ -234,9 +271,25 @@ const checkImageExists = async (url: string): Promise<boolean> => {
     }
 };
 
+async function executeQuery(pool: sql.ConnectionPool, query: string, params: any) {
+    try {
+        // Execute the query with provided parameters
+        const result = await pool.request()
+            .input('ListaPrecios', sql.Int, params.ListaPrecios)
+            .input('Almacen', sql.Int, params.Almacen)
+            .query(query);
+
+        return result.recordset;
+    } catch (error) {
+        throw error;
+    }
+}
+
 
 export {
     getProducts,
     getProducById,
     getTotalProducts,
+    getProductsByStock,
+    getProductByStockAndCodeBar
 }

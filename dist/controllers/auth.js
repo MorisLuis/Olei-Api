@@ -27,14 +27,10 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         const { email, password } = req.body;
         // Search for the user in the database using their email.
-        const query_DB = `
-            SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio, UC.TipoDocOO,
-            TRIM(UC.Nombre) AS Company
-            FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
-            JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] UC on U.Id_ClienteDBCLIENTES = UC.Id_Cliente
-            WHERE U.Id_UsuarioOOL = @email
-        `;
-        const result = yield mainPool.request().input('email', email).query(query_DB);
+        const query_DB = database_1.querys.auth;
+        const result = yield mainPool.request()
+            .input('email', email)
+            .query(query_DB);
         const user = result === null || result === void 0 ? void 0 : result.recordset[0];
         if (!user) {
             return res.status(404).json({ error: 'Correo no encontrada' });
@@ -44,7 +40,9 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         // Get the user's subscription expiration date.
         const query_CLIENTES = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[CLIENTES] WHERE Id_Cliente = @clienteId`;
-        const resultCliente = yield mainPool.request().input('clienteId', user.Id_ClienteDBCLIENTES).query(query_CLIENTES);
+        const resultCliente = yield mainPool.request()
+            .input('clienteId', user.Id_ClienteDBCLIENTES)
+            .query(query_CLIENTES);
         const dueDate = resultCliente === null || resultCliente === void 0 ? void 0 : resultCliente.recordset[0].Vigencia;
         // Compare the expiration date with today.
         const today = (0, moment_1.default)().startOf('day');
@@ -74,13 +72,11 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const otherPool = yield (0, database_1.dbConnection)(otherDBServer, otherDBDatabase);
             const otherPoolDatabase = otherPool.config.database;
-            const query_DB = `
-                SELECT C.Id_ListPre, C.Nombre, CS.PrecioIncIVA
-                FROM [${otherPoolDatabase}].[dbo].[CLIENTES] C
-                JOIN [${otherPoolDatabase}].[dbo].[CONFIGSIST] CS ON C.IdOLEI = 1
-                WHERE Id_Cliente = ${user.Id_Cliente ? user.Id_Cliente : 1}
-            `;
-            const idListPreResult = yield otherPool.query(query_DB);
+            const query_DB = database_1.querys.authCompany;
+            const idListPreResult = yield otherPool.request()
+                .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
+                .input('database', otherPoolDatabase)
+                .query(query_DB);
             const Id_ListPre = idListPreResult.recordset[0].Id_ListPre;
             const Nombre = idListPreResult.recordset[0].Nombre;
             // Update sharedData.currentUser for global access.

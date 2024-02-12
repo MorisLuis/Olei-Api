@@ -10,6 +10,7 @@ import tablesRouter from "../routes/tablesRouter";
 import orderRouter from "../routes/orderRouter";
 import orderDetailsRouter from "../routes/orderDetailsRouter";
 import clientRouter from "../routes/clientRouter";
+import inventoryRouter from "../routes/inventoryRouter";
 
 class Server {
     private app: Application;
@@ -22,7 +23,8 @@ class Server {
         tables: string,
         order: string,
         orderDetails: string,
-        client: string
+        client: string,
+        inventory: string
     }
 
     constructor() {
@@ -36,7 +38,8 @@ class Server {
             tables: "/api/tables",
             order: "/api/order",
             orderDetails: "/api/orderDetails",
-            client: "/api/client"
+            client: "/api/client",
+            inventory: "/api/inventory"
         }
 
         //Connect to database
@@ -71,13 +74,14 @@ class Server {
         this.app.use(this.paths.order, orderRouter);
         this.app.use(this.paths.orderDetails, orderDetailsRouter);
         this.app.use(this.paths.client, clientRouter);
-    }
+        this.app.use(this.paths.inventory, inventoryRouter);
+    };
 
     listen() {
         this.app.listen(this.port, () => {
             console.log("Servidor corriendo en puerto " + this.port)
         })
-    }
+    };
 }
 
 export default Server
