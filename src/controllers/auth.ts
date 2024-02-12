@@ -12,10 +12,6 @@ const login = async (req: Request, res: Response) => {
     try {
         // STEP 1 - LOGIN
         const mainPool = await dbConnection(config.dbServer, config.dbDatabase);
-        /* const server = "serverolei01.database.windows.net";
-        const database = "OLEIDB1_MXNL00181";
-        const mainPool = await dbConnection(server, database);
- */
 
         if (!mainPool) {
             return res.status(500).json({ error: 'Error connecting to the main database' });
@@ -144,17 +140,17 @@ const isSubscriptionExpired = (dueDate: string) => {
 
 const connectToUserDatabase = async (user: UserInterface) => {
     try {
-        const server = "serverolei01.database.windows.net";
-        const database = "OLEIDB1_MXNL00181";
-        const otherPool = await dbConnection(server, database);
-        //const otherPool = await dbConnection("serverolei01.database.windows.net", "OLEIDB1_MXNL00181");
+        const otherPool = await dbConnection(user.ServidorSQL.trim(), user.BaseSQL.trim());
+
         const query_DB = querys.authCompany;
         const idListPreResult = await otherPool.request()
             .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
             .input("IdOLEI", user.IdOLEI)
             .query(query_DB);
 
-        const Id_ListPre = idListPreResult?.recordset[0]?.Id_ListPre;
+        //const Id_ListPre = idListPreResult?.recordset[0]?.Id_ListPre;
+        const Id_ListPre = 1;
+
         const Nombre = idListPreResult?.recordset[0]?.Nombre;
 
         sharedData.currentUser = {
