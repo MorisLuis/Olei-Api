@@ -268,7 +268,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
         res.json(productByStockAndCodeBar)
 
     } catch (error: any) {
-        return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
+        return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud / getProductByStockAndCodeBar' });
     }
 }
 
