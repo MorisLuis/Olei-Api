@@ -33,7 +33,7 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         }
         // Define query parameters for the SQL query
         const params = {
-            ListaPrecios: userListPrice,
+            ListaPrecios: userListPrice, // Default ListaPrecios value
             Almacen: userAlmacen, // User's warehouse
         };
         let query = database_1.querys.getAllProducts;
