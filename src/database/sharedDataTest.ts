@@ -29,6 +29,7 @@ export const currentUserTest: { user: UserInterface } = {
         // Represent if show the products without price (1)
         SwsinPrecio: 0,
         TipoDocOO: 0,
+        IdOLEI: 1,
 
         Id_UsuarioOLEI: null,
         PasswordOLEI: null,

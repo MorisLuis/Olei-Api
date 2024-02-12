@@ -5,6 +5,7 @@ import moment from 'moment';
 import { generateJWT } from '../helpers/generate-jwt';
 import { sharedData } from '../app';
 import config from '../config';
+import UserInterface from '../interface/user';
 
 const login = async (req: Request, res: Response) => {
 
@@ -58,16 +59,11 @@ const login = async (req: Request, res: Response) => {
         // Connect to the user's database.
         const otherDBConnection = await connectToUserDatabase(user);
 
-        console.log({
-            otherDBConnection: otherDBConnection.pool
-        })
-
         return res.json({
             otherDBServer,
             otherDBDatabase,
             user: otherDBConnection.currentUser,
-            token,
-            //otherPool: otherDBConnection.pool
+            token
         });
 
     } catch (error: any) {
@@ -139,18 +135,17 @@ const isSubscriptionExpired = (dueDate: string) => {
     return isExpired;
 };
 
-const connectToUserDatabase = async (user: any) => {
-    const otherPool = await dbConnection(user.ServidorSQL.trim(), user.BaseSQL.trim());
-    const otherPoolDatabase = (otherPool as any).config.database;
+const connectToUserDatabase = async (user: UserInterface) => {
 
+    const otherPool = await dbConnection(user.ServidorSQL.trim(), user.BaseSQL.trim());
     const query_DB = querys.authCompany;
     const idListPreResult = await otherPool.request()
         .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
-        .input('database', otherPoolDatabase)
+        .input("IdOLEI", user.IdOLEI)
         .query(query_DB);
 
-    const Id_ListPre = idListPreResult.recordset[0].Id_ListPre;
-    const Nombre = idListPreResult.recordset[0].Nombre;
+    const Id_ListPre = idListPreResult?.recordset[0]?.Id_ListPre;
+    const Nombre = idListPreResult?.recordset[0]?.Nombre;
 
     sharedData.currentUser = {
         user: {
