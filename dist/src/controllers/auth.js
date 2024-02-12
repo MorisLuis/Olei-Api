@@ -122,6 +122,7 @@ const isSubscriptionExpired = (dueDate) => {
 };
 const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, function* () {
     var _b, _c;
+    console.log({ user });
     try {
         const otherPool = yield (0, database_1.dbConnection)(user.ServidorSQL.trim(), user.BaseSQL.trim());
         const query_DB = database_1.querys.authCompany;
