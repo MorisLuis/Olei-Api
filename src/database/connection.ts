@@ -6,22 +6,17 @@ import config from "../config";
 let pool: sql.ConnectionPool | null = null;
 
 export const dbConnection = async (server?: string, database?: string) => {
+
     const currenUserConnection = sharedData?.userConnection?.connection;
-
-    console.log({
-        server, 
-        database
-    })
-
     const dbConfig = {
         user: config.dbUser,
         password: config.dbPassword,
         server: server || currenUserConnection?.server || config.dbServer,
         database: database || currenUserConnection?.database || config.dbDatabase,
-        /* options: {
-            encrypt: false,
+        options: {
+            encrypt: true,
             trustServerCertificate: true,
-        }, */
+        },
     };
 
 

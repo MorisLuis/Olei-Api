@@ -16,12 +16,12 @@ export interface ConnectionInterface {
 
 export interface ClientInterface {
     Id_Almacen: number,
-    Id_ListPre?: number | null
+    Id_ListPre: number,
     Id_Cliente: number,
 }
 
 // Create a shared data object to store user information for the session.
-// The objective is to track 'Id_ListaPrecion' & 'Id_Almacen' throughout the entire backend.
+// The objective is to track 'Id_ListaPrecio' & 'Id_Almacen' throughout the entire backend.
 export const sharedData = {
     // 'currentUser' stores the current user using the 'UserInterface'.
     currentUser: process.env.TEST === 'TRUE'

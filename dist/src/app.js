@@ -10,7 +10,7 @@ require("./database/connection");
 const sharedDataTest_1 = require("./database/sharedDataTest");
 dotenv_1.default.config();
 // Create a shared data object to store user information for the session.
-// The objective is to track 'Id_ListaPrecion' & 'Id_Almacen' throughout the entire backend.
+// The objective is to track 'Id_ListaPrecio' & 'Id_Almacen' throughout the entire backend.
 exports.sharedData = {
     // 'currentUser' stores the current user using the 'UserInterface'.
     currentUser: process.env.TEST === 'TRUE'

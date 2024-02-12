@@ -20,19 +20,15 @@ let pool = null;
 const dbConnection = (server, database) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const currenUserConnection = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _a === void 0 ? void 0 : _a.connection;
-    console.log({
-        server,
-        database
-    });
     const dbConfig = {
         user: config_1.default.dbUser,
         password: config_1.default.dbPassword,
         server: server || (currenUserConnection === null || currenUserConnection === void 0 ? void 0 : currenUserConnection.server) || config_1.default.dbServer,
         database: database || (currenUserConnection === null || currenUserConnection === void 0 ? void 0 : currenUserConnection.database) || config_1.default.dbDatabase,
-        /* options: {
-            encrypt: false,
+        options: {
+            encrypt: true,
             trustServerCertificate: true,
-        }, */
+        },
     };
     try {
         const pool = new mssql_1.default.ConnectionPool(dbConfig);
