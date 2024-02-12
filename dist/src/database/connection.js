@@ -20,6 +20,10 @@ let pool = null;
 const dbConnection = (server, database) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const currenUserConnection = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _a === void 0 ? void 0 : _a.connection;
+    console.log({
+        server,
+        database
+    });
     const dbConfig = {
         user: config_1.default.dbUser,
         password: config_1.default.dbPassword,

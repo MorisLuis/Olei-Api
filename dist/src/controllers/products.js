@@ -26,7 +26,10 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     const userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
     const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
     try {
-        const pool = yield (0, database_1.dbConnection)();
+        //const pool = await dbConnection();
+        const server = "serverolei01.database.windows.net";
+        const database = "OLEIDB1_MXNL00181";
+        const pool = yield (0, database_1.dbConnection)(server, database);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;

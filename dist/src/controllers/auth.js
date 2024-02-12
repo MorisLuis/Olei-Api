@@ -22,6 +22,10 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // STEP 1 - LOGIN
         const mainPool = yield (0, database_1.dbConnection)(config_1.default.dbServer, config_1.default.dbDatabase);
+        /* const server = "serverolei01.database.windows.net";
+        const database = "OLEIDB1_MXNL00181";
+        const mainPool = await dbConnection(server, database);
+ */
         if (!mainPool) {
             return res.status(500).json({ error: 'Error connecting to the main database' });
         }
@@ -126,7 +130,10 @@ const isSubscriptionExpired = (dueDate) => {
 const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, function* () {
     var _b, _c;
     try {
-        const otherPool = yield (0, database_1.dbConnection)(user.ServidorSQL.trim(), user.BaseSQL.trim());
+        const server = "serverolei01.database.windows.net";
+        const database = "OLEIDB1_MXNL00181";
+        const otherPool = yield (0, database_1.dbConnection)(server, database);
+        //const otherPool = await dbConnection("serverolei01.database.windows.net", "OLEIDB1_MXNL00181");
         const query_DB = database_1.querys.authCompany;
         const idListPreResult = yield otherPool.request()
             .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
