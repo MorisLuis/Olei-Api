@@ -23,7 +23,8 @@ const searchProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const userAlmacen = (_b = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client) === null || _b === void 0 ? void 0 : _b.Id_Almacen;
     const user = (_c = app_1.sharedData.currentUser) === null || _c === void 0 ? void 0 : _c.user;
     const client = (_d = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _d === void 0 ? void 0 : _d.client;
-    const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
+    //const userListPrice = client?.Id_ListPre;
+    const userListPrice = 1;
     try {
         const pool = yield (0, database_1.dbConnection)();
         // Define query parameters for the SQL query

@@ -133,7 +133,7 @@ const isSubscriptionExpired = (dueDate: string) => {
     return isExpired;
 };
 
-const connectToUserDatabase = async (user: any) => {
+const connectToUserDatabase = async (user: UserInterface) => {
     try {
         const otherPool = await dbConnection(user.ServidorSQL.trim(), user.BaseSQL.trim());
 

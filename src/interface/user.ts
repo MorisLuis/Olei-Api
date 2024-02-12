@@ -11,7 +11,7 @@ export default interface UserInterface {
     Company: string,
 
     // The ID of the price list that defines the prices of the products.
-    Id_ListPre?: number;
+    Id_ListPre?: number | null;
 
     // The identifier of the client.
     Id_Cliente: number;

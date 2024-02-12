@@ -10,7 +10,7 @@ export const querys = {
     `,
 
     authCompany: ` 
-        SELECT C.Nombre, CS.PrecioIncIVA
+        SELECT C.Id_ListPre, C.Nombre, CS.PrecioIncIVA
         FROM [dbo].[CLIENTES] C
         JOIN [dbo].[CONFIGSIST] CS ON C.IdOLEI = @IdOLEI
         WHERE Id_Cliente = @Id_Cliente
