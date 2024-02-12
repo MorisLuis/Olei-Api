@@ -53,6 +53,9 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             }
         };
         yield mainPool.close();
+        console.log({
+            user
+        });
         // STEP 2 - CONNECT THE COMPANY DATABASE
         // Connect to the user's database.
         const otherDBConnection = yield connectToUserDatabase(user);

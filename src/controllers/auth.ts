@@ -54,6 +54,10 @@ const login = async (req: Request, res: Response) => {
         };
         await mainPool.close();
 
+        console.log({
+            user
+        })
+
 
         // STEP 2 - CONNECT THE COMPANY DATABASE
         // Connect to the user's database.
