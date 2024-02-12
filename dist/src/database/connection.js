@@ -25,10 +25,10 @@ const dbConnection = (server, database) => __awaiter(void 0, void 0, void 0, fun
         password: config_1.default.dbPassword,
         server: server || (currenUserConnection === null || currenUserConnection === void 0 ? void 0 : currenUserConnection.server) || config_1.default.dbServer,
         database: database || (currenUserConnection === null || currenUserConnection === void 0 ? void 0 : currenUserConnection.database) || config_1.default.dbDatabase,
-        options: {
-            encrypt: true,
+        /* options: {
+            encrypt: false,
             trustServerCertificate: true,
-        },
+        }, */
     };
     try {
         const pool = new mssql_1.default.ConnectionPool(dbConfig);

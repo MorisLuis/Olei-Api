@@ -135,7 +135,6 @@ const isSubscriptionExpired = (dueDate: string) => {
 };
 
 const connectToUserDatabase = async (user: UserInterface) => {
-    console.log({user})
     try {
         const otherPool = await dbConnection(user.ServidorSQL.trim(), user.BaseSQL.trim());
         const query_DB = querys.authCompany;

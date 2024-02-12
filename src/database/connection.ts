@@ -13,10 +13,10 @@ export const dbConnection = async (server?: string, database?: string) => {
         password: config.dbPassword,
         server: server || currenUserConnection?.server || config.dbServer,
         database: database || currenUserConnection?.database || config.dbDatabase,
-        options: {
-            encrypt: true,
+        /* options: {
+            encrypt: false,
             trustServerCertificate: true,
-        },
+        }, */
     };
 
 
