@@ -137,9 +137,6 @@ const getProducById = async (req: Request, res: Response) => {
     const user = sharedData.currentUser?.user
 
     try {
-
-        console.log({id, Marca, userListPrice, userAlmacen})
-
         const pool = await dbConnection();
 
         if (!pool) {
@@ -152,9 +149,6 @@ const getProducById = async (req: Request, res: Response) => {
             .input("ListaPrecios", userListPrice)
             .input("Almacen", userAlmacen)
             .query(querys.getProducById);
-
-            console.log({result})
-
 
         const product = result?.recordset[0];
 

@@ -121,7 +121,6 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
     const user = (_d = app_1.sharedData.currentUser) === null || _d === void 0 ? void 0 : _d.user;
     try {
-        console.log({ id, Marca, userListPrice, userAlmacen });
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -132,7 +131,6 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             .input("ListaPrecios", userListPrice)
             .input("Almacen", userAlmacen)
             .query(database_1.querys.getProducById);
-        console.log({ result });
         const product = result === null || result === void 0 ? void 0 : result.recordset[0];
         if (user === null || user === void 0 ? void 0 : user.SwImagenes) {
             const baseSQL = user === null || user === void 0 ? void 0 : user.BaseSQL.trim().toLowerCase().split(',');

@@ -56,15 +56,11 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         // STEP 2 - CONNECT THE COMPANY DATABASE
         // Connect to the user's database.
         const otherDBConnection = yield connectToUserDatabase(user);
-        console.log({
-            otherDBConnection: otherDBConnection.pool
-        });
         return res.json({
             otherDBServer,
             otherDBDatabase,
             user: otherDBConnection.currentUser,
-            token,
-            //otherPool: otherDBConnection.pool
+            token
         });
     }
     catch (error) {
@@ -125,15 +121,15 @@ const isSubscriptionExpired = (dueDate) => {
     return isExpired;
 };
 const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b, _c;
     const otherPool = yield (0, database_1.dbConnection)(user.ServidorSQL.trim(), user.BaseSQL.trim());
-    const otherPoolDatabase = otherPool.config.database;
     const query_DB = database_1.querys.authCompany;
     const idListPreResult = yield otherPool.request()
         .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
-        .input('database', otherPoolDatabase)
+        .input("IdOLEI", user.IdOLEI)
         .query(query_DB);
-    const Id_ListPre = idListPreResult.recordset[0].Id_ListPre;
-    const Nombre = idListPreResult.recordset[0].Nombre;
+    const Id_ListPre = (_b = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _b === void 0 ? void 0 : _b.Id_ListPre;
+    const Nombre = (_c = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _c === void 0 ? void 0 : _c.Nombre;
     app_1.sharedData.currentUser = {
         user: Object.assign(Object.assign({}, user), { Id_ListPre,
             Nombre })

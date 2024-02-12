@@ -4,7 +4,7 @@ exports.querys = void 0;
 exports.querys = {
     //Auth
     auth: ` 
-        SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio, UC.TipoDocOO,
+        SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio, UC.TipoDocOO, UC.IdOLEI,
         TRIM(UC.Nombre) AS Company
         FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
         JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] UC on U.Id_ClienteDBCLIENTES = UC.Id_Cliente
@@ -13,7 +13,7 @@ exports.querys = {
     authCompany: ` 
         SELECT C.Id_ListPre, C.Nombre, CS.PrecioIncIVA
         FROM [dbo].[CLIENTES] C
-        JOIN [dbo].[CONFIGSIST] CS ON C.IdOLEI = 1
+        JOIN [dbo].[CONFIGSIST] CS ON C.IdOLEI = @IdOLEI
         WHERE Id_Cliente = @Id_Cliente
     `,
     // Products
