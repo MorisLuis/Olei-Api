@@ -137,38 +137,45 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             .input("Almacen", userAlmacen)
             .query(database_1.querys.getProducById);
         const product = result === null || result === void 0 ? void 0 : result.recordset[0];
-        if (user === null || user === void 0 ? void 0 : user.SwImagenes) {
-            const baseSQL = user === null || user === void 0 ? void 0 : user.BaseSQL.trim().toLowerCase().split(',');
+        /* if (user?.SwImagenes) {
+            const baseSQL = user?.BaseSQL.trim().toLowerCase().split(',');
+
             if (baseSQL && baseSQL.length > 0) {
+
                 const imageDB = baseSQL[baseSQL.length - 1];
+
                 // Número máximo de intentos para encontrar la imagen
                 const maxAttempts = 5;
                 let attempt = 0;
                 let images = [];
+
                 while (attempt < maxAttempts) {
                     let imageUrl;
                     if (attempt === 0) {
                         imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
-                    }
-                    else {
+                    } else {
                         imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}_${attempt}.jpg`;
                     }
+
                     // Verifica si la imagen existe
-                    const imageExists = yield checkImageExists(imageUrl);
+                    const imageExists = await checkImageExists(imageUrl);
+
                     if (imageExists) {
                         images.push({
                             url: imageUrl,
                             id: attempt
                         });
                     }
+
                     attempt++;
                 }
+
                 if (images.length > 0) {
                     // Se encontraron imágenes existentes
                     product.imagen = images;
                 }
             }
-        }
+        } */
         return res.json(product);
     }
     catch (error) {
