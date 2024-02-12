@@ -10,8 +10,7 @@ const searchProduct = async (req: Request, res: Response) => {
     const userAlmacen = sharedData?.currentClient?.client?.Id_Almacen;
     const user = sharedData.currentUser?.user;
     const client = sharedData?.currentClient?.client;
-    //const userListPrice = client?.Id_ListPre;
-    const userListPrice = 1;
+    const userListPrice = client?.Id_ListPre;
 
     try {
         const pool = await dbConnection();

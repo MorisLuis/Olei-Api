@@ -49,7 +49,7 @@ export default interface UserInterface {
     TipoDocOO: number;
 
     //
-    IdOLEI: number;
+    IdOLEI?: number;
 
     // This field is currently not in use.
     Id_UsuarioOLEI: number | null;

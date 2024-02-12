@@ -1,7 +1,7 @@
 import Server from "./models/server";
 import dotenv from "dotenv";
-import './database/connection'
 import UserInterface from "./interface/user";
+import './database/connection'
 import { currentClientTest, currentUserTest, userConnectionTest } from "./database/sharedDataTest";
 
 dotenv.config()

@@ -143,8 +143,7 @@ const connectToUserDatabase = async (user: UserInterface) => {
             .input("IdOLEI", user.IdOLEI)
             .query(query_DB);
 
-        //const Id_ListPre = idListPreResult?.recordset[0]?.Id_ListPre;
-        const Id_ListPre = 1;
+        const Id_ListPre = idListPreResult?.recordset[0]?.Id_ListPre;
 
         const Nombre = idListPreResult?.recordset[0]?.Nombre;
 
