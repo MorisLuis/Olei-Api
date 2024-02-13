@@ -22,6 +22,7 @@ export const dbConnection = async (server?: string, database?: string) => {
 
     try {
         const pool = new sql.ConnectionPool(dbConfig);
+        console.log('db online')
         await pool.connect();
         return pool;
     } catch (error: any) {
