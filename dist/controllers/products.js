@@ -85,7 +85,8 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 // Supongamos que la URL de la imagen se basa en la propiedad "Codigo" del producto
                 const baseSQL = user === null || user === void 0 ? void 0 : user.BaseSQL.trim().toLowerCase().split(',');
                 if (baseSQL && baseSQL.length > 0) {
-                    const imageDB = baseSQL[baseSQL.length - 1];
+                    const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
+                    const imageDB = formatImageDB[formatImageDB.length - 1];
                     const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
                     // Verifica si la imagen existe antes de agregarla al producto
                     const imageExists = yield checkImageExists(imageUrl);
@@ -120,11 +121,6 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
     const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
     const user = (_d = __1.sharedData.currentUser) === null || _d === void 0 ? void 0 : _d.user;
-    console.log({
-        Marca,
-        userListPrice,
-        userAlmacen
-    });
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
@@ -140,7 +136,8 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         if (user === null || user === void 0 ? void 0 : user.SwImagenes) {
             const baseSQL = user === null || user === void 0 ? void 0 : user.BaseSQL.trim().toLowerCase().split(',');
             if (baseSQL && baseSQL.length > 0) {
-                const imageDB = baseSQL[baseSQL.length - 1];
+                const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
+                const imageDB = formatImageDB[formatImageDB.length - 1];
                 // Número máximo de intentos para encontrar la imagen
                 const maxAttempts = 5;
                 let attempt = 0;
@@ -152,6 +149,7 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     }
                     else {
                         imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}_${attempt}.jpg`;
+                        /* https://oleistorage.blob.core.windows.net/mxnl00181/001_1.jpg */
                     }
                     // Verifica si la imagen existe
                     const imageExists = yield checkImageExists(imageUrl);

@@ -19,9 +19,9 @@ exports.currentUserTest = {
         // Represent if the images are available (1).
         SwImagenes: 1,
         // Represent if show the products without stock (1)
-        SwSinStock: 0,
+        SwSinStock: 1,
         // Represent if show the products without price (1)
-        SwsinPrecio: 0,
+        SwsinPrecio: 1,
         TipoDocOO: 0,
         IdOLEI: 1,
         Id_UsuarioOLEI: null,
@@ -32,7 +32,7 @@ exports.currentUserTest = {
 exports.currentClientTest = {
     client: {
         Id_Almacen: 1,
-        Id_ListPre: 3,
+        Id_ListPre: 1,
         Id_Cliente: 3
     }
 };

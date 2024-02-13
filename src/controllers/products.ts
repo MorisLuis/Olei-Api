@@ -15,9 +15,7 @@ const getProducts = async (req: Request, res: Response) => {
     const userAlmacen = client?.Id_Almacen;
     const userListPrice = client?.Id_ListPre;
 
-
     try {
-
         const pool = await dbConnection();
 
         if (!pool) {
@@ -97,7 +95,8 @@ const getProducts = async (req: Request, res: Response) => {
                 const baseSQL = user?.BaseSQL.trim().toLowerCase().split(',');
 
                 if (baseSQL && baseSQL.length > 0) {
-                    const imageDB = baseSQL[baseSQL.length - 1];
+                    const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
+                    const imageDB = formatImageDB[formatImageDB.length - 1];                    
                     const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
 
                     // Verifica si la imagen existe antes de agregarla al producto
@@ -139,12 +138,6 @@ const getProducById = async (req: Request, res: Response) => {
 
     const user = sharedData.currentUser?.user
 
-    console.log({
-        Marca,
-        userListPrice,
-        userAlmacen
-    })
-
     try {
         const pool = await dbConnection();
 
@@ -167,13 +160,14 @@ const getProducById = async (req: Request, res: Response) => {
             const baseSQL = user?.BaseSQL.trim().toLowerCase().split(',');
 
             if (baseSQL && baseSQL.length > 0) {
-
-                const imageDB = baseSQL[baseSQL.length - 1];
+                const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
+                const imageDB = formatImageDB[formatImageDB.length - 1];
 
                 // Número máximo de intentos para encontrar la imagen
                 const maxAttempts = 5;
                 let attempt = 0;
                 let images = [];
+
 
                 while (attempt < maxAttempts) {
                     let imageUrl;
@@ -181,6 +175,7 @@ const getProducById = async (req: Request, res: Response) => {
                         imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
                     } else {
                         imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}_${attempt}.jpg`;
+                        /* https://oleistorage.blob.core.windows.net/mxnl00181/001_1.jpg */
                     }
 
                     // Verifica si la imagen existe
