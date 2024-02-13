@@ -22,6 +22,8 @@ const login = async (req: Request, res: Response) => {
         const { email, password } = req.body;
         const user = await getUserByEmail(mainPool, email);
 
+        console.log({user})
+
         if (!user) {
             return res.status(404).json({ error: 'Correo no encontrada' });
         }
