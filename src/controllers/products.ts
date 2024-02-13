@@ -163,7 +163,7 @@ const getProducById = async (req: Request, res: Response) => {
 
         const product = result?.recordset[0];
 
-        /* if (user?.SwImagenes) {
+        if (user?.SwImagenes) {
             const baseSQL = user?.BaseSQL.trim().toLowerCase().split(',');
 
             if (baseSQL && baseSQL.length > 0) {
@@ -201,7 +201,7 @@ const getProducById = async (req: Request, res: Response) => {
                     product.imagen = images;
                 }
             }
-        } */
+        }
 
 
         return res.json(product);
