@@ -226,7 +226,7 @@ const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void
         res.json(productByStockAndCodeBar);
     }
     catch (error) {
-        return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud' });
+        return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud / getProductByStockAndCodeBar' });
     }
 });
 exports.getProductByStockAndCodeBar = getProductByStockAndCodeBar;

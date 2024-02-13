@@ -90,12 +90,12 @@ export const querys = {
             CT.Impto AS Impuesto,
             P.Observaciones,
             TRIM(CT.CodBar) AS CodBar
-            FROM [OLEIDB1].[dbo].[PRODUCTOS] P
-            JOIN [OLEIDB1].[dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
-            JOIN [OLEIDB1].[dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-            JOIN [OLEIDB1].[dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-            JOIN [OLEIDB1].[dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-            JOIN [OLEIDB1].[dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
+            FROM [dbo].[PRODUCTOS] P
+            JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
+            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+            JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
             WHERE P.Codigo = @Codigo AND M.Nombre = @Marca AND PR.Id_ListaPrecios = @ListaPrecios AND E.Id_Almacen = @Almacen
     `,
 

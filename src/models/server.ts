@@ -1,6 +1,7 @@
-import express, { Application } from "express";
+import express, { Application, NextFunction } from "express";
 import cors from 'cors';
 import { dbConnection } from "../database/connection";
+import { Request, Response } from 'express'
 
 import userRouter from "../routes/userRouter";
 import productRouter from "../routes/productRouter";
@@ -50,6 +51,10 @@ class Server {
 
         // Routes of the app
         this.routes();
+
+
+        // Error handling middleware
+        this.errorHandler();
     }
 
     async connectDB() {
@@ -76,6 +81,13 @@ class Server {
         this.app.use(this.paths.client, clientRouter);
         this.app.use(this.paths.inventory, inventoryRouter);
     };
+
+    errorHandler() {
+        // Error handling middleware
+        this.app.use(async (err: any, req: Request, res: Response, next: NextFunction) => {
+            res.status(500).json({ error: 'Ocurrió un error en el servidor', err });
+        });
+    }
 
     listen() {
         this.app.listen(this.port, () => {

@@ -45,6 +45,8 @@ class Server {
         this.middlewares();
         // Routes of the app
         this.routes();
+        // Error handling middleware
+        this.errorHandler();
     }
     connectDB() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -70,6 +72,12 @@ class Server {
         this.app.use(this.paths.inventory, inventoryRouter_1.default);
     }
     ;
+    errorHandler() {
+        // Error handling middleware
+        this.app.use((err, req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            res.status(500).json({ error: 'Ocurrió un error en el servidor', err });
+        }));
+    }
     listen() {
         this.app.listen(this.port, () => {
             console.log("Servidor corriendo en puerto " + this.port);
