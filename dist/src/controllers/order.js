@@ -16,14 +16,14 @@ exports.getAllOrders = exports.getOrder = exports.postOrder = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const moment_timezone_1 = __importDefault(require("moment-timezone"));
-const app_1 = require("../app");
+const __1 = require("..");
 const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c;
     try {
         const postData = req.body;
-        const client = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
-        const user = (_b = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _b === void 0 ? void 0 : _b.user;
-        const connection = (_c = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _c === void 0 ? void 0 : _c.connection;
+        const client = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
+        const user = (_b = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _b === void 0 ? void 0 : _b.user;
+        const connection = (_c = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.userConnection) === null || _c === void 0 ? void 0 : _c.connection;
         const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
         const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
         const Id_ListPre = client === null || client === void 0 ? void 0 : client.Id_ListPre;
@@ -158,9 +158,9 @@ exports.postOrder = postOrder;
 const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _d, _e;
     const { folio } = req.params;
-    const client = (_d = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _d === void 0 ? void 0 : _d.client;
+    const client = (_d = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _d === void 0 ? void 0 : _d.client;
     const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
-    const user = (_e = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _e === void 0 ? void 0 : _e.user;
+    const user = (_e = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _e === void 0 ? void 0 : _e.user;
     const TipoDocOO = user === null || user === void 0 ? void 0 : user.TipoDocOO;
     try {
         const pool = yield (0, database_1.dbConnection)();
@@ -184,8 +184,8 @@ const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.getOrder = getOrder;
 const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _f, _g;
-    const user = (_f = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _f === void 0 ? void 0 : _f.user;
-    const client = (_g = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _g === void 0 ? void 0 : _g.client;
+    const user = (_f = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _f === void 0 ? void 0 : _f.user;
+    const client = (_g = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _g === void 0 ? void 0 : _g.client;
     const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
     const TipoDocOO = user === null || user === void 0 ? void 0 : user.TipoDocOO;
     try {

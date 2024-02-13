@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { closeDbConnection, dbConnection, querys } from '../database';
 import moment from 'moment';
 import { generateJWT } from '../helpers/generate-jwt';
-import { sharedData } from '../app';
+import { sharedData } from '..';
 import config from '../config';
 import UserInterface from '../interface/user';
 

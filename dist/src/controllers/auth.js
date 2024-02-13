@@ -16,7 +16,7 @@ exports.renew = exports.logout = exports.login = void 0;
 const database_1 = require("../database");
 const moment_1 = __importDefault(require("moment"));
 const generate_jwt_1 = require("../helpers/generate-jwt");
-const app_1 = require("../app");
+const __1 = require("..");
 const config_1 = __importDefault(require("../config"));
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -45,7 +45,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const otherDBServer = user.ServidorSQL.trim();
         const otherDBDatabase = user.BaseSQL.trim();
         // Update sharedData.userConnection for global access.
-        app_1.sharedData.userConnection = {
+        __1.sharedData.userConnection = {
             connection: {
                 user: config_1.default.dbUser,
                 password: config_1.default.dbPassword,
@@ -89,7 +89,7 @@ const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.logout = logout;
 const renew = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const user = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user;
+    const user = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user;
     try {
         if (!user)
             return;
@@ -132,11 +132,11 @@ const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, functi
             .query(query_DB);
         const Id_ListPre = (_b = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _b === void 0 ? void 0 : _b.Id_ListPre;
         const Nombre = (_c = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _c === void 0 ? void 0 : _c.Nombre;
-        app_1.sharedData.currentUser = {
+        __1.sharedData.currentUser = {
             user: Object.assign(Object.assign({}, user), { Id_ListPre,
                 Nombre })
         };
-        app_1.sharedData.currentClient = {
+        __1.sharedData.currentClient = {
             client: {
                 Id_Almacen: user.Id_Almacen,
                 Id_Cliente: user.Id_Cliente,
@@ -147,7 +147,7 @@ const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, functi
             server: user.ServidorSQL.trim(),
             database: user.BaseSQL.trim(),
             pool: otherPool,
-            currentUser: app_1.sharedData.currentUser.user
+            currentUser: __1.sharedData.currentUser.user
         };
     }
     catch (error) {

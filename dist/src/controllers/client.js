@@ -10,12 +10,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.selectClient = void 0;
-const app_1 = require("../app");
+const __1 = require("..");
 const selectClient = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { Id_Cliente, Id_Almacen, Id_ListPre } = req.body;
     //const connection = sharedData?.userConnection?.connection;
     try {
-        app_1.sharedData.currentClient = {
+        __1.sharedData.currentClient = {
             client: {
                 Id_Almacen: Id_Almacen,
                 Id_Cliente: Id_Cliente,
@@ -23,7 +23,7 @@ const selectClient = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             }
         };
         return res.json({
-            client: app_1.sharedData.currentClient.client
+            client: __1.sharedData.currentClient.client
         });
     }
     catch (error) {

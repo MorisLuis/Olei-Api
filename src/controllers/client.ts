@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { sharedData } from '../app';
+import { sharedData } from '..';
 import { dbConnection } from '../database';
 import UserInterface from '../interface/user';
 import { getUsers } from './users';

@@ -1,4 +1,4 @@
-import { ClientInterface, ConnectionInterface } from "../app";
+import { ClientInterface, ConnectionInterface } from "..";
 import UserInterface from "../interface/user";
 
 

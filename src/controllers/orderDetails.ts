@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { dbConnection, querys } from "../database";
 import sql from 'mssql';
-import { sharedData } from "../app";
+import { sharedData } from "..";
 import PorductInterface from "../interface/product";
 
 

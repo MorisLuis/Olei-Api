@@ -1,5 +1,5 @@
 import sql from "mssql";
-import { sharedData } from "../app";
+import { sharedData } from "..";
 import config from "../config";
 
 

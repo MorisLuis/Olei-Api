@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { sharedData } from '../app';
+import { sharedData } from '..';
 import { dbConnection, querys } from '../database';
 import sql from 'mssql';
 import fetch from 'node-fetch';

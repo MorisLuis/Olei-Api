@@ -84,9 +84,9 @@ class Server {
 
     errorHandler() {
         // Error handling middleware
-        this.app.use(async (err: any, req: Request, res: Response, next: NextFunction) => {
+        /* this.app.use(async (err: any, req: Request, res: Response, next: NextFunction) => {
             res.status(500).json({ error: 'Ocurrió un error en el servidor', err });
-        });
+        }); */
     }
 
     listen() {

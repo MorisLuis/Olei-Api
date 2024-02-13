@@ -13,16 +13,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchProductInventory = exports.searchClient = exports.searchProduct = void 0;
-const app_1 = require("../app");
+const __1 = require("..");
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const searchProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c, _d;
     const { nombre, familia, codigo, enStock, marca } = req.query;
     // Get the user's almacen (storage) ID, default to 1 if not available
-    const userAlmacen = (_b = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client) === null || _b === void 0 ? void 0 : _b.Id_Almacen;
-    const user = (_c = app_1.sharedData.currentUser) === null || _c === void 0 ? void 0 : _c.user;
-    const client = (_d = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _d === void 0 ? void 0 : _d.client;
+    const userAlmacen = (_b = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client) === null || _b === void 0 ? void 0 : _b.Id_Almacen;
+    const user = (_c = __1.sharedData.currentUser) === null || _c === void 0 ? void 0 : _c.user;
+    const client = (_d = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _d === void 0 ? void 0 : _d.client;
     const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
     try {
         const pool = yield (0, database_1.dbConnection)();

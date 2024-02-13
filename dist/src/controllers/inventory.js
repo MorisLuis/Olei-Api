@@ -15,14 +15,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getInventoryDetails = exports.getInventory = exports.postInventoryDetails = exports.postInventory = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
-const app_1 = require("../app");
+const __1 = require("..");
 const moment_1 = __importDefault(require("moment"));
 const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
         const postInventoryData = req.body;
-        const client = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
-        const connection = (_b = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _b === void 0 ? void 0 : _b.connection;
+        const client = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
+        const connection = (_b = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.userConnection) === null || _b === void 0 ? void 0 : _b.connection;
         const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
         const Id_Usuario = connection === null || connection === void 0 ? void 0 : connection.user;
         const pool = yield (0, database_1.dbConnection)();
@@ -94,7 +94,7 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
     var _c;
     try {
         const postInventoryDataArray = req.body;
-        const client = (_c = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.currentClient) === null || _c === void 0 ? void 0 : _c.client;
+        const client = (_c = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _c === void 0 ? void 0 : _c.client;
         const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {

@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import { dbConnection, querys } from "../database";
 import sql from 'mssql';
 import moment from 'moment-timezone';
-import { sharedData } from "../app";
+import { sharedData } from "..";
 import OrderInterface from "../interface/order";
 
 

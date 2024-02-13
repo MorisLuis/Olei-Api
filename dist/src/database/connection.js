@@ -14,12 +14,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.closeDbConnection = exports.dbConnection = void 0;
 const mssql_1 = __importDefault(require("mssql"));
-const app_1 = require("../app");
+const __1 = require("..");
 const config_1 = __importDefault(require("../config"));
 let pool = null;
 const dbConnection = (server, database) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const currenUserConnection = (_a = app_1.sharedData === null || app_1.sharedData === void 0 ? void 0 : app_1.sharedData.userConnection) === null || _a === void 0 ? void 0 : _a.connection;
+    const currenUserConnection = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.userConnection) === null || _a === void 0 ? void 0 : _a.connection;
     const dbConfig = {
         user: config_1.default.dbUser,
         password: config_1.default.dbPassword,
@@ -43,7 +43,7 @@ const dbConnection = (server, database) => __awaiter(void 0, void 0, void 0, fun
 exports.dbConnection = dbConnection;
 const closeDbConnection = () => __awaiter(void 0, void 0, void 0, function* () {
     if (pool) {
-        app_1.sharedData.userConnection = {
+        __1.sharedData.userConnection = {
             connection: {
                 user: config_1.default.dbUser,
                 password: config_1.default.dbPassword,

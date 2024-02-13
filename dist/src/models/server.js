@@ -74,9 +74,9 @@ class Server {
     ;
     errorHandler() {
         // Error handling middleware
-        this.app.use((err, req, res, next) => __awaiter(this, void 0, void 0, function* () {
+        /* this.app.use(async (err: any, req: Request, res: Response, next: NextFunction) => {
             res.status(500).json({ error: 'Ocurrió un error en el servidor', err });
-        }));
+        }); */
     }
     listen() {
         this.app.listen(this.port, () => {
