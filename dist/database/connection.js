@@ -32,7 +32,6 @@ const dbConnection = (server, database) => __awaiter(void 0, void 0, void 0, fun
     };
     try {
         const pool = new mssql_1.default.ConnectionPool(dbConfig);
-        console.log('db online');
         yield pool.connect();
         return pool;
     }

@@ -34,6 +34,10 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
+        if (!TipoDocOO) {
+            res.status(500).json({ error: 'No se tiene TipoDocOO' });
+            return;
+        }
         const transaction = new mssql_1.default.Transaction(pool);
         yield transaction.begin();
         try {
@@ -44,13 +48,13 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 .input("Id_Cliente_Preview", Id_Cliente)
                 .query(database_1.querys.getPreviewDataToPostOrder);
             const results = previewDataToPostOrder.recordset[0];
-            const { SerieActiva, Folio, Id_Descuento, Id_CondVta, Id_Vendedor, Id_FormaPago, Id_Transporte } = results;
             if (!results) {
                 return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
             }
+            const { SerieActiva, Folio, Id_Descuento, Id_CondVta, Id_Vendedor, Id_FormaPago, Id_Transporte } = results;
             postData.TipoDoc = TipoDocOO;
             postData.Serie = SerieActiva ? SerieActiva : "";
-            postData.Folio = Folio + 1;
+            postData.Folio = (Folio ? Folio : 0) + 1;
             postData.Id_Cliente = Id_Cliente;
             postData.Id_AlmacenClte = Id_Almacen;
             postData.Fecha = currentDate;

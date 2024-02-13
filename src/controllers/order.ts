@@ -20,9 +20,15 @@ const postOrder = async (req: Request, res: Response) => {
         const TipoDocOO = user?.TipoDocOO;
 
         const pool = await dbConnection();
+        
 
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            return;
+        }
+
+        if(!TipoDocOO) {
+            res.status(500).json({ error: 'No se tiene TipoDocOO' });
             return;
         }
 
@@ -32,23 +38,22 @@ const postOrder = async (req: Request, res: Response) => {
         try {
             const request = new sql.Request(transaction);
             const currentDate = moment().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
-
-
             const previewDataToPostOrder = await request
                 .input("Id_Almacen_Preview", Id_Almacen)
                 .input("Id_Cliente_Preview", Id_Cliente)
                 .query(querys.getPreviewDataToPostOrder)
 
             const results = previewDataToPostOrder.recordset[0];
-            const { SerieActiva, Folio, Id_Descuento, Id_CondVta, Id_Vendedor, Id_FormaPago, Id_Transporte } = results;
-
+            
             if (!results) {
                 return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
             }
+            const { SerieActiva, Folio, Id_Descuento, Id_CondVta, Id_Vendedor, Id_FormaPago, Id_Transporte } = results;
+            
 
             postData.TipoDoc = TipoDocOO;
             postData.Serie = SerieActiva ? SerieActiva : "";
-            postData.Folio = Folio + 1;
+            postData.Folio = (Folio ? Folio : 0) + 1;
             postData.Id_Cliente = Id_Cliente;
             postData.Id_AlmacenClte = Id_Almacen;
             postData.Fecha = currentDate;
@@ -138,6 +143,7 @@ const postOrder = async (req: Request, res: Response) => {
 
             await transaction.commit();
             const order = result.recordset[0];
+
             res.status(201).json(order);
 
         } catch (error) {
