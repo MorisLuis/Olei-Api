@@ -115,6 +115,7 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.getProducts = getProducts;
 const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _c, _d;
+    console.log("getProducById");
     const { id } = req.params;
     const { Marca } = req.query;
     const client = (_c = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _c === void 0 ? void 0 : _c.client;
@@ -183,6 +184,7 @@ const getTotalProducts = (req, res) => __awaiter(void 0, void 0, void 0, functio
 exports.getTotalProducts = getTotalProducts;
 const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { PageNumber, PageSize } = req.query;
+    console.log("getProductsByStock");
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
@@ -194,6 +196,9 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
             .input('PageNumber', PageNumber)
             .query(query);
         const productsByStock = request.recordset;
+        console.log({
+            productsByStock
+        });
         res.json(productsByStock);
     }
     catch (error) {

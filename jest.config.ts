@@ -6,7 +6,10 @@ const config: Config.InitialOptions = {
     verbose: true,
     collectCoverage: true,
     collectCoverageFrom: [
-        '<rootDir>/src/**/*.ts'
+        '<rootDir>/src/test/*.ts'
+    ],
+    testPathIgnorePatterns: [
+        '<rootDir>/dist/'
     ]
 }
 

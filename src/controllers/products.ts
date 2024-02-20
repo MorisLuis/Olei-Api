@@ -129,6 +129,8 @@ const getProducts = async (req: Request, res: Response) => {
 
 const getProducById = async (req: Request, res: Response) => {
 
+    console.log("getProducById")
+
     const { id } = req.params;
     const { Marca } = req.query;
 
@@ -218,12 +220,16 @@ const getProductsByStock = async (req: Request, res: Response) => {
 
     const { PageNumber, PageSize } = req.query;
 
+    console.log("getProductsByStock")
+
     try {
         const pool = await dbConnection();
 
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
+
+
 
         let query = querys.getAllProductsByStock;
 
@@ -234,6 +240,10 @@ const getProductsByStock = async (req: Request, res: Response) => {
 
         const productsByStock = request.recordset;
 
+        console.log({
+            productsByStock
+        })
+
         res.json(productsByStock);
 
     } catch (error: any) {
@@ -243,7 +253,6 @@ const getProductsByStock = async (req: Request, res: Response) => {
 }
 
 const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
-
     const { CodeBar } = req.params;
 
     try {

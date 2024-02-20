@@ -39,6 +39,7 @@ export const sharedData = {
         : null as { connection: ConnectionInterface } | null,
 };
 
-const server = new Server()
-
+const server = new Server();
 server.listen()
+
+export default server;

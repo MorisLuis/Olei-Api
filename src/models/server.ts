@@ -1,7 +1,6 @@
-import express, { Application, NextFunction } from "express";
+import express, { Application } from "express";
 import cors from 'cors';
 import { dbConnection } from "../database/connection";
-import { Request, Response } from 'express'
 
 import userRouter from "../routes/userRouter";
 import productRouter from "../routes/productRouter";
@@ -14,7 +13,7 @@ import clientRouter from "../routes/clientRouter";
 import inventoryRouter from "../routes/inventoryRouter";
 
 class Server {
-    private app: Application;
+    public app: Application;
     private port: string;
     private paths: {
         product: string,
@@ -42,6 +41,7 @@ class Server {
             client: "/api/client",
             inventory: "/api/inventory"
         }
+
 
         //Connect to database
         this.connectDB();
@@ -96,4 +96,5 @@ class Server {
     };
 }
 
-export default Server
+
+export default Server;
