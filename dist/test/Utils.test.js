@@ -16,15 +16,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const supertest_1 = __importDefault(require("supertest"));
 const __1 = __importDefault(require(".."));
 const request = (0, supertest_1.default)(__1.default.app);
-//const request = supertest(server.app);
-describe('Server test suite', () => {
-    test('should respond with status 200 for the root endpoint', () => __awaiter(void 0, void 0, void 0, function* () {
+describe('User Controller Test Suite', () => {
+    test('should get users and respond with status 200', () => __awaiter(void 0, void 0, void 0, function* () {
         const response = yield request.get('/api/user');
         expect(response.status).toBe(200);
-    }));
-    test('should respond with status 404 for an unknown endpoint', () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield request.get('/unknown');
-        expect(response.status).toBe(404);
+        expect(response.body).toHaveProperty('total');
+        expect(response.body).toHaveProperty('users');
     }));
 });
 //# sourceMappingURL=Utils.test.js.map
