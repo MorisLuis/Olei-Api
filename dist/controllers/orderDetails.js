@@ -16,6 +16,7 @@ exports.getOrderDetails = exports.postOrderDetails = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const __1 = require("..");
+const orders_1 = require("../database/querys/orders");
 const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
@@ -40,7 +41,7 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 const request = new mssql_1.default.Request(transaction);
                 count++;
                 postData.Cantidad = postData.Piezas;
-                const previewDataToPostOrderDetails = database_1.querys.getPreviewDataToPostOrderDetails;
+                const previewDataToPostOrderDetails = orders_1.orderQuerys.getPreviewDataToPostOrderDetails;
                 const result = yield request
                     .input("Codigo_Preview", postData.Codigo)
                     .input("Id_Marca_Preview", postData.Id_Marca)
@@ -66,7 +67,7 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 postData.Importe = postData.Precio * postData.Piezas;
                 postData.Impuesto = (postData.Precio * postData.Piezas * (postData.Impto / 100));
                 postData.Costo = Costo;
-                const postOrderDetailsQuery = database_1.querys.insertOrderDetails;
+                const postOrderDetailsQuery = orders_1.orderQuerys.insertOrderDetails;
                 const resultOrderPost = yield request
                     .input("Id_Almacen", mssql_1.default.Int, Id_Almacen)
                     .input("TipoDoc", mssql_1.default.SmallInt, 3)
@@ -123,7 +124,7 @@ const getOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function
             return;
         }
         ;
-        const query = database_1.querys.getOrderDetails;
+        const query = orders_1.orderQuerys.getOrderDetails;
         const request = yield pool.request()
             .input('folio', mssql_1.default.Int, folio)
             .query(query);

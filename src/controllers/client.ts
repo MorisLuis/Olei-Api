@@ -1,14 +1,9 @@
 import { Request, Response } from 'express';
 import { sharedData } from '..';
-import { dbConnection } from '../database';
-import UserInterface from '../interface/user';
-import { getUsers } from './users';
-
 
 const selectClient = async (req: Request, res: Response) => {
 
     const { Id_Cliente, Id_Almacen, Id_ListPre } = req.body;
-    //const connection = sharedData?.userConnection?.connection;
 
     try {
 

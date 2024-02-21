@@ -3,6 +3,7 @@ import { dbConnection, querys } from "../database";
 import sql from 'mssql';
 import { sharedData } from "..";
 import PorductInterface from "../interface/product";
+import { orderQuerys } from "../database/querys/orders";
 
 
 const postOrderDetails = async (req: Request, res: Response) => {
@@ -37,7 +38,7 @@ const postOrderDetails = async (req: Request, res: Response) => {
 
                 postData.Cantidad = postData.Piezas;
 
-                const previewDataToPostOrderDetails = querys.getPreviewDataToPostOrderDetails;
+                const previewDataToPostOrderDetails = orderQuerys.getPreviewDataToPostOrderDetails;
 
                 const result = await request
                     .input("Codigo_Preview", postData.Codigo)
@@ -68,7 +69,7 @@ const postOrderDetails = async (req: Request, res: Response) => {
                 postData.Impuesto = (postData.Precio * postData.Piezas * (postData.Impto / 100));
                 postData.Costo = Costo
 
-                const postOrderDetailsQuery = querys.insertOrderDetails;
+                const postOrderDetailsQuery = orderQuerys.insertOrderDetails;
 
                 const resultOrderPost = await request
                     .input("Id_Almacen", sql.Int, Id_Almacen)
@@ -134,7 +135,7 @@ const getOrderDetails = async (req: Request, res: Response) => {
             return;
         };
 
-        const query = querys.getOrderDetails;
+        const query = orderQuerys.getOrderDetails;
 
         const request = await pool.request()
             .input('folio', sql.Int, folio)

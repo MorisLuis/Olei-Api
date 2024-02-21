@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { sharedData } from '..';
 import { dbConnection, querys } from '../database';
 import sql from 'mssql';
+import { productsQuerys } from '../database/querys/products';
 
 const searchProduct = async (req: Request, res: Response) => {
     const { nombre, familia, codigo, enStock, marca } = req.query;
@@ -26,7 +27,7 @@ const searchProduct = async (req: Request, res: Response) => {
         }
 
         // Initialize the base query with the common part
-        let query = `${querys.getProductsBySearch}`;
+        let query = `${productsQuerys.getProductsBySearch}`;
 
         // Split the search term into individual words
         const searchTerms = typeof nombre === 'string' ? nombre.split(' ') : [];
@@ -139,7 +140,7 @@ const searchProductInventory = async (req: Request, res: Response) => {
             return res.status(500).json({ error: 'Unable to establish a connection to the database' });
         }
 
-        const query = querys.getProductsBySearchInventory;
+        const query = productsQuerys.getProductsBySearchInventory;
         const result = await pool.request()
             .input("searchTerm", searchTerm)
             .query(query);

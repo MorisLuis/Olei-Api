@@ -3,6 +3,7 @@ import { sharedData } from '..';
 import { dbConnection, querys } from '../database';
 import sql from 'mssql';
 import fetch from 'node-fetch';
+import { productsQuerys } from '../database/querys/products';
 
 
 const getProducts = async (req: Request, res: Response) => {
@@ -30,7 +31,7 @@ const getProducts = async (req: Request, res: Response) => {
         };
 
 
-        let query = querys.getAllProducts;
+        let query = productsQuerys.getAllProducts;
 
         if (nombre) {
             query += ` AND (LOWER(P.Descripcion) LIKE '%' + LOWER('${nombre}') + '%')`;
@@ -129,8 +130,6 @@ const getProducts = async (req: Request, res: Response) => {
 
 const getProducById = async (req: Request, res: Response) => {
 
-    console.log("getProducById")
-
     const { id } = req.params;
     const { Marca } = req.query;
 
@@ -152,7 +151,7 @@ const getProducById = async (req: Request, res: Response) => {
             .input("Marca", Marca)
             .input("ListaPrecios", userListPrice)
             .input("Almacen", userAlmacen)
-            .query(querys.getProducById);
+            .query(productsQuerys.getProducById);
 
 
 
@@ -211,7 +210,7 @@ const getProducById = async (req: Request, res: Response) => {
 const getTotalProducts = async (req: Request, res: Response) => {
     const pool = await dbConnection();
 
-    const result = await pool?.request().query(querys.getTotalProducts);
+    const result = await pool?.request().query(productsQuerys.getTotalProducts);
 
     res.json(result?.recordset[0][""]);
 };
@@ -219,8 +218,6 @@ const getTotalProducts = async (req: Request, res: Response) => {
 const getProductsByStock = async (req: Request, res: Response) => {
 
     const { PageNumber, PageSize } = req.query;
-
-    console.log("getProductsByStock")
 
     try {
         const pool = await dbConnection();
@@ -231,7 +228,7 @@ const getProductsByStock = async (req: Request, res: Response) => {
 
 
 
-        let query = querys.getAllProductsByStock;
+        let query = productsQuerys.getAllProductsByStock;
 
         const request = await pool.request()
             .input('PageSize', Number(PageSize))
@@ -262,7 +259,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
 
-        let query = querys.getProductByStockAndCodeBar;
+        let query = productsQuerys.getProductByStockAndCodeBar;
         const request = await pool.request()
             .input("CodeBar", CodeBar)
             .query(query);
