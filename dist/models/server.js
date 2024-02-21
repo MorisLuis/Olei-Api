@@ -25,6 +25,7 @@ const orderDetailsRouter_1 = __importDefault(require("../routes/orderDetailsRout
 const clientRouter_1 = __importDefault(require("../routes/clientRouter"));
 const inventoryRouter_1 = __importDefault(require("../routes/inventoryRouter"));
 const costosRouter_1 = __importDefault(require("../routes/costosRouter"));
+const statisticsRouter_1 = __importDefault(require("../routes/statisticsRouter"));
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -39,7 +40,8 @@ class Server {
             orderDetails: "/api/orderDetails",
             client: "/api/client",
             inventory: "/api/inventory",
-            costos: "/api/costos"
+            costos: "/api/costos",
+            statistics: "/api/statistics"
         };
         //Connect to database
         this.connectDB();
@@ -73,6 +75,7 @@ class Server {
         this.app.use(this.paths.client, clientRouter_1.default);
         this.app.use(this.paths.inventory, inventoryRouter_1.default);
         this.app.use(this.paths.costos, costosRouter_1.default);
+        this.app.use(this.paths.statistics, statisticsRouter_1.default);
     }
     ;
     errorHandler() {

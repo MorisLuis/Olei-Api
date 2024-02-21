@@ -237,10 +237,6 @@ const getProductsByStock = async (req: Request, res: Response) => {
 
         const productsByStock = request.recordset;
 
-        console.log({
-            productsByStock
-        })
-
         res.json(productsByStock);
 
     } catch (error: any) {

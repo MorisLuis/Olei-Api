@@ -195,9 +195,6 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
             .input('PageNumber', PageNumber)
             .query(query);
         const productsByStock = request.recordset;
-        console.log({
-            productsByStock
-        });
         res.json(productsByStock);
     }
     catch (error) {
