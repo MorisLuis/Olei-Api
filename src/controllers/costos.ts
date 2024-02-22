@@ -24,6 +24,11 @@ const updateCostos = async (req: Request, res: Response) => {
             const { codigo: codigoParam, Id_Marca } = req.query;
             const body: ExtendedCostosInterface = req.body;
 
+            return console.log({
+                codigoParam,
+                Id_Marca
+            })
+
             if (!codigoParam || !Id_Marca) {
                 await transaction.rollback();
                 return res.status(400).json({ error: 'Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.' });

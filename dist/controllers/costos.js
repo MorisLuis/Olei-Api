@@ -27,6 +27,10 @@ const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         try {
             const { codigo: codigoParam, Id_Marca } = req.query;
             const body = req.body;
+            return console.log({
+                codigoParam,
+                Id_Marca
+            });
             if (!codigoParam || !Id_Marca) {
                 yield transaction.rollback();
                 return res.status(400).json({ error: 'Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.' });
