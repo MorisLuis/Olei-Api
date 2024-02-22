@@ -17,6 +17,7 @@ const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const __1 = require("..");
 const moment_1 = __importDefault(require("moment"));
+const inventory_1 = require("../database/querys/inventory");
 const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
@@ -41,7 +42,7 @@ const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const AlmReq = 0;
         const Fecha = (0, moment_1.default)().format();
         const FechaRecepcion = Fecha;
-        const postInventoryQuery = database_1.querys.insertInventory;
+        const postInventoryQuery = inventory_1.inventoryQuerys.insertInventory;
         const request = new mssql_1.default.Request(transaction);
         const result = yield request
             .input('Id_Almacen', mssql_1.default.Int, Id_Almacen)
@@ -76,7 +77,7 @@ const getInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
-        const getInventoryQuery = database_1.querys.getInventory;
+        const getInventoryQuery = inventory_1.inventoryQuerys.getInventory;
         const request = yield pool.request()
             .input("Folio", Folio)
             .query(getInventoryQuery);
@@ -124,7 +125,7 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
             const NumsDeSerie = null;
             const SKU = null;
             const Diferencia = Existencia - ExistenciaAnt;
-            const postIntentoryDetailsQuery = database_1.querys.insertInventoryDetails;
+            const postIntentoryDetailsQuery = inventory_1.inventoryQuerys.insertInventoryDetails;
             const result = yield request
                 .input('Id_Almacen', mssql_1.default.Int, Id_Almacen)
                 .input('Folio', mssql_1.default.Int, Folio.recordset[0].Folio + 1)
@@ -157,7 +158,7 @@ const getInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, func
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
-        const getInventoryQuery = database_1.querys.getInventoryDetails;
+        const getInventoryQuery = inventory_1.inventoryQuerys.getInventoryDetails;
         const request = yield pool.request()
             .input("Folio", Folio)
             .query(getInventoryQuery);

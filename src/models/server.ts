@@ -1,7 +1,6 @@
-import express, { Application, NextFunction } from "express";
+import express, { Application } from "express";
 import cors from 'cors';
 import { dbConnection } from "../database/connection";
-import { Request, Response } from 'express'
 
 import userRouter from "../routes/userRouter";
 import productRouter from "../routes/productRouter";
@@ -12,9 +11,11 @@ import orderRouter from "../routes/orderRouter";
 import orderDetailsRouter from "../routes/orderDetailsRouter";
 import clientRouter from "../routes/clientRouter";
 import inventoryRouter from "../routes/inventoryRouter";
+import costosRouter from "../routes/costosRouter";
+import statisticsRouter from "../routes/statisticsRouter";
 
 class Server {
-    private app: Application;
+    public app: Application;
     private port: string;
     private paths: {
         product: string,
@@ -25,7 +26,9 @@ class Server {
         order: string,
         orderDetails: string,
         client: string,
-        inventory: string
+        inventory: string,
+        costos: string,
+        statistics: string
     }
 
     constructor() {
@@ -40,8 +43,11 @@ class Server {
             order: "/api/order",
             orderDetails: "/api/orderDetails",
             client: "/api/client",
-            inventory: "/api/inventory"
+            inventory: "/api/inventory",
+            costos: "/api/costos",
+            statistics: "/api/statistics"
         }
+
 
         //Connect to database
         this.connectDB();
@@ -80,6 +86,9 @@ class Server {
         this.app.use(this.paths.orderDetails, orderDetailsRouter);
         this.app.use(this.paths.client, clientRouter);
         this.app.use(this.paths.inventory, inventoryRouter);
+        this.app.use(this.paths.costos, costosRouter);
+        this.app.use(this.paths.statistics, statisticsRouter);
+
     };
 
     errorHandler() {
@@ -96,4 +105,5 @@ class Server {
     };
 }
 
-export default Server
+
+export default Server;

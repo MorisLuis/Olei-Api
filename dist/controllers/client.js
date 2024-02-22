@@ -13,7 +13,6 @@ exports.selectClient = void 0;
 const __1 = require("..");
 const selectClient = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { Id_Cliente, Id_Almacen, Id_ListPre } = req.body;
-    //const connection = sharedData?.userConnection?.connection;
     try {
         __1.sharedData.currentClient = {
             client: {

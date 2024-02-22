@@ -4,6 +4,7 @@ import sql from 'mssql';
 import moment from 'moment-timezone';
 import { sharedData } from "..";
 import OrderInterface from "../interface/order";
+import { orderQuerys } from "../database/querys/orders";
 
 
 const postOrder = async (req: Request, res: Response) => {
@@ -41,7 +42,7 @@ const postOrder = async (req: Request, res: Response) => {
             const previewDataToPostOrder = await request
                 .input("Id_Almacen_Preview", Id_Almacen)
                 .input("Id_Cliente_Preview", Id_Cliente)
-                .query(querys.getPreviewDataToPostOrder)
+                .query(orderQuerys.getPreviewDataToPostOrder)
 
             const results = previewDataToPostOrder.recordset[0];
             
@@ -77,7 +78,7 @@ const postOrder = async (req: Request, res: Response) => {
             postData.Id_TipoPago = 1;
             postData.TipoDocOrigen = 11;
 
-            const postOrderQuery = querys.insertOrder;
+            const postOrderQuery = orderQuerys.insertOrder;
 
             const result = await request
                 .input("Id_Almacen", sql.Int, Id_Almacen)
@@ -176,7 +177,7 @@ const getOrder = async (req: Request, res: Response) => {
             return;
         }
 
-        const getOrderQuery = querys.getOrder;
+        const getOrderQuery = orderQuerys.getOrder;
 
         const request = await pool.request()
             .input('Id_Cliente', sql.Int, Id_Cliente)
@@ -209,7 +210,7 @@ const getAllOrders = async (req: Request, res: Response) => {
             return;
         }
 
-        const query = querys.getAllOrders;
+        const query = orderQuerys.getAllOrders;
 
         const request = await pool.request()
             .input('TipoDocOO', TipoDocOO)

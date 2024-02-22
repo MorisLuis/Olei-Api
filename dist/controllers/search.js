@@ -16,6 +16,7 @@ exports.searchProductInventory = exports.searchClient = exports.searchProduct = 
 const __1 = require("..");
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
+const products_1 = require("../database/querys/products");
 const searchProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c, _d;
     const { nombre, familia, codigo, enStock, marca } = req.query;
@@ -34,7 +35,7 @@ const searchProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             return res.status(500).json({ error: 'Unable to establish a connection to the database' });
         }
         // Initialize the base query with the common part
-        let query = `${database_1.querys.getProductsBySearch}`;
+        let query = `${products_1.productsQuerys.getProductsBySearch}`;
         // Split the search term into individual words
         const searchTerms = typeof nombre === 'string' ? nombre.split(' ') : [];
         // Check if there are search terms
@@ -125,7 +126,7 @@ const searchProductInventory = (req, res) => __awaiter(void 0, void 0, void 0, f
         if (!pool) {
             return res.status(500).json({ error: 'Unable to establish a connection to the database' });
         }
-        const query = database_1.querys.getProductsBySearchInventory;
+        const query = products_1.productsQuerys.getProductsBySearchInventory;
         const result = yield pool.request()
             .input("searchTerm", searchTerm)
             .query(query);

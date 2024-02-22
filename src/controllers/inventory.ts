@@ -4,6 +4,7 @@ import sql from 'mssql';
 import { sharedData } from "..";
 import moment from "moment";
 import PorductInterface from "../interface/product";
+import { inventoryQuerys } from "../database/querys/inventory";
 
 const postInventory = async (req: Request, res: Response) => {
 
@@ -34,7 +35,7 @@ const postInventory = async (req: Request, res: Response) => {
         const Fecha = moment().format();
         const FechaRecepcion = Fecha;
 
-        const postInventoryQuery = querys.insertInventory;
+        const postInventoryQuery = inventoryQuerys.insertInventory;
 
         const request = new sql.Request(transaction);
 
@@ -75,7 +76,7 @@ const getInventory = async (req: Request, res: Response) => {
             return;
         }
 
-        const getInventoryQuery = querys.getInventory;
+        const getInventoryQuery = inventoryQuerys.getInventory;
         const request = await pool.request()
             .input("Folio", Folio)
             .query(getInventoryQuery)
@@ -139,7 +140,7 @@ const postInventoryDetails = async (req: Request, res: Response) => {
             const SKU = null;
             const Diferencia = Existencia - ExistenciaAnt;
 
-            const postIntentoryDetailsQuery = querys.insertInventoryDetails;
+            const postIntentoryDetailsQuery = inventoryQuerys.insertInventoryDetails;
 
             const result = await request
                 .input('Id_Almacen', sql.Int, Id_Almacen)
@@ -179,7 +180,7 @@ const getInventoryDetails = async (req: Request, res: Response) => {
             return;
         }
 
-        const getInventoryQuery = querys.getInventoryDetails;
+        const getInventoryQuery = inventoryQuerys.getInventoryDetails;
         const request = await pool.request()
             .input("Folio", Folio)
             .query(getInventoryQuery)

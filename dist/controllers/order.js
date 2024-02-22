@@ -17,6 +17,7 @@ const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const moment_timezone_1 = __importDefault(require("moment-timezone"));
 const __1 = require("..");
+const orders_1 = require("../database/querys/orders");
 const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c;
     try {
@@ -46,7 +47,7 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             const previewDataToPostOrder = yield request
                 .input("Id_Almacen_Preview", Id_Almacen)
                 .input("Id_Cliente_Preview", Id_Cliente)
-                .query(database_1.querys.getPreviewDataToPostOrder);
+                .query(orders_1.orderQuerys.getPreviewDataToPostOrder);
             const results = previewDataToPostOrder.recordset[0];
             if (!results) {
                 return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
@@ -77,7 +78,7 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             postData.Id_ListPre = Id_ListPre;
             postData.Id_TipoPago = 1;
             postData.TipoDocOrigen = 11;
-            const postOrderQuery = database_1.querys.insertOrder;
+            const postOrderQuery = orders_1.orderQuerys.insertOrder;
             const result = yield request
                 .input("Id_Almacen", mssql_1.default.Int, Id_Almacen)
                 .input("TipoDoc", mssql_1.default.SmallInt, postData.TipoDoc)
@@ -172,7 +173,7 @@ const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
-        const getOrderQuery = database_1.querys.getOrder;
+        const getOrderQuery = orders_1.orderQuerys.getOrder;
         const request = yield pool.request()
             .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
             .input('folio', mssql_1.default.Int, folio)
@@ -198,7 +199,7 @@ const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
-        const query = database_1.querys.getAllOrders;
+        const query = orders_1.orderQuerys.getAllOrders;
         const request = yield pool.request()
             .input('TipoDocOO', TipoDocOO)
             .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)

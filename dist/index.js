@@ -27,4 +27,5 @@ exports.sharedData = {
 };
 const server = new server_1.default();
 server.listen();
+exports.default = server;
 //# sourceMappingURL=index.js.map

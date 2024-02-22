@@ -17,6 +17,7 @@ const __1 = require("..");
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const node_fetch_1 = __importDefault(require("node-fetch"));
+const products_1 = require("../database/querys/products");
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
@@ -36,7 +37,7 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             ListaPrecios: userListPrice, // Default ListaPrecios value
             Almacen: userAlmacen, // User's warehouse
         };
-        let query = database_1.querys.getAllProducts;
+        let query = products_1.productsQuerys.getAllProducts;
         if (nombre) {
             query += ` AND (LOWER(P.Descripcion) LIKE '%' + LOWER('${nombre}') + '%')`;
         }
@@ -131,7 +132,7 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             .input("Marca", Marca)
             .input("ListaPrecios", userListPrice)
             .input("Almacen", userAlmacen)
-            .query(database_1.querys.getProducById);
+            .query(products_1.productsQuerys.getProducById);
         const product = result === null || result === void 0 ? void 0 : result.recordset[0];
         if (user === null || user === void 0 ? void 0 : user.SwImagenes) {
             const baseSQL = user === null || user === void 0 ? void 0 : user.BaseSQL.trim().toLowerCase().split(',');
@@ -177,7 +178,7 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 exports.getProducById = getProducById;
 const getTotalProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const pool = yield (0, database_1.dbConnection)();
-    const result = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(database_1.querys.getTotalProducts));
+    const result = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(products_1.productsQuerys.getTotalProducts));
     res.json(result === null || result === void 0 ? void 0 : result.recordset[0][""]);
 });
 exports.getTotalProducts = getTotalProducts;
@@ -188,7 +189,7 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
-        let query = database_1.querys.getAllProductsByStock;
+        let query = products_1.productsQuerys.getAllProductsByStock;
         const request = yield pool.request()
             .input('PageSize', Number(PageSize))
             .input('PageNumber', PageNumber)
@@ -209,7 +210,7 @@ const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
-        let query = database_1.querys.getProductByStockAndCodeBar;
+        let query = products_1.productsQuerys.getProductByStockAndCodeBar;
         const request = yield pool.request()
             .input("CodeBar", CodeBar)
             .query(query);
