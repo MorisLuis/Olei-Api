@@ -20,6 +20,9 @@ const login = async (req: Request, res: Response) => {
 
         // Search for the user in the database using their email.
         const { email, password } = req.body;
+        console.log({
+            email, password
+        })
         const user = await getUserByEmail(mainPool, email);
 
         if (!user) {
@@ -104,6 +107,7 @@ const renew = async (req: Req, res: Response) => {
     try {
         if (!user) return;
         const token = await generateJWT({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
+
         res.json({
             user,
             token
