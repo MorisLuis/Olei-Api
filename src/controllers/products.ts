@@ -215,6 +215,8 @@ const getProductsByStock = async (req: Request, res: Response) => {
 
     const { PageNumber, PageSize } = req.query;
     const user = sharedData.currentUser?.user
+    const client = sharedData?.currentClient?.client;
+    const userListPrice = client?.Id_ListPre;
 
     try {
         const pool = await dbConnection();
@@ -228,6 +230,7 @@ const getProductsByStock = async (req: Request, res: Response) => {
         const request = await pool.request()
             .input('PageSize', Number(PageSize))
             .input('PageNumber', PageNumber)
+            .input('Id_ListaPrecios', userListPrice)
             .query(query);
 
         const productsByStock = request.recordset;

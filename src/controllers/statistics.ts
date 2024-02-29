@@ -47,11 +47,7 @@ const getProductsStatistics = async (req: Request, res: Response) => {
 
     const { PageNumber, PageSize, path } = req.query;
     const pathString = path as string;
-
-    console.log({
-        PageNumber, PageSize, path
-    })
-
+    
     try {
         const queryFunctions: Record<string, string> = {
             WithoutStock: statisticsQuery.getProductsWithoutStock,

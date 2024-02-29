@@ -15,9 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getProductByStockAndCodeBar = exports.getProductsByStock = exports.getTotalProducts = exports.getProducById = exports.getProducts = void 0;
 const __1 = require("..");
 const database_1 = require("../database");
+const products_1 = require("../database/querys/products");
 const mssql_1 = __importDefault(require("mssql"));
 const node_fetch_1 = __importDefault(require("node-fetch"));
-const products_1 = require("../database/querys/products");
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
@@ -183,7 +183,11 @@ const getTotalProducts = (req, res) => __awaiter(void 0, void 0, void 0, functio
 });
 exports.getTotalProducts = getTotalProducts;
 const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _e, _f;
     const { PageNumber, PageSize } = req.query;
+    const user = (_e = __1.sharedData.currentUser) === null || _e === void 0 ? void 0 : _e.user;
+    const client = (_f = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _f === void 0 ? void 0 : _f.client;
+    const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
@@ -193,9 +197,14 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
         const request = yield pool.request()
             .input('PageSize', Number(PageSize))
             .input('PageNumber', PageNumber)
+            .input('Id_ListaPrecios', userListPrice)
             .query(query);
         const productsByStock = request.recordset;
-        res.json(productsByStock);
+        const { products } = yield getImagesFromProducts({
+            user: user,
+            products: productsByStock
+        });
+        res.json(products);
     }
     catch (error) {
         console.log({ error });
@@ -232,6 +241,29 @@ const checkImageExists = (url) => __awaiter(void 0, void 0, void 0, function* ()
         console.error('Error during image check:', error);
         return false;
     }
+});
+const getImagesFromProducts = ({ user, products }) => __awaiter(void 0, void 0, void 0, function* () {
+    if (user === null || user === void 0 ? void 0 : user.SwImagenes) {
+        // Ahora, para cada producto, agrega la propiedad "imagen"
+        for (const product of products) {
+            // Supongamos que la URL de la imagen se basa en la propiedad "Codigo" del producto
+            const baseSQL = user === null || user === void 0 ? void 0 : user.BaseSQL.trim().toLowerCase().split(',');
+            if (baseSQL && baseSQL.length > 0) {
+                const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
+                const imageDB = formatImageDB[formatImageDB.length - 1];
+                const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
+                // Verifica si la imagen existe antes de agregarla al producto
+                const imageExists = yield checkImageExists(imageUrl);
+                if (imageExists) {
+                    product.imagen = [{
+                            url: imageUrl,
+                            id: 1
+                        }];
+                }
+            }
+        }
+    }
+    return { products };
 });
 function executeQuery(pool, query, params) {
     return __awaiter(this, void 0, void 0, function* () {

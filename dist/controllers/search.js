@@ -120,7 +120,10 @@ const searchClient = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.searchClient = searchClient;
 const searchProductInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _e;
     const { searchTerm } = req.query;
+    const client = (_e = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _e === void 0 ? void 0 : _e.client;
+    const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
@@ -129,6 +132,7 @@ const searchProductInventory = (req, res) => __awaiter(void 0, void 0, void 0, f
         const query = products_1.productsQuerys.getProductsBySearchInventory;
         const result = yield pool.request()
             .input("searchTerm", searchTerm)
+            .input('Id_ListaPrecios', userListPrice)
             .query(query);
         const products = result.recordset;
         res.json(products);
