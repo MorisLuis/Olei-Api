@@ -97,6 +97,9 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
         const postInventoryDataArray = req.body;
         const client = (_c = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _c === void 0 ? void 0 : _c.client;
         const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
+        console.log({
+            postInventoryDataArray
+        });
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });

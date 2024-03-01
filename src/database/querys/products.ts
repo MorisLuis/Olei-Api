@@ -84,7 +84,7 @@ export const productsQuerys = {
             TRIM(P.Codigo) AS Codigo, 
             E.Existencia, 
             E.Id_Almacen, 
-            C.Id_Marca, 
+            M.Id_Marca, 
             TRIM(C.CodBar) AS CodBar, 
             TRIM(M.Nombre) AS Marca
         FROM [dbo].[PRODUCTOS] P

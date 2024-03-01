@@ -27,9 +27,6 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         // Search for the user in the database using their email.
         const { email, password } = req.body;
-        console.log({
-            email, password
-        });
         const user = yield getUserByEmail(mainPool, email);
         if (!user) {
             return res.status(404).json({ error: 'Correo no encontrada' });
