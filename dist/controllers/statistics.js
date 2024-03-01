@@ -37,9 +37,6 @@ const getProductsStatistics = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
     const { PageNumber, PageSize, path } = req.query;
     const pathString = path;
-    console.log({
-        PageNumber, PageSize, path
-    });
     try {
         const queryFunctions = {
             WithoutStock: statistics_1.statisticsQuery.getProductsWithoutStock,

@@ -102,6 +102,10 @@ const postInventoryDetails = async (req: Request, res: Response) => {
         const client = sharedData?.currentClient?.client;
         const Id_Almacen = client?.Id_Almacen;
 
+        console.log({
+            postInventoryDataArray
+        })
+
         const pool = await dbConnection();
 
         if (!pool) {

@@ -71,6 +71,7 @@ exports.productsQuerys = {
         JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
         JOIN [dbo].[COSTOS] C ON P.Codigo = C.Codigo AND PR.Id_Marca = C.Id_Marca
         JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+        WHERE PR.Id_ListaPrecios = @Id_ListaPrecios
         ORDER BY P.Codigo
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY
@@ -82,7 +83,7 @@ exports.productsQuerys = {
             TRIM(P.Codigo) AS Codigo, 
             E.Existencia, 
             E.Id_Almacen, 
-            C.Id_Marca, 
+            M.Id_Marca, 
             TRIM(C.CodBar) AS CodBar, 
             TRIM(M.Nombre) AS Marca
         FROM [dbo].[PRODUCTOS] P
@@ -109,10 +110,7 @@ exports.productsQuerys = {
             E.Id_Almacen,
             M.Id_Marca,
             TRIM(M.Nombre) AS Marca,
-            P.Id_Familia AS Id_Familia,
             TRIM(F.Nombre) AS Familia,
-            TRIM(PR.Codigo) AS CodigoPrecio,
-            PR.Id_ListaPrecios,
             PR.Precio AS Precio
         FROM [dbo].[PRODUCTOS] P
         JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
@@ -120,7 +118,7 @@ exports.productsQuerys = {
         JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
         JOIN [dbo].[COSTOS] C ON P.Codigo = C.Codigo AND PR.Id_Marca = C.Id_Marca
         JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-        WHERE LOWER(P.Descripcion) LIKE '%' + LOWER(@searchTerm) + '%'
+        WHERE LOWER(P.Descripcion) LIKE '%' + LOWER(@searchTerm) + '%' AND  PR.Id_ListaPrecios = @Id_ListaPrecios
         ORDER BY P.Codigo
     `,
 };

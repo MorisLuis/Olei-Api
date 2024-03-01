@@ -131,7 +131,10 @@ const searchClient = async (req: Request, res: Response) => {
 };
 
 const searchProductInventory = async (req: Request, res: Response) => {
+
     const { searchTerm } = req.query;
+    const client = sharedData?.currentClient?.client;
+    const userListPrice = client?.Id_ListPre;
 
     try {
         const pool = await dbConnection();
@@ -143,6 +146,7 @@ const searchProductInventory = async (req: Request, res: Response) => {
         const query = productsQuerys.getProductsBySearchInventory;
         const result = await pool.request()
             .input("searchTerm", searchTerm)
+            .input('Id_ListaPrecios', userListPrice)
             .query(query);
 
         const products = result.recordset

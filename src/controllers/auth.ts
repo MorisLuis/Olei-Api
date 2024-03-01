@@ -20,9 +20,7 @@ const login = async (req: Request, res: Response) => {
 
         // Search for the user in the database using their email.
         const { email, password } = req.body;
-        console.log({
-            email, password
-        })
+
         const user = await getUserByEmail(mainPool, email);
 
         if (!user) {
