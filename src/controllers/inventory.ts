@@ -26,7 +26,7 @@ const postInventory = async (req: Request, res: Response) => {
 
         // Get data default.
         const Id_TipoMovInv = postInventoryData.Id_TipoMovInv;
-        const Estado = 1; // If it were 0 it would mean a inventory was cancelled.
+        const Estado = 1; // If it were 0 it would mean a inventory was cancelled
         const Id_AlmacenDest = 0;
         const SwPendiente = 0;
         const Descripcion = postInventoryData?.Descripcion;
