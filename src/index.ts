@@ -1,24 +1,15 @@
 import Server from "./models/server";
-import dotenv from "dotenv";
-import UserInterface from "./interface/user";
 import './database/connection'
+import dotenv from "dotenv";
+
+import UserInterface from "./interface/user";
 import { currentClientTest, currentUserTest, userConnectionTest } from "./database/sharedDataTest";
+import { ClientInterface } from "./interface/client";
+import { ConnectionInterface } from "./interface/connection";
+
+
 
 dotenv.config()
-
-// Define an interface for the database connection configuration.
-export interface ConnectionInterface {
-    user: string;         // The user for the Azure database connection.
-    password: string;     // The password for the database connection.
-    server: string;    // The server for the database connection.
-    database: string;  // The database for the database connection.
-}
-
-export interface ClientInterface {
-    Id_Almacen: number,
-    Id_ListPre?: number | null,
-    Id_Cliente: number,
-}
 
 // Create a shared data object to store user information for the session.
 // The objective is to track 'Id_ListaPrecio' & 'Id_Almacen' throughout the entire backend.
@@ -40,6 +31,6 @@ export const sharedData = {
 };
 
 const server = new Server();
-server.listen()
+server.listen();
 
 export default server;

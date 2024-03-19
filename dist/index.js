@@ -5,8 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sharedData = void 0;
 const server_1 = __importDefault(require("./models/server"));
-const dotenv_1 = __importDefault(require("dotenv"));
 require("./database/connection");
+const dotenv_1 = __importDefault(require("dotenv"));
 const sharedDataTest_1 = require("./database/sharedDataTest");
 dotenv_1.default.config();
 // Create a shared data object to store user information for the session.

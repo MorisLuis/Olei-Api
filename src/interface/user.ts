@@ -55,4 +55,12 @@ export default interface UserInterface {
     Id_UsuarioOLEI: number | null;
     PasswordOLEI: number | null;
     Id_ClienteDBCLIENTES: number | null;
+
+    // Temporal (!)
+    // Show if is a "Entrada (Inventario) = 1", "Salida = 2" or "Transferencia = 3".
+    Id_TipoMovInv?: {
+        Id_TipoMovInv: number,
+        Accion: number,
+        Descripcion: string
+    };
 }

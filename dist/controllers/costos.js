@@ -16,6 +16,7 @@ exports.updateCostos = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const costos_1 = require("../database/querys/costos");
+const uuid_1 = require("uuid");
 const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const pool = yield (0, database_1.dbConnection)();
@@ -27,10 +28,6 @@ const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         try {
             const { codigo: codigoParam, Id_Marca } = req.query;
             const body = req.body;
-            return console.log({
-                codigoParam,
-                Id_Marca
-            });
             if (!codigoParam || !Id_Marca) {
                 yield transaction.rollback();
                 return res.status(400).json({ error: 'Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.' });
@@ -40,6 +37,12 @@ const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             request.input('Id_Marca', mssql_1.default.Int, Id_Marca);
             const keys = Object.keys(body);
             const query = costos_1.costosQuerys.updateCostos;
+            const uniqueId = (0, uuid_1.v4)();
+            const codigo = uniqueId.replace(/-/g, '').substring(0, 10);
+            if (body.CodBar !== undefined) {
+                console.log('enter');
+                body.CodBar = codigo;
+            }
             // Make forEach to create de SET of the query.
             keys.forEach((key) => {
                 request.input(key, mssql_1.default.NVarChar, body[key]);

@@ -93,15 +93,15 @@ const getProducts = async (req: Request, res: Response) => {
             for (const product of products) {
                 // Supongamos que la URL de la imagen se basa en la propiedad "Codigo" del producto
                 const baseSQL = user?.BaseSQL.trim().toLowerCase().split(',');
-    
+
                 if (baseSQL && baseSQL.length > 0) {
                     const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
                     const imageDB = formatImageDB[formatImageDB.length - 1];
                     const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
-    
+
                     // Verifica si la imagen existe antes de agregarla al producto
                     const imageExists = await checkImageExists(imageUrl);
-    
+
                     if (imageExists) {
                         product.imagen = [{
                             url: imageUrl,
@@ -235,7 +235,7 @@ const getProductsByStock = async (req: Request, res: Response) => {
 
         const productsByStock = request.recordset;
 
-        const {products} = await getImagesFromProducts({
+        const { products } = await getImagesFromProducts({
             user: user as UserInterface,
             products: productsByStock
         })
@@ -248,7 +248,10 @@ const getProductsByStock = async (req: Request, res: Response) => {
 }
 
 const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
-    const { CodeBar } = req.params;
+
+    const { CodBar, Codigo } = req.query;
+    const client = sharedData?.currentClient?.client;
+    const Id_ListaPrecios = client?.Id_ListPre;
 
     try {
         const pool = await dbConnection();
@@ -259,8 +262,11 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
 
         let query = productsQuerys.getProductByStockAndCodeBar;
         const request = await pool.request()
-            .input("CodeBar", CodeBar)
+            .input("CodBar", CodBar === 'undefined' ? null : CodBar)
+            .input("Codigo", Codigo === 'undefined' ? null : Codigo)
+            .input("Id_ListaPrecios", Id_ListaPrecios)
             .query(query);
+
 
         const productByStockAndCodeBar = request.recordset;
 
@@ -318,7 +324,7 @@ const getImagesFromProducts = async ({
         }
     }
 
-    return {products}
+    return { products }
 }
 
 async function executeQuery(pool: sql.ConnectionPool, query: string, params: any) {
