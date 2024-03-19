@@ -213,7 +213,10 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.getProductsByStock = getProductsByStock;
 const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { CodeBar } = req.params;
+    var _g;
+    const { CodBar, Codigo } = req.query;
+    const client = (_g = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _g === void 0 ? void 0 : _g.client;
+    const Id_ListaPrecios = client === null || client === void 0 ? void 0 : client.Id_ListPre;
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
@@ -221,7 +224,9 @@ const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void
         }
         let query = products_1.productsQuerys.getProductByStockAndCodeBar;
         const request = yield pool.request()
-            .input("CodeBar", CodeBar)
+            .input("CodBar", CodBar === 'undefined' ? null : CodBar)
+            .input("Codigo", Codigo === 'undefined' ? null : Codigo)
+            .input("Id_ListaPrecios", Id_ListaPrecios)
             .query(query);
         const productByStockAndCodeBar = request.recordset;
         res.json(productByStockAndCodeBar);

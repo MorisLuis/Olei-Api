@@ -3,6 +3,7 @@ import { dbConnection } from '../database';
 import sql from 'mssql';
 import CostosInterface from '../interface/costos';
 import { costosQuerys } from '../database/querys/costos';
+import { v4 as uuidv4 } from 'uuid';
 
 export default interface ExtendedCostosInterface extends CostosInterface {
     [key: string]: any;
@@ -24,10 +25,6 @@ const updateCostos = async (req: Request, res: Response) => {
             const { codigo: codigoParam, Id_Marca } = req.query;
             const body: ExtendedCostosInterface = req.body;
 
-            return console.log({
-                codigoParam,
-                Id_Marca
-            })
 
             if (!codigoParam || !Id_Marca) {
                 await transaction.rollback();
@@ -40,6 +37,14 @@ const updateCostos = async (req: Request, res: Response) => {
 
             const keys = Object.keys(body);
             const query = costosQuerys.updateCostos;
+
+            const uniqueId = uuidv4();
+            const codigo = uniqueId.replace(/-/g, '').substring(0, 10);
+
+            if(body.CodBar !== undefined) {
+                console.log('enter')
+                body.CodBar = codigo
+            }
 
             // Make forEach to create de SET of the query.
             keys.forEach((key) => {
@@ -63,6 +68,7 @@ const updateCostos = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Hubo un error en la actualización de costos.' });
     }
 };
+
 
 
 export {

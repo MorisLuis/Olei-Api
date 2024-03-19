@@ -25,6 +25,26 @@ export const querys = {
     getMarcas: `SELECT TRIM(M.Nombre) AS Nombre FROM [dbo].[MARCAS] M`,
     getFolios: `SELECT TRIM(P.Codigo) AS Codigo FROM [dbo].[PRODUCTOS] P`,
 
+    // TypeOfMovements
+    getTiposMovimiento: `
+        SELECT TOP (1000) 
+            [Id_TipoMovInv],
+            [Descripcion],
+            [Accion],
+            [Id_AlmDest]
+        FROM [dbo].[TIPOMOVSINV]
+    `,
+
+    getTipoDeMovimiento: `
+        SELECT 
+            [Id_TipoMovInv],
+            [Descripcion],
+            [Accion],
+            [Id_AlmDest]
+        FROM [dbo].[TIPOMOVSINV]
+        WHERE Id_TipoMovInv = @Id_TipoMovInv
+    `,
+
     // Clients
     getClientBySearch: `
         SELECT TOP(20) TRIM(C.Nombre) AS Nombre, C.Id_Cliente, C.Id_Almacen, C.Id_ListPre

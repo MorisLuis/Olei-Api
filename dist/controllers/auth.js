@@ -121,7 +121,7 @@ const isSubscriptionExpired = (dueDate) => {
     return isExpired;
 };
 const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b, _c;
+    var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
     try {
         const otherPool = yield (0, database_1.dbConnection)(user.ServidorSQL.trim(), user.BaseSQL.trim());
         const query_DB = database_1.querys.authCompany;
@@ -133,7 +133,11 @@ const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, functi
         const Nombre = (_c = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _c === void 0 ? void 0 : _c.Nombre;
         __1.sharedData.currentUser = {
             user: Object.assign(Object.assign({}, user), { Id_ListPre,
-                Nombre })
+                Nombre, Id_TipoMovInv: {
+                    Id_TipoMovInv: ((_e = (_d = __1.sharedData.currentUser) === null || _d === void 0 ? void 0 : _d.user.Id_TipoMovInv) === null || _e === void 0 ? void 0 : _e.Id_TipoMovInv) ? (_f = __1.sharedData.currentUser) === null || _f === void 0 ? void 0 : _f.user.Id_TipoMovInv.Id_TipoMovInv : 0,
+                    Accion: ((_h = (_g = __1.sharedData.currentUser) === null || _g === void 0 ? void 0 : _g.user.Id_TipoMovInv) === null || _h === void 0 ? void 0 : _h.Accion) ? (_j = __1.sharedData.currentUser) === null || _j === void 0 ? void 0 : _j.user.Id_TipoMovInv.Accion : 0,
+                    Descripcion: ((_l = (_k = __1.sharedData.currentUser) === null || _k === void 0 ? void 0 : _k.user.Id_TipoMovInv) === null || _l === void 0 ? void 0 : _l.Descripcion) ? (_m = __1.sharedData.currentUser) === null || _m === void 0 ? void 0 : _m.user.Id_TipoMovInv.Descripcion : "Inventario",
+                } })
         };
         __1.sharedData.currentClient = {
             client: {

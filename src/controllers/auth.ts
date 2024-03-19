@@ -153,7 +153,12 @@ const connectToUserDatabase = async (user: UserInterface) => {
             user: {
                 ...user,
                 Id_ListPre,
-                Nombre
+                Nombre,
+                Id_TipoMovInv: {
+                    Id_TipoMovInv: sharedData.currentUser?.user.Id_TipoMovInv?.Id_TipoMovInv ? sharedData.currentUser?.user.Id_TipoMovInv.Id_TipoMovInv : 0,
+                    Accion: sharedData.currentUser?.user.Id_TipoMovInv?.Accion ? sharedData.currentUser?.user.Id_TipoMovInv.Accion : 0,
+                    Descripcion: sharedData.currentUser?.user.Id_TipoMovInv?.Descripcion ? sharedData.currentUser?.user.Id_TipoMovInv.Descripcion : "Inventario",
+                }
             }
         };
 

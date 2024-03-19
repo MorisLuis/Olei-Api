@@ -27,6 +27,11 @@ exports.currentUserTest = {
         Id_UsuarioOLEI: null,
         PasswordOLEI: null,
         Id_ClienteDBCLIENTES: null,
+        Id_TipoMovInv: {
+            Id_TipoMovInv: 0,
+            Accion: 0,
+            Descripcion: "Inventario"
+        }
     }
 };
 exports.currentClientTest = {

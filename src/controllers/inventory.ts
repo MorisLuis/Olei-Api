@@ -1,4 +1,5 @@
 import { Response, Request } from "express";
+
 import { dbConnection, querys } from "../database";
 import sql from 'mssql';
 import { sharedData } from "..";
@@ -10,9 +11,9 @@ const postInventory = async (req: Request, res: Response) => {
 
     try {
         const postInventoryData = req.body;
-        const client = sharedData?.currentClient?.client;
+        const user = sharedData?.currentUser?.user;
+        const Id_Almacen = user?.Id_Almacen;
         const connection = sharedData?.userConnection?.connection
-        const Id_Almacen = client?.Id_Almacen;
         const Id_Usuario = connection?.user;
 
         const pool = await dbConnection();
@@ -24,8 +25,8 @@ const postInventory = async (req: Request, res: Response) => {
         const Folio = await pool.request().query('SELECT MAX(FOLIO) AS Folio FROM [dbo].[INVENTARIOS]');
 
         // Get data default.
-        const Id_TipoMovInv = 0; // Physical movement
-        const Estado = 1; // If it were 0 it would mean a inventory cancelled.
+        const Id_TipoMovInv = postInventoryData.Id_TipoMovInv;
+        const Estado = 1; // If it were 0 it would mean a inventory was cancelled
         const Id_AlmacenDest = 0;
         const SwPendiente = 0;
         const Descripcion = postInventoryData?.Descripcion;
@@ -57,6 +58,7 @@ const postInventory = async (req: Request, res: Response) => {
 
         await transaction.commit();
         const inventory = result.recordset[0];
+
         res.json(inventory)
 
     } catch (error) {
@@ -99,12 +101,8 @@ const postInventoryDetails = async (req: Request, res: Response) => {
 
     try {
         const postInventoryDataArray: PorductInterface[] = req.body;
-        const client = sharedData?.currentClient?.client;
-        const Id_Almacen = client?.Id_Almacen;
-
-        console.log({
-            postInventoryDataArray
-        })
+        const user = sharedData?.currentUser?.user;
+        const Id_Almacen = user?.Id_Almacen;
 
         const pool = await dbConnection();
 

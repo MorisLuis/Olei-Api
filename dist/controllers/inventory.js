@@ -22,9 +22,9 @@ const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     var _a, _b;
     try {
         const postInventoryData = req.body;
-        const client = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
+        const user = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user;
+        const Id_Almacen = user === null || user === void 0 ? void 0 : user.Id_Almacen;
         const connection = (_b = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.userConnection) === null || _b === void 0 ? void 0 : _b.connection;
-        const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
         const Id_Usuario = connection === null || connection === void 0 ? void 0 : connection.user;
         const pool = yield (0, database_1.dbConnection)();
         const transaction = new mssql_1.default.Transaction(pool);
@@ -32,8 +32,8 @@ const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         // Get last Folio
         const Folio = yield pool.request().query('SELECT MAX(FOLIO) AS Folio FROM [dbo].[INVENTARIOS]');
         // Get data default.
-        const Id_TipoMovInv = 0; // Physical movement
-        const Estado = 1; // If it were 0 it would mean a inventory cancelled.
+        const Id_TipoMovInv = postInventoryData.Id_TipoMovInv;
+        const Estado = 1; // If it were 0 it would mean a inventory was cancelled.
         const Id_AlmacenDest = 0;
         const SwPendiente = 0;
         const Descripcion = postInventoryData === null || postInventoryData === void 0 ? void 0 : postInventoryData.Descripcion;
@@ -95,11 +95,8 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
     var _c;
     try {
         const postInventoryDataArray = req.body;
-        const client = (_c = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _c === void 0 ? void 0 : _c.client;
-        const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
-        console.log({
-            postInventoryDataArray
-        });
+        const user = (_c = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _c === void 0 ? void 0 : _c.user;
+        const Id_Almacen = user === null || user === void 0 ? void 0 : user.Id_Almacen;
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });

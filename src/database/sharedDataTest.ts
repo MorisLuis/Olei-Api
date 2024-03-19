@@ -1,4 +1,5 @@
-import { ClientInterface, ConnectionInterface } from "..";
+import { ClientInterface } from "../interface/client";
+import { ConnectionInterface } from "../interface/connection";
 import UserInterface from "../interface/user";
 
 
@@ -34,6 +35,11 @@ export const currentUserTest: { user: UserInterface } = {
         Id_UsuarioOLEI: null,
         PasswordOLEI: null,
         Id_ClienteDBCLIENTES: null,
+        Id_TipoMovInv: {
+            Id_TipoMovInv: 0,
+            Accion: 0,
+            Descripcion: "Inventario"
+        }
     }
 }
 

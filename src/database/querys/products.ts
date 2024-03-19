@@ -79,19 +79,24 @@ export const productsQuerys = {
 
     // Get Product by Stock and CodeBar.
     getProductByStockAndCodeBar: `
-        SELECT 
-            TRIM(P.Descripcion) AS Descripcion, 
-            TRIM(P.Codigo) AS Codigo, 
-            E.Existencia, 
-            E.Id_Almacen, 
-            M.Id_Marca, 
-            TRIM(C.CodBar) AS CodBar, 
+        SELECT
+            TRIM(P.Descripcion) AS Descripcion,
+            TRIM(P.Codigo) AS Codigo,
+            E.Existencia,
+            E.Id_Almacen,
+            M.Id_Marca,
+            PR.Id_ListaPrecios,
+            TRIM(CT.CodBar) AS CodBar,
             TRIM(M.Nombre) AS Marca
         FROM [dbo].[PRODUCTOS] P
-        JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo
-        JOIN [dbo].[COSTOS] C ON C.Codigo = P.Codigo
-        JOIN [dbo].[MARCAS] M ON E.Id_Marca = M.Id_Marca
-        WHERE C.CodBar = @CodeBar
+            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+            JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
+            WHERE
+        PR.Id_ListaPrecios = @Id_ListaPrecios AND
+            (@CodBar IS NULL OR TRIM(CT.CodBar) = @CodBar)
+        AND (@Codigo IS NULL OR TRIM(P.Codigo) = @Codigo)
     `,
 
     // Get number of products.

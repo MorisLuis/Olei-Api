@@ -11,7 +11,7 @@ import {
 const router = Router()
 
 router.get("/byStock", getProductsByStock)
-router.get("/byStockAndCodeBar/:CodeBar", getProductByStockAndCodeBar)
+router.get("/byStockAndCodeBar", getProductByStockAndCodeBar)
 router.get("/:id", getProducById)
 router.get("/", getProducts)
 

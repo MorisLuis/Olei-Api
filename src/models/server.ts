@@ -13,6 +13,7 @@ import clientRouter from "../routes/clientRouter";
 import inventoryRouter from "../routes/inventoryRouter";
 import costosRouter from "../routes/costosRouter";
 import statisticsRouter from "../routes/statisticsRouter";
+import typeofmovementsRouter from "../routes/typeofmovementsRouter";
 
 class Server {
     public app: Application;
@@ -28,7 +29,8 @@ class Server {
         client: string,
         inventory: string,
         costos: string,
-        statistics: string
+        statistics: string,
+        typeofmovements: string
     }
 
     constructor() {
@@ -45,7 +47,8 @@ class Server {
             client: "/api/client",
             inventory: "/api/inventory",
             costos: "/api/costos",
-            statistics: "/api/statistics"
+            statistics: "/api/statistics",
+            typeofmovements: "/api/typeofmovements"
         }
 
 
@@ -88,7 +91,7 @@ class Server {
         this.app.use(this.paths.inventory, inventoryRouter);
         this.app.use(this.paths.costos, costosRouter);
         this.app.use(this.paths.statistics, statisticsRouter);
-
+        this.app.use(this.paths.typeofmovements, typeofmovementsRouter);
     };
 
     errorHandler() {
