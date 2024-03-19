@@ -16,6 +16,15 @@ export const querys = {
         WHERE Id_Cliente = @Id_Cliente
     ` ,
 
+    getTypeOfMovementInitial: `
+        SELECT TOP (1) 
+            [Id_TipoMovInv],
+            [Descripcion],
+            [Accion],
+            [Id_AlmDest]
+        FROM [dbo].[TIPOMOVSINV]
+    `,
+
     // Users
     getAllUsers: "SELECT TOP(500) * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS]",
     getUser: "SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS] WHERE Nombre = ?",

@@ -33,7 +33,7 @@ const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const Folio = yield pool.request().query('SELECT MAX(FOLIO) AS Folio FROM [dbo].[INVENTARIOS]');
         // Get data default.
         const Id_TipoMovInv = postInventoryData.Id_TipoMovInv;
-        const Estado = 1; // If it were 0 it would mean a inventory was cancelled.
+        const Estado = 1; // If it were 0 it would mean a inventory was cancelled
         const Id_AlmacenDest = 0;
         const SwPendiente = 0;
         const Descripcion = postInventoryData === null || postInventoryData === void 0 ? void 0 : postInventoryData.Descripcion;
