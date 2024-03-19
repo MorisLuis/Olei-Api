@@ -116,6 +116,10 @@ const renew = async (req: Req, res: Response) => {
     }
 }
 
+
+
+
+
 // Utils
 const getUserByEmail = async (mainPool: any, email: string) => {
     const query_DB = querys.auth;
@@ -146,8 +150,11 @@ const connectToUserDatabase = async (user: UserInterface) => {
             .query(query_DB);
 
         const Id_ListPre = idListPreResult?.recordset[0]?.Id_ListPre;
-
         const Nombre = idListPreResult?.recordset[0]?.Nombre;
+
+
+        const TypeOfMovementsResult =  await otherPool.request().query(querys.getTypeOfMovementInitial)
+        const TypeOfMovements = TypeOfMovementsResult.recordset[0]
 
         sharedData.currentUser = {
             user: {
@@ -155,9 +162,9 @@ const connectToUserDatabase = async (user: UserInterface) => {
                 Id_ListPre,
                 Nombre,
                 Id_TipoMovInv: {
-                    Id_TipoMovInv: sharedData.currentUser?.user.Id_TipoMovInv?.Id_TipoMovInv ? sharedData.currentUser?.user.Id_TipoMovInv.Id_TipoMovInv : 0,
-                    Accion: sharedData.currentUser?.user.Id_TipoMovInv?.Accion ? sharedData.currentUser?.user.Id_TipoMovInv.Accion : 0,
-                    Descripcion: sharedData.currentUser?.user.Id_TipoMovInv?.Descripcion ? sharedData.currentUser?.user.Id_TipoMovInv.Descripcion : "Inventario",
+                    Id_TipoMovInv: TypeOfMovements.Id_TipoMovInv,
+                    Accion: TypeOfMovements.Accion,
+                    Descripcion: TypeOfMovements.Descripcion
                 }
             }
         };
