@@ -138,7 +138,8 @@ const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, functi
                 Nombre, Id_TipoMovInv: {
                     Id_TipoMovInv: TypeOfMovements.Id_TipoMovInv,
                     Accion: TypeOfMovements.Accion,
-                    Descripcion: TypeOfMovements.Descripcion
+                    Descripcion: TypeOfMovements.Descripcion,
+                    Id_AlmDest: TypeOfMovements.Id_AlmDest
                 } })
         };
         __1.sharedData.currentClient = {

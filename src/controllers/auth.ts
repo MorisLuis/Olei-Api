@@ -164,7 +164,8 @@ const connectToUserDatabase = async (user: UserInterface) => {
                 Id_TipoMovInv: {
                     Id_TipoMovInv: TypeOfMovements.Id_TipoMovInv,
                     Accion: TypeOfMovements.Accion,
-                    Descripcion: TypeOfMovements.Descripcion
+                    Descripcion: TypeOfMovements.Descripcion,
+                    Id_AlmDest: TypeOfMovements.Id_AlmDest
                 }
             }
         };
