@@ -38,7 +38,8 @@ export const currentUserTest: { user: UserInterface } = {
         Id_TipoMovInv: {
             Id_TipoMovInv: 0,
             Accion: 0,
-            Descripcion: "Inventario"
+            Descripcion: "Inventario",
+            Id_AlmDest: 1
         }
     }
 }
@@ -47,7 +48,8 @@ export const currentClientTest: { client: ClientInterface } = {
     client: {
         Id_Almacen: 1,
         Id_ListPre: 1,
-        Id_Cliente: 3
+        Id_Cliente: 3,
+        Id_AlmDest: 1
     }
 }
 

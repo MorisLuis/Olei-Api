@@ -38,7 +38,8 @@ const changeTypeofmovements = async (req: Request, res: Response) => {
                 Id_TipoMovInv: {
                     Id_TipoMovInv: result.Id_TipoMovInv,
                     Accion: result.Accion,
-                    Descripcion: result.Descripcion
+                    Descripcion: result.Descripcion,
+                    Id_AlmDest: result.Id_AlmDest
                 },
             }
         }

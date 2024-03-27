@@ -62,17 +62,35 @@ export const querys = {
 
 
     // ...
-    updateExistenceTable: ` 
-        DECLARE @UpdatedData TABLE (
-            Id_Almacen INT,
-            ExistenciaAnt INT,
-            Existencia INT,
-            Codigo NVARCHAR(255)
-        )
-        UPDATE [dbo].[EXISTENCIAS]
-        SET Existencia = Existencia + @Cantidad_Existence, ExistenciaAnt = Existencia, Diferencia = @Cantidad_Existence
-        OUTPUT INSERTED.Id_Almacen, INSERTED.ExistenciaAnt, INSERTED.Existencia, INSERTED.Codigo INTO @UpdatedData
-        WHERE Codigo = @Codigo_Existence AND Id_Marca = @Id_Marca_Existence AND Id_Almacen = @Id_Almacen_Existence
-        SELECT * FROM @UpdatedData;
-    `,
+    updateExistenceTable: (updateValue: string, difference: string) => { 
+        return ` 
+            DECLARE @UpdatedData TABLE (
+                Id_Almacen INT,
+                ExistenciaAnt INT,
+                Existencia INT,
+                Codigo NVARCHAR(255)
+            )
+            UPDATE [dbo].[EXISTENCIAS]
+            SET Existencia = ${updateValue}, ExistenciaAnt = Existencia, Diferencia = ${difference}
+            OUTPUT INSERTED.Id_Almacen, INSERTED.ExistenciaAnt, INSERTED.Existencia, INSERTED.Codigo INTO @UpdatedData
+            WHERE Codigo = @Codigo_Existence AND Id_Marca = @Id_Marca_Existence AND Id_Almacen = @Id_Almacen_Existence
+            SELECT * FROM @UpdatedData;
+        `;
+    },
+
+    updateExistenceTableTransfer: (updateValue: string, difference: string) => { 
+        return ` 
+            DECLARE @UpdatedData TABLE (
+                Id_Almacen INT,
+                ExistenciaAnt INT,
+                Existencia INT,
+                Codigo NVARCHAR(255)
+            )
+            UPDATE [dbo].[EXISTENCIAS]
+            SET Existencia = ${updateValue}, ExistenciaAnt = Existencia, Diferencia = ${difference}
+            OUTPUT INSERTED.Id_Almacen, INSERTED.ExistenciaAnt, INSERTED.Existencia, INSERTED.Codigo INTO @UpdatedData
+            WHERE Codigo = @Codigo_Existence_transfer AND Id_Marca = @Id_Marca_Existence_transfer AND Id_Almacen = @Id_Almacen_Existence_transfer
+            SELECT * FROM @UpdatedData;
+        `;
+    },
 };

@@ -16,6 +16,8 @@ const postInventory = async (req: Request, res: Response) => {
         const connection = sharedData?.userConnection?.connection
         const Id_Usuario = connection?.user;
 
+        console.log({user})
+
         const pool = await dbConnection();
 
         const transaction = new sql.Transaction(pool);
@@ -124,14 +126,48 @@ const postInventoryDetails = async (req: Request, res: Response) => {
             // Get last Folio
             const Folio = await pool.request().query('SELECT MAX(FOLIO) AS Folio FROM [dbo].[DETALLEINVENTARIOS]');
 
+            // New Existence accord with the type of movement.
+            const typeOfMovement = user?.Id_TipoMovInv;
+            let updateValue = '@Cantidad_Existence';
+            let difference = 'ABS(@Cantidad_Existence - Existencia)';
 
-            //UPDATE 'EXISTENCIAS' Table
+            const newExistence = () => {
+                if (typeOfMovement?.Accion === 1 && typeOfMovement.Id_TipoMovInv === 0) { // Inventario fisico
+                    updateValue = '@Cantidad_Existence'; // Asignar el valor directamente
+                } else if (typeOfMovement?.Accion === 1 && typeOfMovement.Id_TipoMovInv === 1) { // Entrada
+                    updateValue = 'Existencia + @Cantidad_Existence'; // Incrementar el valor existente
+                    difference = 'ABS(Existencia - Existencia - @Cantidad_Existence)';
+                } else if (typeOfMovement?.Accion === 2) { // Salida
+                    updateValue = 'Existencia - @Cantidad_Existence'; // Restar el valor existente
+                } else if (typeOfMovement?.Accion === 3) { // Traspaso
+                    updateValue = 'Existencia - @Cantidad_Existence'; // Restar el valor existente y despues se le tiene que sumar al otro almacen
+                    difference = 'ABS(Existencia - Existencia - @Cantidad_Existence)';
+                }
+                //return { updateValue, difference }; // Devolver ambos valores
+            }
+
+            newExistence();
+            const updateQuery = querys.updateExistenceTable(updateValue as string, difference);
+
+            // UPDATE 'EXISTENCIAS' Table
+            // If is transfer, first we rest the existence...
             const existenceUpdated = await request
                 .input('Cantidad_Existence', postInventoryData.Piezas)
                 .input('Codigo_Existence', postInventoryData.Codigo)
                 .input('Id_Marca_Existence', postInventoryData.Id_Marca)
                 .input('Id_Almacen_Existence', Id_Almacen)
-                .query(querys.updateExistenceTable);
+                .query(updateQuery);
+
+            if (typeOfMovement?.Accion === 3) {
+                updateValue = 'Existencia + @Cantidad_Existence'
+                const updateNewQuery = querys.updateExistenceTableTransfer(updateValue as string, difference);
+                await request
+                    .input('Cantidad_Existence_transfer', postInventoryData.Piezas)
+                    .input('Codigo_Existence_transfer', postInventoryData.Codigo)
+                    .input('Id_Marca_Existence_transfer', postInventoryData.Id_Marca)
+                    .input('Id_Almacen_Existence_transfer', user?.Id_TipoMovInv?.Id_AlmDest)
+                    .query(updateNewQuery);
+            }
 
             const { Existencia, ExistenciaAnt } = existenceUpdated.recordset[0];
 
@@ -157,8 +193,8 @@ const postInventoryDetails = async (req: Request, res: Response) => {
                 .input('NumsDeSerie', sql.VarChar, NumsDeSerie)
                 .input('SKU', sql.Int, SKU)
                 .query(postIntentoryDetailsQuery);
-
             inventoryDetails.push(result.recordset[0]);
+
         }
 
         await transaction.commit();
