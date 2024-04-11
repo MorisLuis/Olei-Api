@@ -16,8 +16,6 @@ const postInventory = async (req: Request, res: Response) => {
         const connection = sharedData?.userConnection?.connection
         const Id_Usuario = connection?.user;
 
-        console.log({user})
-
         const pool = await dbConnection();
 
         const transaction = new sql.Transaction(pool);
@@ -143,7 +141,6 @@ const postInventoryDetails = async (req: Request, res: Response) => {
                     updateValue = 'Existencia - @Cantidad_Existence'; // Restar el valor existente y despues se le tiene que sumar al otro almacen
                     difference = 'ABS(Existencia - Existencia - @Cantidad_Existence)';
                 }
-                //return { updateValue, difference }; // Devolver ambos valores
             }
 
             newExistence();
@@ -159,7 +156,9 @@ const postInventoryDetails = async (req: Request, res: Response) => {
                 .query(updateQuery);
 
             if (typeOfMovement?.Accion === 3) {
-                updateValue = 'Existencia + @Cantidad_Existence'
+                updateValue = '@Cantidad_Existence_transfer';
+                difference = 'ABS(@Cantidad_Existence_transfer)'
+
                 const updateNewQuery = querys.updateExistenceTableTransfer(updateValue as string, difference);
                 await request
                     .input('Cantidad_Existence_transfer', postInventoryData.Piezas)

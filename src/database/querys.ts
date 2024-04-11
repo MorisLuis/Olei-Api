@@ -90,6 +90,12 @@ export const querys = {
             SET Existencia = ${updateValue}, ExistenciaAnt = Existencia, Diferencia = ${difference}
             OUTPUT INSERTED.Id_Almacen, INSERTED.ExistenciaAnt, INSERTED.Existencia, INSERTED.Codigo INTO @UpdatedData
             WHERE Codigo = @Codigo_Existence_transfer AND Id_Marca = @Id_Marca_Existence_transfer AND Id_Almacen = @Id_Almacen_Existence_transfer
+            IF @@ROWCOUNT = 0
+            BEGIN
+                INSERT INTO [dbo].[EXISTENCIAS] (Id_Almacen, ExistenciaAnt, Existencia, Diferencia, Codigo, Id_Marca, Id_Ubicacion, Periodo, IdOLEI)
+                OUTPUT INSERTED.Id_Almacen, INSERTED.ExistenciaAnt, INSERTED.Existencia, INSERTED.Codigo INTO @UpdatedData
+                VALUES (@Id_Almacen_Existence_transfer, 0, ${updateValue}, ${difference}, @Codigo_Existence_transfer, @Id_Marca_Existence_transfer, 1, 0, NULL)
+            END
             SELECT * FROM @UpdatedData;
         `;
     },
