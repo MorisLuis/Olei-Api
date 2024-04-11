@@ -138,6 +138,7 @@ const getProducById = async (req: Request, res: Response) => {
 
     const user = sharedData.currentUser?.user
 
+
     try {
         const pool = await dbConnection();
 
@@ -165,7 +166,6 @@ const getProducById = async (req: Request, res: Response) => {
                 const maxAttempts = 5;
                 let attempt = 0;
                 let images = [];
-
 
                 while (attempt < maxAttempts) {
                     let imageUrl;
@@ -217,6 +217,7 @@ const getProductsByStock = async (req: Request, res: Response) => {
     const user = sharedData.currentUser?.user
     const client = sharedData?.currentClient?.client;
     const userListPrice = client?.Id_ListPre;
+    const userAlmacen = client?.Id_Almacen;
 
     try {
         const pool = await dbConnection();
@@ -231,6 +232,8 @@ const getProductsByStock = async (req: Request, res: Response) => {
             .input('PageSize', Number(PageSize))
             .input('PageNumber', PageNumber)
             .input('Id_ListaPrecios', userListPrice)
+            .input('Almacen', userAlmacen)
+
             .query(query);
 
         const productsByStock = request.recordset;
@@ -341,12 +344,6 @@ async function executeQuery(pool: sql.ConnectionPool, query: string, params: any
     }
 }
 
-/* const getImageFromOneProduct = async ({
-
-}) => {
-
-}
- */
 
 export {
     getProducts,

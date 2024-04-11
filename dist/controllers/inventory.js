@@ -26,7 +26,6 @@ const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const Id_Almacen = user === null || user === void 0 ? void 0 : user.Id_Almacen;
         const connection = (_b = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.userConnection) === null || _b === void 0 ? void 0 : _b.connection;
         const Id_Usuario = connection === null || connection === void 0 ? void 0 : connection.user;
-        console.log({ user });
         const pool = yield (0, database_1.dbConnection)();
         const transaction = new mssql_1.default.Transaction(pool);
         yield transaction.begin();
@@ -131,7 +130,6 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
                     updateValue = 'Existencia - @Cantidad_Existence'; // Restar el valor existente y despues se le tiene que sumar al otro almacen
                     difference = 'ABS(Existencia - Existencia - @Cantidad_Existence)';
                 }
-                //return { updateValue, difference }; // Devolver ambos valores
             };
             newExistence();
             const updateQuery = database_1.querys.updateExistenceTable(updateValue, difference);
@@ -144,7 +142,8 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
                 .input('Id_Almacen_Existence', Id_Almacen)
                 .query(updateQuery);
             if ((typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion) === 3) {
-                updateValue = 'Existencia + @Cantidad_Existence';
+                updateValue = '@Cantidad_Existence_transfer';
+                difference = 'ABS(@Cantidad_Existence_transfer)';
                 const updateNewQuery = database_1.querys.updateExistenceTableTransfer(updateValue, difference);
                 yield request
                     .input('Cantidad_Existence_transfer', postInventoryData.Piezas)

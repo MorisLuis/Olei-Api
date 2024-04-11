@@ -62,16 +62,16 @@ export const productsQuerys = {
             E.Existencia,
             E.Id_Almacen,
             M.Id_Marca,
-            TRIM(C.CodBar) AS CodBar,
+            TRIM(CT.CodBar) AS CodBar,
             TRIM(M.Nombre) AS Marca,
             PR.Id_ListaPrecios
         FROM [dbo].[PRODUCTOS] P
-        JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
-        JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-        JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-        JOIN [dbo].[COSTOS] C ON P.Codigo = C.Codigo AND PR.Id_Marca = C.Id_Marca
-        JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-        WHERE PR.Id_ListaPrecios = @Id_ListaPrecios
+            JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
+            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+            JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
+        WHERE PR.Id_ListaPrecios = @Id_ListaPrecios  AND E.Id_Almacen = @Almacen
         ORDER BY P.Codigo
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY
@@ -113,20 +113,17 @@ export const productsQuerys = {
     // Search products in inventory.
     getProductsBySearchInventory: `
         SELECT TOP(20)
-            TRIM(P.Descripcion) AS Descripcion,
-            TRIM(P.Codigo) AS Codigo,
-            E.Existencia,
-            E.Id_Almacen,
-            M.Id_Marca,
-            TRIM(M.Nombre) AS Marca,
-            TRIM(F.Nombre) AS Familia,
-            PR.Precio AS Precio
-        FROM [dbo].[PRODUCTOS] P
-        JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
+        TRIM(P.Descripcion) AS Descripcion,
+        TRIM(P.Codigo) AS Codigo,
+        E.Id_Almacen,
+        M.Id_Marca,
+        TRIM(CT.CodBar) AS CodBar,
+        TRIM(M.Nombre) AS Marca
+    FROM [dbo].[PRODUCTOS] P
         JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
         JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-        JOIN [dbo].[COSTOS] C ON P.Codigo = C.Codigo AND PR.Id_Marca = C.Id_Marca
         JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+        JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
         WHERE LOWER(P.Descripcion) LIKE '%' + LOWER(@searchTerm) + '%' AND  PR.Id_ListaPrecios = @Id_ListaPrecios
         ORDER BY P.Codigo
     `,
