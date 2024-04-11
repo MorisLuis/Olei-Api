@@ -188,6 +188,7 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
     const user = (_e = __1.sharedData.currentUser) === null || _e === void 0 ? void 0 : _e.user;
     const client = (_f = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _f === void 0 ? void 0 : _f.client;
     const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
+    const userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
@@ -198,6 +199,7 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
             .input('PageSize', Number(PageSize))
             .input('PageNumber', PageNumber)
             .input('Id_ListaPrecios', userListPrice)
+            .input('Almacen', userAlmacen)
             .query(query);
         const productsByStock = request.recordset;
         const { products } = yield getImagesFromProducts({

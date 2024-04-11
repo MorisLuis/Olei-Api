@@ -34,7 +34,7 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
         const transaction = new mssql_1.default.Transaction(pool);
         try {
             yield transaction.begin();
-            const request = new mssql_1.default.Request(transaction);
+            //const request = new sql.Request(transaction);
             let count = 0;
             const orderDetails = []; // Store every orderDetails from the for.
             for (const postData of postArray) {

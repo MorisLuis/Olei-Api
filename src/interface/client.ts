@@ -3,4 +3,5 @@ export interface ClientInterface {
     Id_Almacen: number,
     Id_ListPre?: number | null,
     Id_Cliente: number,
+    Id_AlmDest?: number
 }

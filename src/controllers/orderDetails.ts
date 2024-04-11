@@ -28,7 +28,7 @@ const postOrderDetails = async (req: Request, res: Response) => {
         try {
 
             await transaction.begin();
-            const request = new sql.Request(transaction);
+            //const request = new sql.Request(transaction);
             let count = 0;
             const orderDetails = [];  // Store every orderDetails from the for.
 

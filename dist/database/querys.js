@@ -55,18 +55,41 @@ exports.querys = {
         FROM [dbo].[CLIENTES] C
     `,
     // ...
-    updateExistenceTable: ` 
-        DECLARE @UpdatedData TABLE (
-            Id_Almacen INT,
-            ExistenciaAnt INT,
-            Existencia INT,
-            Codigo NVARCHAR(255)
-        )
-        UPDATE [dbo].[EXISTENCIAS]
-        SET Existencia = Existencia + @Cantidad_Existence, ExistenciaAnt = Existencia, Diferencia = @Cantidad_Existence
-        OUTPUT INSERTED.Id_Almacen, INSERTED.ExistenciaAnt, INSERTED.Existencia, INSERTED.Codigo INTO @UpdatedData
-        WHERE Codigo = @Codigo_Existence AND Id_Marca = @Id_Marca_Existence AND Id_Almacen = @Id_Almacen_Existence
-        SELECT * FROM @UpdatedData;
-    `,
+    updateExistenceTable: (updateValue, difference) => {
+        return ` 
+            DECLARE @UpdatedData TABLE (
+                Id_Almacen INT,
+                ExistenciaAnt INT,
+                Existencia INT,
+                Codigo NVARCHAR(255)
+            )
+            UPDATE [dbo].[EXISTENCIAS]
+            SET Existencia = ${updateValue}, ExistenciaAnt = Existencia, Diferencia = ${difference}
+            OUTPUT INSERTED.Id_Almacen, INSERTED.ExistenciaAnt, INSERTED.Existencia, INSERTED.Codigo INTO @UpdatedData
+            WHERE Codigo = @Codigo_Existence AND Id_Marca = @Id_Marca_Existence AND Id_Almacen = @Id_Almacen_Existence
+            SELECT * FROM @UpdatedData;
+        `;
+    },
+    updateExistenceTableTransfer: (updateValue, difference) => {
+        return ` 
+            DECLARE @UpdatedData TABLE (
+                Id_Almacen INT,
+                ExistenciaAnt INT,
+                Existencia INT,
+                Codigo NVARCHAR(255)
+            )
+            UPDATE [dbo].[EXISTENCIAS]
+            SET Existencia = ${updateValue}, ExistenciaAnt = Existencia, Diferencia = ${difference}
+            OUTPUT INSERTED.Id_Almacen, INSERTED.ExistenciaAnt, INSERTED.Existencia, INSERTED.Codigo INTO @UpdatedData
+            WHERE Codigo = @Codigo_Existence_transfer AND Id_Marca = @Id_Marca_Existence_transfer AND Id_Almacen = @Id_Almacen_Existence_transfer
+            IF @@ROWCOUNT = 0
+            BEGIN
+                INSERT INTO [dbo].[EXISTENCIAS] (Id_Almacen, ExistenciaAnt, Existencia, Diferencia, Codigo, Id_Marca, Id_Ubicacion, Periodo, IdOLEI)
+                OUTPUT INSERTED.Id_Almacen, INSERTED.ExistenciaAnt, INSERTED.Existencia, INSERTED.Codigo INTO @UpdatedData
+                VALUES (@Id_Almacen_Existence_transfer, 0, ${updateValue}, ${difference}, @Codigo_Existence_transfer, @Id_Marca_Existence_transfer, 1, 0, NULL)
+            END
+            SELECT * FROM @UpdatedData;
+        `;
+    },
 };
 //# sourceMappingURL=querys.js.map

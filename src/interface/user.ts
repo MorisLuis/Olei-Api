@@ -61,6 +61,7 @@ export default interface UserInterface {
     Id_TipoMovInv?: {
         Id_TipoMovInv: number,
         Accion: number,
-        Descripcion: string
+        Descripcion: string,
+        Id_AlmDest: number
     };
 }

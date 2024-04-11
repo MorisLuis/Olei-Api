@@ -40,7 +40,8 @@ const changeTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, fu
             user: Object.assign(Object.assign({}, user), { Id_TipoMovInv: {
                     Id_TipoMovInv: result.Id_TipoMovInv,
                     Accion: result.Accion,
-                    Descripcion: result.Descripcion
+                    Descripcion: result.Descripcion,
+                    Id_AlmDest: result.Id_AlmDest
                 } })
         };
         res.json({

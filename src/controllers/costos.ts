@@ -38,11 +38,9 @@ const updateCostos = async (req: Request, res: Response) => {
             const keys = Object.keys(body);
             const query = costosQuerys.updateCostos;
 
-            const uniqueId = uuidv4();
-            const codigo = uniqueId.replace(/-/g, '').substring(0, 10);
-
-            if(body.CodBar !== undefined) {
-                console.log('enter')
+            if ( body.codeRandom === "true" ) {
+                const uniqueId = uuidv4();
+                const codigo = uniqueId.replace(/-/g, '').substring(0, 10);
                 body.CodBar = codigo
             }
 

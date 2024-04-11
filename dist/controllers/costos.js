@@ -37,10 +37,9 @@ const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             request.input('Id_Marca', mssql_1.default.Int, Id_Marca);
             const keys = Object.keys(body);
             const query = costos_1.costosQuerys.updateCostos;
-            const uniqueId = (0, uuid_1.v4)();
-            const codigo = uniqueId.replace(/-/g, '').substring(0, 10);
-            if (body.CodBar !== undefined) {
-                console.log('enter');
+            if (body.codeRandom === "true") {
+                const uniqueId = (0, uuid_1.v4)();
+                const codigo = uniqueId.replace(/-/g, '').substring(0, 10);
                 body.CodBar = codigo;
             }
             // Make forEach to create de SET of the query.
