@@ -219,6 +219,7 @@ const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void
     const { CodBar, Codigo } = req.query;
     const client = (_g = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _g === void 0 ? void 0 : _g.client;
     const Id_ListaPrecios = client === null || client === void 0 ? void 0 : client.Id_ListPre;
+    const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
@@ -229,6 +230,7 @@ const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void
             .input("CodBar", CodBar === 'undefined' ? null : CodBar)
             .input("Codigo", Codigo === 'undefined' ? null : Codigo)
             .input("Id_ListaPrecios", Id_ListaPrecios)
+            .input("Id_Almacen", Id_Almacen)
             .query(query);
         const productByStockAndCodeBar = request.recordset;
         res.json(productByStockAndCodeBar);
