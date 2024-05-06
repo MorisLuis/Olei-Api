@@ -57,7 +57,7 @@ const postOrderDetails = async (req: Request, res: Response) => {
                 postData.Id_Almacen = Id_Almacen;
                 postData.TipoDoc = user?.TipoDocOO;
                 postData.Serie = SerieActiva ? SerieActiva : "";
-                postData.Folio = Folio + 1;
+                postData.Folio = (Folio ? Folio : 0) + 1;
                 postData.Id_ListaPrecios = Id_ListPre;
                 postData.Descuento = Valor;
                 postData.Id_Unidad = Id_Unidad;

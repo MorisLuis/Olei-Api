@@ -255,6 +255,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
     const { CodBar, Codigo } = req.query;
     const client = sharedData?.currentClient?.client;
     const Id_ListaPrecios = client?.Id_ListPre;
+    const Id_Almacen = client?.Id_Almacen;
 
     try {
         const pool = await dbConnection();
@@ -268,6 +269,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
             .input("CodBar", CodBar === 'undefined' ? null : CodBar)
             .input("Codigo", Codigo === 'undefined' ? null : Codigo)
             .input("Id_ListaPrecios", Id_ListaPrecios)
+            .input("Id_Almacen", Id_Almacen)
             .query(query);
 
 

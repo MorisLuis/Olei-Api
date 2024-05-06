@@ -127,23 +127,24 @@ const postInventoryDetails = async (req: Request, res: Response) => {
             // New Existence accord with the type of movement.
             const typeOfMovement = user?.Id_TipoMovInv;
             let updateValue = '@Cantidad_Existence';
-            let difference = 'ABS(@Cantidad_Existence - Existencia)';
+            let difference = '@Cantidad_Existence - Existencia';
 
             const newExistence = () => {
                 if (typeOfMovement?.Accion === 1 && typeOfMovement.Id_TipoMovInv === 0) { // Inventario fisico
                     updateValue = '@Cantidad_Existence'; // Asignar el valor directamente
                 } else if (typeOfMovement?.Accion === 1 && typeOfMovement.Id_TipoMovInv === 1) { // Entrada
                     updateValue = 'Existencia + @Cantidad_Existence'; // Incrementar el valor existente
-                    difference = 'ABS(Existencia - Existencia - @Cantidad_Existence)';
+                    difference = 'Existencia - Existencia - @Cantidad_Existence';
                 } else if (typeOfMovement?.Accion === 2) { // Salida
                     updateValue = 'Existencia - @Cantidad_Existence'; // Restar el valor existente
                 } else if (typeOfMovement?.Accion === 3) { // Traspaso
                     updateValue = 'Existencia - @Cantidad_Existence'; // Restar el valor existente y despues se le tiene que sumar al otro almacen
-                    difference = 'ABS(Existencia - Existencia - @Cantidad_Existence)';
+                    difference = 'Existencia - Existencia - @Cantidad_Existence';
                 }
             }
 
             newExistence();
+            console.log({postInventoryData: JSON.stringify(postInventoryData, null, 2)})
             const updateQuery = querys.updateExistenceTable(updateValue as string, difference);
 
             // UPDATE 'EXISTENCIAS' Table
@@ -157,7 +158,7 @@ const postInventoryDetails = async (req: Request, res: Response) => {
 
             if (typeOfMovement?.Accion === 3) {
                 updateValue = '@Cantidad_Existence_transfer';
-                difference = 'ABS(@Cantidad_Existence_transfer)'
+                difference = '@Cantidad_Existence_transfer'
 
                 const updateNewQuery = querys.updateExistenceTableTransfer(updateValue as string, difference);
                 await request

@@ -96,6 +96,7 @@ exports.productsQuerys = {
         PR.Id_ListaPrecios = @Id_ListaPrecios AND
             (@CodBar IS NULL OR TRIM(CT.CodBar) = @CodBar)
         AND (@Codigo IS NULL OR TRIM(P.Codigo) = @Codigo)
+        AND E.Id_Almacen = @Id_Almacen
     `,
     // Get number of products.
     getTotalProducts: "SELECT COUNT(*) FROM [dbo].[CLIENTES]",

@@ -50,7 +50,6 @@ const postOrder = async (req: Request, res: Response) => {
                 return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
             }
             const { SerieActiva, Folio, Id_Descuento, Id_CondVta, Id_Vendedor, Id_FormaPago, Id_Transporte } = results;
-            
 
             postData.TipoDoc = TipoDocOO;
             postData.Serie = SerieActiva ? SerieActiva : "";

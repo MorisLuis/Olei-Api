@@ -56,7 +56,7 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 postData.Id_Almacen = Id_Almacen;
                 postData.TipoDoc = user === null || user === void 0 ? void 0 : user.TipoDocOO;
                 postData.Serie = SerieActiva ? SerieActiva : "";
-                postData.Folio = Folio + 1;
+                postData.Folio = (Folio ? Folio : 0) + 1;
                 postData.Id_ListaPrecios = Id_ListPre;
                 postData.Descuento = Valor;
                 postData.Id_Unidad = Id_Unidad;
