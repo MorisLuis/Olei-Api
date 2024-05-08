@@ -157,9 +157,8 @@ const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, functi
         };
     }
     catch (error) {
-        // Aquí puedes manejar el error, ya sea registrándolo, lanzando una excepción diferente o realizando alguna otra acción.
         console.error("Error en connectToUserDatabase:", error);
-        throw error; // Puedes relanzar el error si quieres que la función que llamó a esta también lo maneje.
+        throw error;
     }
 });
 //# sourceMappingURL=auth.js.map

@@ -3,7 +3,6 @@ import { Response, Request } from "express";
 import { dbConnection, querys } from "../database";
 import sql from 'mssql';
 import { sharedData } from "..";
-import moment, { now } from "moment";
 import PorductInterface from "../interface/product";
 import { inventoryQuerys } from "../database/querys/inventory";
 import { currentTime } from "../utils/currentTime";
