@@ -3,9 +3,10 @@ import { Response, Request } from "express";
 import { dbConnection, querys } from "../database";
 import sql from 'mssql';
 import { sharedData } from "..";
-import moment from "moment";
+import moment, { now } from "moment";
 import PorductInterface from "../interface/product";
 import { inventoryQuerys } from "../database/querys/inventory";
+import { currentTime } from "../utils/currentTime";
 
 const postInventory = async (req: Request, res: Response) => {
 
@@ -33,8 +34,7 @@ const postInventory = async (req: Request, res: Response) => {
         const SwTr = 0;
         const FolioReq = null;
         const AlmReq = 0;
-        const Fecha = moment().format();
-        const FechaRecepcion = Fecha;
+        const Fecha = currentTime()
 
         const postInventoryQuery = inventoryQuerys.insertInventory;
 
@@ -51,7 +51,7 @@ const postInventory = async (req: Request, res: Response) => {
             .input('Descripcion', sql.VarChar(100), Descripcion)
             .input('Id_Usuario', sql.VarChar(50), Id_Usuario)
             .input('SwTr', sql.SmallInt, SwTr)
-            .input('FechaRecepcion', sql.DateTime, FechaRecepcion)
+            .input('FechaRecepcion', sql.DateTime, Fecha)
             .input('FolioReq', sql.Int, FolioReq)
             .input('AlmReq', sql.Int, AlmReq)
             .query(postInventoryQuery)
@@ -144,7 +144,6 @@ const postInventoryDetails = async (req: Request, res: Response) => {
             }
 
             newExistence();
-            console.log({postInventoryData: JSON.stringify(postInventoryData, null, 2)})
             const updateQuery = querys.updateExistenceTable(updateValue as string, difference);
 
             // UPDATE 'EXISTENCIAS' Table

@@ -16,8 +16,8 @@ exports.getInventoryDetails = exports.getInventory = exports.postInventoryDetail
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const __1 = require("..");
-const moment_1 = __importDefault(require("moment"));
 const inventory_1 = require("../database/querys/inventory");
+const currentTime_1 = require("../utils/currentTime");
 const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
@@ -40,8 +40,7 @@ const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const SwTr = 0;
         const FolioReq = null;
         const AlmReq = 0;
-        const Fecha = (0, moment_1.default)().format();
-        const FechaRecepcion = Fecha;
+        const Fecha = (0, currentTime_1.currentTime)();
         const postInventoryQuery = inventory_1.inventoryQuerys.insertInventory;
         const request = new mssql_1.default.Request(transaction);
         const result = yield request
@@ -55,7 +54,7 @@ const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             .input('Descripcion', mssql_1.default.VarChar(100), Descripcion)
             .input('Id_Usuario', mssql_1.default.VarChar(50), Id_Usuario)
             .input('SwTr', mssql_1.default.SmallInt, SwTr)
-            .input('FechaRecepcion', mssql_1.default.DateTime, FechaRecepcion)
+            .input('FechaRecepcion', mssql_1.default.DateTime, Fecha)
             .input('FolioReq', mssql_1.default.Int, FolioReq)
             .input('AlmReq', mssql_1.default.Int, AlmReq)
             .query(postInventoryQuery);
@@ -132,7 +131,6 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
                 }
             };
             newExistence();
-            console.log({ postInventoryData: JSON.stringify(postInventoryData, null, 2) });
             const updateQuery = database_1.querys.updateExistenceTable(updateValue, difference);
             // UPDATE 'EXISTENCIAS' Table
             // If is transfer, first we rest the existence...
