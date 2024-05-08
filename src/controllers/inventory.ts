@@ -35,6 +35,8 @@ const postInventory = async (req: Request, res: Response) => {
         const AlmReq = 0;
         const Fecha = currentTime()
 
+        console.log({Fecha})
+
         const postInventoryQuery = inventoryQuerys.insertInventory;
 
         const request = new sql.Request(transaction);
