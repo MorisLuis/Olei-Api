@@ -15,9 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllOrders = exports.getOrder = exports.postOrder = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
-const moment_timezone_1 = __importDefault(require("moment-timezone"));
 const __1 = require("..");
 const orders_1 = require("../database/querys/orders");
+const currentTime_1 = require("../utils/currentTime");
 const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c;
     try {
@@ -43,7 +43,7 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         yield transaction.begin();
         try {
             const request = new mssql_1.default.Request(transaction);
-            const currentDate = (0, moment_timezone_1.default)().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
+            const currentDate = (0, currentTime_1.currentTime)();
             const previewDataToPostOrder = yield request
                 .input("Id_Almacen_Preview", Id_Almacen)
                 .input("Id_Cliente_Preview", Id_Cliente)

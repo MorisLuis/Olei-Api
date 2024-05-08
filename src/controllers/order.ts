@@ -5,6 +5,7 @@ import moment from 'moment-timezone';
 import { sharedData } from "..";
 import OrderInterface from "../interface/order";
 import { orderQuerys } from "../database/querys/orders";
+import { currentTime } from "../utils/currentTime";
 
 
 const postOrder = async (req: Request, res: Response) => {
@@ -38,7 +39,7 @@ const postOrder = async (req: Request, res: Response) => {
 
         try {
             const request = new sql.Request(transaction);
-            const currentDate = moment().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
+            const currentDate = currentTime();
             const previewDataToPostOrder = await request
                 .input("Id_Almacen_Preview", Id_Almacen)
                 .input("Id_Cliente_Preview", Id_Cliente)
