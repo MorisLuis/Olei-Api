@@ -251,7 +251,7 @@ const checkImageExists = (url) => __awaiter(void 0, void 0, void 0, function* ()
         return false;
     }
 });
-const getImagesFromProducts = ({ user, products }) => __awaiter(void 0, void 0, void 0, function* () {
+const getImagesFromProducts = (_h) => __awaiter(void 0, [_h], void 0, function* ({ user, products }) {
     if (user === null || user === void 0 ? void 0 : user.SwImagenes) {
         // Ahora, para cada producto, agrega la propiedad "imagen"
         for (const product of products) {
