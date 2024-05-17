@@ -4,6 +4,11 @@ exports.querys = void 0;
 exports.querys = {
     //Auth
     auth: ` 
+        SELECT *
+        FROM [dbo].[USUARIOS]
+        WHERE EMail = @email
+    `,
+    authWeb: ` 
         SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio, UC.TipoDocOO, UC.IdOLEI,
         TRIM(UC.Nombre) AS Company
         FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U

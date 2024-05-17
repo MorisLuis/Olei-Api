@@ -1,13 +1,16 @@
 import { Request, Response } from 'express';
-
-import { closeDbConnection, dbConnection, querys } from '../database';
+import { closeDbConnection, dbConnection, querys } from '../../database';
+import config from '../../config';
+import { sharedData } from '../..';
+import { generateJWT } from '../../helpers/generate-jwt';
 import moment from 'moment';
-import { generateJWT } from '../helpers/generate-jwt';
-import { sharedData } from '..';
-import config from '../config';
-import UserInterface from '../interface/user';
+import UserInterface from '../../interface/user';
 
-const login = async (req: Request, res: Response) => {
+
+
+
+
+const loginWeb = async (req: Request, res: Response) => {
 
     try {
         // STEP 1 - LOGIN
@@ -17,11 +20,10 @@ const login = async (req: Request, res: Response) => {
             return res.status(500).json({ error: 'Error connecting to the main database' });
         }
 
-
         // Search for the user in the database using their email.
         const { email, password } = req.body;
 
-        const user = await getUserByEmail(mainPool, email);
+        const user = await getUserByEmailWeb(mainPool, email);
 
         if (!user) {
             return res.status(404).json({ error: 'Correo no encontrada' });
@@ -42,7 +44,6 @@ const login = async (req: Request, res: Response) => {
         // Get user database connection details.
         const otherDBServer = user.ServidorSQL.trim();
         const otherDBDatabase = user.BaseSQL.trim();
-
 
         // Update sharedData.userConnection for global access.
         sharedData.userConnection = {
@@ -72,6 +73,7 @@ const login = async (req: Request, res: Response) => {
     }
 };
 
+
 const logout = async (req: Request, res: Response) => {
 
     try {
@@ -98,7 +100,8 @@ interface Req extends Request {
     id?: string
 }
 
-const renew = async (req: Req, res: Response) => {
+const renewWeb = async (req: Req, res: Response) => {
+    console.log("renewWeb")
 
     const user = sharedData?.currentUser?.user;
 
@@ -118,11 +121,9 @@ const renew = async (req: Req, res: Response) => {
 
 
 
-
-
 // Utils
-const getUserByEmail = async (mainPool: any, email: string) => {
-    const query_DB = querys.auth;
+const getUserByEmailWeb = async (mainPool: any, email: string) => {
+    const query_DB = querys.authWeb;
     const result = await mainPool.request().input('email', email).query(query_DB);
     return result?.recordset[0];
 };
@@ -151,7 +152,6 @@ const connectToUserDatabase = async (user: UserInterface) => {
 
         const Id_ListPre = idListPreResult?.recordset[0]?.Id_ListPre;
         const Nombre = idListPreResult?.recordset[0]?.Nombre;
-
 
         const TypeOfMovementsResult =  await otherPool.request().query(querys.getTypeOfMovementInitial)
         const TypeOfMovements = TypeOfMovementsResult.recordset[0]
@@ -192,7 +192,7 @@ const connectToUserDatabase = async (user: UserInterface) => {
 };
 
 export {
-    login,
+    loginWeb,
     logout,
-    renew
+    renewWeb
 }

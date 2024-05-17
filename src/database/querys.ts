@@ -2,6 +2,12 @@ export const querys = {
 
     //Auth
     auth: ` 
+        SELECT *
+        FROM [dbo].[USUARIOS]
+        WHERE EMail = @email
+    `,
+
+    authWeb: ` 
         SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio, UC.TipoDocOO, UC.IdOLEI,
         TRIM(UC.Nombre) AS Company
         FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
@@ -62,7 +68,7 @@ export const querys = {
 
 
     // ...
-    updateExistenceTable: (updateValue: string, difference: string) => { 
+    updateExistenceTable: (updateValue: string, difference: string) => {
         return ` 
             DECLARE @UpdatedData TABLE (
                 Id_Almacen INT,
@@ -78,7 +84,7 @@ export const querys = {
         `;
     },
 
-    updateExistenceTableTransfer: (updateValue: string, difference: string) => { 
+    updateExistenceTableTransfer: (updateValue: string, difference: string) => {
         return ` 
             DECLARE @UpdatedData TABLE (
                 Id_Almacen INT,
