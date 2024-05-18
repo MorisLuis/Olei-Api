@@ -114,6 +114,66 @@ const login = async (req: Request, res: Response) => {
     }
 };
 
+const loginWeb = async (req: Request, res: Response) => {
+
+    try {
+        // STEP 1 - LOGIN
+        const mainPool = await dbConnection(config.dbServer, config.dbDatabase);
+
+        if (!mainPool) {
+            return res.status(500).json({ error: 'Error connecting to the main database' });
+        }
+
+        // Search for the user in the database using their email.
+        const { email, password } = req.body;
+
+        console.log({email, password})
+
+
+        if (email === "" || password === "") {
+            return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
+        }
+
+        const user = await getUserByEmail(mainPool, email);
+
+        if (!user) {
+            return res.status(404).json({ error: 'Correo no encontrado' });
+        }
+
+        if (user.Password.trim() !== password) {
+            return res.status(401).json({ error: 'Contraseña incorrecta' });
+        }
+
+
+        // Get the user's subscription expiration date.
+        /* const dueDate = await getUserSubscriptionDueDate(mainPool, user.Id_ClienteDBCLIENTES);
+        if (isSubscriptionExpired(dueDate)) {
+            return res.status(401).json({ error: 'Subscripción ha expirado' });
+        } */
+
+        const token = await generateJWT({ id: user.EMail, rol: user.Id_Perfil });
+
+
+        // Update sharedData.userConnection for global access.
+        sharedData.userConnection = {
+            connection: {
+                user: config.dbUser,
+                password: config.dbPassword,
+                server: sharedData.userConnection?.connection.server as string,
+                database: sharedData.userConnection?.connection.database as string
+            }
+        };
+
+        return res.json({
+            user,
+            token
+        });
+
+    } catch (error: any) {
+        console.log({ error })
+        return res.status(500).json({ error: error.message || 'Unexpected error' });
+    }
+};
 
 
 const logout = async (req: Request, res: Response) => {
@@ -205,6 +265,7 @@ const isSubscriptionExpired = (dueDate: string) => {
 export {
     loginDB,
     login,
+    loginWeb,
     logout,
     renew,
     renewWeb
