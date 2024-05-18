@@ -4,11 +4,13 @@ import { closeDbConnection, dbConnection, querys } from '../../database';
 import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
 import { sharedData } from '../..';
 import config from '../../config';
+import moment from 'moment';
+import UserInterface from '../../interface/user';
 
 const loginDB = async (req: Request, res: Response) => {
 
     try {
-        const {servidor, database} = req.body;
+        const { servidor, database } = req.body;
 
 
         if (servidor === "" || database === "") {
@@ -65,9 +67,6 @@ const login = async (req: Request, res: Response) => {
 
         // Search for the user in the database using their email.
         const { email, password } = req.body;
-
-        console.log({email, password})
-
 
         if (email === "" || password === "") {
             return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
@@ -127,31 +126,31 @@ const loginWeb = async (req: Request, res: Response) => {
         // Search for the user in the database using their email.
         const { email, password } = req.body;
 
-        console.log({email, password})
-
-
         if (email === "" || password === "") {
             return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
         }
 
-        const user = await getUserByEmail(mainPool, email);
+        const user = await getUserByEmailWeb(mainPool, email);
 
         if (!user) {
             return res.status(404).json({ error: 'Correo no encontrado' });
         }
 
-        if (user.Password.trim() !== password) {
+        if (user.PasswordOOL.trim() !== password) {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
 
-
         // Get the user's subscription expiration date.
-        /* const dueDate = await getUserSubscriptionDueDate(mainPool, user.Id_ClienteDBCLIENTES);
+        const dueDate = await getUserSubscriptionDueDate(mainPool, user.Id_ClienteDBCLIENTES);
         if (isSubscriptionExpired(dueDate)) {
             return res.status(401).json({ error: 'Subscripción ha expirado' });
-        } */
+        }
+        const token = await generateJWT({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
 
-        const token = await generateJWT({ id: user.EMail, rol: user.Id_Perfil });
+
+        // Get user database connection details.
+        const otherDBServer = user.ServidorSQL.trim();
+        const otherDBDatabase = user.BaseSQL.trim();
 
 
         // Update sharedData.userConnection for global access.
@@ -159,15 +158,23 @@ const loginWeb = async (req: Request, res: Response) => {
             connection: {
                 user: config.dbUser,
                 password: config.dbPassword,
-                server: sharedData.userConnection?.connection.server as string,
-                database: sharedData.userConnection?.connection.database as string
+                server: otherDBServer,
+                database: otherDBDatabase
             }
         };
+        await mainPool.close();
+
+        // STEP 2 - CONNECT THE COMPANY DATABASE
+        // Connect to the user's database.
+        const otherDBConnection = await connectToUserDatabase(user);
 
         return res.json({
-            user,
+            otherDBServer,
+            otherDBDatabase,
+            user: otherDBConnection.currentUser,
             token
         });
+
 
     } catch (error: any) {
         console.log({ error })
@@ -208,7 +215,7 @@ const renew = async (req: Req, res: Response) => {
 
     try {
         if (!user) return;
-        const token = await generateJWTDB({servidor: user.server, database: user.database as string });
+        const token = await generateJWTDB({ servidor: user.server, database: user.database as string });
 
         res.json({
             user,
@@ -249,7 +256,13 @@ const getUserByEmail = async (mainPool: any, email: string) => {
     return result?.recordset[0];
 };
 
-/* const getUserSubscriptionDueDate = async (mainPool: any, clientId: number) => {
+const getUserByEmailWeb = async (mainPool: any, email: string) => {
+    const query_DB = querys.authWeb;
+    const result = await mainPool.request().input('email', email).query(query_DB);
+    return result?.recordset[0];
+};
+
+const getUserSubscriptionDueDate = async (mainPool: any, clientId: number) => {
     const query_CLIENTES = `SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[CLIENTES] WHERE Id_Cliente = @clienteId`;
     const resultCliente = await mainPool.request().input('clienteId', clientId).query(query_CLIENTES);
     return resultCliente?.recordset[0].Vigencia;
@@ -259,8 +272,59 @@ const isSubscriptionExpired = (dueDate: string) => {
     const today = moment().startOf('day');
     const isExpired = moment(dueDate).startOf('day').isBefore(today);
     return isExpired;
-}; */
+};
 
+const connectToUserDatabase = async (user: UserInterface) => {
+    try {
+        const otherPool = await dbConnection(user.ServidorSQL.trim(), user.BaseSQL.trim());
+
+        const query_DB = querys.authCompany;
+        const idListPreResult = await otherPool.request()
+            .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
+            .input("IdOLEI", user.IdOLEI)
+            .query(query_DB);
+
+        const Id_ListPre = idListPreResult?.recordset[0]?.Id_ListPre;
+        const Nombre = idListPreResult?.recordset[0]?.Nombre;
+
+
+        const TypeOfMovementsResult =  await otherPool.request().query(querys.getTypeOfMovementInitial)
+        const TypeOfMovements = TypeOfMovementsResult.recordset[0]
+
+        sharedData.currentUser = {
+            user: {
+                ...user,
+                Id_ListPre,
+                Nombre,
+                Id_TipoMovInv: {
+                    Id_TipoMovInv: TypeOfMovements.Id_TipoMovInv,
+                    Accion: TypeOfMovements.Accion,
+                    Descripcion: TypeOfMovements.Descripcion,
+                    Id_AlmDest: TypeOfMovements.Id_AlmDest
+                }
+            }
+        };
+
+        sharedData.currentClient = {
+            client: {
+                Id_Almacen: user.Id_Almacen,
+                Id_Cliente: user.Id_Cliente,
+                Id_ListPre
+            }
+        };
+
+        return {
+            server: user.ServidorSQL.trim(),
+            database: user.BaseSQL.trim(),
+            pool: otherPool,
+            currentUser: sharedData.currentUser.user
+        }
+
+    } catch (error) {
+        console.error("Error en connectToUserDatabase:", error);
+        throw error;
+    }
+};
 
 export {
     loginDB,
