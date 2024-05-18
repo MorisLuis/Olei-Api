@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 
 import { closeDbConnection, dbConnection, querys } from '../../database';
-import moment from 'moment';
 import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
 import { sharedData } from '../..';
 import config from '../../config';
@@ -11,7 +10,10 @@ const loginDB = async (req: Request, res: Response) => {
     try {
         const {servidor, database} = req.body;
 
-        console.log({servidor, database})
+
+        if (servidor === "" || database === "") {
+            return res.status(400).json({ error: 'Necesario enviar servidor y base de datos' });
+        }
 
         // STEP 1 - LOGIN
         const mainPool = await dbConnection(servidor, database);
@@ -22,7 +24,6 @@ const loginDB = async (req: Request, res: Response) => {
 
         const tokenDB = await generateJWTDB({ servidor, database });
 
-        console.log({tokenDB})
 
         sharedData.userConnection = {
             connection: {
@@ -65,10 +66,17 @@ const login = async (req: Request, res: Response) => {
         // Search for the user in the database using their email.
         const { email, password } = req.body;
 
+        console.log({email, password})
+
+
+        if (email === "" || password === "") {
+            return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
+        }
+
         const user = await getUserByEmail(mainPool, email);
 
         if (!user) {
-            return res.status(404).json({ error: 'Correo no encontrada' });
+            return res.status(404).json({ error: 'Correo no encontrado' });
         }
 
         if (user.Password.trim() !== password) {
@@ -102,10 +110,33 @@ const login = async (req: Request, res: Response) => {
 
     } catch (error: any) {
         console.log({ error })
-        return res.status(500).send(error.message);
+        return res.status(500).json({ error: error.message || 'Unexpected error' });
     }
 };
 
+
+
+const logout = async (req: Request, res: Response) => {
+
+    try {
+
+        await closeDbConnection()
+
+        const server = "babs4kdofr.database.windows.net";
+        const database = "OLEIDB1_CLIENTES";
+        const pool = await dbConnection(server, database);
+
+        const connectionStatus = pool?.connected ? 'Connected' : 'Not Connected';
+
+        res.json({
+            status: connectionStatus,
+            pool
+        })
+
+    } catch (error) {
+        console.log({ error })
+    }
+}
 
 interface Req extends Request {
     id?: string
@@ -129,6 +160,25 @@ const renew = async (req: Req, res: Response) => {
     }
 }
 
+
+const renewWeb = async (req: Req, res: Response) => {
+    console.log("renewWeb")
+
+    const user = sharedData?.currentUser?.user;
+
+    try {
+        if (!user) return;
+        const token = await generateJWT({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
+
+        res.json({
+            user,
+            token
+        });
+    } catch (error: any) {
+        res.status(500).send(error.message);
+        console.log({ error })
+    }
+}
 
 
 // Utils
@@ -155,5 +205,7 @@ const isSubscriptionExpired = (dueDate: string) => {
 export {
     loginDB,
     login,
-    renew
+    logout,
+    renew,
+    renewWeb
 }

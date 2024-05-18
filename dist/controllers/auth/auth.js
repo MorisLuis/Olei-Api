@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.renew = exports.login = exports.loginDB = void 0;
+exports.renewWeb = exports.renew = exports.logout = exports.login = exports.loginDB = void 0;
 const database_1 = require("../../database");
 const generate_jwt_1 = require("../../helpers/generate-jwt");
 const __1 = require("../..");
@@ -20,14 +20,15 @@ const config_1 = __importDefault(require("../../config"));
 const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { servidor, database } = req.body;
-        console.log({ servidor, database });
+        if (servidor === "" || database === "") {
+            return res.status(400).json({ error: 'Necesario enviar servidor y base de datos' });
+        }
         // STEP 1 - LOGIN
         const mainPool = yield (0, database_1.dbConnection)(servidor, database);
         if (!mainPool) {
             return res.status(500).json({ error: 'Error connecting to the main database' });
         }
         const tokenDB = yield (0, generate_jwt_1.generateJWTDB)({ servidor, database });
-        console.log({ tokenDB });
         __1.sharedData.userConnection = {
             connection: {
                 user: config_1.default.dbUser,
@@ -64,9 +65,13 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         // Search for the user in the database using their email.
         const { email, password } = req.body;
+        console.log({ email, password });
+        if (email === "" || password === "") {
+            return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
+        }
         const user = yield getUserByEmail(mainPool, email);
         if (!user) {
-            return res.status(404).json({ error: 'Correo no encontrada' });
+            return res.status(404).json({ error: 'Correo no encontrado' });
         }
         if (user.Password.trim() !== password) {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
@@ -93,10 +98,27 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     catch (error) {
         console.log({ error });
-        return res.status(500).send(error.message);
+        return res.status(500).json({ error: error.message || 'Unexpected error' });
     }
 });
 exports.login = login;
+const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield (0, database_1.closeDbConnection)();
+        const server = "babs4kdofr.database.windows.net";
+        const database = "OLEIDB1_CLIENTES";
+        const pool = yield (0, database_1.dbConnection)(server, database);
+        const connectionStatus = (pool === null || pool === void 0 ? void 0 : pool.connected) ? 'Connected' : 'Not Connected';
+        res.json({
+            status: connectionStatus,
+            pool
+        });
+    }
+    catch (error) {
+        console.log({ error });
+    }
+});
+exports.logout = logout;
 const renew = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _e;
     const user = (_e = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.userConnection) === null || _e === void 0 ? void 0 : _e.connection;
@@ -115,6 +137,25 @@ const renew = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.renew = renew;
+const renewWeb = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _f;
+    console.log("renewWeb");
+    const user = (_f = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _f === void 0 ? void 0 : _f.user;
+    try {
+        if (!user)
+            return;
+        const token = yield (0, generate_jwt_1.generateJWT)({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
+        res.json({
+            user,
+            token
+        });
+    }
+    catch (error) {
+        res.status(500).send(error.message);
+        console.log({ error });
+    }
+});
+exports.renewWeb = renewWeb;
 // Utils
 const getUserByEmail = (mainPool, email) => __awaiter(void 0, void 0, void 0, function* () {
     const query_DB = database_1.querys.auth;
