@@ -120,10 +120,17 @@ const searchClient = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.searchClient = searchClient;
 const searchProductInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _e;
+    var _e, _f;
     const { searchTerm } = req.query;
     const client = (_e = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _e === void 0 ? void 0 : _e.client;
-    const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
+    const user = (_f = __1.sharedData.currentUser) === null || _f === void 0 ? void 0 : _f.user;
+    let userListPrice;
+    if (client) {
+        userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
+    }
+    else {
+        userListPrice = user === null || user === void 0 ? void 0 : user.Id_ListPre;
+    }
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {

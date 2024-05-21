@@ -8,13 +8,13 @@ export default interface UserInterface {
     Nombre: string;
 
     // The name of the company.
-    Company: string,
+    Company?: string,
 
     // The ID of the price list that defines the prices of the products.
     Id_ListPre?: number | null;
 
     // The identifier of the client.
-    Id_Cliente: number;
+    Id_Cliente?: number;
 
     // The unique identifier for database access.
     Id_UsuarioOOL: string;
@@ -52,9 +52,9 @@ export default interface UserInterface {
     IdOLEI?: number;
 
     // This field is currently not in use.
-    Id_UsuarioOLEI: number | null;
-    PasswordOLEI: number | null;
-    Id_ClienteDBCLIENTES: number | null;
+    /* Id_UsuarioOLEI?: number | null;
+    PasswordOLEI?: number | null;
+    Id_ClienteDBCLIENTES?: number | null; */
 
     // Temporal (!)
     // Show if is a "Entrada (Inventario) = 1", "Salida = 2" or "Transferencia = 3".
@@ -64,4 +64,7 @@ export default interface UserInterface {
         Descripcion: string,
         Id_AlmDest: number
     };
+
+    // This is the dueDate
+    Vigencia?: string
 }

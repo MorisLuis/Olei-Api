@@ -24,9 +24,9 @@ exports.currentUserTest = {
         SwsinPrecio: 1,
         TipoDocOO: 0,
         IdOLEI: 1,
-        Id_UsuarioOLEI: null,
-        PasswordOLEI: null,
-        Id_ClienteDBCLIENTES: null,
+        //Id_UsuarioOLEI: null,
+        //PasswordOLEI: null,
+        //Id_ClienteDBCLIENTES: null,
         Id_TipoMovInv: {
             Id_TipoMovInv: 0,
             Accion: 0,

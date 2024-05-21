@@ -145,6 +145,7 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             res.status(201).json(order);
         }
         catch (error) {
+            console.log({ error });
             yield transaction.rollback();
             throw error;
         }

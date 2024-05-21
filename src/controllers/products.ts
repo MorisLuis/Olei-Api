@@ -133,10 +133,18 @@ const getProducById = async (req: Request, res: Response) => {
     const { Marca } = req.query;
 
     const client = sharedData?.currentClient?.client;
-    const userAlmacen = client?.Id_Almacen;
-    const userListPrice = client?.Id_ListPre;
-
     const user = sharedData.currentUser?.user
+
+    let userListPrice;
+    let userAlmacen;
+
+    if( client ) {
+        userListPrice = client?.Id_ListPre;
+        userAlmacen = client?.Id_Almacen;
+    } else {
+        userListPrice = user?.Id_ListPre;
+        userAlmacen = user?.Id_Almacen;
+    }
 
 
     try {
@@ -145,6 +153,11 @@ const getProducById = async (req: Request, res: Response) => {
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
+
+        console.log({
+            userListPrice,
+            userAlmacen
+        })
 
         const result = await pool.request()
             .input("Codigo", id)
@@ -170,9 +183,9 @@ const getProducById = async (req: Request, res: Response) => {
                 while (attempt < maxAttempts) {
                     let imageUrl;
                     if (attempt === 0) {
-                        imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
+                        imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product?.Codigo.trim()}.jpg`;
                     } else {
-                        imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}_${attempt}.jpg`;
+                        imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product?.Codigo.trim()}_${attempt}.jpg`;
                         /* https://oleistorage.blob.core.windows.net/mxnl00181/001_1.jpg */
                     }
 
@@ -216,8 +229,17 @@ const getProductsByStock = async (req: Request, res: Response) => {
     const { PageNumber, PageSize } = req.query;
     const user = sharedData.currentUser?.user
     const client = sharedData?.currentClient?.client;
-    const userListPrice = client?.Id_ListPre;
-    const userAlmacen = client?.Id_Almacen;
+
+    let userListPrice;
+    let userAlmacen;
+
+    if( client ) {
+        userListPrice = client?.Id_ListPre;
+        userAlmacen = client?.Id_Almacen;
+    } else {
+        userListPrice = user?.Id_ListPre;
+        userAlmacen = user?.Id_Almacen;
+    }
 
     try {
         const pool = await dbConnection();
@@ -242,6 +264,7 @@ const getProductsByStock = async (req: Request, res: Response) => {
             user: user as UserInterface,
             products: productsByStock
         })
+
         res.json(products);
 
     } catch (error: any) {
@@ -253,9 +276,9 @@ const getProductsByStock = async (req: Request, res: Response) => {
 const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
 
     const { CodBar, Codigo } = req.query;
-    const client = sharedData?.currentClient?.client;
-    const Id_ListaPrecios = client?.Id_ListPre;
-    const Id_Almacen = client?.Id_Almacen;
+    const user = sharedData?.currentUser?.user;
+    const Id_ListaPrecios = user?.Id_ListPre;
+    const Id_Almacen = user?.Id_Almacen;
 
     try {
         const pool = await dbConnection();

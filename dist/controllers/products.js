@@ -119,14 +119,26 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const { id } = req.params;
     const { Marca } = req.query;
     const client = (_c = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _c === void 0 ? void 0 : _c.client;
-    const userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
-    const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
     const user = (_d = __1.sharedData.currentUser) === null || _d === void 0 ? void 0 : _d.user;
+    let userListPrice;
+    let userAlmacen;
+    if (client) {
+        userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
+        userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
+    }
+    else {
+        userListPrice = user === null || user === void 0 ? void 0 : user.Id_ListPre;
+        userAlmacen = user === null || user === void 0 ? void 0 : user.Id_Almacen;
+    }
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
+        console.log({
+            userListPrice,
+            userAlmacen
+        });
         const result = yield pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)
@@ -146,10 +158,10 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 while (attempt < maxAttempts) {
                     let imageUrl;
                     if (attempt === 0) {
-                        imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
+                        imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product === null || product === void 0 ? void 0 : product.Codigo.trim()}.jpg`;
                     }
                     else {
-                        imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}_${attempt}.jpg`;
+                        imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product === null || product === void 0 ? void 0 : product.Codigo.trim()}_${attempt}.jpg`;
                         /* https://oleistorage.blob.core.windows.net/mxnl00181/001_1.jpg */
                     }
                     // Verifica si la imagen existe
@@ -187,8 +199,16 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
     const { PageNumber, PageSize } = req.query;
     const user = (_e = __1.sharedData.currentUser) === null || _e === void 0 ? void 0 : _e.user;
     const client = (_f = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _f === void 0 ? void 0 : _f.client;
-    const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
-    const userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
+    let userListPrice;
+    let userAlmacen;
+    if (client) {
+        userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
+        userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
+    }
+    else {
+        userListPrice = user === null || user === void 0 ? void 0 : user.Id_ListPre;
+        userAlmacen = user === null || user === void 0 ? void 0 : user.Id_Almacen;
+    }
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
@@ -217,9 +237,9 @@ exports.getProductsByStock = getProductsByStock;
 const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _g;
     const { CodBar, Codigo } = req.query;
-    const client = (_g = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _g === void 0 ? void 0 : _g.client;
-    const Id_ListaPrecios = client === null || client === void 0 ? void 0 : client.Id_ListPre;
-    const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
+    const user = (_g = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _g === void 0 ? void 0 : _g.user;
+    const Id_ListaPrecios = user === null || user === void 0 ? void 0 : user.Id_ListPre;
+    const Id_Almacen = user === null || user === void 0 ? void 0 : user.Id_Almacen;
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {

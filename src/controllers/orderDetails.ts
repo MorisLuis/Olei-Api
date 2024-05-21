@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { dbConnection, querys } from "../database";
+import { dbConnection } from "../database";
 import sql from 'mssql';
 import { sharedData } from "..";
 import PorductInterface from "../interface/product";
@@ -26,9 +26,7 @@ const postOrderDetails = async (req: Request, res: Response) => {
         const transaction = new sql.Transaction(pool);
 
         try {
-
             await transaction.begin();
-            //const request = new sql.Request(transaction);
             let count = 0;
             const orderDetails = [];  // Store every orderDetails from the for.
 
@@ -49,6 +47,7 @@ const postOrderDetails = async (req: Request, res: Response) => {
 
                 const results: any = result.recordset[0];
                 const { SerieActiva, Folio, Valor, Id_Unidad, SwNs, SKU, Costo } = results;
+
 
                 if (!results) {
                     return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
@@ -91,7 +90,7 @@ const postOrderDetails = async (req: Request, res: Response) => {
                     .input("SKU", sql.NChar(20), postData.SKU)
                     .input("Partida", sql.SmallInt, postData.Partida)
                     .input("Costo", sql.Decimal(18, 6), postData.Costo)
-                    .query(postOrderDetailsQuery)
+                    .query(postOrderDetailsQuery);
 
                 orderDetails.push(resultOrderPost.recordset[0]);
 
@@ -113,7 +112,7 @@ const postOrderDetails = async (req: Request, res: Response) => {
         }
 
     } catch (error: any) {
-        console.error('Error al crear el post:', error.message);
+        console.error('Error al crear el orde details:', error.message);
         res.status(500).json({ error: error });
     }
 }

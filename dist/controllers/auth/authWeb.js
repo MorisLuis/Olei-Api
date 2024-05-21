@@ -12,11 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.renewWeb = exports.logout = exports.loginWeb = void 0;
+exports.logout = exports.renewWeb = exports.loginWeb = void 0;
 const database_1 = require("../../database");
-const config_1 = __importDefault(require("../../config"));
-const __1 = require("../..");
 const generate_jwt_1 = require("../../helpers/generate-jwt");
+const __1 = require("../..");
+const config_1 = __importDefault(require("../../config"));
 const moment_1 = __importDefault(require("moment"));
 const loginWeb = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -27,9 +27,12 @@ const loginWeb = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         // Search for the user in the database using their email.
         const { email, password } = req.body;
+        if (email === "" || password === "") {
+            return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
+        }
         const user = yield getUserByEmailWeb(mainPool, email);
         if (!user) {
-            return res.status(404).json({ error: 'Correo no encontrada' });
+            return res.status(404).json({ error: 'Correo no encontrado' });
         }
         if (user.PasswordOOL.trim() !== password) {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
@@ -65,10 +68,28 @@ const loginWeb = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     catch (error) {
         console.log({ error });
-        return res.status(500).send(error.message);
+        return res.status(500).json({ error: error.message || 'Unexpected error' });
     }
 });
 exports.loginWeb = loginWeb;
+const renewWeb = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const user = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user;
+    try {
+        if (!user)
+            return;
+        const token = yield (0, generate_jwt_1.generateJWT)({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
+        res.json({
+            user,
+            token
+        });
+    }
+    catch (error) {
+        res.status(500).send(error.message);
+        console.log({ error });
+    }
+});
+exports.renewWeb = renewWeb;
 const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield (0, database_1.closeDbConnection)();
@@ -86,26 +107,7 @@ const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.logout = logout;
-const renewWeb = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    console.log("renewWeb");
-    const user = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user;
-    try {
-        if (!user)
-            return;
-        const token = yield (0, generate_jwt_1.generateJWT)({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
-        res.json({
-            user,
-            token
-        });
-    }
-    catch (error) {
-        res.status(500).send(error.message);
-        console.log({ error });
-    }
-});
-exports.renewWeb = renewWeb;
-// Utils
+//Utils
 const getUserByEmailWeb = (mainPool, email) => __awaiter(void 0, void 0, void 0, function* () {
     const query_DB = database_1.querys.authWeb;
     const result = yield mainPool.request().input('email', email).query(query_DB);

@@ -8,6 +8,7 @@ const products_1 = require("../controllers/products");
 const router = (0, express_1.default)();
 router.get("/byStock", products_1.getProductsByStock);
 router.get("/byStockAndCodeBar", products_1.getProductByStockAndCodeBar);
+// This enndpoint is used in WEB and APP to get product details.
 router.get("/:id", products_1.getProducById);
 router.get("/", products_1.getProducts);
 router.get("/count", products_1.getTotalProducts);

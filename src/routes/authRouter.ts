@@ -1,6 +1,7 @@
 import { Router } from "express";
-import {  renew, loginDB, login, renewWeb, logout, loginWeb } from "../controllers/auth/auth";
+import {  renew, loginDB, login } from "../controllers/auth/auth";
 import { validateJWT } from "../helpers/validate-jwt";
+import { loginWeb, logout, renewWeb } from "../controllers/auth/authWeb";
 
 const router = Router();
 

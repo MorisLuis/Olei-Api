@@ -134,7 +134,14 @@ const searchProductInventory = async (req: Request, res: Response) => {
 
     const { searchTerm } = req.query;
     const client = sharedData?.currentClient?.client;
-    const userListPrice = client?.Id_ListPre;
+    const user = sharedData.currentUser?.user;
+    let userListPrice;
+
+    if( client ) {
+        userListPrice = client?.Id_ListPre;
+    } else {
+        userListPrice = user?.Id_ListPre;
+    }
 
     try {
         const pool = await dbConnection();

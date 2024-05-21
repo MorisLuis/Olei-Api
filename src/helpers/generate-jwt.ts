@@ -7,7 +7,7 @@ interface generateJWTProps {
 
 const generateJWT = ({ id, rol }: generateJWTProps) => {
     return new Promise((resolve, reject) => {
-        const payload = { id, rol}
+        const payload = { id, rol }
         jwt.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
             expiresIn: '8h'
         }, (error, token) => {
@@ -22,14 +22,14 @@ const generateJWT = ({ id, rol }: generateJWTProps) => {
 }
 
 interface generateJWTDBProps {
-    servidor: string,
-    database: string
+    IdUsuarioOLEI: string,
+    PasswordOLEI: string
 }
 
 
-const generateJWTDB = ({ servidor, database }: generateJWTDBProps) => {
+const generateJWTDB = ({ IdUsuarioOLEI, PasswordOLEI }: generateJWTDBProps) => {
     return new Promise((resolve, reject) => {
-        const payload = { servidor, database}
+        const payload = { IdUsuarioOLEI, PasswordOLEI }
         jwt.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
             expiresIn: '1y'
         }, (error, token) => {

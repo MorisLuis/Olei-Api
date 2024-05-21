@@ -1,10 +1,11 @@
 import moment from 'moment-timezone';
-import { DateTime } from 'luxon';
 
 export const currentTime = () => {
-    var m = moment.utc("DD-MM-YYYY h:mm:ss A"); // parse input as UTC
-    var tz = 'America/Monterrey'; // example value, you can use moment.tz.guess()
-    console.log(m.clone().tz(tz).format("DD-MM-YYYY h:mm:ss")); // 30-03-2017 2:34:22 AM
+    const tz = 'America/Monterrey'; // Zona horaria deseada
+    const format = "YYYY-MM-DDTHH:mm:ss.sssZ"; // Formato ISO 8601
 
-    return m.clone().tz(tz).format("DD-MM-YYYY h:mm:ss");
+    // Obtener la fecha y hora actual en la zona horaria deseada y formatearla
+    const currentDateTime = moment().tz(tz).format(format);
+
+    return currentDateTime;
 }

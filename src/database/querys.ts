@@ -22,6 +22,27 @@ export const querys = {
         WHERE Id_Cliente = @Id_Cliente
     ` ,
 
+    authDatabase: `
+        SELECT [IdOLEI]
+            ,[Id_Almacen]
+            ,[Id_Cliente]
+            ,[Nombre]
+            ,[Id_ListPre]
+            ,[IdUsuarioOLEI]
+            ,[PasswordOLEI]
+            ,[ServidorSQL]
+            ,[BaseSQL]
+            ,[UsuarioSQL]
+            ,[PasswordSQL]
+            ,[Vigencia]
+            ,[SwImagenes]
+            ,[SwSinStock]
+            ,[SwSinPrecio]
+            ,[TipoDocOO]
+        FROM [dbo].[CLIENTES]
+        WHERE IdUsuarioOLEI = @IdUsuarioOLEI
+    `,
+
     getTypeOfMovementInitial: `
         SELECT TOP (1) 
             [Id_TipoMovInv],

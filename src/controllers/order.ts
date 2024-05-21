@@ -39,6 +39,7 @@ const postOrder = async (req: Request, res: Response) => {
         try {
             const request = new sql.Request(transaction);
             const currentDate = currentTime();
+
             const previewDataToPostOrder = await request
                 .input("Id_Almacen_Preview", Id_Almacen)
                 .input("Id_Cliente_Preview", Id_Cliente)
@@ -147,6 +148,7 @@ const postOrder = async (req: Request, res: Response) => {
             res.status(201).json(order);
 
         } catch (error) {
+            console.log({error})
             await transaction.rollback();
             throw error;
         } finally {

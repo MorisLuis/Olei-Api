@@ -20,9 +20,9 @@ const generateJWT = ({ id, rol }) => {
     });
 };
 exports.generateJWT = generateJWT;
-const generateJWTDB = ({ servidor, database }) => {
+const generateJWTDB = ({ IdUsuarioOLEI, PasswordOLEI }) => {
     return new Promise((resolve, reject) => {
-        const payload = { servidor, database };
+        const payload = { IdUsuarioOLEI, PasswordOLEI };
         jsonwebtoken_1.default.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
             expiresIn: '1y'
         }, (error, token) => {
