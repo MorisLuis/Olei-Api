@@ -6,7 +6,7 @@ exports.querys = {
     auth: ` 
         SELECT *
         FROM [dbo].[USUARIOS]
-        WHERE EMail = @email
+        WHERE Id_Usuario = @Id_Usuario
     `,
     authWeb: ` 
         SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio, UC.TipoDocOO, UC.IdOLEI,

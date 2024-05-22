@@ -71,11 +71,11 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return res.status(500).json({ error: 'Error connecting to the main database' });
         }
         // Search for the user in the database using their email.
-        const { email, password } = req.body;
-        if (email === "" || password === "") {
+        const { Id_Usuario, password } = req.body;
+        if (Id_Usuario.trim() === "" || password.trim() === "") {
             return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
         }
-        const user = yield getUserByEmail(mainPool, email);
+        const user = yield getUserByEmail(mainPool, Id_Usuario);
         if (!user) {
             return res.status(404).json({ error: 'Correo no encontrado' });
         }
@@ -139,9 +139,9 @@ const renew = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.renew = renew;
 // Utils
-const getUserByEmail = (mainPool, email) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserByEmail = (mainPool, Id_Usuario) => __awaiter(void 0, void 0, void 0, function* () {
     const query_DB = database_1.querys.auth;
-    const result = yield mainPool.request().input('email', email).query(query_DB);
+    const result = yield mainPool.request().input('Id_Usuario', Id_Usuario.trim()).query(query_DB);
     return result === null || result === void 0 ? void 0 : result.recordset[0];
 });
 const isSubscriptionExpired = (dueDate) => {
