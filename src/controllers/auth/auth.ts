@@ -92,13 +92,13 @@ const login = async (req: Request, res: Response) => {
         }
 
         // Search for the user in the database using their email.
-        const { email, password } = req.body;
+        const { Id_Usuario, password } = req.body;
 
-        if (email === "" || password === "") {
+        if (Id_Usuario.trim() === "" || password.trim() === "") {
             return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
         }
 
-        const user = await getUserByEmail(mainPool, email);
+        const user = await getUserByEmail(mainPool, Id_Usuario);
 
         if (!user) {
             return res.status(404).json({ error: 'Correo no encontrado' });
@@ -179,9 +179,9 @@ const renew = async (req: Req, res: Response) => {
 
 
 // Utils
-const getUserByEmail = async (mainPool: any, email: string) => {
+const getUserByEmail = async (mainPool: any, Id_Usuario: string) => {
     const query_DB = querys.auth;
-    const result = await mainPool.request().input('email', email).query(query_DB);
+    const result = await mainPool.request().input('Id_Usuario', Id_Usuario.trim() ).query(query_DB);
     return result?.recordset[0];
 };
 

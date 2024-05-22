@@ -4,7 +4,7 @@ export const querys = {
     auth: ` 
         SELECT *
         FROM [dbo].[USUARIOS]
-        WHERE EMail = @email
+        WHERE Id_Usuario = @Id_Usuario
     `,
 
     authWeb: ` 
