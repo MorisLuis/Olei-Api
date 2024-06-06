@@ -38,7 +38,7 @@ const updateCostos = async (req: Request, res: Response) => {
             const keys = Object.keys(body);
             const query = costosQuerys.updateCostos;
 
-            if ( body.codeRandom === "true" ) {
+            if (body.codeRandom === "true") {
                 const uniqueId = uuidv4();
                 const codigo = uniqueId.replace(/-/g, '').substring(0, 10);
                 body.CodBar = codigo
@@ -46,7 +46,11 @@ const updateCostos = async (req: Request, res: Response) => {
 
             // Make forEach to create de SET of the query.
             keys.forEach((key) => {
-                request.input(key, sql.NVarChar, body[key]);
+                if(key === 'codeRandom') {
+                    request.input('CodBar', sql.NVarChar, body['CodBar']);
+                } else {
+                    request.input(key, sql.NVarChar, body[key]);
+                }
             });
 
             await request.query(query);

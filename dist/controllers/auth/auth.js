@@ -37,7 +37,7 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
         __1.sharedData.currentUser = {
-            user: Object.assign(Object.assign({}, (_a = __1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user), { Nombre: cleanResult.Nombre, Id_ListPre: cleanResult.Id_ListPre, Id_Almacen: cleanResult.Id_Almacen, Id_UsuarioOOL: cleanResult.IdUsuarioOLEI, PasswordOOL: cleanResult.PasswordOLEI, ServidorSQL: cleanResult.ServidorSQL, BaseSQL: cleanResult.BaseSQL, TipoUsuario: 1, PrivilegioTipoCliente: 1, PrecioIncIVA: 1, SwImagenes: cleanResult.SwImagenes === true ? 1 : 0, SwSinStock: cleanResult.SwSinStock === true ? 1 : 0, SwsinPrecio: cleanResult.SwsinPrecio === true ? 1 : 0, TipoDocOO: cleanResult.TipoDocOO, IdOLEI: cleanResult.IdOLEI, Vigencia: cleanResult.Vigencia })
+            user: Object.assign(Object.assign({}, (_a = __1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user), { Nombre: cleanResult.Nombre, Id_ListPre: cleanResult.Id_ListPre, Id_Almacen: cleanResult.Id_Almacen, Id_UsuarioOOL: cleanResult.IdUsuarioOLEI, PasswordOOL: cleanResult.PasswordOLEI, ServidorSQL: cleanResult.ServidorSQL, BaseSQL: cleanResult.BaseSQL, TipoUsuario: 1, PrivilegioTipoCliente: 1, PrecioIncIVA: 1, SwImagenes: cleanResult.SwImagenes === true ? 1 : 0, SwSinStock: cleanResult.SwSinStock === true ? 1 : 0, SwsinPrecio: cleanResult.SwsinPrecio === true ? 1 : 0, TipoDocOO: cleanResult.TipoDocOO, IdOLEI: cleanResult.IdOLEI, Vigencia: cleanResult.Vigencia, RazonSocial: cleanResult.RazonSocial })
         };
         __1.sharedData.userConnection = {
             connection: {
@@ -50,6 +50,7 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const tokenDB = yield (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI, PasswordOLEI });
         return res.json({
             tokenDB,
+            user: __1.sharedData.currentUser.user,
             userDB: {
                 servidor: cleanResult.ServidorSQL,
                 database: cleanResult.BaseSQL
@@ -121,13 +122,15 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.login = login;
 const renew = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _h;
-    const user = (_h = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.userConnection) === null || _h === void 0 ? void 0 : _h.connection;
+    var _h, _j;
+    const userDB = (_h = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.userConnection) === null || _h === void 0 ? void 0 : _h.connection;
+    const user = (_j = __1.sharedData.currentUser) === null || _j === void 0 ? void 0 : _j.user;
     try {
-        if (!user)
+        if (!userDB)
             return;
-        const token = yield (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI: user.server, PasswordOLEI: user.database });
+        const token = yield (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI: userDB.server, PasswordOLEI: userDB.database });
         res.json({
+            userDB,
             user,
             token
         });

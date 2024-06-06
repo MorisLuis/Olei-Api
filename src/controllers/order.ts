@@ -21,7 +21,6 @@ const postOrder = async (req: Request, res: Response) => {
         const TipoDocOO = user?.TipoDocOO;
 
         const pool = await dbConnection();
-        
 
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -144,6 +143,8 @@ const postOrder = async (req: Request, res: Response) => {
 
             await transaction.commit();
             const order = result.recordset[0];
+
+            console.log({order})
 
             res.status(201).json(order);
 

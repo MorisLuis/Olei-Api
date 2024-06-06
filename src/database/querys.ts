@@ -35,6 +35,7 @@ export const querys = {
             ,[UsuarioSQL]
             ,[PasswordSQL]
             ,[Vigencia]
+            ,[RazonSocial]
             ,[SwImagenes]
             ,[SwSinStock]
             ,[SwSinPrecio]

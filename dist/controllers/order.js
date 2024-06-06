@@ -142,6 +142,7 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 .query(postOrderQuery);
             yield transaction.commit();
             const order = result.recordset[0];
+            console.log({ order });
             res.status(201).json(order);
         }
         catch (error) {

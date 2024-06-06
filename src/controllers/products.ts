@@ -154,11 +154,6 @@ const getProducById = async (req: Request, res: Response) => {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
 
-        console.log({
-            userListPrice,
-            userAlmacen
-        })
-
         const result = await pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)

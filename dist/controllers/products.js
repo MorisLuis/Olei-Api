@@ -135,10 +135,6 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
-        console.log({
-            userListPrice,
-            userAlmacen
-        });
         const result = yield pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)

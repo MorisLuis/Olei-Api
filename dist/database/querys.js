@@ -34,6 +34,7 @@ exports.querys = {
             ,[UsuarioSQL]
             ,[PasswordSQL]
             ,[Vigencia]
+            ,[RazonSocial]
             ,[SwImagenes]
             ,[SwSinStock]
             ,[SwSinPrecio]

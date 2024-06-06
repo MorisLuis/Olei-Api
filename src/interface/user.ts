@@ -45,6 +45,8 @@ export default interface UserInterface {
     // Represent if show the products without price (1)
     SwsinPrecio: 0 | 1;
 
+    RazonSocial: string,
+
     //
     TipoDocOO: number;
 

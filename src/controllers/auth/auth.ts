@@ -50,7 +50,8 @@ const loginDB = async (req: Request, res: Response) => {
                 SwsinPrecio: cleanResult.SwsinPrecio === true ? 1 : 0,
                 TipoDocOO: cleanResult.TipoDocOO,
                 IdOLEI: cleanResult.IdOLEI,
-                Vigencia: cleanResult.Vigencia
+                Vigencia: cleanResult.Vigencia,
+                RazonSocial: cleanResult.RazonSocial
             }
         };
 
@@ -68,6 +69,7 @@ const loginDB = async (req: Request, res: Response) => {
 
         return res.json({
             tokenDB,
+            user: sharedData.currentUser.user,
             userDB: {
                 servidor: cleanResult.ServidorSQL,
                 database: cleanResult.BaseSQL
@@ -161,16 +163,19 @@ interface Req extends Request {
 
 const renew = async (req: Req, res: Response) => {
 
-    const user = sharedData?.userConnection?.connection;
+    const userDB = sharedData?.userConnection?.connection;
+    const user = sharedData.currentUser?.user;
 
     try {
-        if (!user) return;
-        const token = await generateJWTDB({ IdUsuarioOLEI: user.server, PasswordOLEI: user.database as string });
+        if (!userDB) return;
+        const token = await generateJWTDB({ IdUsuarioOLEI: userDB.server, PasswordOLEI: userDB.database as string });
 
         res.json({
+            userDB,
             user,
             token
         });
+
     } catch (error: any) {
         res.status(500).send(error.message);
         console.log({ error })

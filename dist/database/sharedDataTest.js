@@ -22,6 +22,7 @@ exports.currentUserTest = {
         SwSinStock: 1,
         // Represent if show the products without price (1)
         SwsinPrecio: 1,
+        RazonSocial: "RAZON DE PRUEBA",
         TipoDocOO: 0,
         IdOLEI: 1,
         //Id_UsuarioOLEI: null,

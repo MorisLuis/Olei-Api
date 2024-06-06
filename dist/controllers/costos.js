@@ -44,7 +44,12 @@ const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             }
             // Make forEach to create de SET of the query.
             keys.forEach((key) => {
-                request.input(key, mssql_1.default.NVarChar, body[key]);
+                if (key === 'codeRandom') {
+                    request.input('CodBar', mssql_1.default.NVarChar, body['CodBar']);
+                }
+                else {
+                    request.input(key, mssql_1.default.NVarChar, body[key]);
+                }
             });
             yield request.query(query);
             yield transaction.commit();
