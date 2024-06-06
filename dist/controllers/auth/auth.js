@@ -27,6 +27,7 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
         const mainPool = yield (0, database_1.dbConnection)(config_1.default.dbServer, config_1.default.dbDatabase);
+        console.log({ mainPool });
         if (!mainPool) {
             return res.status(500).json({ error: 'Error connecting to the main database' });
         }
@@ -47,6 +48,9 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 database: cleanResult.BaseSQL.trim()
             }
         };
+        console.log({
+            IdUsuarioOLEI, PasswordOLEI
+        });
         const tokenDB = yield (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI, PasswordOLEI });
         return res.json({
             tokenDB,

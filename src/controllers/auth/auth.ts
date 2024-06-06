@@ -18,6 +18,7 @@ const loginDB = async (req: Request, res: Response) => {
         // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
         const mainPool = await dbConnection(config.dbServer, config.dbDatabase);
 
+        console.log({mainPool})
 
         if (!mainPool) {
             return res.status(500).json({ error: 'Error connecting to the main database' });
@@ -63,6 +64,10 @@ const loginDB = async (req: Request, res: Response) => {
                 database: cleanResult.BaseSQL.trim()
             }
         };
+
+        console.log({
+            IdUsuarioOLEI, PasswordOLEI
+        })
 
 
         const tokenDB = await generateJWTDB({ IdUsuarioOLEI, PasswordOLEI });
