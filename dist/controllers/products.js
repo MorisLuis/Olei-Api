@@ -236,18 +236,40 @@ const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void
     const user = (_g = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _g === void 0 ? void 0 : _g.user;
     const Id_ListaPrecios = user === null || user === void 0 ? void 0 : user.Id_ListPre;
     const Id_Almacen = user === null || user === void 0 ? void 0 : user.Id_Almacen;
+    console.log({ user });
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
-        let query = products_1.productsQuerys.getProductByStockAndCodeBar;
-        const request = yield pool.request()
-            .input("CodBar", CodBar === 'undefined' ? null : CodBar)
-            .input("Codigo", Codigo === 'undefined' ? null : Codigo)
-            .input("Id_ListaPrecios", Id_ListaPrecios)
-            .input("Id_Almacen", Id_Almacen)
-            .query(query);
+        let isEAN13orUPC14 = false;
+        if (CodBar) {
+            isEAN13orUPC14 = guessBarcodeType(CodBar);
+            console.log({ isEAN13orUPC14 });
+        }
+        let request;
+        if (isEAN13orUPC14) {
+            console.log("first");
+            console.log({ CodBar });
+            console.log({ Id_ListaPrecios });
+            console.log({ Id_Almacen });
+            let query = products_1.productsQuerys.getProductByStockAndCodeBarDV;
+            request = yield pool.request()
+                .input("CodBar", CodBar === 'undefined' ? null : CodBar)
+                .input("Id_ListaPrecios", Id_ListaPrecios)
+                .input("Id_Almacen", Id_Almacen)
+                .query(query);
+        }
+        else {
+            console.log("second");
+            let query = products_1.productsQuerys.getProductByStockAndCodeBar;
+            request = yield pool.request()
+                .input("CodBar", CodBar === 'undefined' ? null : CodBar)
+                .input("Codigo", Codigo === 'undefined' ? null : Codigo)
+                .input("Id_ListaPrecios", Id_ListaPrecios)
+                .input("Id_Almacen", Id_Almacen)
+                .query(query);
+        }
         const productByStockAndCodeBar = request.recordset;
         res.json(productByStockAndCodeBar);
     }
@@ -305,4 +327,15 @@ function executeQuery(pool, query, params) {
         }
     });
 }
+const guessBarcodeType = (code) => {
+    if (/^[0-9]{12}$/.test(code)) {
+        //UPC-A
+        return true;
+    }
+    else if (/^[0-9]{12,13}$/.test(code)) {
+        //EAN-13
+        return true;
+    }
+    return false;
+};
 //# sourceMappingURL=products.js.map

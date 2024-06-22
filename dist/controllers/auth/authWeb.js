@@ -76,8 +76,10 @@ const renewWeb = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const user = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user;
     try {
-        if (!user)
-            return;
+        if (!user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+        ;
         const token = yield (0, generate_jwt_1.generateJWT)({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
         res.json({
             user,
@@ -86,7 +88,6 @@ const renewWeb = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     catch (error) {
         res.status(500).send(error.message);
-        console.log({ error });
     }
 });
 exports.renewWeb = renewWeb;

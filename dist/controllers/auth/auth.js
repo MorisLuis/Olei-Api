@@ -20,16 +20,15 @@ const config_1 = __importDefault(require("../../config"));
 const moment_1 = __importDefault(require("moment"));
 const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
+    // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
+    const mainPool = yield (0, database_1.dbConnection)(config_1.default.dbServer, config_1.default.dbDatabase);
+    if (!mainPool) {
+        return res.status(500).json({ error: 'Error connecting to the main database' });
+    }
     try {
         const { IdUsuarioOLEI, PasswordOLEI } = req.body;
         if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
             return res.status(400).json({ error: 'Necesario enviar usuario y contraseña' });
-        }
-        // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
-        const mainPool = yield (0, database_1.dbConnection)(config_1.default.dbServer, config_1.default.dbDatabase);
-        console.log({ mainPool });
-        if (!mainPool) {
-            return res.status(500).json({ error: 'Error connecting to the main database' });
         }
         const query_DB = database_1.querys.authDatabase;
         const result = yield mainPool.request().input('IdUsuarioOLEI', IdUsuarioOLEI).query(query_DB);
@@ -48,9 +47,6 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 database: cleanResult.BaseSQL.trim()
             }
         };
-        console.log({
-            IdUsuarioOLEI, PasswordOLEI
-        });
         const tokenDB = yield (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI, PasswordOLEI });
         return res.json({
             tokenDB,
@@ -130,8 +126,10 @@ const renew = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userDB = (_h = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.userConnection) === null || _h === void 0 ? void 0 : _h.connection;
     const user = (_j = __1.sharedData.currentUser) === null || _j === void 0 ? void 0 : _j.user;
     try {
-        if (!userDB)
-            return;
+        if (!userDB) {
+            return res.status(401).json({ message: 'UserDB not authenticated' });
+        }
+        ;
         const token = yield (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI: userDB.server, PasswordOLEI: userDB.database });
         res.json({
             userDB,
