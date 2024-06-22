@@ -236,7 +236,6 @@ const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void
     const user = (_g = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _g === void 0 ? void 0 : _g.user;
     const Id_ListaPrecios = user === null || user === void 0 ? void 0 : user.Id_ListPre;
     const Id_Almacen = user === null || user === void 0 ? void 0 : user.Id_Almacen;
-    console.log({ user });
     try {
         const pool = yield (0, database_1.dbConnection)();
         if (!pool) {
@@ -245,14 +244,9 @@ const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void
         let isEAN13orUPC14 = false;
         if (CodBar) {
             isEAN13orUPC14 = guessBarcodeType(CodBar);
-            console.log({ isEAN13orUPC14 });
         }
         let request;
         if (isEAN13orUPC14) {
-            console.log("first");
-            console.log({ CodBar });
-            console.log({ Id_ListaPrecios });
-            console.log({ Id_Almacen });
             let query = products_1.productsQuerys.getProductByStockAndCodeBarDV;
             request = yield pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)
@@ -261,7 +255,6 @@ const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void
                 .query(query);
         }
         else {
-            console.log("second");
             let query = products_1.productsQuerys.getProductByStockAndCodeBar;
             request = yield pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)

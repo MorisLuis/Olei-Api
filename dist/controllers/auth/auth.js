@@ -61,16 +61,19 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         console.log({ error });
         return res.status(500).send(error.message);
     }
+    finally {
+        mainPool.close();
+    }
 });
 exports.loginDB = loginDB;
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _b, _c, _d, _e, _f, _g;
+    // STEP 1 - LOGIN
+    const mainPool = yield (0, database_1.dbConnection)((_b = __1.sharedData.userConnection) === null || _b === void 0 ? void 0 : _b.connection.server, (_c = __1.sharedData.userConnection) === null || _c === void 0 ? void 0 : _c.connection.database);
+    if (!mainPool) {
+        return res.status(500).json({ error: 'Error connecting to the main database' });
+    }
     try {
-        // STEP 1 - LOGIN
-        const mainPool = yield (0, database_1.dbConnection)((_b = __1.sharedData.userConnection) === null || _b === void 0 ? void 0 : _b.connection.server, (_c = __1.sharedData.userConnection) === null || _c === void 0 ? void 0 : _c.connection.database);
-        if (!mainPool) {
-            return res.status(500).json({ error: 'Error connecting to the main database' });
-        }
         // Search for the user in the database using their email.
         const { Id_Usuario, password } = req.body;
         if (Id_Usuario.trim() === "" || password.trim() === "") {
@@ -118,6 +121,9 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     catch (error) {
         console.log({ error });
         return res.status(500).json({ error: error.message || 'Unexpected error' });
+    }
+    finally {
+        mainPool.close();
     }
 });
 exports.login = login;
