@@ -243,6 +243,7 @@ const getProductsByStock = async (req: Request, res: Response) => {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
 
+
         let query = productsQuerys.getAllProductsByStock;
 
         const request = await pool.request()
@@ -275,6 +276,9 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
     const Id_ListaPrecios = user?.Id_ListPre;
     const Id_Almacen = user?.Id_Almacen;
 
+
+    console.log({user})
+
     try {
         const pool = await dbConnection();
 
@@ -282,17 +286,38 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
 
-        let query = productsQuerys.getProductByStockAndCodeBar;
-        const request = await pool.request()
-            .input("CodBar", CodBar === 'undefined' ? null : CodBar)
-            .input("Codigo", Codigo === 'undefined' ? null : Codigo)
-            .input("Id_ListaPrecios", Id_ListaPrecios)
-            .input("Id_Almacen", Id_Almacen)
-            .query(query);
 
+        let isEAN13orUPC14 = false;
+        if ( CodBar ) {
+            isEAN13orUPC14 = guessBarcodeType(CodBar)
+            console.log({isEAN13orUPC14})
+        }
+        
 
+        let request
+        if(isEAN13orUPC14)  {
+            console.log("first")
+            console.log({CodBar})
+            console.log({Id_ListaPrecios})
+            console.log({Id_Almacen})
+            let query = productsQuerys.getProductByStockAndCodeBarDV;
+            request = await pool.request()
+                .input("CodBar", CodBar === 'undefined' ? null : CodBar)
+                .input("Id_ListaPrecios", Id_ListaPrecios)
+                .input("Id_Almacen", Id_Almacen)
+                .query(query);
+
+        } else {
+            console.log("second")
+            let query = productsQuerys.getProductByStockAndCodeBar;
+            request = await pool.request()
+                .input("CodBar", CodBar === 'undefined' ? null : CodBar)
+                .input("Codigo", Codigo === 'undefined' ? null : Codigo)
+                .input("Id_ListaPrecios", Id_ListaPrecios)
+                .input("Id_Almacen", Id_Almacen)
+                .query(query);
+        }
         const productByStockAndCodeBar = request.recordset;
-
         res.json(productByStockAndCodeBar)
 
     } catch (error: any) {
@@ -363,6 +388,19 @@ async function executeQuery(pool: sql.ConnectionPool, query: string, params: any
         throw error;
     }
 }
+
+const guessBarcodeType = (code: any) => {
+
+    if (/^[0-9]{12}$/.test(code)) {
+        //UPC-A
+        return true;
+    } else if (/^[0-9]{12,13}$/.test(code)) {
+        //EAN-13
+        return true;
+    }
+
+    return false;
+};
 
 
 export {

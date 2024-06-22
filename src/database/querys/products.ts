@@ -100,6 +100,27 @@ export const productsQuerys = {
         AND E.Id_Almacen = @Id_Almacen
     `,
 
+    //This is a double verification to 'UPC-A' and 'EAN-13' codebar.
+    getProductByStockAndCodeBarDV: `
+        SELECT
+            TRIM(P.Descripcion) AS Descripcion,
+            TRIM(P.Codigo) AS Codigo,
+            E.Existencia,
+            E.Id_Almacen,
+            M.Id_Marca,
+            PR.Id_ListaPrecios,
+            TRIM(CT.CodBar) AS CodBar,
+            TRIM(M.Nombre) AS Marca
+        FROM [dbo].[PRODUCTOS] P
+            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+            JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
+        WHERE PR.Id_ListaPrecios = @Id_ListaPrecios AND E.Id_Almacen = @Id_Almacen
+            AND (TRIM(CT.CodBar) = @CodBar OR
+            TRIM(CT.CodBar) = SUBSTRING(@CodBar, 2, LEN(@CodBar) - 1))
+    `,
+
     // Get number of products.
     getTotalProducts: "SELECT COUNT(*) FROM [dbo].[CLIENTES]",
 

@@ -81,7 +81,10 @@ const renewWeb = async (req: Request, res: Response) => {
     const user = sharedData?.currentUser?.user;
 
     try {
-        if (!user) return;
+        if (!user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        };
+
         const token = await generateJWT({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
 
         res.json({
@@ -90,7 +93,6 @@ const renewWeb = async (req: Request, res: Response) => {
         });
     } catch (error: any) {
         res.status(500).send(error.message);
-        console.log({ error })
     }
 }
 

@@ -5,23 +5,22 @@ import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
 import { sharedData } from '../..';
 import config from '../../config';
 import moment from 'moment';
+import { pool } from 'mssql';
 
 const loginDB = async (req: Request, res: Response) => {
+
+    // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
+    const mainPool = await dbConnection(config.dbServer, config.dbDatabase);
+
+    if (!mainPool) {
+        return res.status(500).json({ error: 'Error connecting to the main database' });
+    }
 
     try {
         const { IdUsuarioOLEI, PasswordOLEI } = req.body;
 
         if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
             return res.status(400).json({ error: 'Necesario enviar usuario y contraseña' });
-        }
-
-        // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
-        const mainPool = await dbConnection(config.dbServer, config.dbDatabase);
-
-        console.log({mainPool})
-
-        if (!mainPool) {
-            return res.status(500).json({ error: 'Error connecting to the main database' });
         }
 
         const query_DB = querys.authDatabase;
@@ -65,11 +64,6 @@ const loginDB = async (req: Request, res: Response) => {
             }
         };
 
-        console.log({
-            IdUsuarioOLEI, PasswordOLEI
-        })
-
-
         const tokenDB = await generateJWTDB({ IdUsuarioOLEI, PasswordOLEI });
 
         return res.json({
@@ -85,7 +79,8 @@ const loginDB = async (req: Request, res: Response) => {
         console.log({ error })
         return res.status(500).send(error.message);
     }
-};
+
+}
 
 const login = async (req: Request, res: Response) => {
 
@@ -115,7 +110,7 @@ const login = async (req: Request, res: Response) => {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
 
-        if(!sharedData.currentUser?.user.Vigencia) return;
+        if (!sharedData.currentUser?.user.Vigencia) return;
 
         // Get the user's subscription expiration date.
         const dueDate = await isSubscriptionExpired(sharedData.currentUser?.user.Vigencia);
@@ -150,6 +145,7 @@ const login = async (req: Request, res: Response) => {
 
         const token = await generateJWT({ id: user.EMail, rol: user.Id_Perfil });
 
+
         return res.json({
             user,
             token
@@ -172,7 +168,10 @@ const renew = async (req: Req, res: Response) => {
     const user = sharedData.currentUser?.user;
 
     try {
-        if (!userDB) return;
+        if (!userDB) {
+            return res.status(401).json({ message: 'UserDB not authenticated' });
+        };
+
         const token = await generateJWTDB({ IdUsuarioOLEI: userDB.server, PasswordOLEI: userDB.database as string });
 
         res.json({
@@ -191,7 +190,7 @@ const renew = async (req: Req, res: Response) => {
 // Utils
 const getUserByEmail = async (mainPool: any, Id_Usuario: string) => {
     const query_DB = querys.auth;
-    const result = await mainPool.request().input('Id_Usuario', Id_Usuario.trim() ).query(query_DB);
+    const result = await mainPool.request().input('Id_Usuario', Id_Usuario.trim()).query(query_DB);
     return result?.recordset[0];
 };
 
