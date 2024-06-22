@@ -5,7 +5,6 @@ import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
 import { sharedData } from '../..';
 import config from '../../config';
 import moment from 'moment';
-import { pool } from 'mssql';
 
 const loginDB = async (req: Request, res: Response) => {
 
@@ -78,21 +77,21 @@ const loginDB = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.log({ error })
         return res.status(500).send(error.message);
+    } finally {
+        mainPool.close()
     }
-
 }
 
 const login = async (req: Request, res: Response) => {
 
+    // STEP 1 - LOGIN
+    const mainPool = await dbConnection(sharedData.userConnection?.connection.server, sharedData.userConnection?.connection.database);
+
+    if (!mainPool) {
+        return res.status(500).json({ error: 'Error connecting to the main database' });
+    }
+
     try {
-
-        // STEP 1 - LOGIN
-        const mainPool = await dbConnection(sharedData.userConnection?.connection.server, sharedData.userConnection?.connection.database);
-
-        if (!mainPool) {
-            return res.status(500).json({ error: 'Error connecting to the main database' });
-        }
-
         // Search for the user in the database using their email.
         const { Id_Usuario, password } = req.body;
 
@@ -154,7 +153,10 @@ const login = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.log({ error })
         return res.status(500).json({ error: error.message || 'Unexpected error' });
+    } finally {
+        mainPool.close()
     }
+
 };
 
 

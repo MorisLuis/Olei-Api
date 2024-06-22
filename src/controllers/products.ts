@@ -276,9 +276,6 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
     const Id_ListaPrecios = user?.Id_ListPre;
     const Id_Almacen = user?.Id_Almacen;
 
-
-    console.log({user})
-
     try {
         const pool = await dbConnection();
 
@@ -290,16 +287,10 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
         let isEAN13orUPC14 = false;
         if ( CodBar ) {
             isEAN13orUPC14 = guessBarcodeType(CodBar)
-            console.log({isEAN13orUPC14})
         }
-        
 
         let request
         if(isEAN13orUPC14)  {
-            console.log("first")
-            console.log({CodBar})
-            console.log({Id_ListaPrecios})
-            console.log({Id_Almacen})
             let query = productsQuerys.getProductByStockAndCodeBarDV;
             request = await pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)
@@ -307,8 +298,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
                 .input("Id_Almacen", Id_Almacen)
                 .query(query);
 
-        } else {
-            console.log("second")
+        } else {         
             let query = productsQuerys.getProductByStockAndCodeBar;
             request = await pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)
@@ -316,6 +306,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
                 .input("Id_ListaPrecios", Id_ListaPrecios)
                 .input("Id_Almacen", Id_Almacen)
                 .query(query);
+
         }
         const productByStockAndCodeBar = request.recordset;
         res.json(productByStockAndCodeBar)
