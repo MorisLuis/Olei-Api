@@ -17,7 +17,9 @@ const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const costos_1 = require("../database/querys/costos");
 const uuid_1 = require("uuid");
+const identifyBarcodeType_1 = require("../utils/identifyBarcodeType");
 const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
         const pool = yield (0, database_1.dbConnection)();
         const transaction = new mssql_1.default.Transaction(pool);
@@ -28,6 +30,13 @@ const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         try {
             const { codigo: codigoParam, Id_Marca } = req.query;
             const body = req.body;
+            let isEAN13 = false;
+            if (body.CodBar) {
+                isEAN13 = (0, identifyBarcodeType_1.verifyIfIsEAN13)(body.CodBar);
+            }
+            if (isEAN13) {
+                body.CodBar = (_a = body.CodBar) === null || _a === void 0 ? void 0 : _a.substring(1);
+            }
             if (!codigoParam || !Id_Marca) {
                 yield transaction.rollback();
                 return res.status(400).json({ error: 'Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.' });
@@ -37,10 +46,11 @@ const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             request.input('Id_Marca', mssql_1.default.Int, Id_Marca);
             const keys = Object.keys(body);
             const query = costos_1.costosQuerys.updateCostos;
+            // Codebar random
             if (body.codeRandom === "true") {
                 const uniqueId = (0, uuid_1.v4)();
-                const codigo = uniqueId.replace(/-/g, '').substring(0, 10);
-                body.CodBar = codigo;
+                const codeBarRandom = uniqueId.replace(/-/g, '').substring(0, 10);
+                body.CodBar = codeBarRandom;
             }
             // Make forEach to create de SET of the query.
             keys.forEach((key) => {

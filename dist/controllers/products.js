@@ -18,6 +18,7 @@ const database_1 = require("../database");
 const products_1 = require("../database/querys/products");
 const mssql_1 = __importDefault(require("mssql"));
 const node_fetch_1 = __importDefault(require("node-fetch"));
+const identifyBarcodeType_1 = require("../utils/identifyBarcodeType");
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
@@ -243,7 +244,7 @@ const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void
         }
         let isEAN13orUPC14 = false;
         if (CodBar) {
-            isEAN13orUPC14 = guessBarcodeType(CodBar);
+            isEAN13orUPC14 = (0, identifyBarcodeType_1.guessBarcodeType)(CodBar);
         }
         let request;
         if (isEAN13orUPC14) {
@@ -320,15 +321,4 @@ function executeQuery(pool, query, params) {
         }
     });
 }
-const guessBarcodeType = (code) => {
-    if (/^[0-9]{12}$/.test(code)) {
-        //UPC-A
-        return true;
-    }
-    else if (/^[0-9]{12,13}$/.test(code)) {
-        //EAN-13
-        return true;
-    }
-    return false;
-};
 //# sourceMappingURL=products.js.map

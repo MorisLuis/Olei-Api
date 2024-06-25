@@ -5,6 +5,7 @@ import { productsQuerys } from '../database/querys/products';
 import sql from 'mssql';
 import fetch from 'node-fetch';
 import UserInterface from '../interface/user';
+import { guessBarcodeType } from '../utils/identifyBarcodeType';
 
 const getProducts = async (req: Request, res: Response) => {
 
@@ -289,7 +290,8 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
             isEAN13orUPC14 = guessBarcodeType(CodBar)
         }
 
-        let request
+        let request;
+
         if(isEAN13orUPC14)  {
             let query = productsQuerys.getProductByStockAndCodeBarDV;
             request = await pool.request()
@@ -380,18 +382,7 @@ async function executeQuery(pool: sql.ConnectionPool, query: string, params: any
     }
 }
 
-const guessBarcodeType = (code: any) => {
 
-    if (/^[0-9]{12}$/.test(code)) {
-        //UPC-A
-        return true;
-    } else if (/^[0-9]{12,13}$/.test(code)) {
-        //EAN-13
-        return true;
-    }
-
-    return false;
-};
 
 
 export {
