@@ -4,6 +4,7 @@ import sql from 'mssql';
 import CostosInterface from '../interface/costos';
 import { costosQuerys } from '../database/querys/costos';
 import { v4 as uuidv4 } from 'uuid';
+import { identifyBarcodeType, verifyIfIsEAN13 } from '../utils/identifyBarcodeType';
 
 export default interface ExtendedCostosInterface extends CostosInterface {
     [key: string]: any;
@@ -25,6 +26,14 @@ const updateCostos = async (req: Request, res: Response) => {
             const { codigo: codigoParam, Id_Marca } = req.query;
             const body: ExtendedCostosInterface = req.body;
 
+            let isEAN13 = false;
+            if(body.CodBar){
+                isEAN13 = verifyIfIsEAN13(body.CodBar)
+            }
+
+            if(isEAN13) {
+                body.CodBar = body.CodBar?.substring(1)
+            }
 
             if (!codigoParam || !Id_Marca) {
                 await transaction.rollback();
@@ -38,10 +47,11 @@ const updateCostos = async (req: Request, res: Response) => {
             const keys = Object.keys(body);
             const query = costosQuerys.updateCostos;
 
+            // Codebar random
             if (body.codeRandom === "true") {
                 const uniqueId = uuidv4();
-                const codigo = uniqueId.replace(/-/g, '').substring(0, 10);
-                body.CodBar = codigo
+                const codeBarRandom = uniqueId.replace(/-/g, '').substring(0, 10);
+                body.CodBar = codeBarRandom
             }
 
             // Make forEach to create de SET of the query.
