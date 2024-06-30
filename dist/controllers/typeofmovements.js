@@ -13,8 +13,11 @@ exports.changeTypeofmovements = exports.getTypeofmovements = void 0;
 const database_1 = require("../database");
 const __1 = require("..");
 const getTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+    console.log({ serverclientes, baseclientes });
     try {
-        const pool = yield (0, database_1.dbConnection)();
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const TiposMovimientoResult = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(database_1.querys.getTiposMovimiento));
         const TiposMovimiento = TiposMovimientoResult === null || TiposMovimientoResult === void 0 ? void 0 : TiposMovimientoResult.recordset;
         res.json(TiposMovimiento);
@@ -28,8 +31,10 @@ exports.getTypeofmovements = getTypeofmovements;
 // Temporal (!)
 const changeTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
+    const serverclientes = req.server;
+    const baseclientes = req.base;
     try {
-        const pool = yield (0, database_1.dbConnection)();
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const { Id_TipoMovInv } = req.body;
         const user = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user;
         const TipoMovimiento = yield pool.request()

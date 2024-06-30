@@ -2,21 +2,31 @@ import { Response, Request } from "express";
 
 import { dbConnection, querys } from "../database";
 import sql from 'mssql';
-import { sharedData } from "..";
-import PorductInterface from "../interface/product";
 import { inventoryQuerys } from "../database/querys/inventory";
 import { currentTime } from "../utils/currentTime";
+import { getUserData } from "../storage";
 
 const postInventory = async (req: Request, res: Response) => {
 
-    try {
-        const postInventoryData = req.body;
-        const user = sharedData?.currentUser?.user;
-        const Id_Almacen = user?.Id_Almacen;
-        const connection = sharedData?.userConnection?.connection
-        const Id_Usuario = connection?.user;
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+    const Id_Usuario = req.id;
 
-        const pool = await dbConnection();
+    console.log({serverclientes, baseclientes, Id_Usuario})
+
+    try {
+        
+        const postInventoryData = req.body;
+        
+        const pool = await dbConnection(serverclientes, baseclientes);
+        const userquery = querys.getAuthLimitData;
+        const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
+        const user = requestUser.recordset[0]
+        console.log({storage: `${Id_Usuario}_${baseclientes}`.toLowerCase()})
+        const dataStorage = getUserData(`${Id_Usuario}_${baseclientes}`.toLowerCase());
+
+        console.log({user});
+        console.log({dataStorage});
 
         const transaction = new sql.Transaction(pool);
         await transaction.begin();
@@ -24,8 +34,9 @@ const postInventory = async (req: Request, res: Response) => {
         // Get last Folio
         const Folio = await pool.request().query('SELECT MAX(FOLIO) AS Folio FROM [dbo].[INVENTARIOS]');
 
+
         // Get data default.
-        const Id_TipoMovInv = postInventoryData.Id_TipoMovInv;
+        const Id_TipoMovInv = dataStorage?.Id_TipoMovInv;
         const Estado = 1; // If it were 0 it would mean a inventory was cancelled
         const Id_AlmacenDest = 0;
         const SwPendiente = 0;
@@ -40,9 +51,9 @@ const postInventory = async (req: Request, res: Response) => {
         const request = new sql.Request(transaction);
 
         const result = await request
-            .input('Id_Almacen', sql.Int, Id_Almacen)
+            .input('Id_Almacen', sql.Int, user.Id_Almacen)
             .input('Folio', sql.Int, Folio.recordset[0].Folio + 1)
-            .input('Id_TipoMovInv', sql.Int, Id_TipoMovInv)
+            .input('Id_TipoMovInv', sql.Int, Id_TipoMovInv?.Id_TipoMovInv)
             .input('Estado', sql.Int, Estado)
             .input('Fecha', sql.DateTime, Fecha)
             .input('Id_AlmacenDest', sql.Int, Id_AlmacenDest)
@@ -61,7 +72,7 @@ const postInventory = async (req: Request, res: Response) => {
         res.json(inventory)
 
     } catch (error) {
-        console.log({ error })
+        console.log({ postInventoryError: error })
         res.status(500).json({ error: error });
     }
 }
@@ -98,12 +109,19 @@ const postInventoryDetails = async (req: Request, res: Response) => {
 
     //Receive products and with that create inventory Details.
 
-    try {
-        const postInventoryDataArray: PorductInterface[] = req.body;
-        const user = sharedData?.currentUser?.user;
-        const Id_Almacen = user?.Id_Almacen;
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+    const Id_Usuario = req.id;
+    const dataStorage = getUserData(`${Id_Usuario}_${baseclientes}`.toLowerCase());
 
-        const pool = await dbConnection();
+    try {
+        const postInventoryDataArray = req.body;
+
+        const pool = await dbConnection(serverclientes, baseclientes);
+
+        const userquery = querys.getAuthLimitData;
+        const requestUser: any = await pool.request().input("Id_Usuario", Id_Usuario).query(userquery)
+        const user = requestUser.recordset[0]
 
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -116,7 +134,7 @@ const postInventoryDetails = async (req: Request, res: Response) => {
         let countPartida = 0; // Increase the data of 'Partida'
         const inventoryDetails = [];  // Store every inventoryDetails from the for.
 
-        for (const postInventoryData of postInventoryDataArray) {
+        for (const postInventoryData of postInventoryDataArray.products) {
             const request = new sql.Request(transaction);
             countPartida++;
 
@@ -124,7 +142,7 @@ const postInventoryDetails = async (req: Request, res: Response) => {
             const Folio = await pool.request().query('SELECT MAX(FOLIO) AS Folio FROM [dbo].[DETALLEINVENTARIOS]');
 
             // New Existence accord with the type of movement.
-            const typeOfMovement = user?.Id_TipoMovInv;
+            const typeOfMovement = dataStorage?.Id_TipoMovInv;
             let updateValue = '@Cantidad_Existence';
             let difference = '@Cantidad_Existence - Existencia';
 
@@ -151,7 +169,7 @@ const postInventoryDetails = async (req: Request, res: Response) => {
                 .input('Cantidad_Existence', postInventoryData.Piezas)
                 .input('Codigo_Existence', postInventoryData.Codigo)
                 .input('Id_Marca_Existence', postInventoryData.Id_Marca)
-                .input('Id_Almacen_Existence', Id_Almacen)
+                .input('Id_Almacen_Existence', user.Id_Almacen)
                 .query(updateQuery);
 
             if (typeOfMovement?.Accion === 3) {
@@ -163,7 +181,7 @@ const postInventoryDetails = async (req: Request, res: Response) => {
                     .input('Cantidad_Existence_transfer', postInventoryData.Piezas)
                     .input('Codigo_Existence_transfer', postInventoryData.Codigo)
                     .input('Id_Marca_Existence_transfer', postInventoryData.Id_Marca)
-                    .input('Id_Almacen_Existence_transfer', user?.Id_TipoMovInv?.Id_AlmDest)
+                    .input('Id_Almacen_Existence_transfer', dataStorage?.Id_TipoMovInv?.Id_AlmDest)
                     .query(updateNewQuery);
             }
 
@@ -179,7 +197,7 @@ const postInventoryDetails = async (req: Request, res: Response) => {
             const postIntentoryDetailsQuery = inventoryQuerys.insertInventoryDetails;
 
             const result = await request
-                .input('Id_Almacen', sql.Int, Id_Almacen)
+                .input('Id_Almacen', sql.Int, user.Id_Almacen)
                 .input('Folio', sql.Int, Folio.recordset[0].Folio + 1)
                 .input('Partida', sql.Int, countPartida)
                 .input('Codigo', sql.VarChar, postInventoryData.Codigo)
@@ -200,7 +218,7 @@ const postInventoryDetails = async (req: Request, res: Response) => {
         res.json(inventoryDetails)
 
     } catch (error) {
-        console.log({ error })
+        console.log({ postInventoryDetailsError: error })
         res.status(500).json({ error: error });
     }
 }

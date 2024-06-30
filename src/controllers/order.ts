@@ -144,8 +144,6 @@ const postOrder = async (req: Request, res: Response) => {
             await transaction.commit();
             const order = result.recordset[0];
 
-            console.log({order})
-
             res.status(201).json(order);
 
         } catch (error) {

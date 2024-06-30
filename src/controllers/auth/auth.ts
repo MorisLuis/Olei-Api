@@ -1,12 +1,18 @@
 import { Request, Response } from 'express';
-
 import { dbConnection, querys } from '../../database';
 import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
-import { sharedData } from '../..';
 import config from '../../config';
 import moment from 'moment';
+import { getClienteData, setClienteData, setUserData } from '../../storage';
 
-const loginDB = async (req: Request, res: Response) => {
+export interface Req extends Request {
+    serverclientes: string;
+    baseclientes: string;
+    id: string;
+    rol: number;
+}
+
+const loginDB = async (req: Req, res: Response) => {
 
     // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
     const mainPool = await dbConnection(config.dbServer, config.dbDatabase);
@@ -26,48 +32,36 @@ const loginDB = async (req: Request, res: Response) => {
         const result = await mainPool.request().input('IdUsuarioOLEI', IdUsuarioOLEI).query(query_DB);
         const cleanResult = result?.recordset[0];
 
-
         if (cleanResult.PasswordOLEI.trim() !== PasswordOLEI) {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
 
-        sharedData.currentUser = {
-            user: {
-                ...sharedData.currentUser?.user,
-                Nombre: cleanResult.Nombre,
-                Id_ListPre: cleanResult.Id_ListPre,
-                Id_Almacen: cleanResult.Id_Almacen,
-                Id_UsuarioOOL: cleanResult.IdUsuarioOLEI,
-                PasswordOOL: cleanResult.PasswordOLEI,
-                ServidorSQL: cleanResult.ServidorSQL,
-                BaseSQL: cleanResult.BaseSQL,
-                TipoUsuario: 1,
-                PrivilegioTipoCliente: 1,
-                PrecioIncIVA: 1,
-                SwImagenes: cleanResult.SwImagenes === true ? 1 : 0,
-                SwSinStock: cleanResult.SwSinStock === true ? 1 : 0,
-                SwsinPrecio: cleanResult.SwsinPrecio === true ? 1 : 0,
-                TipoDocOO: cleanResult.TipoDocOO,
-                IdOLEI: cleanResult.IdOLEI,
-                Vigencia: cleanResult.Vigencia,
-                RazonSocial: cleanResult.RazonSocial
-            }
+        const user = {
+            ServidorSQL: cleanResult.ServidorSQL,
+            BaseSQL: cleanResult.BaseSQL,
+            RazonSocial: cleanResult.RazonSocial
         };
 
-        sharedData.userConnection = {
-            connection: {
-                user: config.dbUser,
-                password: config.dbPassword,
-                server: cleanResult.ServidorSQL.trim(),
-                database: cleanResult.BaseSQL.trim()
-            }
-        };
+        const tokenDB = await generateJWTDB({
+            serverclientes: cleanResult.ServidorSQL.trim(),
+            baseclientes: cleanResult.BaseSQL.trim(),
+            IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim()
+        });
 
-        const tokenDB = await generateJWTDB({ IdUsuarioOLEI, PasswordOLEI });
+
+        const dataDB = {
+            RazonSocial: cleanResult.RazonSocial,
+            SwImagenes: cleanResult.SwImagenes,
+            Vigencia: cleanResult.Vigencia
+        }
+
+        console.log({ id: cleanResult.IdUsuarioOLEI.trim() })
+
+        setClienteData(cleanResult.IdUsuarioOLEI.trim(), dataDB)
 
         return res.json({
             tokenDB,
-            user: sharedData.currentUser.user,
+            user,
             userDB: {
                 servidor: cleanResult.ServidorSQL,
                 database: cleanResult.BaseSQL
@@ -82,10 +76,14 @@ const loginDB = async (req: Request, res: Response) => {
     }
 }
 
-const login = async (req: Request, res: Response) => {
+const login = async (req: Req, res: Response) => {
+
+    const serverclientes = req.serverclientes;
+    const baseclientes = req.baseclientes;
+    const IdUsuarioOLEI = req.IdUsuarioOLEI;
 
     // STEP 1 - LOGIN
-    const mainPool = await dbConnection(sharedData.userConnection?.connection.server, sharedData.userConnection?.connection.database);
+    const mainPool = await dbConnection(serverclientes, baseclientes);
 
     if (!mainPool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
@@ -109,44 +107,42 @@ const login = async (req: Request, res: Response) => {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
 
-        if (!sharedData.currentUser?.user.Vigencia) return;
+        const TypeOfMovementsResult = await mainPool.request().query(querys.getTypeOfMovementInitial)
+        const TypeOfMovements = TypeOfMovementsResult.recordset[0]
+
+        const userStorage = {
+            Id_Usuario,
+            Id_TipoMovInv: {
+                Id_TipoMovInv: TypeOfMovements.Id_TipoMovInv,
+                Accion: TypeOfMovements.Accion,
+                Descripcion: TypeOfMovements.Descripcion,
+                Id_AlmDest: TypeOfMovements.Id_AlmDest
+            }
+        }
+
+        setUserData(`${Id_Usuario}_${baseclientes}`, userStorage);
+
+        const clientData = getClienteData(IdUsuarioOLEI)
+
+        if (!clientData?.Vigencia) {
+            return res.status(401).json({ error: 'Necesario tener una cuenta vigente' });
+        };
 
         // Get the user's subscription expiration date.
-        const dueDate = await isSubscriptionExpired(sharedData.currentUser?.user.Vigencia);
+        const dueDate = await isSubscriptionExpired(clientData?.Vigencia);
         if (dueDate) {
             return res.status(401).json({ error: 'Subscripción ha expirado' });
         }
 
-        // Update sharedData.userConnection for global access.
-        sharedData.userConnection = {
-            connection: {
-                user: config.dbUser,
-                password: config.dbPassword,
-                server: sharedData.userConnection?.connection.server as string,
-                database: sharedData.userConnection?.connection.database as string
-            }
-        };
-
-        const TypeOfMovementsResult = await mainPool.request().query(querys.getTypeOfMovementInitial)
-        const TypeOfMovements = TypeOfMovementsResult.recordset[0]
-
-        sharedData.currentUser = {
-            user: {
-                ...sharedData.currentUser.user,
-                Id_TipoMovInv: {
-                    Id_TipoMovInv: TypeOfMovements.Id_TipoMovInv,
-                    Accion: TypeOfMovements.Accion,
-                    Descripcion: TypeOfMovements.Descripcion,
-                    Id_AlmDest: TypeOfMovements.Id_AlmDest
-                }
-            }
-        };
-
-        const token = await generateJWT({ id: user.EMail, rol: user.Id_Perfil });
-
+        const token = await generateJWT({
+            id: user.Id_Usuario.trim(),
+            rol: user.Id_Perfil,
+            server: serverclientes,
+            base: baseclientes
+        });
 
         return res.json({
-            user,
+            user: userStorage,
             token
         });
 
@@ -156,30 +152,57 @@ const login = async (req: Request, res: Response) => {
     } finally {
         mainPool.close()
     }
-
 };
 
+const renewDB = async (req: Req, res: Response) => {
 
-interface Req extends Request {
-    id?: string
-}
-
-const renew = async (req: Req, res: Response) => {
-
-    const userDB = sharedData?.userConnection?.connection;
-    const user = sharedData.currentUser?.user;
+    const serverclientes = req.serverclientes;
+    const baseclientes = req.baseclientes;
+    const IdUsuarioOLEI = req.IdUsuarioOLEI;
 
     try {
-        if (!userDB) {
+        if (!serverclientes && !baseclientes) {
             return res.status(401).json({ message: 'UserDB not authenticated' });
         };
 
-        const token = await generateJWTDB({ IdUsuarioOLEI: userDB.server, PasswordOLEI: userDB.database as string });
+        const token = await generateJWTDB({
+            serverclientes: serverclientes,
+            baseclientes: baseclientes,
+            IdUsuarioOLEI
+        });
+
+        if (!token) {
+            return res.status(401).json({ message: 'Failed to generate token' });
+        };
+
+
+        //To get 'Vigencia', SwImagenes and 'RazonSocial'.
+        const dataFromDatabase = getClienteData(IdUsuarioOLEI)
+        const user = {
+            ServidorSQL: serverclientes,
+            BaseSQL: baseclientes,
+            Vigencia: dataFromDatabase?.Vigencia,
+            SwImagenes: dataFromDatabase?.SwImagenes,
+            RazonSocial: dataFromDatabase?.RazonSocial
+        };
+
+        if (!user) {
+            return res.status(401).json({ message: 'User data is neccesary' });
+        };
+
+        if (!dataFromDatabase?.Vigencia) {
+            return res.status(401).json({ error: 'Necesario tener una cuenta vigente' });
+        };
+
+        // Get the user's subscription expiration date.
+        const dueDate = await isSubscriptionExpired(dataFromDatabase?.Vigencia);
+        if (dueDate) {
+            return res.status(401).json({ error: 'Subscripción ha expirado' });
+        }
 
         res.json({
-            userDB,
-            user,
-            token
+            token,
+            user
         });
 
     } catch (error: any) {
@@ -188,6 +211,58 @@ const renew = async (req: Req, res: Response) => {
     }
 }
 
+const renewLogin = async (req: Req, res: Response) => {
+
+    const userId = req.id;
+    const userRol = req.rol;
+    const server = req.server;
+    const base = req.base;
+
+    try {
+
+        if (!userId && !userRol) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        };
+
+        if (!server && !base) {
+            return res.status(401).json({ message: 'Server and base data is neccessary' });
+        };
+
+        const token = await generateJWT({
+            id: userId,
+            rol: userRol,
+            server,
+            base
+        });
+
+        if (!token) {
+            return res.status(401).json({ message: 'Failed to generate token' });
+        };
+
+        // Get user data.
+        const mainPool = await dbConnection(server, base);
+        const userDB = await getUserByEmail(mainPool, userId);
+
+        const user = {
+            ...userDB,
+            ServidorSQL: server,
+            BaseSQL: base,
+        };
+
+        if (!userDB) {
+            return res.status(401).json({ message: 'User data is neccesary' });
+        };
+
+        res.json({
+            user,
+            token
+        });
+
+    } catch (error: any) {
+        console.log({ error })
+        res.status(500).send(error.message);
+    }
+}
 
 // Utils
 const getUserByEmail = async (mainPool: any, Id_Usuario: string) => {
@@ -205,5 +280,6 @@ const isSubscriptionExpired = (dueDate: string) => {
 export {
     loginDB,
     login,
-    renew
+    renewDB,
+    renewLogin
 }

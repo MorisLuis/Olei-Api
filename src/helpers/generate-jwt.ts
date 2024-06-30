@@ -1,15 +1,18 @@
 import jwt from 'jsonwebtoken';
 
-interface generateJWTProps {
-    id: string,
-    rol: number
+
+interface generateJWTDBProps {
+    serverclientes?: string,
+    baseclientes?: string,
+    IdUsuarioOLEI?: string
 }
 
-const generateJWT = ({ id, rol }: generateJWTProps) => {
+
+const generateJWTDB = ({ serverclientes, baseclientes, IdUsuarioOLEI }: generateJWTDBProps) => {
     return new Promise((resolve, reject) => {
-        const payload = { id, rol }
+        const payload = { serverclientes, baseclientes, IdUsuarioOLEI }
         jwt.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
-            expiresIn: '8h'
+            expiresIn: '1y'
         }, (error, token) => {
             if (error) {
                 console.log(error)
@@ -21,15 +24,17 @@ const generateJWT = ({ id, rol }: generateJWTProps) => {
     })
 }
 
-interface generateJWTDBProps {
-    IdUsuarioOLEI: string,
-    PasswordOLEI: string
+
+interface generateJWTProps {
+    id: string,
+    rol: number,
+    server?: string,
+    base?: string
 }
 
-
-const generateJWTDB = ({ IdUsuarioOLEI, PasswordOLEI }: generateJWTDBProps) => {
+const generateJWT = ({ id, rol, server, base }: generateJWTProps) => {
     return new Promise((resolve, reject) => {
-        const payload = { IdUsuarioOLEI, PasswordOLEI }
+        const payload = { id, rol, server, base }
         jwt.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
             expiresIn: '1y'
         }, (error, token) => {

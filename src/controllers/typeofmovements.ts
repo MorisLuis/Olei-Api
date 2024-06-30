@@ -6,8 +6,11 @@ import UserInterface from '../interface/user';
 
 const getTypeofmovements = async (req: Request, res: Response) => {
 
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+
     try {
-        const pool = await dbConnection();
+        const pool = await dbConnection(serverclientes, baseclientes);
         const TiposMovimientoResult = await pool?.request().query(querys.getTiposMovimiento);
         const TiposMovimiento = TiposMovimientoResult?.recordset
 
@@ -21,8 +24,12 @@ const getTypeofmovements = async (req: Request, res: Response) => {
 
 // Temporal (!)
 const changeTypeofmovements = async (req: Request, res: Response) => {
+
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+
     try {
-        const pool = await dbConnection();
+        const pool = await dbConnection(serverclientes, baseclientes);
         const { Id_TipoMovInv } = req.body;
         const user = sharedData?.currentUser?.user as UserInterface;
 

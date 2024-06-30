@@ -8,6 +8,13 @@ exports.querys = {
         FROM [dbo].[USUARIOS]
         WHERE Id_Usuario = @Id_Usuario
     `,
+    getAuthLimitData: `
+        SELECT 
+            Id_Almacen,
+            ActualizarListas AS Id_ListPre
+        FROM [dbo].[USUARIOS]
+        WHERE Id_Usuario = @Id_Usuario
+    `,
     authWeb: ` 
         SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio, UC.TipoDocOO, UC.IdOLEI,
         TRIM(UC.Nombre) AS Company

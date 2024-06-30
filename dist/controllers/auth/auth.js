@@ -12,14 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.renew = exports.login = exports.loginDB = void 0;
+exports.renewLogin = exports.renewDB = exports.login = exports.loginDB = void 0;
 const database_1 = require("../../database");
 const generate_jwt_1 = require("../../helpers/generate-jwt");
-const __1 = require("../..");
 const config_1 = __importDefault(require("../../config"));
 const moment_1 = __importDefault(require("moment"));
+const storage_1 = require("../../storage");
 const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
     const mainPool = yield (0, database_1.dbConnection)(config_1.default.dbServer, config_1.default.dbDatabase);
     if (!mainPool) {
@@ -36,21 +35,17 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (cleanResult.PasswordOLEI.trim() !== PasswordOLEI) {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
-        __1.sharedData.currentUser = {
-            user: Object.assign(Object.assign({}, (_a = __1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user), { Nombre: cleanResult.Nombre, Id_ListPre: cleanResult.Id_ListPre, Id_Almacen: cleanResult.Id_Almacen, Id_UsuarioOOL: cleanResult.IdUsuarioOLEI, PasswordOOL: cleanResult.PasswordOLEI, ServidorSQL: cleanResult.ServidorSQL, BaseSQL: cleanResult.BaseSQL, TipoUsuario: 1, PrivilegioTipoCliente: 1, PrecioIncIVA: 1, SwImagenes: cleanResult.SwImagenes === true ? 1 : 0, SwSinStock: cleanResult.SwSinStock === true ? 1 : 0, SwsinPrecio: cleanResult.SwsinPrecio === true ? 1 : 0, TipoDocOO: cleanResult.TipoDocOO, IdOLEI: cleanResult.IdOLEI, Vigencia: cleanResult.Vigencia, RazonSocial: cleanResult.RazonSocial })
+        const user = {
+            ServidorSQL: cleanResult.ServidorSQL,
+            BaseSQL: cleanResult.BaseSQL,
         };
-        __1.sharedData.userConnection = {
-            connection: {
-                user: config_1.default.dbUser,
-                password: config_1.default.dbPassword,
-                server: cleanResult.ServidorSQL.trim(),
-                database: cleanResult.BaseSQL.trim()
-            }
-        };
-        const tokenDB = yield (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI, PasswordOLEI });
+        const tokenDB = yield (0, generate_jwt_1.generateJWTDB)({
+            serverclientes: cleanResult.ServidorSQL.trim(),
+            baseclientes: cleanResult.BaseSQL.trim()
+        });
         return res.json({
             tokenDB,
-            user: __1.sharedData.currentUser.user,
+            user,
             userDB: {
                 servidor: cleanResult.ServidorSQL,
                 database: cleanResult.BaseSQL
@@ -67,15 +62,20 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.loginDB = loginDB;
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b, _c, _d, _e, _f, _g;
+    const serverclientes = req.serverclientes;
+    const baseclientes = req.baseclientes;
+    console.log({ serverclientes, baseclientes });
     // STEP 1 - LOGIN
-    const mainPool = yield (0, database_1.dbConnection)((_b = __1.sharedData.userConnection) === null || _b === void 0 ? void 0 : _b.connection.server, (_c = __1.sharedData.userConnection) === null || _c === void 0 ? void 0 : _c.connection.database);
+    const mainPool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
     if (!mainPool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
     }
     try {
         // Search for the user in the database using their email.
         const { Id_Usuario, password } = req.body;
+        console.log({
+            Id_Usuario, password
+        });
         if (Id_Usuario.trim() === "" || password.trim() === "") {
             return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
         }
@@ -86,35 +86,32 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (user.Password.trim() !== password) {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
-        if (!((_d = __1.sharedData.currentUser) === null || _d === void 0 ? void 0 : _d.user.Vigencia))
-            return;
-        // Get the user's subscription expiration date.
-        const dueDate = yield isSubscriptionExpired((_e = __1.sharedData.currentUser) === null || _e === void 0 ? void 0 : _e.user.Vigencia);
-        if (dueDate) {
-            return res.status(401).json({ error: 'Subscripción ha expirado' });
-        }
-        // Update sharedData.userConnection for global access.
-        __1.sharedData.userConnection = {
-            connection: {
-                user: config_1.default.dbUser,
-                password: config_1.default.dbPassword,
-                server: (_f = __1.sharedData.userConnection) === null || _f === void 0 ? void 0 : _f.connection.server,
-                database: (_g = __1.sharedData.userConnection) === null || _g === void 0 ? void 0 : _g.connection.database
-            }
-        };
         const TypeOfMovementsResult = yield mainPool.request().query(database_1.querys.getTypeOfMovementInitial);
         const TypeOfMovements = TypeOfMovementsResult.recordset[0];
-        __1.sharedData.currentUser = {
-            user: Object.assign(Object.assign({}, __1.sharedData.currentUser.user), { Id_TipoMovInv: {
-                    Id_TipoMovInv: TypeOfMovements.Id_TipoMovInv,
-                    Accion: TypeOfMovements.Accion,
-                    Descripcion: TypeOfMovements.Descripcion,
-                    Id_AlmDest: TypeOfMovements.Id_AlmDest
-                } })
+        const userStorage = {
+            Id_Usuario,
+            Id_TipoMovInv: {
+                Id_TipoMovInv: TypeOfMovements.Id_TipoMovInv,
+                Accion: TypeOfMovements.Accion,
+                Descripcion: TypeOfMovements.Descripcion,
+                Id_AlmDest: TypeOfMovements.Id_AlmDest
+            }
         };
-        const token = yield (0, generate_jwt_1.generateJWT)({ id: user.EMail, rol: user.Id_Perfil });
+        (0, storage_1.setUserData)(`${Id_Usuario}_${baseclientes}`, userStorage);
+        //if (!sharedData.currentUser?.user.Vigencia) return;
+        // Get the user's subscription expiration date.
+        /* const dueDate = await isSubscriptionExpired(sharedData.currentUser?.user.Vigencia);
+        if (dueDate) {
+            return res.status(401).json({ error: 'Subscripción ha expirado' });
+        } */
+        const token = yield (0, generate_jwt_1.generateJWT)({
+            id: user.Id_Usuario.trim(),
+            rol: user.Id_Perfil,
+            server: serverclientes,
+            base: baseclientes
+        });
         return res.json({
-            user,
+            user: userStorage,
             token
         });
     }
@@ -127,20 +124,22 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.login = login;
-const renew = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _h, _j;
-    const userDB = (_h = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.userConnection) === null || _h === void 0 ? void 0 : _h.connection;
-    const user = (_j = __1.sharedData.currentUser) === null || _j === void 0 ? void 0 : _j.user;
+const renewDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const serverclientes = req.serverclientes;
+    const baseclientes = req.baseclientes;
     try {
-        if (!userDB) {
+        if (!serverclientes && !baseclientes) {
             return res.status(401).json({ message: 'UserDB not authenticated' });
         }
         ;
-        const token = yield (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI: userDB.server, PasswordOLEI: userDB.database });
+        const token = yield (0, generate_jwt_1.generateJWTDB)({ serverclientes: serverclientes, baseclientes: baseclientes });
+        const user = {
+            ServidorSQL: serverclientes,
+            BaseSQL: baseclientes,
+        };
         res.json({
-            userDB,
-            user,
-            token
+            token,
+            user
         });
     }
     catch (error) {
@@ -148,7 +147,40 @@ const renew = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         console.log({ error });
     }
 });
-exports.renew = renew;
+exports.renewDB = renewDB;
+const renewLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = req.id;
+    const userRol = req.rol;
+    const server = req.server;
+    const base = req.base;
+    try {
+        if (!userId && !userRol) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+        ;
+        if (!server && !base) {
+            return res.status(401).json({ message: 'Server and base data is neccessary' });
+        }
+        ;
+        const mainPool = yield (0, database_1.dbConnection)(server, base);
+        const userDB = yield getUserByEmail(mainPool, userId);
+        const token = yield (0, generate_jwt_1.generateJWT)({
+            id: userId,
+            rol: userRol,
+            server,
+            base
+        });
+        const user = Object.assign(Object.assign({}, userDB), { ServidorSQL: server, BaseSQL: base });
+        res.json({
+            user,
+            token
+        });
+    }
+    catch (error) {
+        res.status(500).send(error.message);
+    }
+});
+exports.renewLogin = renewLogin;
 // Utils
 const getUserByEmail = (mainPool, Id_Usuario) => __awaiter(void 0, void 0, void 0, function* () {
     const query_DB = database_1.querys.auth;

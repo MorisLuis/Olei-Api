@@ -15,24 +15,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getInventoryDetails = exports.getInventory = exports.postInventoryDetails = exports.postInventory = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
-const __1 = require("..");
 const inventory_1 = require("../database/querys/inventory");
 const currentTime_1 = require("../utils/currentTime");
+const storage_1 = require("../storage");
 const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    const serverclientes = req.serverclientes;
+    const baseclientes = req.baseclientes;
     try {
         const postInventoryData = req.body;
-        const user = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user;
-        const Id_Almacen = user === null || user === void 0 ? void 0 : user.Id_Almacen;
-        const connection = (_b = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.userConnection) === null || _b === void 0 ? void 0 : _b.connection;
-        const Id_Usuario = connection === null || connection === void 0 ? void 0 : connection.user;
-        const pool = yield (0, database_1.dbConnection)();
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const Id_Usuario = 'IDALIA';
+        const userquery = database_1.querys.getAuthLimitData;
+        const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
+        const user = requestUser.recordset[0];
+        const dataStorage = (0, storage_1.getUserData)("idalia");
         const transaction = new mssql_1.default.Transaction(pool);
         yield transaction.begin();
         // Get last Folio
         const Folio = yield pool.request().query('SELECT MAX(FOLIO) AS Folio FROM [dbo].[INVENTARIOS]');
         // Get data default.
-        const Id_TipoMovInv = postInventoryData.Id_TipoMovInv;
+        const Id_TipoMovInv = dataStorage === null || dataStorage === void 0 ? void 0 : dataStorage.Id_TipoMovInv;
         const Estado = 1; // If it were 0 it would mean a inventory was cancelled
         const Id_AlmacenDest = 0;
         const SwPendiente = 0;
@@ -44,9 +46,9 @@ const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const postInventoryQuery = inventory_1.inventoryQuerys.insertInventory;
         const request = new mssql_1.default.Request(transaction);
         const result = yield request
-            .input('Id_Almacen', mssql_1.default.Int, Id_Almacen)
+            .input('Id_Almacen', mssql_1.default.Int, user.Id_Almacen)
             .input('Folio', mssql_1.default.Int, Folio.recordset[0].Folio + 1)
-            .input('Id_TipoMovInv', mssql_1.default.Int, Id_TipoMovInv)
+            .input('Id_TipoMovInv', mssql_1.default.Int, Id_TipoMovInv === null || Id_TipoMovInv === void 0 ? void 0 : Id_TipoMovInv.Id_TipoMovInv)
             .input('Estado', mssql_1.default.Int, Estado)
             .input('Fecha', mssql_1.default.DateTime, Fecha)
             .input('Id_AlmacenDest', mssql_1.default.Int, Id_AlmacenDest)
@@ -63,7 +65,7 @@ const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         res.json(inventory);
     }
     catch (error) {
-        console.log({ error });
+        console.log({ postInventoryError: error });
         res.status(500).json({ error: error });
     }
 });
@@ -91,12 +93,17 @@ const getInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 exports.getInventory = getInventory;
 const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //Receive products and with that create inventory Details.
-    var _c, _d;
+    var _a;
+    const serverclientes = req.serverclientes;
+    const baseclientes = req.baseclientes;
+    const dataStorage = (0, storage_1.getUserData)("idalia");
     try {
         const postInventoryDataArray = req.body;
-        const user = (_c = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _c === void 0 ? void 0 : _c.user;
-        const Id_Almacen = user === null || user === void 0 ? void 0 : user.Id_Almacen;
-        const pool = yield (0, database_1.dbConnection)();
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const Id_Usuario = 'IDALIA';
+        const userquery = database_1.querys.getAuthLimitData;
+        const requestUser = yield pool.request().input("Id_Usuario", 'IDALIA').query(userquery);
+        const user = requestUser.recordset[0];
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
@@ -105,13 +112,13 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
         yield transaction.begin();
         let countPartida = 0; // Increase the data of 'Partida'
         const inventoryDetails = []; // Store every inventoryDetails from the for.
-        for (const postInventoryData of postInventoryDataArray) {
+        for (const postInventoryData of postInventoryDataArray.products) {
             const request = new mssql_1.default.Request(transaction);
             countPartida++;
             // Get last Folio
             const Folio = yield pool.request().query('SELECT MAX(FOLIO) AS Folio FROM [dbo].[DETALLEINVENTARIOS]');
             // New Existence accord with the type of movement.
-            const typeOfMovement = user === null || user === void 0 ? void 0 : user.Id_TipoMovInv;
+            const typeOfMovement = dataStorage === null || dataStorage === void 0 ? void 0 : dataStorage.Id_TipoMovInv;
             let updateValue = '@Cantidad_Existence';
             let difference = '@Cantidad_Existence - Existencia';
             const newExistence = () => {
@@ -138,7 +145,7 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
                 .input('Cantidad_Existence', postInventoryData.Piezas)
                 .input('Codigo_Existence', postInventoryData.Codigo)
                 .input('Id_Marca_Existence', postInventoryData.Id_Marca)
-                .input('Id_Almacen_Existence', Id_Almacen)
+                .input('Id_Almacen_Existence', user.Id_Almacen)
                 .query(updateQuery);
             if ((typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion) === 3) {
                 updateValue = '@Cantidad_Existence_transfer';
@@ -148,7 +155,7 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
                     .input('Cantidad_Existence_transfer', postInventoryData.Piezas)
                     .input('Codigo_Existence_transfer', postInventoryData.Codigo)
                     .input('Id_Marca_Existence_transfer', postInventoryData.Id_Marca)
-                    .input('Id_Almacen_Existence_transfer', (_d = user === null || user === void 0 ? void 0 : user.Id_TipoMovInv) === null || _d === void 0 ? void 0 : _d.Id_AlmDest)
+                    .input('Id_Almacen_Existence_transfer', (_a = dataStorage === null || dataStorage === void 0 ? void 0 : dataStorage.Id_TipoMovInv) === null || _a === void 0 ? void 0 : _a.Id_AlmDest)
                     .query(updateNewQuery);
             }
             const { Existencia, ExistenciaAnt } = existenceUpdated.recordset[0];
@@ -160,7 +167,7 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
             const Diferencia = Existencia - ExistenciaAnt;
             const postIntentoryDetailsQuery = inventory_1.inventoryQuerys.insertInventoryDetails;
             const result = yield request
-                .input('Id_Almacen', mssql_1.default.Int, Id_Almacen)
+                .input('Id_Almacen', mssql_1.default.Int, user.Id_Almacen)
                 .input('Folio', mssql_1.default.Int, Folio.recordset[0].Folio + 1)
                 .input('Partida', mssql_1.default.Int, countPartida)
                 .input('Codigo', mssql_1.default.VarChar, postInventoryData.Codigo)
@@ -178,7 +185,7 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
         res.json(inventoryDetails);
     }
     catch (error) {
-        console.log({ error });
+        console.log({ postInventoryDetailsError: error });
         res.status(500).json({ error: error });
     }
 });

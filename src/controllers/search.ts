@@ -133,18 +133,21 @@ const searchClient = async (req: Request, res: Response) => {
 const searchProductInventory = async (req: Request, res: Response) => {
 
     const { searchTerm } = req.query;
-    const client = sharedData?.currentClient?.client;
-    const user = sharedData.currentUser?.user;
-    let userListPrice;
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+    const Id_Usuario = req.id;
 
-    if( client ) {
-        userListPrice = client?.Id_ListPre;
-    } else {
-        userListPrice = user?.Id_ListPre;
-    }
 
+    console.log({Id_Usuario})
     try {
-        const pool = await dbConnection();
+        const pool = await dbConnection(serverclientes, baseclientes);
+
+        const userquery = querys.getAuthLimitData;
+        const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
+        const user = requestUser.recordset[0]
+
+
+        console.log({user});
 
         if (!pool) {
             return res.status(500).json({ error: 'Unable to establish a connection to the database' });
@@ -153,7 +156,7 @@ const searchProductInventory = async (req: Request, res: Response) => {
         const query = productsQuerys.getProductsBySearchInventory;
         const result = await pool.request()
             .input("searchTerm", searchTerm)
-            .input('Id_ListaPrecios', userListPrice)
+            .input('Id_ListaPrecios', user.Id_ListPre)
             .query(query);
 
         const products = result.recordset
