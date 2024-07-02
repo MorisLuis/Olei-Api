@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userConnectionTest = exports.currentClientTest = exports.currentUserTest = void 0;
+exports.userConnectionTest = exports.currentUserTest = void 0;
 exports.currentUserTest = {
     user: {
         Id_Almacen: 1,
@@ -36,14 +36,14 @@ exports.currentUserTest = {
         }
     }
 };
-exports.currentClientTest = {
+/* export const currentClientTest: { client: ClientInterface } = {
     client: {
         Id_Almacen: 1,
         Id_ListPre: 1,
         Id_Cliente: 3,
         Id_AlmDest: 1
     }
-};
+} */
 exports.userConnectionTest = {
     connection: {
         user: process.env.DB_USER || "",

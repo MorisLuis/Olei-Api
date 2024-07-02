@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { getOrderDetails, postOrderDetails } from "../controllers/orderDetails";
+import { validateJWTWeb } from "../helpers/validate-jwt";
 
 
 const router = Router();
 
-router.post("/", postOrderDetails);
-router.get("/", getOrderDetails);
+router.post("/", validateJWTWeb, postOrderDetails);
+router.get("/", validateJWTWeb, getOrderDetails);
 
 export default router;

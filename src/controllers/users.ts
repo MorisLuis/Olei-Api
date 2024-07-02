@@ -1,12 +1,14 @@
 import { Request, Response } from 'express'
-import { dbConnection, querys } from '../database';
+import { closeDbConnection, dbConnection, querys } from '../database';
 
 
 const getUsers =  async (req: Request, res: Response) => {
 
-    const pool = await dbConnection();
-
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
+    
     try {
+        const pool = await dbConnection(serverWeb, baseWeb);
         const result = await pool?.request().query(querys.getAllUsers);
         const users = result?.recordset
         const total = result?.rowsAffected[0]
@@ -16,8 +18,11 @@ const getUsers =  async (req: Request, res: Response) => {
         });
 
     } catch (error: any) {
+        console.log({getUsersError: error})
         res.status(500);
         res.send(error.message);
+    } finally {
+        await closeDbConnection()
     }
 
 }

@@ -4,7 +4,7 @@ import sql from 'mssql';
 import CostosInterface from '../interface/costos';
 import { costosQuerys } from '../database/querys/costos';
 import { v4 as uuidv4 } from 'uuid';
-import { identifyBarcodeType, verifyIfIsEAN13 } from '../utils/identifyBarcodeType';
+import {  verifyIfIsEAN13 } from '../utils/identifyBarcodeType';
 
 export default interface ExtendedCostosInterface extends CostosInterface {
     [key: string]: any;
@@ -13,8 +13,12 @@ export default interface ExtendedCostosInterface extends CostosInterface {
 
 const updateCostos = async (req: Request, res: Response) => {
 
+
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+
     try {
-        const pool = await dbConnection();
+        const pool = await dbConnection(serverclientes, baseclientes);
         const transaction = new sql.Transaction(pool);
         await transaction.begin();
 

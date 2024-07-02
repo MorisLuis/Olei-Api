@@ -1,1 +1,1 @@
-{"version":3,"file":"tablesRouter.js","sourceRoot":"","sources":["../../src/routes/tablesRouter.ts"],"names":[],"mappings":";;AAAA,qCAAiC;AACjC,kDAAkD;AAGlD,MAAM,MAAM,GAAG,IAAA,gBAAM,GAAE,CAAA;AAEvB,MAAM,CAAC,GAAG,CAAC,GAAG,EAAE,kBAAS,CAAC,CAAA;AAE1B,kBAAe,MAAM,CAAC"}
+{"version":3,"file":"tablesRouter.js","sourceRoot":"","sources":["../../src/routes/tablesRouter.ts"],"names":[],"mappings":";;AAAA,qCAAiC;AACjC,kDAAkD;AAClD,0DAAyD;AAGzD,MAAM,MAAM,GAAG,IAAA,gBAAM,GAAE,CAAA;AAEvB,MAAM,CAAC,GAAG,CAAC,GAAG,EAAE,6BAAc,EAAE,kBAAS,CAAC,CAAA;AAE1C,kBAAe,MAAM,CAAC"}

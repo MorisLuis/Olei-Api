@@ -20,8 +20,10 @@ const uuid_1 = require("uuid");
 const identifyBarcodeType_1 = require("../utils/identifyBarcodeType");
 const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
+    const serverclientes = req.server;
+    const baseclientes = req.base;
     try {
-        const pool = yield (0, database_1.dbConnection)();
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const transaction = new mssql_1.default.Transaction(pool);
         yield transaction.begin();
         if (!pool) {

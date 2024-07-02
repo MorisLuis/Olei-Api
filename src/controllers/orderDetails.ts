@@ -1,22 +1,43 @@
 import { Request, Response } from "express";
-import { dbConnection } from "../database";
+import { closeDbConnection, dbConnection } from "../database";
 import sql from 'mssql';
-import { sharedData } from "..";
 import PorductInterface from "../interface/product";
 import { orderQuerys } from "../database/querys/orders";
+import { getClientData, getUserDataWeb } from "../Storage/storageWeb";
 
 
 const postOrderDetails = async (req: Request, res: Response) => {
 
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
+    const clientid = req.clientid;
+
+    // Get the user information from shared data, including the user's warehouse (Almacen)
+    const currentUser = getUserDataWeb(baseWeb.trim())
+    const currentClient = getClientData(`${baseWeb.trim()}_${clientid}`);
+
+    let userAlmacen;
+    let userListPrice;
+    if (currentClient?.IsEmploye) {
+        userAlmacen = currentClient?.Id_Almacen;
+        userListPrice = currentClient?.Id_ListPre;
+    } else {
+        userAlmacen = currentUser?.Id_Almacen;
+        userListPrice = currentUser?.Id_ListPre;
+    }
+
+    if (!currentClient) {
+        res.status(500).json({ error: 'Es necesario tener la información de el cliente' });
+        return;
+    };
+
     try {
         const postArray = req.body;
-        const client = sharedData?.currentClient?.client;
-        const user = sharedData?.currentUser?.user;
-        const Id_Almacen = client?.Id_Almacen;
-        const Id_Cliente = client?.Id_Cliente;
-        const Id_ListPre = client?.Id_ListPre;
+        const Id_Almacen = userAlmacen;
+        const Id_ListPre = userListPrice;
+        const Id_Cliente = currentClient.Id_Cliente;
 
-        const pool = await dbConnection();
+        const pool = await dbConnection(serverWeb, baseWeb);
 
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -54,7 +75,7 @@ const postOrderDetails = async (req: Request, res: Response) => {
                 }
 
                 postData.Id_Almacen = Id_Almacen;
-                postData.TipoDoc = user?.TipoDocOO;
+                postData.TipoDoc = currentUser?.TipoDocOO;
                 postData.Serie = SerieActiva ? SerieActiva : "";
                 postData.Folio = (Folio ? Folio : 0) + 1;
                 postData.Id_ListaPrecios = Id_ListPre;
@@ -114,10 +135,16 @@ const postOrderDetails = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.error('Error al crear el orde details:', error.message);
         res.status(500).json({ error: error });
+    } finally {
+        await closeDbConnection()
     }
 }
 
 const getOrderDetails = async (req: Request, res: Response) => {
+
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
+    const clientid = req.clientid;
 
     const { folio } = req.query;
 
@@ -127,7 +154,7 @@ const getOrderDetails = async (req: Request, res: Response) => {
     }
 
     try {
-        const pool = await dbConnection();
+        const pool = await dbConnection(serverWeb, baseWeb);
 
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -146,6 +173,8 @@ const getOrderDetails = async (req: Request, res: Response) => {
 
     } catch (error) {
         res.status(500).json({ error: error });
+    } finally {
+        await closeDbConnection()
     }
 }
 

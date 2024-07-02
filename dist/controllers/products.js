@@ -22,13 +22,17 @@ const identifyBarcodeType_1 = require("../utils/identifyBarcodeType");
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
+    //console.log("getProducts=======================================")
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
+    // console.log({serverWeb, baseWeb})
     // Get the user information from shared data, including the user's warehouse (Almacen)
     const client = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
     const user = (_b = __1.sharedData.currentUser) === null || _b === void 0 ? void 0 : _b.user;
     const userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
     const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
     try {
-        const pool = yield (0, database_1.dbConnection)();
+        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
@@ -116,65 +120,56 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 });
 exports.getProducts = getProducts;
 const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _c, _d;
     const { id } = req.params;
     const { Marca } = req.query;
-    const client = (_c = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _c === void 0 ? void 0 : _c.client;
-    const user = (_d = __1.sharedData.currentUser) === null || _d === void 0 ? void 0 : _d.user;
-    let userListPrice;
-    let userAlmacen;
-    if (client) {
-        userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
-        userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
-    }
-    else {
-        userListPrice = user === null || user === void 0 ? void 0 : user.Id_ListPre;
-        userAlmacen = user === null || user === void 0 ? void 0 : user.Id_Almacen;
-    }
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+    const Id_Usuario = req.id;
     try {
-        const pool = yield (0, database_1.dbConnection)();
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const userquery = database_1.querys.getAuthLimitData;
+        const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
+        const user = requestUser.recordset[0];
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
         const result = yield pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)
-            .input("ListaPrecios", userListPrice)
-            .input("Almacen", userAlmacen)
+            .input("ListaPrecios", user.Id_ListPre)
+            .input("Almacen", user.Id_Almacen)
             .query(products_1.productsQuerys.getProducById);
         const product = result === null || result === void 0 ? void 0 : result.recordset[0];
-        if (user === null || user === void 0 ? void 0 : user.SwImagenes) {
-            const baseSQL = user === null || user === void 0 ? void 0 : user.BaseSQL.trim().toLowerCase().split(',');
-            if (baseSQL && baseSQL.length > 0) {
-                const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
-                const imageDB = formatImageDB[formatImageDB.length - 1];
-                // Número máximo de intentos para encontrar la imagen
-                const maxAttempts = 5;
-                let attempt = 0;
-                let images = [];
-                while (attempt < maxAttempts) {
-                    let imageUrl;
-                    if (attempt === 0) {
-                        imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product === null || product === void 0 ? void 0 : product.Codigo.trim()}.jpg`;
-                    }
-                    else {
-                        imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product === null || product === void 0 ? void 0 : product.Codigo.trim()}_${attempt}.jpg`;
-                        /* https://oleistorage.blob.core.windows.net/mxnl00181/001_1.jpg */
-                    }
-                    // Verifica si la imagen existe
-                    const imageExists = yield checkImageExists(imageUrl);
-                    if (imageExists) {
-                        images.push({
-                            url: imageUrl,
-                            id: attempt
-                        });
-                    }
-                    attempt++;
+        //if (user?.SwImagenes) {
+        const baseSQL = baseclientes.trim().toLowerCase().split(',');
+        if (baseSQL && baseSQL.length > 0) {
+            const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
+            const imageDB = formatImageDB[formatImageDB.length - 1];
+            // Número máximo de intentos para encontrar la imagen
+            const maxAttempts = 5;
+            let attempt = 0;
+            let images = [];
+            while (attempt < maxAttempts) {
+                let imageUrl;
+                if (attempt === 0) {
+                    imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product === null || product === void 0 ? void 0 : product.Codigo.trim()}.jpg`;
                 }
-                if (images.length > 0) {
-                    // Se encontraron imágenes existentes
-                    product.imagen = images;
+                else {
+                    imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product === null || product === void 0 ? void 0 : product.Codigo.trim()}_${attempt}.jpg`;
                 }
+                // Verifica si la imagen existe
+                const imageExists = yield checkImageExists(imageUrl);
+                if (imageExists) {
+                    images.push({
+                        url: imageUrl,
+                        id: attempt
+                    });
+                }
+                attempt++;
+            }
+            if (images.length > 0) {
+                // Se encontraron imágenes existentes
+                product.imagen = images;
             }
         }
         return res.json(product);
@@ -192,22 +187,15 @@ const getTotalProducts = (req, res) => __awaiter(void 0, void 0, void 0, functio
 });
 exports.getTotalProducts = getTotalProducts;
 const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _e, _f;
     const { PageNumber, PageSize } = req.query;
-    const user = (_e = __1.sharedData.currentUser) === null || _e === void 0 ? void 0 : _e.user;
-    const client = (_f = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _f === void 0 ? void 0 : _f.client;
-    let userListPrice;
-    let userAlmacen;
-    if (client) {
-        userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
-        userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
-    }
-    else {
-        userListPrice = user === null || user === void 0 ? void 0 : user.Id_ListPre;
-        userAlmacen = user === null || user === void 0 ? void 0 : user.Id_Almacen;
-    }
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+    const Id_Usuario = req.id;
     try {
-        const pool = yield (0, database_1.dbConnection)();
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const userquery = database_1.querys.getAuthLimitData;
+        const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
+        const user = requestUser.recordset[0];
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
@@ -215,12 +203,12 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
         const request = yield pool.request()
             .input('PageSize', Number(PageSize))
             .input('PageNumber', PageNumber)
-            .input('Id_ListaPrecios', userListPrice)
-            .input('Almacen', userAlmacen)
+            .input('Id_ListaPrecios', user.Id_ListPre)
+            .input('Almacen', user.Id_Almacen)
             .query(query);
         const productsByStock = request.recordset;
         const { products } = yield getImagesFromProducts({
-            user: user,
+            base: baseclientes,
             products: productsByStock
         });
         res.json(products);
@@ -232,13 +220,15 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.getProductsByStock = getProductsByStock;
 const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _g;
     const { CodBar, Codigo } = req.query;
-    const user = (_g = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _g === void 0 ? void 0 : _g.user;
-    const Id_ListaPrecios = user === null || user === void 0 ? void 0 : user.Id_ListPre;
-    const Id_Almacen = user === null || user === void 0 ? void 0 : user.Id_Almacen;
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+    const Id_Usuario = req.id;
     try {
-        const pool = yield (0, database_1.dbConnection)();
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const userquery = database_1.querys.getAuthLimitData;
+        const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
+        const user = requestUser.recordset[0];
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
@@ -251,8 +241,8 @@ const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void
             let query = products_1.productsQuerys.getProductByStockAndCodeBarDV;
             request = yield pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)
-                .input("Id_ListaPrecios", Id_ListaPrecios)
-                .input("Id_Almacen", Id_Almacen)
+                .input('Id_ListaPrecios', user.Id_ListPre)
+                .input('Id_Almacen', user.Id_Almacen)
                 .query(query);
         }
         else {
@@ -260,14 +250,15 @@ const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void
             request = yield pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)
                 .input("Codigo", Codigo === 'undefined' ? null : Codigo)
-                .input("Id_ListaPrecios", Id_ListaPrecios)
-                .input("Id_Almacen", Id_Almacen)
+                .input('Id_ListaPrecios', user.Id_ListPre)
+                .input('Id_Almacen', user.Id_Almacen)
                 .query(query);
         }
         const productByStockAndCodeBar = request.recordset;
         res.json(productByStockAndCodeBar);
     }
     catch (error) {
+        console.log({ error });
         return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud / getProductByStockAndCodeBar' });
     }
 });
@@ -283,27 +274,48 @@ const checkImageExists = (url) => __awaiter(void 0, void 0, void 0, function* ()
         return false;
     }
 });
-const getImagesFromProducts = (_h) => __awaiter(void 0, [_h], void 0, function* ({ user, products }) {
-    if (user === null || user === void 0 ? void 0 : user.SwImagenes) {
-        // Ahora, para cada producto, agrega la propiedad "imagen"
-        for (const product of products) {
-            // Supongamos que la URL de la imagen se basa en la propiedad "Codigo" del producto
-            const baseSQL = user === null || user === void 0 ? void 0 : user.BaseSQL.trim().toLowerCase().split(',');
-            if (baseSQL && baseSQL.length > 0) {
-                const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
-                const imageDB = formatImageDB[formatImageDB.length - 1];
-                const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
-                // Verifica si la imagen existe antes de agregarla al producto
-                const imageExists = yield checkImageExists(imageUrl);
-                if (imageExists) {
-                    product.imagen = [{
-                            url: imageUrl,
-                            id: 1
-                        }];
-                }
+const getImagesFromProducts = (_c) => __awaiter(void 0, [_c], void 0, function* ({ base, products }) {
+    // Ahora, para cada producto, agrega la propiedad "imagen"
+    for (const product of products) {
+        // Supongamos que la URL de la imagen se basa en la propiedad "Codigo" del producto
+        const baseSQL = base === null || base === void 0 ? void 0 : base.trim().toLowerCase().split(',');
+        if (baseSQL && baseSQL.length > 0) {
+            const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
+            const imageDB = formatImageDB[formatImageDB.length - 1];
+            const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
+            // Verifica si la imagen existe antes de agregarla al producto
+            const imageExists = yield checkImageExists(imageUrl);
+            if (imageExists) {
+                product.imagen = [{
+                        url: imageUrl,
+                        id: 1
+                    }];
             }
         }
     }
+    /*     if (user?.SwImagenes) {
+            // Ahora, para cada producto, agrega la propiedad "imagen"
+            for (const product of products) {
+                // Supongamos que la URL de la imagen se basa en la propiedad "Codigo" del producto
+                const baseSQL = user?.BaseSQL.trim().toLowerCase().split(',');
+    
+                if (baseSQL && baseSQL.length > 0) {
+                    const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
+                    const imageDB = formatImageDB[formatImageDB.length - 1];
+                    const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
+    
+                    // Verifica si la imagen existe antes de agregarla al producto
+                    const imageExists = await checkImageExists(imageUrl);
+    
+                    if (imageExists) {
+                        product.imagen = [{
+                            url: imageUrl,
+                            id: 1
+                        }];
+                    }
+                }
+            }
+        } */
     return { products };
 });
 function executeQuery(pool, query, params) {

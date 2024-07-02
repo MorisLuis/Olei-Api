@@ -12,8 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUsers = void 0;
 const database_1 = require("../database");
 const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const pool = yield (0, database_1.dbConnection)();
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
     try {
+        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
         const result = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(database_1.querys.getAllUsers));
         const users = result === null || result === void 0 ? void 0 : result.recordset;
         const total = result === null || result === void 0 ? void 0 : result.rowsAffected[0];
@@ -23,8 +25,12 @@ const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         });
     }
     catch (error) {
+        console.log({ getUsersError: error });
         res.status(500);
         res.send(error.message);
+    }
+    finally {
+        yield (0, database_1.closeDbConnection)();
     }
 });
 exports.getUsers = getUsers;

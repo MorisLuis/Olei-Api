@@ -14,17 +14,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.closeDbConnection = exports.dbConnection = void 0;
 const mssql_1 = __importDefault(require("mssql"));
-const __1 = require("..");
 const config_1 = __importDefault(require("../config"));
 let pool = null;
 const dbConnection = (server, database) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const currenUserConnection = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.userConnection) === null || _a === void 0 ? void 0 : _a.connection;
     const dbConfig = {
         user: config_1.default.dbUser,
         password: config_1.default.dbPassword,
-        server: server || (currenUserConnection === null || currenUserConnection === void 0 ? void 0 : currenUserConnection.server) || config_1.default.dbServer,
-        database: database || (currenUserConnection === null || currenUserConnection === void 0 ? void 0 : currenUserConnection.database) || config_1.default.dbDatabase,
+        server: server || config_1.default.dbServer,
+        database: database || config_1.default.dbDatabase,
         options: {
             encrypt: true,
             trustServerCertificate: true,
@@ -43,14 +40,6 @@ const dbConnection = (server, database) => __awaiter(void 0, void 0, void 0, fun
 exports.dbConnection = dbConnection;
 const closeDbConnection = () => __awaiter(void 0, void 0, void 0, function* () {
     if (pool) {
-        __1.sharedData.userConnection = {
-            connection: {
-                user: config_1.default.dbUser,
-                password: config_1.default.dbPassword,
-                server: config_1.default.dbServer,
-                database: config_1.default.dbDatabase
-            }
-        };
         yield pool.close();
         pool = null;
     }

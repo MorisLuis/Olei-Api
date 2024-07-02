@@ -2,7 +2,20 @@ export const querys = {
 
     //Auth
     auth: ` 
-        SELECT *
+        SELECT
+        [Nombre],
+        [EMail],
+        [Id_Usuario],
+        [Password],
+        [Id_Almacen]
+        FROM [dbo].[USUARIOS]
+        WHERE Id_Usuario = @Id_Usuario
+    `,
+
+    getAuthLimitData: `
+        SELECT 
+            Id_Almacen,
+            ActualizarListas AS Id_ListPre
         FROM [dbo].[USUARIOS]
         WHERE Id_Usuario = @Id_Usuario
     `,
@@ -55,7 +68,7 @@ export const querys = {
 
     // Users
     getAllUsers: "SELECT TOP(500) * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS]",
-    getUser: "SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS] WHERE Nombre = ?",
+    //getUser: "SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS] WHERE Nombre = ?",
 
     // Tables
     getFamilias: `SELECT TRIM(F.Nombre) AS Nombre FROM [dbo].[FAMILIAS] F`,
