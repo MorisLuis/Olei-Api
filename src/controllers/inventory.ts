@@ -17,10 +17,11 @@ const postInventory = async (req: Request, res: Response) => {
         const postInventoryData = req.body;
         
         const pool = await dbConnection(serverclientes, baseclientes);
+        
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
         const user = requestUser.recordset[0]
-        const dataStorage = getUserData(`${Id_Usuario}_${baseclientes}`.toLowerCase());
+        const dataStorage = getUserData(`${Id_Usuario}_${baseclientes}`);
 
         const transaction = new sql.Transaction(pool);
         await transaction.begin();
@@ -106,7 +107,7 @@ const postInventoryDetails = async (req: Request, res: Response) => {
     const serverclientes = req.server;
     const baseclientes = req.base;
     const Id_Usuario = req.id;
-    const dataStorage = getUserData(`${Id_Usuario}_${baseclientes}`.toLowerCase());
+    const dataStorage = getUserData(`${Id_Usuario}_${baseclientes}`);
 
     try {
         const postInventoryDataArray = req.body;

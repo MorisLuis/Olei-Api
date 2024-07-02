@@ -55,7 +55,7 @@ const loginDB = async (req: Req, res: Response) => {
             Vigencia: cleanResult.Vigencia
         }
 
-        setClienteData(cleanResult.IdUsuarioOLEI.trim(), dataDB)
+        setClienteData(cleanResult.IdUsuarioOLEI, dataDB)
 
         return res.json({
             tokenDB,

@@ -26,7 +26,7 @@ const changeTypeofmovements = async (req: Request, res: Response) => {
 
     const serverclientes = req.server;
     const baseclientes = req.base;
-    const currentUser = getUserDataWeb(baseclientes.trim())
+    const currentUser = getUserDataWeb(baseclientes)
 
     try {
         const pool = await dbConnection(serverclientes, baseclientes);
@@ -54,6 +54,7 @@ const changeTypeofmovements = async (req: Request, res: Response) => {
         });
 
     } catch (error: any) {
+        console.log({error})
         res.status(500);
         res.send(error.message);
     }

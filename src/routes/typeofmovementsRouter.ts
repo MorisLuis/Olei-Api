@@ -5,7 +5,7 @@ import { validateJWT } from "../helpers/validate-jwt";
 
 const router = Router();
 router.get('/', validateJWT, getTypeofmovements);
-router.put('/', changeTypeofmovements);
+router.put('/', validateJWT, changeTypeofmovements);
 
 
 export default router;

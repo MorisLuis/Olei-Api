@@ -9,6 +9,7 @@ interface UserData {
 
 const userStorage: { [userId: string]: UserData } = {};
 
+/* userId = ${Id_Usuario}_${baseclientes}` */
 export const getUserData = (userId: string): UserData | undefined => {
     return userStorage[userId.toLowerCase().trim()];
 };

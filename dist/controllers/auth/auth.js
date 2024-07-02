@@ -50,7 +50,7 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             SwImagenes: cleanResult.SwImagenes,
             Vigencia: cleanResult.Vigencia
         };
-        (0, storageApp_1.setClienteData)(cleanResult.IdUsuarioOLEI.trim(), dataDB);
+        (0, storageApp_1.setClienteData)(cleanResult.IdUsuarioOLEI, dataDB);
         return res.json({
             tokenDB,
             user,

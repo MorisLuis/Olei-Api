@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.removeClienteData = exports.setClienteData = exports.getClienteData = exports.removeUserData = exports.setUserData = exports.getUserData = void 0;
 const userStorage = {};
+/* userId = ${Id_Usuario}_${baseclientes}` */
 const getUserData = (userId) => {
     return userStorage[userId.toLowerCase().trim()];
 };

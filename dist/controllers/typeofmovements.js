@@ -31,7 +31,7 @@ exports.getTypeofmovements = getTypeofmovements;
 const changeTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const serverclientes = req.server;
     const baseclientes = req.base;
-    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseclientes.trim());
+    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseclientes);
     try {
         const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const { Id_TipoMovInv } = req.body;
@@ -51,6 +51,7 @@ const changeTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, fu
         });
     }
     catch (error) {
+        console.log({ error });
         res.status(500);
         res.send(error.message);
     }

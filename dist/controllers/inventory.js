@@ -28,7 +28,7 @@ const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
-        const dataStorage = (0, storageApp_1.getUserData)(`${Id_Usuario}_${baseclientes}`.toLowerCase());
+        const dataStorage = (0, storageApp_1.getUserData)(`${Id_Usuario}_${baseclientes}`);
         const transaction = new mssql_1.default.Transaction(pool);
         yield transaction.begin();
         // Get last Folio
@@ -97,7 +97,7 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
     const serverclientes = req.server;
     const baseclientes = req.base;
     const Id_Usuario = req.id;
-    const dataStorage = (0, storageApp_1.getUserData)(`${Id_Usuario}_${baseclientes}`.toLowerCase());
+    const dataStorage = (0, storageApp_1.getUserData)(`${Id_Usuario}_${baseclientes}`);
     try {
         const postInventoryDataArray = req.body;
         const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
