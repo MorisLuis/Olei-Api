@@ -3,7 +3,7 @@ import { dbConnection, querys } from '../../database';
 import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
 import config from '../../config';
 import moment from 'moment';
-import { getClienteData, setClienteData, setUserData } from '../../storage';
+import { getClienteData, setClienteData, setUserData } from '../../Storage/storageApp';
 
 export interface Req extends Request {
     serverclientes: string;
@@ -54,8 +54,6 @@ const loginDB = async (req: Req, res: Response) => {
             SwImagenes: cleanResult.SwImagenes,
             Vigencia: cleanResult.Vigencia
         }
-
-        console.log({ id: cleanResult.IdUsuarioOLEI.trim() })
 
         setClienteData(cleanResult.IdUsuarioOLEI.trim(), dataDB)
 

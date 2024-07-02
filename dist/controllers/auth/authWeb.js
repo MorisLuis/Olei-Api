@@ -15,9 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.logout = exports.renewWeb = exports.loginWeb = void 0;
 const database_1 = require("../../database");
 const generate_jwt_1 = require("../../helpers/generate-jwt");
-const __1 = require("../..");
 const config_1 = __importDefault(require("../../config"));
 const moment_1 = __importDefault(require("moment"));
+const storageWeb_1 = require("../../Storage/storageWeb");
 const loginWeb = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // STEP 1 - LOGIN
@@ -38,73 +38,102 @@ const loginWeb = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
         // Get the user's subscription expiration date.
-        const dueDate = yield getUserSubscriptionDueDate(mainPool, user.Id_ClienteDBCLIENTES);
+        /* const dueDate = await getUserSubscriptionDueDate(mainPool, user.Id_ClienteDBCLIENTES);
+        console.log({dueDate})
         if (isSubscriptionExpired(dueDate)) {
             return res.status(401).json({ error: 'Subscripción ha expirado' });
-        }
-        const token = yield (0, generate_jwt_1.generateJWT)({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
+        } */
         // Get user database connection details.
         const otherDBServer = user.ServidorSQL.trim();
         const otherDBDatabase = user.BaseSQL.trim();
-        // Update sharedData.userConnection for global access.
-        __1.sharedData.userConnection = {
-            connection: {
-                user: config_1.default.dbUser,
-                password: config_1.default.dbPassword,
-                server: otherDBServer,
-                database: otherDBDatabase
-            }
-        };
         yield mainPool.close();
         // STEP 2 - CONNECT THE COMPANY DATABASE
         // Connect to the user's database.
         const otherDBConnection = yield connectToUserDatabase(user);
+        const UserData = {
+            Id_UsuarioOOL: user.Id_UsuarioOOL,
+            TipoUsuario: user.TipoUsuario,
+            PrivilegioTipoCliente: user.PrivilegioTipoCliente,
+            Id_Almacen: user.Id_Almacen,
+            SwImagenes: user.SwImagenes,
+            SwSinStock: user.SwSinStock,
+            SwsinPrecio: user.SwsinPrecio,
+            TipoDocOO: user.TipoDocOO,
+            IdOLEI: user.IdOLEI,
+            Company: user.Company,
+            Id_ListPre: otherDBConnection.currentUser.user.Id_ListPre
+        };
+        (0, storageWeb_1.setUserDataWeb)(user.BaseSQL.trim(), UserData);
+        const currentUser = (0, storageWeb_1.getUserDataWeb)(user.BaseSQL.trim());
         return res.json({
             otherDBServer,
             otherDBDatabase,
-            user: otherDBConnection.currentUser,
-            token
+            user: currentUser,
+            token: otherDBConnection.token
         });
     }
     catch (error) {
         console.log({ error });
         return res.status(500).json({ error: error.message || 'Unexpected error' });
     }
+    finally {
+        yield (0, database_1.closeDbConnection)();
+    }
 });
 exports.loginWeb = loginWeb;
 const renewWeb = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const user = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user;
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
+    const id = req.id;
+    const rol = req.rol;
+    const clientid = req.clientid;
     try {
-        if (!user) {
-            return res.status(401).json({ message: 'User not authenticated' });
+        if (!id && !rol) {
+            return res.status(401).json({ message: 'Id and rol are neccessary' });
         }
         ;
-        const token = yield (0, generate_jwt_1.generateJWT)({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
+        if (!serverWeb && !baseWeb) {
+            return res.status(401).json({ message: 'Server and base data is neccessary' });
+        }
+        ;
+        let token;
+        if (clientid) {
+            token = yield (0, generate_jwt_1.generateWebJWT)({ id, rol, serverweb: serverWeb, baseweb: baseWeb, clientid });
+        }
+        else {
+            token = yield (0, generate_jwt_1.generateWebJWT)({ id, rol, serverweb: serverWeb, baseweb: baseWeb });
+        }
+        if (!token) {
+            return res.status(401).json({ message: 'Failed to generate token' });
+        }
+        ;
+        const user = yield (0, storageWeb_1.getUserDataWeb)(baseWeb);
         res.json({
             user,
             token
         });
     }
     catch (error) {
+        console.log({ errorRW: error });
         res.status(500).send(error.message);
+    }
+    finally {
+        yield (0, database_1.closeDbConnection)();
     }
 });
 exports.renewWeb = renewWeb;
 const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield (0, database_1.closeDbConnection)();
-        const server = "babs4kdofr.database.windows.net";
-        const database = "OLEIDB1_CLIENTES";
-        const pool = yield (0, database_1.dbConnection)(server, database);
-        const connectionStatus = (pool === null || pool === void 0 ? void 0 : pool.connected) ? 'Connected' : 'Not Connected';
         res.json({
-            status: connectionStatus,
-            pool
+            ok: false,
         });
     }
     catch (error) {
         console.log({ error });
+    }
+    finally {
+        yield (0, database_1.closeDbConnection)();
     }
 });
 exports.logout = logout;
@@ -125,7 +154,7 @@ const isSubscriptionExpired = (dueDate) => {
     return isExpired;
 };
 const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b, _c;
+    var _a, _b;
     try {
         const otherPool = yield (0, database_1.dbConnection)(user.ServidorSQL.trim(), user.BaseSQL.trim());
         const query_DB = database_1.querys.authCompany;
@@ -133,11 +162,11 @@ const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, functi
             .input('Id_Cliente', user.Id_Cliente ? user.Id_Cliente : 1)
             .input("IdOLEI", user.IdOLEI)
             .query(query_DB);
-        const Id_ListPre = (_b = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _b === void 0 ? void 0 : _b.Id_ListPre;
-        const Nombre = (_c = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _c === void 0 ? void 0 : _c.Nombre;
+        const Id_ListPre = (_a = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _a === void 0 ? void 0 : _a.Id_ListPre;
+        const Nombre = (_b = idListPreResult === null || idListPreResult === void 0 ? void 0 : idListPreResult.recordset[0]) === null || _b === void 0 ? void 0 : _b.Nombre;
         const TypeOfMovementsResult = yield otherPool.request().query(database_1.querys.getTypeOfMovementInitial);
         const TypeOfMovements = TypeOfMovementsResult.recordset[0];
-        __1.sharedData.currentUser = {
+        const UserData = {
             user: Object.assign(Object.assign({}, user), { Id_ListPre,
                 Nombre, Id_TipoMovInv: {
                     Id_TipoMovInv: TypeOfMovements.Id_TipoMovInv,
@@ -146,18 +175,27 @@ const connectToUserDatabase = (user) => __awaiter(void 0, void 0, void 0, functi
                     Id_AlmDest: TypeOfMovements.Id_AlmDest
                 } })
         };
-        __1.sharedData.currentClient = {
-            client: {
-                Id_Almacen: user.Id_Almacen,
-                Id_Cliente: user.Id_Cliente,
-                Id_ListPre
-            }
+        const Id_Cliente = (user === null || user === void 0 ? void 0 : user.Id_Cliente) ? user.Id_Cliente : 0;
+        const client = {
+            Id_Almacen: user.Id_Almacen,
+            Id_Cliente: Id_Cliente,
+            Id_ListPre,
+            IsEmploye: false
         };
+        (0, storageWeb_1.setClientData)(`${user.BaseSQL.trim()}_${Id_Cliente}`, client);
+        const token = yield (0, generate_jwt_1.generateWebJWT)({
+            id: user.Id_UsuarioOOL.trim(),
+            rol: user.TipoUsuario,
+            serverweb: user.ServidorSQL.trim(),
+            baseweb: user.BaseSQL.trim(),
+            clientid: Id_Cliente
+        });
         return {
             server: user.ServidorSQL.trim(),
             database: user.BaseSQL.trim(),
             pool: otherPool,
-            currentUser: __1.sharedData.currentUser.user
+            currentUser: UserData,
+            token
         };
     }
     catch (error) {

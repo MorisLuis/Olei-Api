@@ -17,7 +17,7 @@ const database_1 = require("../../database");
 const generate_jwt_1 = require("../../helpers/generate-jwt");
 const config_1 = __importDefault(require("../../config"));
 const moment_1 = __importDefault(require("moment"));
-const storage_1 = require("../../storage");
+const storageApp_1 = require("../../Storage/storageApp");
 const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
     const mainPool = yield (0, database_1.dbConnection)(config_1.default.dbServer, config_1.default.dbDatabase);
@@ -38,11 +38,19 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const user = {
             ServidorSQL: cleanResult.ServidorSQL,
             BaseSQL: cleanResult.BaseSQL,
+            RazonSocial: cleanResult.RazonSocial
         };
         const tokenDB = yield (0, generate_jwt_1.generateJWTDB)({
             serverclientes: cleanResult.ServidorSQL.trim(),
-            baseclientes: cleanResult.BaseSQL.trim()
+            baseclientes: cleanResult.BaseSQL.trim(),
+            IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim()
         });
+        const dataDB = {
+            RazonSocial: cleanResult.RazonSocial,
+            SwImagenes: cleanResult.SwImagenes,
+            Vigencia: cleanResult.Vigencia
+        };
+        (0, storageApp_1.setClienteData)(cleanResult.IdUsuarioOLEI.trim(), dataDB);
         return res.json({
             tokenDB,
             user,
@@ -64,7 +72,7 @@ exports.loginDB = loginDB;
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const serverclientes = req.serverclientes;
     const baseclientes = req.baseclientes;
-    console.log({ serverclientes, baseclientes });
+    const IdUsuarioOLEI = req.IdUsuarioOLEI;
     // STEP 1 - LOGIN
     const mainPool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
     if (!mainPool) {
@@ -73,9 +81,6 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Search for the user in the database using their email.
         const { Id_Usuario, password } = req.body;
-        console.log({
-            Id_Usuario, password
-        });
         if (Id_Usuario.trim() === "" || password.trim() === "") {
             return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
         }
@@ -97,13 +102,17 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 Id_AlmDest: TypeOfMovements.Id_AlmDest
             }
         };
-        (0, storage_1.setUserData)(`${Id_Usuario}_${baseclientes}`, userStorage);
-        //if (!sharedData.currentUser?.user.Vigencia) return;
+        (0, storageApp_1.setUserData)(`${Id_Usuario}_${baseclientes}`, userStorage);
+        const clientData = (0, storageApp_1.getClienteData)(IdUsuarioOLEI);
+        if (!(clientData === null || clientData === void 0 ? void 0 : clientData.Vigencia)) {
+            return res.status(401).json({ error: 'Necesario tener una cuenta vigente' });
+        }
+        ;
         // Get the user's subscription expiration date.
-        /* const dueDate = await isSubscriptionExpired(sharedData.currentUser?.user.Vigencia);
+        const dueDate = yield isSubscriptionExpired(clientData === null || clientData === void 0 ? void 0 : clientData.Vigencia);
         if (dueDate) {
             return res.status(401).json({ error: 'Subscripción ha expirado' });
-        } */
+        }
         const token = yield (0, generate_jwt_1.generateJWT)({
             id: user.Id_Usuario.trim(),
             rol: user.Id_Perfil,
@@ -127,16 +136,43 @@ exports.login = login;
 const renewDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const serverclientes = req.serverclientes;
     const baseclientes = req.baseclientes;
+    const IdUsuarioOLEI = req.IdUsuarioOLEI;
     try {
         if (!serverclientes && !baseclientes) {
             return res.status(401).json({ message: 'UserDB not authenticated' });
         }
         ;
-        const token = yield (0, generate_jwt_1.generateJWTDB)({ serverclientes: serverclientes, baseclientes: baseclientes });
+        const token = yield (0, generate_jwt_1.generateJWTDB)({
+            serverclientes: serverclientes,
+            baseclientes: baseclientes,
+            IdUsuarioOLEI
+        });
+        if (!token) {
+            return res.status(401).json({ message: 'Failed to generate token' });
+        }
+        ;
+        //To get 'Vigencia', SwImagenes and 'RazonSocial'.
+        const dataFromDatabase = (0, storageApp_1.getClienteData)(IdUsuarioOLEI);
         const user = {
             ServidorSQL: serverclientes,
             BaseSQL: baseclientes,
+            Vigencia: dataFromDatabase === null || dataFromDatabase === void 0 ? void 0 : dataFromDatabase.Vigencia,
+            SwImagenes: dataFromDatabase === null || dataFromDatabase === void 0 ? void 0 : dataFromDatabase.SwImagenes,
+            RazonSocial: dataFromDatabase === null || dataFromDatabase === void 0 ? void 0 : dataFromDatabase.RazonSocial
         };
+        if (!user) {
+            return res.status(401).json({ message: 'User data is neccesary' });
+        }
+        ;
+        if (!(dataFromDatabase === null || dataFromDatabase === void 0 ? void 0 : dataFromDatabase.Vigencia)) {
+            return res.status(401).json({ error: 'Necesario tener una cuenta vigente' });
+        }
+        ;
+        // Get the user's subscription expiration date.
+        const dueDate = yield isSubscriptionExpired(dataFromDatabase === null || dataFromDatabase === void 0 ? void 0 : dataFromDatabase.Vigencia);
+        if (dueDate) {
+            return res.status(401).json({ error: 'Subscripción ha expirado' });
+        }
         res.json({
             token,
             user
@@ -162,21 +198,31 @@ const renewLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             return res.status(401).json({ message: 'Server and base data is neccessary' });
         }
         ;
-        const mainPool = yield (0, database_1.dbConnection)(server, base);
-        const userDB = yield getUserByEmail(mainPool, userId);
         const token = yield (0, generate_jwt_1.generateJWT)({
             id: userId,
             rol: userRol,
             server,
             base
         });
+        if (!token) {
+            return res.status(401).json({ message: 'Failed to generate token' });
+        }
+        ;
+        // Get user data.
+        const mainPool = yield (0, database_1.dbConnection)(server, base);
+        const userDB = yield getUserByEmail(mainPool, userId);
         const user = Object.assign(Object.assign({}, userDB), { ServidorSQL: server, BaseSQL: base });
+        if (!userDB) {
+            return res.status(401).json({ message: 'User data is neccesary' });
+        }
+        ;
         res.json({
             user,
             token
         });
     }
     catch (error) {
+        console.log({ error });
         res.status(500).send(error.message);
     }
 });

@@ -121,13 +121,16 @@ const searchClient = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 exports.searchClient = searchClient;
 const searchProductInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerm } = req.query;
-    const serverclientes = req.serverclientes;
-    const baseclientes = req.baseclientes;
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+    const Id_Usuario = req.id;
+    console.log({ Id_Usuario });
     try {
         const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const userquery = database_1.querys.getAuthLimitData;
-        const requestUser = yield pool.request().input('Id_Usuario', 'IDALIA').query(userquery);
+        const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
+        console.log({ user });
         if (!pool) {
             return res.status(500).json({ error: 'Unable to establish a connection to the database' });
         }

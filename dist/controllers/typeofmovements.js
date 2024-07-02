@@ -11,11 +11,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.changeTypeofmovements = exports.getTypeofmovements = void 0;
 const database_1 = require("../database");
-const __1 = require("..");
+const storageWeb_1 = require("../Storage/storageWeb");
 const getTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const serverclientes = req.server;
     const baseclientes = req.base;
-    console.log({ serverclientes, baseclientes });
     try {
         const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const TiposMovimientoResult = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(database_1.querys.getTiposMovimiento));
@@ -30,27 +29,25 @@ const getTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, funct
 exports.getTypeofmovements = getTypeofmovements;
 // Temporal (!)
 const changeTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     const serverclientes = req.server;
     const baseclientes = req.base;
+    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseclientes.trim());
     try {
         const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const { Id_TipoMovInv } = req.body;
-        const user = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _a === void 0 ? void 0 : _a.user;
+        const user = currentUser;
         const TipoMovimiento = yield pool.request()
             .input('Id_TipoMovInv', JSON.parse(Id_TipoMovInv))
             .query(database_1.querys.getTipoDeMovimiento);
         const result = TipoMovimiento.recordset[0];
-        __1.sharedData.currentUser = {
-            user: Object.assign(Object.assign({}, user), { Id_TipoMovInv: {
-                    Id_TipoMovInv: result.Id_TipoMovInv,
-                    Accion: result.Accion,
-                    Descripcion: result.Descripcion,
-                    Id_AlmDest: result.Id_AlmDest
-                } })
-        };
+        const userData = Object.assign(Object.assign({}, user), { Id_TipoMovInv: {
+                Id_TipoMovInv: result.Id_TipoMovInv,
+                Accion: result.Accion,
+                Descripcion: result.Descripcion,
+                Id_AlmDest: result.Id_AlmDest
+            } });
         res.json({
-            user: __1.sharedData.currentUser.user
+            user: userData
         });
     }
     catch (error) {

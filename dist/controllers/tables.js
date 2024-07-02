@@ -12,8 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTables = void 0;
 const database_1 = require("../database");
 const getTables = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
     try {
-        const pool = yield (0, database_1.dbConnection)();
+        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
         const FamiliasResult = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(database_1.querys.getFamilias));
         const Familias = FamiliasResult === null || FamiliasResult === void 0 ? void 0 : FamiliasResult.recordset.map(familia => familia.Nombre);
         const MarcaResult = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(database_1.querys.getMarcas));
@@ -29,6 +31,9 @@ const getTables = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     catch (error) {
         res.status(500);
         res.send(error.message);
+    }
+    finally {
+        yield (0, database_1.closeDbConnection)();
     }
 });
 exports.getTables = getTables;

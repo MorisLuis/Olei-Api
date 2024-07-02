@@ -15,18 +15,36 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getOrderDetails = exports.postOrderDetails = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
-const __1 = require("..");
 const orders_1 = require("../database/querys/orders");
+const storageWeb_1 = require("../Storage/storageWeb");
 const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
+    const clientid = req.clientid;
+    // Get the user information from shared data, including the user's warehouse (Almacen)
+    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseWeb.trim());
+    const currentClient = (0, storageWeb_1.getClientData)(`${baseWeb.trim()}_${clientid}`);
+    let userAlmacen;
+    let userListPrice;
+    if (currentClient === null || currentClient === void 0 ? void 0 : currentClient.IsEmploye) {
+        userAlmacen = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_Almacen;
+        userListPrice = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_ListPre;
+    }
+    else {
+        userAlmacen = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_Almacen;
+        userListPrice = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_ListPre;
+    }
+    if (!currentClient) {
+        res.status(500).json({ error: 'Es necesario tener la información de el cliente' });
+        return;
+    }
+    ;
     try {
         const postArray = req.body;
-        const client = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
-        const user = (_b = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentUser) === null || _b === void 0 ? void 0 : _b.user;
-        const Id_Almacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
-        const Id_Cliente = client === null || client === void 0 ? void 0 : client.Id_Cliente;
-        const Id_ListPre = client === null || client === void 0 ? void 0 : client.Id_ListPre;
-        const pool = yield (0, database_1.dbConnection)();
+        const Id_Almacen = userAlmacen;
+        const Id_ListPre = userListPrice;
+        const Id_Cliente = currentClient.Id_Cliente;
+        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
@@ -53,7 +71,7 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
                     return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
                 }
                 postData.Id_Almacen = Id_Almacen;
-                postData.TipoDoc = user === null || user === void 0 ? void 0 : user.TipoDocOO;
+                postData.TipoDoc = currentUser === null || currentUser === void 0 ? void 0 : currentUser.TipoDocOO;
                 postData.Serie = SerieActiva ? SerieActiva : "";
                 postData.Folio = (Folio ? Folio : 0) + 1;
                 postData.Id_ListaPrecios = Id_ListPre;
@@ -108,16 +126,22 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
         console.error('Error al crear el orde details:', error.message);
         res.status(500).json({ error: error });
     }
+    finally {
+        yield (0, database_1.closeDbConnection)();
+    }
 });
 exports.postOrderDetails = postOrderDetails;
 const getOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
+    const clientid = req.clientid;
     const { folio } = req.query;
     if (!folio) {
         res.status(500).json({ error: 'No se envio el folio' });
         return;
     }
     try {
-        const pool = yield (0, database_1.dbConnection)();
+        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
@@ -132,6 +156,9 @@ const getOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
     catch (error) {
         res.status(500).json({ error: error });
+    }
+    finally {
+        yield (0, database_1.closeDbConnection)();
     }
 });
 exports.getOrderDetails = getOrderDetails;

@@ -4,15 +4,13 @@ import { dbConnection, querys } from "../database";
 import sql from 'mssql';
 import { inventoryQuerys } from "../database/querys/inventory";
 import { currentTime } from "../utils/currentTime";
-import { getUserData } from "../storage";
+import { getUserData } from "../Storage/storageApp";
 
 const postInventory = async (req: Request, res: Response) => {
 
     const serverclientes = req.server;
     const baseclientes = req.base;
     const Id_Usuario = req.id;
-
-    console.log({serverclientes, baseclientes, Id_Usuario})
 
     try {
         
@@ -22,11 +20,7 @@ const postInventory = async (req: Request, res: Response) => {
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
         const user = requestUser.recordset[0]
-        console.log({storage: `${Id_Usuario}_${baseclientes}`.toLowerCase()})
         const dataStorage = getUserData(`${Id_Usuario}_${baseclientes}`.toLowerCase());
-
-        console.log({user});
-        console.log({dataStorage});
 
         const transaction = new sql.Transaction(pool);
         await transaction.begin();

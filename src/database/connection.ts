@@ -1,5 +1,4 @@
 import sql from "mssql";
-import { sharedData } from "..";
 import config from "../config";
 
 
@@ -7,12 +6,11 @@ let pool: sql.ConnectionPool | null = null;
 
 export const dbConnection = async (server?: string, database?: string) => {
 
-    const currenUserConnection = sharedData?.userConnection?.connection;
     const dbConfig = {
         user: config.dbUser,
         password: config.dbPassword,
-        server: server || currenUserConnection?.server || config.dbServer,
-        database: database || currenUserConnection?.database || config.dbDatabase,
+        server: server  || config.dbServer,
+        database: database || config.dbDatabase,
         options: {
             encrypt: true,
             trustServerCertificate: true,
@@ -32,14 +30,7 @@ export const dbConnection = async (server?: string, database?: string) => {
 
 export const closeDbConnection = async () => {
     if (pool) {
-        sharedData.userConnection = {
-            connection: {
-                user: config.dbUser,
-                password: config.dbPassword,
-                server: config.dbServer,
-                database: config.dbDatabase
-            }
-        };
+
 
         await pool.close();
         pool = null;

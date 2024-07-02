@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 
 import { closeDbConnection, dbConnection, querys } from '../../database';
-import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
-import { sharedData } from '../..';
+import { generateWebJWT } from '../../helpers/generate-jwt';
 import config from '../../config';
 import moment from 'moment';
 import UserInterface from '../../interface/user';
+import { getUserDataWeb, setClientData, setUserDataWeb } from '../../Storage/storageWeb';
 
 const loginWeb = async (req: Request, res: Response) => {
 
@@ -26,6 +26,7 @@ const loginWeb = async (req: Request, res: Response) => {
 
         const user = await getUserByEmailWeb(mainPool, email);
 
+
         if (!user) {
             return res.status(404).json({ error: 'Correo no encontrado' });
         }
@@ -35,11 +36,11 @@ const loginWeb = async (req: Request, res: Response) => {
         }
 
         // Get the user's subscription expiration date.
-        const dueDate = await getUserSubscriptionDueDate(mainPool, user.Id_ClienteDBCLIENTES);
+        /* const dueDate = await getUserSubscriptionDueDate(mainPool, user.Id_ClienteDBCLIENTES);
+        console.log({dueDate})
         if (isSubscriptionExpired(dueDate)) {
             return res.status(401).json({ error: 'Subscripción ha expirado' });
-        }
-        const token = await generateJWT({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
+        } */
 
 
         // Get user database connection details.
@@ -47,52 +48,88 @@ const loginWeb = async (req: Request, res: Response) => {
         const otherDBDatabase = user.BaseSQL.trim();
 
 
-        // Update sharedData.userConnection for global access.
-        sharedData.userConnection = {
-            connection: {
-                user: config.dbUser,
-                password: config.dbPassword,
-                server: otherDBServer,
-                database: otherDBDatabase
-            }
-        };
+
         await mainPool.close();
 
         // STEP 2 - CONNECT THE COMPANY DATABASE
         // Connect to the user's database.
         const otherDBConnection = await connectToUserDatabase(user);
 
+        const UserData = {
+            Id_UsuarioOOL: user.Id_UsuarioOOL,
+            TipoUsuario: user.TipoUsuario,
+            PrivilegioTipoCliente: user.PrivilegioTipoCliente,
+            Id_Almacen: user.Id_Almacen,
+            SwImagenes: user.SwImagenes,
+            SwSinStock: user.SwSinStock,
+            SwsinPrecio: user.SwsinPrecio,
+            TipoDocOO: user.TipoDocOO,
+            IdOLEI: user.IdOLEI,
+            Company: user.Company,
+
+            Id_ListPre: otherDBConnection.currentUser.user.Id_ListPre
+        }
+
+
+        setUserDataWeb(user.BaseSQL.trim(), UserData)
+        const currentUser = getUserDataWeb(user.BaseSQL.trim());
+
         return res.json({
             otherDBServer,
             otherDBDatabase,
-            user: otherDBConnection.currentUser,
-            token
+            user: currentUser,
+            token: otherDBConnection.token
         });
-
 
     } catch (error: any) {
         console.log({ error })
         return res.status(500).json({ error: error.message || 'Unexpected error' });
+    } finally {
+        await closeDbConnection()
     }
 };
 
 const renewWeb = async (req: Request, res: Response) => {
 
-    const user = sharedData?.currentUser?.user;
+
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
+    const id = req.id;
+    const rol = req.rol;
+    const clientid = req.clientid
 
     try {
-        if (!user) {
-            return res.status(401).json({ message: 'User not authenticated' });
+
+        if (!id && !rol) {
+            return res.status(401).json({ message: 'Id and rol are neccessary' });
         };
 
-        const token = await generateJWT({ id: user.Id_UsuarioOOL, rol: user.TipoUsuario });
+        if (!serverWeb && !baseWeb) {
+            return res.status(401).json({ message: 'Server and base data is neccessary' });
+        };
+
+        let token
+        if (clientid) {
+            token = await generateWebJWT({ id, rol, serverweb: serverWeb, baseweb: baseWeb, clientid });
+        } else {
+            token = await generateWebJWT({ id, rol, serverweb: serverWeb, baseweb: baseWeb });
+        }
+
+        if (!token) {
+            return res.status(401).json({ message: 'Failed to generate token' });
+        };
+
+        const user = await getUserDataWeb(baseWeb)
 
         res.json({
             user,
             token
         });
     } catch (error: any) {
+        console.log({ errorRW: error })
         res.status(500).send(error.message);
+    } finally {
+        await closeDbConnection()
     }
 }
 
@@ -103,19 +140,14 @@ const logout = async (req: Request, res: Response) => {
 
         await closeDbConnection()
 
-        const server = "babs4kdofr.database.windows.net";
-        const database = "OLEIDB1_CLIENTES";
-        const pool = await dbConnection(server, database);
-
-        const connectionStatus = pool?.connected ? 'Connected' : 'Not Connected';
-
         res.json({
-            status: connectionStatus,
-            pool
+            ok: false,
         })
 
     } catch (error) {
         console.log({ error })
+    }  finally {
+        await closeDbConnection()
     }
 }
 
@@ -155,10 +187,10 @@ const connectToUserDatabase = async (user: UserInterface) => {
         const Nombre = idListPreResult?.recordset[0]?.Nombre;
 
 
-        const TypeOfMovementsResult =  await otherPool.request().query(querys.getTypeOfMovementInitial)
+        const TypeOfMovementsResult = await otherPool.request().query(querys.getTypeOfMovementInitial)
         const TypeOfMovements = TypeOfMovementsResult.recordset[0]
 
-        sharedData.currentUser = {
+        const UserData = {
             user: {
                 ...user,
                 Id_ListPre,
@@ -172,19 +204,32 @@ const connectToUserDatabase = async (user: UserInterface) => {
             }
         };
 
-        sharedData.currentClient = {
-            client: {
-                Id_Almacen: user.Id_Almacen,
-                Id_Cliente: user.Id_Cliente as number,
-                Id_ListPre
-            }
+        const Id_Cliente = user?.Id_Cliente ? user.Id_Cliente : 0
+
+        const client = {
+            Id_Almacen: user.Id_Almacen,
+            Id_Cliente: Id_Cliente,
+            Id_ListPre,
+            IsEmploye: false
         };
+
+        setClientData(`${user.BaseSQL.trim()}_${Id_Cliente}`, client)
+
+        const token = await generateWebJWT({
+            id: user.Id_UsuarioOOL.trim(),
+            rol: user.TipoUsuario,
+            serverweb: user.ServidorSQL.trim(),
+            baseweb: user.BaseSQL.trim(),
+            clientid: Id_Cliente
+        });
+
 
         return {
             server: user.ServidorSQL.trim(),
             database: user.BaseSQL.trim(),
             pool: otherPool,
-            currentUser: sharedData.currentUser.user
+            currentUser: UserData,
+            token
         }
 
     } catch (error) {

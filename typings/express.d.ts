@@ -3,14 +3,20 @@ import { Request } from 'express';
 declare global {
   namespace Express {
     interface Request {
+      //app properties
       serverclientes: string;
       baseclientes: string;
-      IdUsuarioOLEI: string;
       server: string;
       base: string;
+
+      IdUsuarioOLEI: string;
       id: string;
       rol: number;
-      // Puedes añadir más propiedades si es necesario
+
+      // web properties
+      serverweb: string;
+      baseweb: string;
+      clientid: number;
     }
   }
 }

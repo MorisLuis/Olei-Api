@@ -22,13 +22,17 @@ const identifyBarcodeType_1 = require("../utils/identifyBarcodeType");
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
+    //console.log("getProducts=======================================")
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
+    // console.log({serverWeb, baseWeb})
     // Get the user information from shared data, including the user's warehouse (Almacen)
     const client = (_a = __1.sharedData === null || __1.sharedData === void 0 ? void 0 : __1.sharedData.currentClient) === null || _a === void 0 ? void 0 : _a.client;
     const user = (_b = __1.sharedData.currentUser) === null || _b === void 0 ? void 0 : _b.user;
     const userAlmacen = client === null || client === void 0 ? void 0 : client.Id_Almacen;
     const userListPrice = client === null || client === void 0 ? void 0 : client.Id_ListPre;
     try {
-        const pool = yield (0, database_1.dbConnection)();
+        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
@@ -118,12 +122,13 @@ exports.getProducts = getProducts;
 const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const { Marca } = req.query;
-    const serverclientes = req.serverclientes;
-    const baseclientes = req.baseclientes;
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+    const Id_Usuario = req.id;
     try {
         const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const userquery = database_1.querys.getAuthLimitData;
-        const requestUser = yield pool.request().input('Id_Usuario', 'IDALIA').query(userquery);
+        const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -183,12 +188,13 @@ const getTotalProducts = (req, res) => __awaiter(void 0, void 0, void 0, functio
 exports.getTotalProducts = getTotalProducts;
 const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { PageNumber, PageSize } = req.query;
-    const serverclientes = req.serverclientes;
-    const baseclientes = req.baseclientes;
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+    const Id_Usuario = req.id;
     try {
         const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const userquery = database_1.querys.getAuthLimitData;
-        const requestUser = yield pool.request().input('Id_Usuario', 'IDALIA').query(userquery);
+        const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -215,14 +221,14 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
 exports.getProductsByStock = getProductsByStock;
 const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { CodBar, Codigo } = req.query;
-    const serverclientes = req.serverclientes;
-    const baseclientes = req.baseclientes;
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+    const Id_Usuario = req.id;
     try {
         const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const userquery = database_1.querys.getAuthLimitData;
-        const requestUser = yield pool.request().input('Id_Usuario', 'IDALIA').query(userquery);
+        const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
-        console.log({ user });
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }

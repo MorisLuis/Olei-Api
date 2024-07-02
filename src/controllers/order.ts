@@ -1,33 +1,55 @@
 import { Request, Response } from "express"
-import { dbConnection, querys } from "../database";
+import { closeDbConnection, dbConnection } from "../database";
 import sql from 'mssql';
-import { sharedData } from "..";
 import OrderInterface from "../interface/order";
 import { orderQuerys } from "../database/querys/orders";
 import { currentTime } from "../utils/currentTime";
+import { getClientData, getUserDataWeb } from "../Storage/storageWeb";
 
 
 const postOrder = async (req: Request, res: Response) => {
 
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
+    const clientid = req.clientid;
+
+
+    // Get the user information from shared data, including the user's warehouse (Almacen)
+    const currentUser = getUserDataWeb(baseWeb.trim())
+    const currentClient = getClientData(`${baseWeb.trim()}_${clientid}`)
+
+    let userAlmacen;
+    let userListPrice;
+    if (currentClient?.IsEmploye) {
+        userAlmacen = currentClient?.Id_Almacen;
+        userListPrice = currentClient?.Id_ListPre;
+    } else {
+        userAlmacen = currentUser?.Id_Almacen;
+        userListPrice = currentUser?.Id_ListPre;
+    }
+
+    if (!currentClient) {
+        res.status(500).json({ error: 'Es necesario tener la información de el cliente' });
+        return;
+    };
+
     try {
         const postData = req.body;
-        const client = sharedData?.currentClient?.client;
-        const user = sharedData?.currentUser?.user;
-        const connection = sharedData?.userConnection?.connection
-        const Id_Almacen = client?.Id_Almacen;
-        const Id_Cliente = client?.Id_Cliente;
-        const Id_ListPre = client?.Id_ListPre;
-        const Id_Usuario = connection?.user;
-        const TipoDocOO = user?.TipoDocOO;
+        const Id_Almacen = userAlmacen;
+        const Id_ListPre = userListPrice;
+        const Id_Usuario = process.env.DB_USER;
+        const TipoDocOO = currentUser?.TipoDocOO;
+        const Id_Cliente = currentClient.Id_Cliente;
 
-        const pool = await dbConnection();
+
+        const pool = await dbConnection(serverWeb, baseWeb);
 
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
 
-        if(!TipoDocOO) {
+        if (!TipoDocOO) {
             res.status(500).json({ error: 'No se tiene TipoDocOO' });
             return;
         }
@@ -45,7 +67,7 @@ const postOrder = async (req: Request, res: Response) => {
                 .query(orderQuerys.getPreviewDataToPostOrder)
 
             const results = previewDataToPostOrder.recordset[0];
-            
+
             if (!results) {
                 return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
             }
@@ -147,7 +169,7 @@ const postOrder = async (req: Request, res: Response) => {
             res.status(201).json(order);
 
         } catch (error) {
-            console.log({error})
+            console.log({ error })
             await transaction.rollback();
             throw error;
         } finally {
@@ -158,19 +180,34 @@ const postOrder = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.error('Error al crear el post:', error);
         res.status(500).json({ error: error });
+    } finally {
+        await closeDbConnection()
     }
 };
 
 const getOrder = async (req: Request, res: Response) => {
 
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
+    const clientid = req.clientid;
+
+
+    // Get the user information from shared data, including the user's warehouse (Almacen)
+    const currentUser = getUserDataWeb(baseWeb.trim())
+    const currentClient = getClientData(`${baseWeb.trim()}_${clientid}`)
+
+
     const { folio } = req.params;
-    const client = sharedData?.currentClient?.client;
-    const Id_Cliente = client?.Id_Cliente;
-    const user = sharedData?.currentUser?.user;
-    const TipoDocOO = user?.TipoDocOO;
+    const Id_Cliente = currentClient?.Id_Cliente;
+    const TipoDocOO = currentUser?.TipoDocOO;
+
+    if (!currentClient) {
+        res.status(500).json({ error: 'Es necesario tener la información de el cliente' });
+        return;
+    };
 
     try {
-        const pool = await dbConnection();
+        const pool = await dbConnection(serverWeb, baseWeb);
 
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -191,19 +228,32 @@ const getOrder = async (req: Request, res: Response) => {
 
     } catch (error) {
         res.status(500).json({ error: error });
+    } finally {
+        await closeDbConnection()
     }
 }
 
 const getAllOrders = async (req: Request, res: Response) => {
 
-    const user = sharedData?.currentUser?.user;
-    const client = sharedData?.currentClient?.client;
-    const Id_Cliente = client?.Id_Cliente;
-    const TipoDocOO = user?.TipoDocOO;
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
+    const clientid = req.clientid;
 
+    // Get the user information from shared data, including the user's warehouse (Almacen)
+    const currentUser = getUserDataWeb(baseWeb.trim())
+    const currentClient = getClientData(`${baseWeb.trim()}_${clientid}`)
+
+
+    const Id_Cliente = currentClient?.Id_Cliente;
+    const TipoDocOO = currentUser?.TipoDocOO;
+
+    if (!currentClient) {
+        res.status(500).json({ error: 'Es necesario tener la información de el cliente' });
+        return;
+    };
 
     try {
-        const pool = await dbConnection();
+        const pool = await dbConnection(serverWeb, baseWeb);
 
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -225,6 +275,8 @@ const getAllOrders = async (req: Request, res: Response) => {
     } catch (error) {
         console.log({ error })
         res.status(500).json({ error: error });
+    } finally {
+        await closeDbConnection()
     }
 }
 

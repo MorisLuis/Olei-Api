@@ -1,20 +1,34 @@
 import { Request, Response } from 'express'
-import { sharedData } from '..';
-import { dbConnection, querys } from '../database';
+import { closeDbConnection, dbConnection, querys } from '../../database';
 import sql from 'mssql';
-import { productsQuerys } from '../database/querys/products';
+import { productsQuerys } from '../../database/querys/products';
+import { getClientData, getUserDataWeb } from '../../Storage/storageWeb';
 
 const searchProduct = async (req: Request, res: Response) => {
     const { nombre, familia, codigo, enStock, marca } = req.query;
 
     // Get the user's almacen (storage) ID, default to 1 if not available
-    const userAlmacen = sharedData?.currentClient?.client?.Id_Almacen;
-    const user = sharedData.currentUser?.user;
-    const client = sharedData?.currentClient?.client;
-    const userListPrice = client?.Id_ListPre;
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
+    const clientid = req.clientid;
+
+    if(!clientid) return;
+    // Get the user information from shared data, including the user's warehouse (Almacen)
+    const currentUser = getUserDataWeb(baseWeb.trim())
+    const currentClient = getClientData(`${baseWeb.trim()}_${clientid}`)
+
+    let userAlmacen;
+    let userListPrice;
+    if(currentClient){
+        userAlmacen = currentClient?.Id_Almacen;
+        userListPrice = currentClient?.Id_ListPre;
+    } else {
+        userAlmacen = currentUser?.Id_Almacen;
+        userListPrice = currentUser?.Id_ListPre;
+    }
 
     try {
-        const pool = await dbConnection();
+        const pool = await dbConnection(serverWeb, baseWeb);
 
         // Define query parameters for the SQL query
         const params = {
@@ -71,12 +85,12 @@ const searchProduct = async (req: Request, res: Response) => {
             }
 
             // Dont show products without stock
-            if (!user?.SwSinStock) {
+            if (!currentUser?.SwSinStock) {
                 query += ' AND E.Existencia > 0 ';
             }
 
             // Dont show products without price
-            if (!user?.SwsinPrecio) {
+            if (!currentUser?.SwsinPrecio) {
                 query += 'AND PR.Precio > 0'
             }
         }
@@ -100,15 +114,19 @@ const searchProduct = async (req: Request, res: Response) => {
     } catch (error: any) {
         // Handle errors and send an error response if necessary
         res.status(500).json({ error: error.message });
+    } finally {
+        await closeDbConnection()
     }
 };
 
 const searchClient = async (req: Request, res: Response) => {
 
     const { term } = req.query
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
 
     try {
-        const pool = await dbConnection();
+        const pool = await dbConnection(serverWeb, baseWeb);
 
         if (!pool) {
             return res.status(500).json({ error: 'Unable to establish a connection to the database' });
@@ -127,50 +145,13 @@ const searchClient = async (req: Request, res: Response) => {
 
     } catch (error: any) {
         res.status(500).json({ error: error.message });
+    } finally {
+        await closeDbConnection()
     }
 };
 
-const searchProductInventory = async (req: Request, res: Response) => {
-
-    const { searchTerm } = req.query;
-    const serverclientes = req.server;
-    const baseclientes = req.base;
-    const Id_Usuario = req.id;
-
-
-    console.log({Id_Usuario})
-    try {
-        const pool = await dbConnection(serverclientes, baseclientes);
-
-        const userquery = querys.getAuthLimitData;
-        const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
-        const user = requestUser.recordset[0]
-
-
-        console.log({user});
-
-        if (!pool) {
-            return res.status(500).json({ error: 'Unable to establish a connection to the database' });
-        }
-
-        const query = productsQuerys.getProductsBySearchInventory;
-        const result = await pool.request()
-            .input("searchTerm", searchTerm)
-            .input('Id_ListaPrecios', user.Id_ListPre)
-            .query(query);
-
-        const products = result.recordset
-
-        res.json(products)
-
-
-    } catch (error) {
-        console.log({ error })
-    }
-}
 
 export {
     searchProduct,
-    searchClient,
-    searchProductInventory
+    searchClient
 }

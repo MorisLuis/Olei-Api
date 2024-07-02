@@ -17,18 +17,18 @@ const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const inventory_1 = require("../database/querys/inventory");
 const currentTime_1 = require("../utils/currentTime");
-const storage_1 = require("../storage");
+const storageApp_1 = require("../Storage/storageApp");
 const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverclientes = req.serverclientes;
-    const baseclientes = req.baseclientes;
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+    const Id_Usuario = req.id;
     try {
         const postInventoryData = req.body;
         const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
-        const Id_Usuario = 'IDALIA';
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
-        const dataStorage = (0, storage_1.getUserData)("idalia");
+        const dataStorage = (0, storageApp_1.getUserData)(`${Id_Usuario}_${baseclientes}`.toLowerCase());
         const transaction = new mssql_1.default.Transaction(pool);
         yield transaction.begin();
         // Get last Folio
@@ -94,15 +94,15 @@ exports.getInventory = getInventory;
 const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //Receive products and with that create inventory Details.
     var _a;
-    const serverclientes = req.serverclientes;
-    const baseclientes = req.baseclientes;
-    const dataStorage = (0, storage_1.getUserData)("idalia");
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+    const Id_Usuario = req.id;
+    const dataStorage = (0, storageApp_1.getUserData)(`${Id_Usuario}_${baseclientes}`.toLowerCase());
     try {
         const postInventoryDataArray = req.body;
         const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
-        const Id_Usuario = 'IDALIA';
         const userquery = database_1.querys.getAuthLimitData;
-        const requestUser = yield pool.request().input("Id_Usuario", 'IDALIA').query(userquery);
+        const requestUser = yield pool.request().input("Id_Usuario", Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });

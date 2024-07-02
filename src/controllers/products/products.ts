@@ -1,134 +1,10 @@
 import { Request, Response } from 'express'
-import { sharedData } from '..';
-import { dbConnection, querys } from '../database';
-import { productsQuerys } from '../database/querys/products';
-import sql from 'mssql';
+import { dbConnection, querys } from '../../database';
+import { productsQuerys } from '../../database/querys/products';
 import fetch from 'node-fetch';
-import { guessBarcodeType } from '../utils/identifyBarcodeType';
-import { Req } from './auth/auth';
+import { guessBarcodeType } from '../../utils/identifyBarcodeType';
+import { Req } from '../auth/auth';
 
-const getProducts = async (req: Request, res: Response) => {
-
-    const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
-
-
-
-    // Get the user information from shared data, including the user's warehouse (Almacen)
-    const client = sharedData?.currentClient?.client;
-    const user = sharedData.currentUser?.user
-    const userAlmacen = client?.Id_Almacen;
-    const userListPrice = client?.Id_ListPre;
-
-    try {
-        const pool = await dbConnection();
-
-        if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
-            return;
-        }
-
-        // Define query parameters for the SQL query
-        const params = {
-            ListaPrecios: userListPrice, // Default ListaPrecios value
-            Almacen: userAlmacen, // User's warehouse
-        };
-
-
-        let query = productsQuerys.getAllProducts;
-
-        if (nombre) {
-            query += ` AND (LOWER(P.Descripcion) LIKE '%' + LOWER('${nombre}') + '%')`;
-        }
-
-        if (marca && marca !== 'undefined') {
-            query += ` AND (LOWER(M.Nombre) LIKE '%' + LOWER('${marca}') + '%')`;
-        }
-
-        if (familia && familia !== 'undefined') {
-            query += ` AND (LOWER(F.Nombre) LIKE '%' + LOWER('${familia}') + '%')`;
-        }
-
-        if (folio && folio !== 'undefined') {
-            query += ` AND (LOWER(P.Codigo) LIKE '%' + LOWER('${folio}') + '%')`;
-        }
-
-        if (enStock === 'true') {
-            query += ' AND E.Existencia > 0';
-        }
-
-        // Dont show products without stock
-        if (!user?.SwSinStock) {
-            query += ' AND E.Existencia > 0';
-        }
-
-        // Dont show products without price
-        if (!user?.SwsinPrecio) {
-            query += 'AND PR.Precio > 0'
-        }
-
-        let paginationQuery = '';
-
-        // Check if pagination parameters are provided
-        if (page && limit) {
-            const pageNumber = parseInt(page as string) || 1;
-            const limitNumber = parseInt(limit as string) || 20;
-            const offset = (pageNumber - 1) * limitNumber;
-
-            paginationQuery = `
-                SELECT *
-                FROM (
-                    ${query.replace('SELECT DISTINCT', 'SELECT ROW_NUMBER() OVER(ORDER BY P.Codigo) AS RowNum,')}
-                ) AS NumberedResults
-                WHERE RowNum > ${offset}
-                AND RowNum <= ${offset + limitNumber}
-            `;
-        }
-
-        // Use the pagination query if available; otherwise, use the base query
-        const finalQuery = paginationQuery || query;
-
-        // Execute the parameterized query
-        const products = await executeQuery(pool, finalQuery, params);
-
-
-        if (user?.SwImagenes) {
-            // Ahora, para cada producto, agrega la propiedad "imagen"
-            for (const product of products) {
-                // Supongamos que la URL de la imagen se basa en la propiedad "Codigo" del producto
-                const baseSQL = user?.BaseSQL.trim().toLowerCase().split(',');
-
-                if (baseSQL && baseSQL.length > 0) {
-                    const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
-                    const imageDB = formatImageDB[formatImageDB.length - 1];
-                    const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
-
-                    // Verifica si la imagen existe antes de agregarla al producto
-                    const imageExists = await checkImageExists(imageUrl);
-
-                    if (imageExists) {
-                        product.imagen = [{
-                            url: imageUrl,
-                            id: 1
-                        }];
-                    }
-                }
-            }
-        }
-
-        // Get the total count without pagination
-        const total = products.length;
-
-        res.json({
-            total,
-            page: page ? parseInt(page as string) : 1,
-            limit: limit ? parseInt(limit as string) : 20,
-            products
-        });
-
-    } catch (error: any) {
-        res.status(500).json({ error: error.message });
-    }
-};
 
 const getProducById = async (req: Request, res: Response) => {
 
@@ -383,25 +259,9 @@ const getImagesFromProducts = async ({
     return { products }
 }
 
-async function executeQuery(pool: sql.ConnectionPool, query: string, params: any) {
-    try {
-        // Execute the query with provided parameters
-        const result = await pool.request()
-            .input('ListaPrecios', sql.Int, params.ListaPrecios)
-            .input('Almacen', sql.Int, params.Almacen)
-            .query(query);
-
-        return result.recordset;
-    } catch (error) {
-        throw error;
-    }
-}
-
-
 
 
 export {
-    getProducts,
     getProducById,
     getTotalProducts,
     getProductsByStock,
