@@ -24,6 +24,10 @@ const loginDB = async (req: Req, res: Response) => {
     try {
         const { IdUsuarioOLEI, PasswordOLEI } = req.body;
 
+        console.log({
+            IdUsuarioOLEI, PasswordOLEI 
+        })
+
         if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
             return res.status(400).json({ error: 'Necesario enviar usuario y contraseña' });
         }
@@ -31,6 +35,12 @@ const loginDB = async (req: Req, res: Response) => {
         const query_DB = querys.authDatabase;
         const result = await mainPool.request().input('IdUsuarioOLEI', IdUsuarioOLEI).query(query_DB);
         const cleanResult = result?.recordset[0];
+
+
+        if (!cleanResult) {
+            return res.status(401).json({ error: `No se encontro el usuario: ${IdUsuarioOLEI}` });
+        }
+
 
         if (cleanResult.PasswordOLEI.trim() !== PasswordOLEI) {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
