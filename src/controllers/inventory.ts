@@ -1,5 +1,4 @@
 import { Response, Request } from "express";
-
 import { dbConnection, querys } from "../database";
 import sql from 'mssql';
 import { inventoryQuerys } from "../database/querys/inventory";
@@ -13,7 +12,6 @@ const postInventory = async (req: Request, res: Response) => {
     const Id_Usuario = req.id;
 
     try {
-        
         const postInventoryData = req.body;
         
         const pool = await dbConnection(serverclientes, baseclientes);
@@ -28,7 +26,6 @@ const postInventory = async (req: Request, res: Response) => {
 
         // Get last Folio
         const Folio = await pool.request().query('SELECT MAX(FOLIO) AS Folio FROM [dbo].[INVENTARIOS]');
-
 
         // Get data default.
         const Id_TipoMovInv = dataStorage?.Id_TipoMovInv;
@@ -88,11 +85,9 @@ const getInventory = async (req: Request, res: Response) => {
             .input("Folio", Folio)
             .query(getInventoryQuery)
 
-
         let inventory = request.recordset[0];
 
         res.json(inventory)
-
 
     } catch (error) {
         console.log({ error })
@@ -143,13 +138,17 @@ const postInventoryDetails = async (req: Request, res: Response) => {
 
             const newExistence = () => {
                 if (typeOfMovement?.Accion === 1 && typeOfMovement.Id_TipoMovInv === 0) { // Inventario fisico
+                    console.log("Inventario fisico")
                     updateValue = '@Cantidad_Existence'; // Asignar el valor directamente
                 } else if (typeOfMovement?.Accion === 1 && typeOfMovement.Id_TipoMovInv === 1) { // Entrada
+                    console.log("Entrada")
                     updateValue = 'Existencia + @Cantidad_Existence'; // Incrementar el valor existente
                     difference = 'Existencia - Existencia - @Cantidad_Existence';
                 } else if (typeOfMovement?.Accion === 2) { // Salida
+                    console.log("Salida")
                     updateValue = 'Existencia - @Cantidad_Existence'; // Restar el valor existente
                 } else if (typeOfMovement?.Accion === 3) { // Traspaso
+                    console.log("trapaso")
                     updateValue = 'Existencia - @Cantidad_Existence'; // Restar el valor existente y despues se le tiene que sumar al otro almacen
                     difference = 'Existencia - Existencia - @Cantidad_Existence';
                 }

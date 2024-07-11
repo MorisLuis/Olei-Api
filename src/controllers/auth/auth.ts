@@ -24,10 +24,6 @@ const loginDB = async (req: Req, res: Response) => {
     try {
         const { IdUsuarioOLEI, PasswordOLEI } = req.body;
 
-        console.log({
-            IdUsuarioOLEI, PasswordOLEI 
-        })
-
         if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
             return res.status(400).json({ error: 'Necesario enviar usuario y contraseña' });
         }
@@ -256,6 +252,7 @@ const renewLogin = async (req: Req, res: Response) => {
             ServidorSQL: server,
             BaseSQL: base,
         };
+
 
         if (!userDB) {
             return res.status(401).json({ message: 'User data is neccesary' });

@@ -108,7 +108,6 @@ const getProductsByStock = async (req: Req, res: Response) => {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
 
-
         let query = productsQuerys.getAllProductsByStock;
 
         const request = await pool.request()
@@ -127,6 +126,40 @@ const getProductsByStock = async (req: Req, res: Response) => {
         })
 
         res.json(products);
+
+    } catch (error: any) {
+        console.log({ error })
+        res.status(500).json({ error: error.message });
+    }
+}
+
+const getTotalOfProductsByStock = async (req: Req, res: Response) => {
+
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+    const Id_Usuario = req.id;
+
+    try {
+        const pool = await dbConnection(serverclientes, baseclientes);
+
+        const userquery = querys.getAuthLimitData;
+        const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
+        const user = requestUser.recordset[0]
+
+        if (!pool) {
+            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+        }
+
+        let query = productsQuerys.getTotalOfAllProductsByStock;
+
+        const request = await pool.request()
+            .input('Id_ListaPrecios', user.Id_ListPre)
+            .input('Almacen', user.Id_Almacen)
+            .query(query);
+
+        const TotalProductos = request.recordset;
+
+        res.json(TotalProductos);
 
     } catch (error: any) {
         console.log({ error })
@@ -166,7 +199,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
             request = await pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)
                 .input('Id_ListaPrecios', user.Id_ListPre)
-                .input('Id_Almacen', user.Id_Almacen)    
+                .input('Id_Almacen', user.Id_Almacen)
                 .query(query);
 
         } else {
@@ -175,7 +208,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)
                 .input("Codigo", Codigo === 'undefined' ? null : Codigo)
                 .input('Id_ListaPrecios', user.Id_ListPre)
-                .input('Id_Almacen', user.Id_Almacen)    
+                .input('Id_Almacen', user.Id_Almacen)
                 .query(query);
 
         }
@@ -183,7 +216,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
         res.json(productByStockAndCodeBar)
 
     } catch (error: any) {
-        console.log({error})
+        console.log({ error })
         return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud / getProductByStockAndCodeBar' });
     }
 }
@@ -265,5 +298,6 @@ export {
     getProducById,
     getTotalProducts,
     getProductsByStock,
+    getTotalOfProductsByStock,
     getProductByStockAndCodeBar
 }

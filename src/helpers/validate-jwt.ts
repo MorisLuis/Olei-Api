@@ -15,7 +15,7 @@ interface Req extends Request {
 }
 
 
-// Middleware to validate JWT from first login.
+// Middleware to validate JWT from first login. (App)
 const validateJWTDB = async (req: Req, res: Response, next: NextFunction) => {
     const token = req.headers['authorization']?.split(' ')[1];
 
@@ -46,7 +46,7 @@ const validateJWTDB = async (req: Req, res: Response, next: NextFunction) => {
 };
 
 
-// Middleware to validate JWT from second login.
+// Middleware to validate JWT from second login. (App)
 const validateJWT = async (req: Req, res: Response, next: NextFunction) => {
 
     const token = req.headers['authorization']?.split(' ')[1];
@@ -78,6 +78,7 @@ const validateJWT = async (req: Req, res: Response, next: NextFunction) => {
     }
 };
 
+// (Web)
 const validateJWTWeb = async (req: Req, res: Response, next: NextFunction) => {
 
     const authHeader = req.headers['authorization'];

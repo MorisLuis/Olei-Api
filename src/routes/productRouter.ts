@@ -7,6 +7,7 @@ import {
     getProducById,
     getProductByStockAndCodeBar,
     getProductsByStock,
+    getTotalOfProductsByStock,
     getTotalProducts
 } from "../controllers/products/products";
 import { validateJWT, validateJWTWeb } from "../helpers/validate-jwt";
@@ -15,8 +16,10 @@ import { getProducByIdWeb, getProducts } from "../controllers/products/productsW
 
 const router = Router()
 
-router.get("/byStock", validateJWT, getProductsByStock)
-router.get("/byStockAndCodeBar", validateJWT, getProductByStockAndCodeBar)
+router.get("/byStock", validateJWT, getProductsByStock);
+router.get("/byStockCount", validateJWT, getTotalOfProductsByStock);
+
+router.get("/byStockAndCodeBar", validateJWT, getProductByStockAndCodeBar);
 
 // This enndpoint is used in WEB and APP to get product details.
 router.get("/:id", validateJWT, getProducById)

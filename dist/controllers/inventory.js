@@ -123,16 +123,20 @@ const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, fun
             let difference = '@Cantidad_Existence - Existencia';
             const newExistence = () => {
                 if ((typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion) === 1 && typeOfMovement.Id_TipoMovInv === 0) { // Inventario fisico
+                    console.log("Inventario fisico");
                     updateValue = '@Cantidad_Existence'; // Asignar el valor directamente
                 }
                 else if ((typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion) === 1 && typeOfMovement.Id_TipoMovInv === 1) { // Entrada
+                    console.log("Entrada");
                     updateValue = 'Existencia + @Cantidad_Existence'; // Incrementar el valor existente
                     difference = 'Existencia - Existencia - @Cantidad_Existence';
                 }
                 else if ((typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion) === 2) { // Salida
+                    console.log("Salida");
                     updateValue = 'Existencia - @Cantidad_Existence'; // Restar el valor existente
                 }
                 else if ((typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion) === 3) { // Traspaso
+                    console.log("trapaso");
                     updateValue = 'Existencia - @Cantidad_Existence'; // Restar el valor existente y despues se le tiene que sumar al otro almacen
                     difference = 'Existencia - Existencia - @Cantidad_Existence';
                 }

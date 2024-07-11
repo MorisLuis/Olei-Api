@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.changeTypeofmovements = exports.getTypeofmovements = void 0;
 const database_1 = require("../database");
-const storageWeb_1 = require("../Storage/storageWeb");
+const storageApp_1 = require("../Storage/storageApp");
 const getTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const serverclientes = req.server;
     const baseclientes = req.base;
@@ -31,7 +31,8 @@ exports.getTypeofmovements = getTypeofmovements;
 const changeTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const serverclientes = req.server;
     const baseclientes = req.base;
-    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseclientes);
+    const id = req.id;
+    const currentUser = (0, storageApp_1.getUserData)(`${id}_${baseclientes}`);
     try {
         const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const { Id_TipoMovInv } = req.body;
@@ -46,6 +47,7 @@ const changeTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, fu
                 Descripcion: result.Descripcion,
                 Id_AlmDest: result.Id_AlmDest
             } });
+        (0, storageApp_1.setUserData)(`${id}_${baseclientes}`, userData);
         res.json({
             user: userData
         });

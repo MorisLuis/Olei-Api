@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { dbConnection, querys } from '../database';
 import { getUserDataWeb } from '../Storage/storageWeb';
+import { getUserData, setUserData } from '../Storage/storageApp';
 
 
 const getTypeofmovements = async (req: Request, res: Response) => {
@@ -26,7 +27,9 @@ const changeTypeofmovements = async (req: Request, res: Response) => {
 
     const serverclientes = req.server;
     const baseclientes = req.base;
-    const currentUser = getUserDataWeb(baseclientes)
+    const id = req.id;
+    const currentUser = getUserData(`${id}_${baseclientes}`)
+
 
     try {
         const pool = await dbConnection(serverclientes, baseclientes);
@@ -48,6 +51,8 @@ const changeTypeofmovements = async (req: Request, res: Response) => {
                 Id_AlmDest: result.Id_AlmDest
             },
         }
+
+        setUserData(`${id}_${baseclientes}`, userData)
 
         res.json({
             user: userData

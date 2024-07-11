@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateJWTWeb = exports.validateJWT = exports.validateJWTDB = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-// Middleware to validate JWT from first login.
+// Middleware to validate JWT from first login. (App)
 const validateJWTDB = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const token = (_a = req.headers['authorization']) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
@@ -42,7 +42,7 @@ const validateJWTDB = (req, res, next) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.validateJWTDB = validateJWTDB;
-// Middleware to validate JWT from second login.
+// Middleware to validate JWT from second login. (App)
 const validateJWT = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _b;
     const token = (_b = req.headers['authorization']) === null || _b === void 0 ? void 0 : _b.split(' ')[1];
@@ -71,6 +71,7 @@ const validateJWT = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.validateJWT = validateJWT;
+// (Web)
 const validateJWTWeb = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];

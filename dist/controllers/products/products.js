@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProductByStockAndCodeBar = exports.getProductsByStock = exports.getTotalProducts = exports.getProducById = void 0;
+exports.getProductByStockAndCodeBar = exports.getTotalOfProductsByStock = exports.getProductsByStock = exports.getTotalProducts = exports.getProducById = void 0;
 const database_1 = require("../../database");
 const products_1 = require("../../database/querys/products");
 const node_fetch_1 = __importDefault(require("node-fetch"));
@@ -117,6 +117,32 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.getProductsByStock = getProductsByStock;
+const getTotalOfProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const serverclientes = req.server;
+    const baseclientes = req.base;
+    const Id_Usuario = req.id;
+    try {
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const userquery = database_1.querys.getAuthLimitData;
+        const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
+        const user = requestUser.recordset[0];
+        if (!pool) {
+            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+        }
+        let query = products_1.productsQuerys.getTotalOfAllProductsByStock;
+        const request = yield pool.request()
+            .input('Id_ListaPrecios', user.Id_ListPre)
+            .input('Almacen', user.Id_Almacen)
+            .query(query);
+        const TotalProductos = request.recordset;
+        res.json(TotalProductos);
+    }
+    catch (error) {
+        console.log({ error });
+        res.status(500).json({ error: error.message });
+    }
+});
+exports.getTotalOfProductsByStock = getTotalOfProductsByStock;
 const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { CodBar, Codigo } = req.query;
     const serverclientes = req.server;

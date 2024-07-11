@@ -76,6 +76,13 @@ exports.productsQuerys = {
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY
     `,
+    getTotalOfAllProductsByStock: `
+        SELECT COUNT(*) AS TotalProductos
+        FROM [dbo].[PRODUCTOS] P
+            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+        WHERE PR.Id_ListaPrecios = @Id_ListaPrecios AND E.Id_Almacen = @Almacen;
+    `,
     // Get Product by Stock and CodeBar.
     getProductByStockAndCodeBar: `
         SELECT
