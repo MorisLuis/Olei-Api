@@ -13,7 +13,6 @@ export default interface ExtendedCostosInterface extends CostosInterface {
 
 const updateCostos = async (req: Request, res: Response) => {
 
-
     const serverclientes = req.server;
     const baseclientes = req.base;
 
@@ -84,8 +83,6 @@ const updateCostos = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Hubo un error en la actualización de costos.' });
     }
 };
-
-
 
 export {
     updateCostos
