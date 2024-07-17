@@ -116,8 +116,6 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         }
         // Get the total count without pagination
         const total = products.length;
-        console.log({ total });
-        console.log({ products });
         res.json({
             total,
             page: page ? parseInt(page) : 1,
