@@ -23,7 +23,6 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     const serverWeb = req.serverweb;
     const baseWeb = req.baseweb;
     const clientid = req.clientid;
-    //if(!client) return;
     // Get the user information from shared data, including the user's warehouse (Almacen)
     const currentUser = (0, storageWeb_1.getUserDataWeb)(baseWeb.trim());
     const currentClient = (0, storageWeb_1.getClientData)(`${baseWeb.trim()}_${clientid}`);

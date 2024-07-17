@@ -13,8 +13,6 @@ const getProducts = async (req: Request, res: Response) => {
     const baseWeb = req.baseweb;
     const clientid = req.clientid;
 
-    //if(!client) return;
-
     // Get the user information from shared data, including the user's warehouse (Almacen)
     const currentUser = getUserDataWeb(baseWeb.trim())
     const currentClient = getClientData(`${baseWeb.trim()}_${clientid}`)
