@@ -4,7 +4,7 @@ import sql from 'mssql';
 import CostosInterface from '../interface/costos';
 import { costosQuerys } from '../database/querys/costos';
 import { v4 as uuidv4 } from 'uuid';
-import {  verifyIfIsEAN13 } from '../utils/identifyBarcodeType';
+import { verifyIfIsEAN13 } from '../utils/identifyBarcodeType';
 
 export default interface ExtendedCostosInterface extends CostosInterface {
     [key: string]: any;
@@ -31,11 +31,11 @@ const updateCostos = async (req: Request, res: Response) => {
             const body: ExtendedCostosInterface = req.body;
 
             let isEAN13 = false;
-            if(body.CodBar){
+            if (body.CodBar) {
                 isEAN13 = verifyIfIsEAN13(body.CodBar)
             }
 
-            if(isEAN13) {
+            if (isEAN13) {
                 body.CodBar = body.CodBar?.substring(1)
             }
 
@@ -60,7 +60,7 @@ const updateCostos = async (req: Request, res: Response) => {
 
             // Make forEach to create de SET of the query.
             keys.forEach((key) => {
-                if(key === 'codeRandom') {
+                if (key === 'codeRandom') {
                     request.input('CodBar', sql.NVarChar, body['CodBar']);
                 } else {
                     request.input(key, sql.NVarChar, body[key]);
