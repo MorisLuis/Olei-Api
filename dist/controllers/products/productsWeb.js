@@ -20,13 +20,9 @@ const node_fetch_1 = __importDefault(require("node-fetch"));
 const storageWeb_1 = require("../../Storage/storageWeb");
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
-    /*     const serverWeb = req.serverweb;
-        const baseWeb = req.baseweb;
-        const clientid = req.clientid; */
-    const serverWeb = "serverolei01.database.windows.net";
-    const baseWeb = "OLEIDB1_MXNL00181";
-    const clientid = 2;
-    console.log({ serverWeb, baseWeb, clientid });
+    const serverWeb = req.serverweb;
+    const baseWeb = req.baseweb;
+    const clientid = req.clientid;
     // Get the user information from shared data, including the user's warehouse (Almacen)
     const currentUser = (0, storageWeb_1.getUserDataWeb)(baseWeb.trim());
     const currentClient = (0, storageWeb_1.getClientData)(`${baseWeb.trim()}_${clientid}`);
