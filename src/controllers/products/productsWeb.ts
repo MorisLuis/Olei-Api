@@ -9,16 +9,10 @@ const getProducts = async (req: Request, res: Response) => {
 
     const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
 
-/*     const serverWeb = req.serverweb;
+    const serverWeb = req.serverweb;
     const baseWeb = req.baseweb;
-    const clientid = req.clientid; */
+    const clientid = req.clientid;
 
-    const serverWeb = "serverolei01.database.windows.net";
-    const baseWeb = "OLEIDB1_MXNL00181"
-    const clientid = 2
-
-
-    console.log({serverWeb, baseWeb, clientid})
     // Get the user information from shared data, including the user's warehouse (Almacen)
     const currentUser = getUserDataWeb(baseWeb.trim())
     const currentClient = getClientData(`${baseWeb.trim()}_${clientid}`)
@@ -131,6 +125,9 @@ const getProducts = async (req: Request, res: Response) => {
 
         // Get the total count without pagination
         const total = products.length;
+
+        console.log({total});
+        console.log({products});
     
         res.json({
             total,
