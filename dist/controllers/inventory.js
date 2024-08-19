@@ -12,57 +12,55 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getInventoryDetails = exports.getInventory = exports.postInventoryDetails = exports.postInventory = void 0;
+exports.getInventoryDetails = exports.getInventory = exports.postInventory = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const inventory_1 = require("../database/querys/inventory");
 const currentTime_1 = require("../utils/currentTime");
-const storageApp_1 = require("../Storage/storageApp");
+const convertArrayToXml_1 = require("../utils/convertArrayToXml");
 const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const serverclientes = req.server;
     const baseclientes = req.base;
     const Id_Usuario = req.id;
     try {
-        const postInventoryData = req.body;
         const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
-        const userquery = database_1.querys.getAuthLimitData;
-        const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
-        const user = requestUser.recordset[0];
-        const dataStorage = (0, storageApp_1.getUserData)(`${Id_Usuario}_${baseclientes}`);
+        const { inventoryDetails, typeOfMovement } = req.body;
+        const Accion = typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion;
+        const Id_TipoMovInv = typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Id_TipoMovInv;
+        const ExpectedRows = inventoryDetails.length;
+        const ExpectedTotalQuantity = inventoryDetails.reduce((sum, item) => sum + item.Cantidad, 0);
+        ;
         const transaction = new mssql_1.default.Transaction(pool);
         yield transaction.begin();
-        // Get last Folio
-        const Folio = yield pool.request().query('SELECT MAX(FOLIO) AS Folio FROM [dbo].[INVENTARIOS]');
-        // Get data default.
-        const Id_TipoMovInv = dataStorage === null || dataStorage === void 0 ? void 0 : dataStorage.Id_TipoMovInv;
-        const Estado = 1; // If it were 0 it would mean a inventory was cancelled
-        const Id_AlmacenDest = 0;
-        const SwPendiente = 0;
-        const Descripcion = postInventoryData === null || postInventoryData === void 0 ? void 0 : postInventoryData.Descripcion;
-        const SwTr = 0;
-        const FolioReq = null;
-        const AlmReq = 0;
-        const Fecha = (0, currentTime_1.currentTime)();
-        const postInventoryQuery = inventory_1.inventoryQuerys.insertInventory;
         const request = new mssql_1.default.Request(transaction);
+        // Get the inventory data.
+        const inventoryData = {
+            Estado: 1, // If it were 0 it would mean a inventory was cancelled
+            Fecha: (0, currentTime_1.currentTime)(),
+            Id_TipoMovInv: typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Id_TipoMovInv,
+            Id_AlmacenDest: 0,
+            SwPendiente: 0,
+            Descripcion: '',
+            SwTr: 0,
+            FolioReq: null,
+            AlmReq: 0,
+        };
+        const xmlDataInventory = yield (0, convertArrayToXml_1.convertArrayToXml)(inventoryData);
+        const xmlDataInventoryDetails = yield (0, convertArrayToXml_1.convertArrayToXml)(inventoryDetails);
         const result = yield request
-            .input('Id_Almacen', mssql_1.default.Int, user.Id_Almacen)
-            .input('Folio', mssql_1.default.Int, Folio.recordset[0].Folio + 1)
-            .input('Id_TipoMovInv', mssql_1.default.Int, Id_TipoMovInv === null || Id_TipoMovInv === void 0 ? void 0 : Id_TipoMovInv.Id_TipoMovInv)
-            .input('Estado', mssql_1.default.Int, Estado)
-            .input('Fecha', mssql_1.default.DateTime, Fecha)
-            .input('Id_AlmacenDest', mssql_1.default.Int, Id_AlmacenDest)
-            .input('SwPendiente', mssql_1.default.SmallInt, SwPendiente)
-            .input('Descripcion', mssql_1.default.VarChar(100), Descripcion)
-            .input('Id_Usuario', mssql_1.default.VarChar(50), Id_Usuario)
-            .input('SwTr', mssql_1.default.SmallInt, SwTr)
-            .input('FechaRecepcion', mssql_1.default.DateTime, Fecha)
-            .input('FolioReq', mssql_1.default.Int, FolioReq)
-            .input('AlmReq', mssql_1.default.Int, AlmReq)
-            .query(postInventoryQuery);
+            .input('xmlDataInventory', mssql_1.default.Xml, xmlDataInventory)
+            .input('xmlDataInventoryDetails', mssql_1.default.Xml, xmlDataInventoryDetails)
+            .input('Accion', mssql_1.default.Int, Accion)
+            .input('Id_TipoMovInv', mssql_1.default.Int, Id_TipoMovInv)
+            .input('user', mssql_1.default.NVarChar(50), Id_Usuario)
+            .input('ExpectedRows', mssql_1.default.Int, ExpectedRows)
+            .input('ExpectedTotalQuantity', mssql_1.default.Decimal(18, 0), ExpectedTotalQuantity)
+            .output('Folio', mssql_1.default.Int)
+            .execute('fn_ExecuteInventory');
+        const Folio = result.output.Folio;
         yield transaction.commit();
         const inventory = result.recordset[0];
-        res.json(inventory);
+        res.json({ Folio, inventory });
     }
     catch (error) {
         console.log({ postInventoryError: error });
@@ -91,109 +89,6 @@ const getInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.getInventory = getInventory;
-const postInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //Receive products and with that create inventory Details.
-    var _a;
-    const serverclientes = req.server;
-    const baseclientes = req.base;
-    const Id_Usuario = req.id;
-    const dataStorage = (0, storageApp_1.getUserData)(`${Id_Usuario}_${baseclientes}`);
-    try {
-        const postInventoryDataArray = req.body;
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
-        const userquery = database_1.querys.getAuthLimitData;
-        const requestUser = yield pool.request().input("Id_Usuario", Id_Usuario).query(userquery);
-        const user = requestUser.recordset[0];
-        if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
-            return;
-        }
-        const transaction = new mssql_1.default.Transaction(pool);
-        yield transaction.begin();
-        let countPartida = 0; // Increase the data of 'Partida'
-        const inventoryDetails = []; // Store every inventoryDetails from the for.
-        for (const postInventoryData of postInventoryDataArray.products) {
-            const request = new mssql_1.default.Request(transaction);
-            countPartida++;
-            // Get last Folio
-            const Folio = yield pool.request().query('SELECT MAX(FOLIO) AS Folio FROM [dbo].[DETALLEINVENTARIOS]');
-            // New Existence accord with the type of movement.
-            const typeOfMovement = dataStorage === null || dataStorage === void 0 ? void 0 : dataStorage.Id_TipoMovInv;
-            let updateValue = '@Cantidad_Existence';
-            let difference = '@Cantidad_Existence - Existencia';
-            const newExistence = () => {
-                if ((typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion) === 1 && typeOfMovement.Id_TipoMovInv === 0) { // Inventario fisico
-                    console.log("Inventario fisico");
-                    updateValue = '@Cantidad_Existence'; // Asignar el valor directamente
-                }
-                else if ((typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion) === 1 && typeOfMovement.Id_TipoMovInv === 1) { // Entrada
-                    console.log("Entrada");
-                    updateValue = 'Existencia + @Cantidad_Existence'; // Incrementar el valor existente
-                    difference = 'Existencia - Existencia - @Cantidad_Existence';
-                }
-                else if ((typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion) === 2) { // Salida
-                    console.log("Salida");
-                    updateValue = 'Existencia - @Cantidad_Existence'; // Restar el valor existente
-                }
-                else if ((typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion) === 3) { // Traspaso
-                    console.log("trapaso");
-                    updateValue = 'Existencia - @Cantidad_Existence'; // Restar el valor existente y despues se le tiene que sumar al otro almacen
-                    difference = 'Existencia - Existencia - @Cantidad_Existence';
-                }
-            };
-            newExistence();
-            const updateQuery = database_1.querys.updateExistenceTable(updateValue, difference);
-            // UPDATE 'EXISTENCIAS' Table
-            // If is transfer, first we rest the existence...
-            const existenceUpdated = yield request
-                .input('Cantidad_Existence', postInventoryData.Piezas)
-                .input('Codigo_Existence', postInventoryData.Codigo)
-                .input('Id_Marca_Existence', postInventoryData.Id_Marca)
-                .input('Id_Almacen_Existence', user.Id_Almacen)
-                .query(updateQuery);
-            if ((typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion) === 3) {
-                updateValue = '@Cantidad_Existence_transfer';
-                difference = '@Cantidad_Existence_transfer';
-                const updateNewQuery = database_1.querys.updateExistenceTableTransfer(updateValue, difference);
-                yield request
-                    .input('Cantidad_Existence_transfer', postInventoryData.Piezas)
-                    .input('Codigo_Existence_transfer', postInventoryData.Codigo)
-                    .input('Id_Marca_Existence_transfer', postInventoryData.Id_Marca)
-                    .input('Id_Almacen_Existence_transfer', (_a = dataStorage === null || dataStorage === void 0 ? void 0 : dataStorage.Id_TipoMovInv) === null || _a === void 0 ? void 0 : _a.Id_AlmDest)
-                    .query(updateNewQuery);
-            }
-            const { Existencia, ExistenciaAnt } = existenceUpdated.recordset[0];
-            // Get data default.
-            const Id_Ubicacion = 0;
-            const SwNS = null;
-            const NumsDeSerie = null;
-            const SKU = null;
-            const Diferencia = Existencia - ExistenciaAnt;
-            const postIntentoryDetailsQuery = inventory_1.inventoryQuerys.insertInventoryDetails;
-            const result = yield request
-                .input('Id_Almacen', mssql_1.default.Int, user.Id_Almacen)
-                .input('Folio', mssql_1.default.Int, Folio.recordset[0].Folio + 1)
-                .input('Partida', mssql_1.default.Int, countPartida)
-                .input('Codigo', mssql_1.default.VarChar, postInventoryData.Codigo)
-                .input('Id_Marca', mssql_1.default.Int, postInventoryData.Id_Marca)
-                .input('Cantidad', mssql_1.default.Int, postInventoryData.Piezas)
-                .input('Id_Ubicacion', mssql_1.default.Int, Id_Ubicacion)
-                .input('Diferencia', mssql_1.default.Int, Diferencia)
-                .input('SwNS', mssql_1.default.Int, SwNS)
-                .input('NumsDeSerie', mssql_1.default.VarChar, NumsDeSerie)
-                .input('SKU', mssql_1.default.Int, SKU)
-                .query(postIntentoryDetailsQuery);
-            inventoryDetails.push(result.recordset[0]);
-        }
-        yield transaction.commit();
-        res.json(inventoryDetails);
-    }
-    catch (error) {
-        console.log({ postInventoryDetailsError: error });
-        res.status(500).json({ error: error });
-    }
-});
-exports.postInventoryDetails = postInventoryDetails;
 const getInventoryDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { Folio } = req.query;
     try {

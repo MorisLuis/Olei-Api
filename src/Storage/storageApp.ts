@@ -1,28 +1,3 @@
-interface UserData {
-    Id_TipoMovInv?: {
-        Id_TipoMovInv: number;
-        Accion: number;
-        Descripcion: string;
-        Id_AlmDest: number;
-    };
-}
-
-const userStorage: { [userId: string]: UserData } = {};
-
-/* userId = ${Id_Usuario}_${baseclientes}` */
-export const getUserData = (userId: string): UserData | undefined => {
-    return userStorage[userId.toLowerCase().trim()];
-};
-
-export const setUserData = (userId: string, data: UserData): void => {
-    userStorage[userId.toLowerCase().trim()] = data;
-};
-
-export const removeUserData = (userId: string): void => {
-    delete userStorage[userId.toLowerCase().trim()];
-};
-
-
 interface clientData {
     RazonSocial?: string;
     SwImagenes?: boolean;

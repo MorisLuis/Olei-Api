@@ -18,6 +18,7 @@ const generate_jwt_1 = require("../../helpers/generate-jwt");
 const config_1 = __importDefault(require("../../config"));
 const moment_1 = __importDefault(require("moment"));
 const storageApp_1 = require("../../Storage/storageApp");
+const mssql_1 = __importDefault(require("mssql"));
 const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
     const mainPool = yield (0, database_1.dbConnection)(config_1.default.dbServer, config_1.default.dbDatabase);
@@ -68,14 +69,13 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.status(500).send(error.message);
     }
     finally {
-        mainPool.close();
+        yield (0, database_1.closeDbConnection)();
     }
 });
 exports.loginDB = loginDB;
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const serverclientes = req.serverclientes;
     const baseclientes = req.baseclientes;
-    const IdUsuarioOLEI = req.IdUsuarioOLEI;
     // STEP 1 - LOGIN
     const mainPool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
     if (!mainPool) {
@@ -87,52 +87,41 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (Id_Usuario.trim() === "" || password.trim() === "") {
             return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
         }
-        const user = yield getUserByEmail(mainPool, Id_Usuario);
-        if (!user) {
+        const request = mainPool.request();
+        request.input('Id_Usuario', mssql_1.default.VarChar(50), Id_Usuario);
+        request.input('Password', mssql_1.default.VarChar(50), password);
+        const resultData = yield request.execute('sp_AuthenticateAndGetMovement');
+        const Validations = resultData.recordsets[0];
+        if (Validations[0].Tipo === "usuario" && Validations[0].Resultado !== 1) {
             return res.status(404).json({ error: 'Correo no encontrado' });
         }
-        if (user.Password.trim() !== password) {
+        if (Validations[1].Tipo === "contrasena" && Validations[1].Resultado !== 1) {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
-        const TypeOfMovementsResult = yield mainPool.request().query(database_1.querys.getTypeOfMovementInitial);
-        const TypeOfMovements = TypeOfMovementsResult.recordset[0];
-        const userStorage = {
-            Id_Usuario,
-            Id_TipoMovInv: {
-                Id_TipoMovInv: TypeOfMovements.Id_TipoMovInv,
-                Accion: TypeOfMovements.Accion,
-                Descripcion: TypeOfMovements.Descripcion,
-                Id_AlmDest: TypeOfMovements.Id_AlmDest
-            }
-        };
-        (0, storageApp_1.setUserData)(`${Id_Usuario}_${baseclientes}`, userStorage);
-        const clientData = (0, storageApp_1.getClienteData)(IdUsuarioOLEI);
-        if (!(clientData === null || clientData === void 0 ? void 0 : clientData.Vigencia)) {
-            return res.status(401).json({ error: 'Necesario tener una cuenta vigente' });
-        }
-        ;
-        // Get the user's subscription expiration date.
-        const dueDate = yield isSubscriptionExpired(clientData === null || clientData === void 0 ? void 0 : clientData.Vigencia);
-        if (dueDate) {
-            return res.status(401).json({ error: 'Subscripción ha expirado' });
-        }
+        const User = resultData.recordsets[1][0];
         const token = yield (0, generate_jwt_1.generateJWT)({
-            id: user.Id_Usuario.trim(),
-            rol: user.Id_Perfil,
+            id: Id_Usuario.trim(),
+            rol: User.Id_Perfil,
             server: serverclientes,
             base: baseclientes
         });
+        const userStorage = {
+            Id_Usuario,
+            Id_TipoMovInv: {
+                Id_TipoMovInv: User.Id_TipoMovInv,
+                Accion: User.Accion,
+                Descripcion: User.Descripcion,
+                Id_AlmDest: User.Id_AlmDest
+            }
+        };
         return res.json({
-            user: userStorage,
+            userStorage,
             token
         });
     }
     catch (error) {
         console.log({ error });
         return res.status(500).json({ error: error.message || 'Unexpected error' });
-    }
-    finally {
-        mainPool.close();
     }
 });
 exports.login = login;

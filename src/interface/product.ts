@@ -18,3 +18,14 @@ export default interface PorductInterface {
         id: number
     }];
 }
+
+export interface ProductInterfaceBag {
+    Codigo: string;
+    Id_Marca: number;
+    Cantidad: number;
+    Existencia: number;
+
+    Descripcion?: string;
+    Marca?: string;
+    key?: number
+}

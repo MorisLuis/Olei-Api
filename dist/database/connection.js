@@ -17,25 +17,26 @@ const mssql_1 = __importDefault(require("mssql"));
 const config_1 = __importDefault(require("../config"));
 let pool = null;
 const dbConnection = (server, database) => __awaiter(void 0, void 0, void 0, function* () {
-    const dbConfig = {
-        user: config_1.default.dbUser,
-        password: config_1.default.dbPassword,
-        server: server || config_1.default.dbServer,
-        database: database || config_1.default.dbDatabase,
-        options: {
-            encrypt: true,
-            trustServerCertificate: true,
-        },
-    };
-    try {
-        const pool = new mssql_1.default.ConnectionPool(dbConfig);
-        yield pool.connect();
-        return pool;
+    if (!pool) {
+        const dbConfig = {
+            user: config_1.default.dbUser,
+            password: config_1.default.dbPassword,
+            server: server || config_1.default.dbServer,
+            database: database || config_1.default.dbDatabase,
+            options: {
+                encrypt: true,
+                trustServerCertificate: true,
+            },
+        };
+        try {
+            pool = yield mssql_1.default.connect(dbConfig);
+        }
+        catch (error) {
+            console.error('Error al conectar a la base de datos:', error.message);
+            throw error;
+        }
     }
-    catch (error) {
-        console.error('Error al conectar a la base de datos:', error.message);
-        throw error;
-    }
+    return pool;
 });
 exports.dbConnection = dbConnection;
 const closeDbConnection = () => __awaiter(void 0, void 0, void 0, function* () {

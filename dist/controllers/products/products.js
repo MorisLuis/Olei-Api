@@ -217,29 +217,6 @@ const getImagesFromProducts = (_a) => __awaiter(void 0, [_a], void 0, function* 
             }
         }
     }
-    /*     if (user?.SwImagenes) {
-            // Ahora, para cada producto, agrega la propiedad "imagen"
-            for (const product of products) {
-                // Supongamos que la URL de la imagen se basa en la propiedad "Codigo" del producto
-                const baseSQL = user?.BaseSQL.trim().toLowerCase().split(',');
-    
-                if (baseSQL && baseSQL.length > 0) {
-                    const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
-                    const imageDB = formatImageDB[formatImageDB.length - 1];
-                    const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
-    
-                    // Verifica si la imagen existe antes de agregarla al producto
-                    const imageExists = await checkImageExists(imageUrl);
-    
-                    if (imageExists) {
-                        product.imagen = [{
-                            url: imageUrl,
-                            id: 1
-                        }];
-                    }
-                }
-            }
-        } */
     return { products };
 });
 //# sourceMappingURL=products.js.map

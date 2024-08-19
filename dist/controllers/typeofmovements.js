@@ -8,17 +8,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changeTypeofmovements = exports.getTypeofmovements = void 0;
+exports.getTypeofmovements = void 0;
 const database_1 = require("../database");
-const storageApp_1 = require("../Storage/storageApp");
+const mssql_1 = __importDefault(require("mssql"));
 const getTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const serverclientes = req.server;
     const baseclientes = req.base;
+    const userId = req.id;
     try {
         const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
-        const TiposMovimientoResult = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(database_1.querys.getTiposMovimiento));
-        const TiposMovimiento = TiposMovimientoResult === null || TiposMovimientoResult === void 0 ? void 0 : TiposMovimientoResult.recordset;
+        const request = pool.request();
+        request.input('Id_Usuario', mssql_1.default.VarChar(50), userId);
+        const resultData = yield request.execute('fn_GetTypeOfMovement');
+        const TiposMovimiento = resultData === null || resultData === void 0 ? void 0 : resultData.recordset;
         res.json(TiposMovimiento);
     }
     catch (error) {
@@ -27,36 +33,4 @@ const getTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.getTypeofmovements = getTypeofmovements;
-// Temporal (!)
-const changeTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverclientes = req.server;
-    const baseclientes = req.base;
-    const id = req.id;
-    const currentUser = (0, storageApp_1.getUserData)(`${id}_${baseclientes}`);
-    try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
-        const { Id_TipoMovInv } = req.body;
-        const user = currentUser;
-        const TipoMovimiento = yield pool.request()
-            .input('Id_TipoMovInv', JSON.parse(Id_TipoMovInv))
-            .query(database_1.querys.getTipoDeMovimiento);
-        const result = TipoMovimiento.recordset[0];
-        const userData = Object.assign(Object.assign({}, user), { Id_TipoMovInv: {
-                Id_TipoMovInv: result.Id_TipoMovInv,
-                Accion: result.Accion,
-                Descripcion: result.Descripcion,
-                Id_AlmDest: result.Id_AlmDest
-            } });
-        (0, storageApp_1.setUserData)(`${id}_${baseclientes}`, userData);
-        res.json({
-            user: userData
-        });
-    }
-    catch (error) {
-        console.log({ error });
-        res.status(500);
-        res.send(error.message);
-    }
-});
-exports.changeTypeofmovements = changeTypeofmovements;
 //# sourceMappingURL=typeofmovements.js.map

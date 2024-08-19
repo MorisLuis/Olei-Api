@@ -75,7 +75,6 @@ exports.validateJWT = validateJWT;
 const validateJWTWeb = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    console.log({ token });
     if (!token) {
         return res.status(401).json({
             ok: false,
