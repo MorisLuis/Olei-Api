@@ -3,7 +3,6 @@ import { dbConnection, querys } from "../database";
 import sql from 'mssql';
 import { inventoryQuerys } from "../database/querys/inventory";
 import { currentTime } from "../utils/currentTime";
-import { getUserData } from "../Storage/storageApp";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
 
 const postInventory = async (req: Request, res: Response) => {
@@ -12,12 +11,9 @@ const postInventory = async (req: Request, res: Response) => {
     const baseclientes = req.base;
     const Id_Usuario = req.id;
 
-    console.log({ serverclientes, baseclientes, Id_Usuario })
     try {
         const pool = await dbConnection(serverclientes, baseclientes);
-        const { inventoryDetails } = req.body;
-        const dataStorage = getUserData(`${Id_Usuario}_${baseclientes}`);
-        const typeOfMovement = dataStorage?.Id_TipoMovInv;
+        const { inventoryDetails, typeOfMovement } = req.body;
         const Accion = typeOfMovement?.Accion;
         const Id_TipoMovInv = typeOfMovement?.Id_TipoMovInv;
         const ExpectedRows = inventoryDetails.length;
@@ -31,7 +27,7 @@ const postInventory = async (req: Request, res: Response) => {
         const inventoryData = {
             Estado: 1, // If it were 0 it would mean a inventory was cancelled
             Fecha: currentTime(),
-            Id_TipoMovInv: dataStorage?.Id_TipoMovInv?.Id_TipoMovInv,
+            Id_TipoMovInv: typeOfMovement?.Id_TipoMovInv,
             Id_AlmacenDest: 0,
             SwPendiente: 0,
             Descripcion: '',

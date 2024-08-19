@@ -27,9 +27,6 @@ function convertArrayToXml(objectsArray: Item[]): Promise<string> {
 const getUtils = async (req: Request, res: Response) => {
     const serverWeb = process.env.DB_SERVER;
     const baseWeb = process.env.DB_DATABASE;
-
-    console.log({serverWeb, baseWeb})
-    console.log("hellow!!")
     
     try {
         const pool = await dbConnection(serverWeb, baseWeb);

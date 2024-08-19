@@ -35,14 +35,6 @@ const loginWeb = async (req: Request, res: Response) => {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
 
-        // Get the user's subscription expiration date.
-        /* const dueDate = await getUserSubscriptionDueDate(mainPool, user.Id_ClienteDBCLIENTES);
-        console.log({dueDate})
-        if (isSubscriptionExpired(dueDate)) {
-            return res.status(401).json({ error: 'Subscripción ha expirado' });
-        } */
-
-
         // Get user database connection details.
         const otherDBServer = user.ServidorSQL.trim();
         const otherDBDatabase = user.BaseSQL.trim();

@@ -17,19 +17,14 @@ const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const inventory_1 = require("../database/querys/inventory");
 const currentTime_1 = require("../utils/currentTime");
-const storageApp_1 = require("../Storage/storageApp");
 const convertArrayToXml_1 = require("../utils/convertArrayToXml");
 const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     const serverclientes = req.server;
     const baseclientes = req.base;
     const Id_Usuario = req.id;
-    console.log({ serverclientes, baseclientes, Id_Usuario });
     try {
         const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
-        const { inventoryDetails } = req.body;
-        const dataStorage = (0, storageApp_1.getUserData)(`${Id_Usuario}_${baseclientes}`);
-        const typeOfMovement = dataStorage === null || dataStorage === void 0 ? void 0 : dataStorage.Id_TipoMovInv;
+        const { inventoryDetails, typeOfMovement } = req.body;
         const Accion = typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion;
         const Id_TipoMovInv = typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Id_TipoMovInv;
         const ExpectedRows = inventoryDetails.length;
@@ -42,7 +37,7 @@ const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const inventoryData = {
             Estado: 1, // If it were 0 it would mean a inventory was cancelled
             Fecha: (0, currentTime_1.currentTime)(),
-            Id_TipoMovInv: (_a = dataStorage === null || dataStorage === void 0 ? void 0 : dataStorage.Id_TipoMovInv) === null || _a === void 0 ? void 0 : _a.Id_TipoMovInv,
+            Id_TipoMovInv: typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Id_TipoMovInv,
             Id_AlmacenDest: 0,
             SwPendiente: 0,
             Descripcion: '',

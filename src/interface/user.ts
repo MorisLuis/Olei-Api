@@ -70,3 +70,20 @@ export default interface UserInterface {
     // This is the dueDate
     Vigencia?: string
 }
+
+export type ValidationResult = {
+    Tipo: 'usuario' | 'contrasena';
+    Resultado: number;
+};
+
+export type MovementDetail = {
+    Id_Perfil: number;
+    InventarioW: boolean;
+    TraspasosW: boolean;
+
+    //Type of movement
+    Descripcion: string;
+    Id_TipoMovInv: number;
+    Accion: number;
+    Id_AlmDest: number;
+};

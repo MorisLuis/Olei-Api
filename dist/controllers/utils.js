@@ -21,8 +21,6 @@ function convertArrayToXml(objectsArray) {
 const getUtils = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const serverWeb = process.env.DB_SERVER;
     const baseWeb = process.env.DB_DATABASE;
-    console.log({ serverWeb, baseWeb });
-    console.log("hellow!!");
     try {
         const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
         // Simulación de un arreglo de objetos (reemplaza esto con la consulta real)

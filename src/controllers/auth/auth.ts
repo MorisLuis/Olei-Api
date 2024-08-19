@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
-import { dbConnection, querys } from '../../database';
+import { closeDbConnection, dbConnection, querys } from '../../database';
 import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
 import config from '../../config';
 import moment from 'moment';
-import { getClienteData, setClienteData, setUserData } from '../../Storage/storageApp';
+import { getClienteData, setClienteData } from '../../Storage/storageApp';
+import sql from "mssql";
+import { MovementDetail, ValidationResult } from '../../interface/user';
 
 export interface Req extends Request {
     serverclientes: string;
@@ -76,15 +78,15 @@ const loginDB = async (req: Req, res: Response) => {
         console.log({ error })
         return res.status(500).send(error.message);
     } finally {
-        mainPool.close()
+        await closeDbConnection()
     }
+
 }
 
 const login = async (req: Req, res: Response) => {
 
     const serverclientes = req.serverclientes;
     const baseclientes = req.baseclientes;
-    const IdUsuarioOLEI = req.IdUsuarioOLEI;
 
     // STEP 1 - LOGIN
     const mainPool = await dbConnection(serverclientes, baseclientes);
@@ -101,60 +103,48 @@ const login = async (req: Req, res: Response) => {
             return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
         }
 
-        const user = await getUserByEmail(mainPool, Id_Usuario);
+        const request = mainPool.request();
+        request.input('Id_Usuario', sql.VarChar(50), Id_Usuario);
+        request.input('Password', sql.VarChar(50), password);
 
-        if (!user) {
+        const resultData = await request.execute('sp_AuthenticateAndGetMovement');
+        const Validations = (resultData.recordsets as any)[0] as ValidationResult[];
+
+        if (Validations[0].Tipo === "usuario" && Validations[0].Resultado !== 1) {
             return res.status(404).json({ error: 'Correo no encontrado' });
         }
 
-        if (user.Password.trim() !== password) {
+        if (Validations[1].Tipo === "contrasena" && Validations[1].Resultado !== 1) {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
 
-        const TypeOfMovementsResult = await mainPool.request().query(querys.getTypeOfMovementInitial)
-        const TypeOfMovements = TypeOfMovementsResult.recordset[0]
-
-        const userStorage = {
-            Id_Usuario,
-            Id_TipoMovInv: {
-                Id_TipoMovInv: TypeOfMovements.Id_TipoMovInv,
-                Accion: TypeOfMovements.Accion,
-                Descripcion: TypeOfMovements.Descripcion,
-                Id_AlmDest: TypeOfMovements.Id_AlmDest
-            }
-        }
-
-        setUserData(`${Id_Usuario}_${baseclientes}`, userStorage);
-
-        const clientData = getClienteData(IdUsuarioOLEI)
-
-        if (!clientData?.Vigencia) {
-            return res.status(401).json({ error: 'Necesario tener una cuenta vigente' });
-        };
-
-        // Get the user's subscription expiration date.
-        const dueDate = await isSubscriptionExpired(clientData?.Vigencia);
-        if (dueDate) {
-            return res.status(401).json({ error: 'Subscripción ha expirado' });
-        }
+        const User = (resultData.recordsets as any)[1][0] as MovementDetail;
 
         const token = await generateJWT({
-            id: user.Id_Usuario.trim(),
-            rol: user.Id_Perfil,
+            id: Id_Usuario.trim(),
+            rol: User.Id_Perfil,
             server: serverclientes,
             base: baseclientes
         });
 
+        const userStorage = {
+            Id_Usuario,
+            Id_TipoMovInv: {
+                Id_TipoMovInv: User.Id_TipoMovInv,
+                Accion: User.Accion,
+                Descripcion: User.Descripcion,
+                Id_AlmDest: User.Id_AlmDest
+            }
+        }
+
         return res.json({
-            user: userStorage,
+            userStorage,
             token
         });
 
     } catch (error: any) {
         console.log({ error })
         return res.status(500).json({ error: error.message || 'Unexpected error' });
-    } finally {
-        mainPool.close()
     }
 };
 
@@ -252,7 +242,6 @@ const renewLogin = async (req: Req, res: Response) => {
             ServidorSQL: server,
             BaseSQL: base,
         };
-
 
         if (!userDB) {
             return res.status(401).json({ message: 'User data is neccesary' });
