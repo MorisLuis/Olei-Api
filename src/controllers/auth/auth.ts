@@ -32,13 +32,14 @@ const loginDB = async (req: Req, res: Response) => {
 
         const query_DB = querys.authDatabase;
         const result = await mainPool.request().input('IdUsuarioOLEI', IdUsuarioOLEI).query(query_DB);
+        console.log({result})
         const cleanResult = result?.recordset[0];
 
+        console.log({cleanResult})
 
         if (!cleanResult) {
             return res.status(401).json({ error: `No se encontro el usuario: ${IdUsuarioOLEI}` });
         }
-
 
         if (cleanResult.PasswordOLEI.trim() !== PasswordOLEI) {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
