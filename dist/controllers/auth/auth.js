@@ -32,7 +32,9 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         const query_DB = database_1.querys.authDatabase;
         const result = yield mainPool.request().input('IdUsuarioOLEI', IdUsuarioOLEI).query(query_DB);
+        console.log({ result });
         const cleanResult = result === null || result === void 0 ? void 0 : result.recordset[0];
+        console.log({ cleanResult });
         if (!cleanResult) {
             return res.status(401).json({ error: `No se encontro el usuario: ${IdUsuarioOLEI}` });
         }
