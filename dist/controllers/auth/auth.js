@@ -12,13 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.renewLogin = exports.renewDB = exports.login = exports.loginDB = void 0;
+exports.logoutDB = exports.logoutUser = exports.renewLogin = exports.renewDB = exports.login = exports.loginDB = void 0;
 const mssql_1 = __importDefault(require("mssql"));
 const database_1 = require("../../database");
 const generate_jwt_1 = require("../../helpers/generate-jwt");
 const config_1 = __importDefault(require("../../config"));
 const server_1 = require("../../models/server");
 const getSession_1 = require("../../utils/Redis/getSession");
+const deleteRedis_1 = require("../../utils/Redis/deleteRedis");
 const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
     const { IdUsuarioOLEI, PasswordOLEI } = req.body;
@@ -183,8 +184,6 @@ const renewLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         ;
         const user = {
             Id_Usuario: userId
-            //ServidorSQL: serverclientes,
-            //BaseSQL: baseclientes,
         };
         res.json({
             user,
@@ -197,4 +196,41 @@ const renewLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.renewLogin = renewLogin;
+const logoutUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    try {
+        req.session.user = Object.assign(Object.assign({}, req.session.user), { userId: undefined, userRol: undefined });
+        res.json({
+            user: userFR
+        });
+    }
+    catch (error) {
+        console.log({ error });
+        res.status(500).send(error.message);
+    }
+});
+exports.logoutUser = logoutUser;
+const logoutDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    if (!sessionId) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    try {
+        yield (0, deleteRedis_1.handleDeleteRedisSession)({ sessionId });
+        res.json({ ok: true });
+    }
+    catch (error) {
+        console.log({ error });
+        res.status(500).send(error.message);
+    }
+});
+exports.logoutDB = logoutDB;
 //# sourceMappingURL=auth.js.map

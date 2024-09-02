@@ -6,6 +6,7 @@ import config from '../../config';
 import { MovementDetail, UserSessionInterface, ValidationResult } from '../../interface/user';
 import { redisClient } from '../../models/server';
 import { handleGetSession } from '../../utils/Redis/getSession';
+import { handleDeleteRedisSession } from '../../utils/Redis/deleteRedis';
 
 const loginDB = async (req: Request, res: Response) => {
 
@@ -220,8 +221,6 @@ const renewLogin = async (req: Request, res: Response) => {
 
         const user = {
             Id_Usuario: userId
-            //ServidorSQL: serverclientes,
-            //BaseSQL: baseclientes,
         };
 
         res.json({
@@ -235,9 +234,62 @@ const renewLogin = async (req: Request, res: Response) => {
     }
 }
 
+const logoutUser = async (req: Request, res: Response) => {
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    try {
+
+        req.session!.user = {
+            ...req.session!.user,
+            userId: undefined,
+            userRol: undefined
+        }
+
+        res.json({
+            user: userFR
+        })
+
+    } catch (error: any) {
+        console.log({ error })
+        res.status(500).send(error.message);
+    }
+}
+
+
+const logoutDB = async (req: Request, res: Response) => {
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    if (!sessionId) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    try {
+
+        await handleDeleteRedisSession({sessionId})
+
+        res.json({ ok: true })
+
+    } catch (error: any) {
+        console.log({ error })
+        res.status(500).send(error.message);
+    }
+}
+
 export {
     loginDB,
     login,
     renewDB,
-    renewLogin
+    renewLogin,
+    logoutUser,
+    logoutDB
 }
