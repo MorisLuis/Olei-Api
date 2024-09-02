@@ -122,11 +122,11 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.login = login;
 const renewDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("renewDB");
     // Get session from REDIS.
     const sessionId = req.sessionID;
     const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
-    if (!sessionId)
-        return;
+    console.log({ userFR });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
@@ -162,12 +162,11 @@ const renewDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.renewDB = renewDB;
 const renewLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const sessionId = req.sessionID;
-    const sessionData = yield (server_1.redisClient === null || server_1.redisClient === void 0 ? void 0 : server_1.redisClient.get(`sess:${sessionId}`));
-    const session = JSON.parse(sessionData);
-    if (!session.user) {
+    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
-    const { serverclientes, baseclientes, userId, userRol } = session.user;
+    const { serverclientes, baseclientes, userId, userRol } = userFR;
     try {
         if (!userId && !userRol) {
             return res.status(401).json({ message: 'User not authenticated' });

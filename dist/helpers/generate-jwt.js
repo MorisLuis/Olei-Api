@@ -9,7 +9,7 @@ const generateJWTDB = ({ IdUsuarioOLEI }) => {
     return new Promise((resolve, reject) => {
         const payload = { IdUsuarioOLEI };
         jsonwebtoken_1.default.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
-            expiresIn: '365d'
+            expiresIn: '31536000s' // 1 year
         }, (error, token) => {
             if (error) {
                 console.log(error);

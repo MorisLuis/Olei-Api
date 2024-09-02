@@ -6,7 +6,6 @@ import config from '../../config';
 import { MovementDetail, UserSessionInterface, ValidationResult } from '../../interface/user';
 import { redisClient } from '../../models/server';
 import { handleGetSession } from '../../utils/Redis/getSession';
-import { handleDeleteRedisSession } from '../../utils/Redis/deleteRedis';
 
 const loginDB = async (req: Request, res: Response) => {
 
@@ -141,10 +140,13 @@ const login = async (req: Request, res: Response) => {
 
 const renewDB = async (req: Request, res: Response) => {
 
+    console.log("renewDB");
+
     // Get session from REDIS.
     const sessionId = req.sessionID;
-    const { user: userFR } = await handleGetSession({ sessionId })
-    if (!sessionId) return;
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+    console.log({userFR})
 
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
@@ -192,14 +194,13 @@ const renewDB = async (req: Request, res: Response) => {
 const renewLogin = async (req: Request, res: Response) => {
 
     const sessionId = req.sessionID;
-    const sessionData = await redisClient?.get(`sess:${sessionId}`);
-    const session = JSON.parse(sessionData as string)
+    const { user: userFR } = await handleGetSession({ sessionId });
 
-    if (!session.user) {
+    if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
 
-    const { serverclientes, baseclientes, userId, userRol } = session.user as UserSessionInterface;
+    const { serverclientes, baseclientes, userId, userRol } = userFR;
 
     try {
 
@@ -233,15 +234,6 @@ const renewLogin = async (req: Request, res: Response) => {
         res.status(500).send(error.message);
     }
 }
-
-// Utils
-/* const getUserByEmail = async (mainPool: any, Id_Usuario: string) => {
-    const query_DB = querys.auth;
-    console.log({Id_Usuario})
-    const result = await mainPool.request().input('Id_Usuario', Id_Usuario.trim()).query(query_DB);
-    console.log({result})
-    return result?.recordset[0];
-}; */
 
 export {
     loginDB,

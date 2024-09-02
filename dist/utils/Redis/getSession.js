@@ -12,11 +12,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.handleGetSession = void 0;
 const server_1 = require("../../models/server");
 const handleGetSession = (_a) => __awaiter(void 0, [_a], void 0, function* ({ sessionId }) {
-    const sessionData = yield (server_1.redisClient === null || server_1.redisClient === void 0 ? void 0 : server_1.redisClient.get(`sess:${sessionId}`));
-    const session = JSON.parse(sessionData);
-    return {
-        user: session.user
-    };
+    try {
+        const sessionData = yield (server_1.redisClient === null || server_1.redisClient === void 0 ? void 0 : server_1.redisClient.get(`sess:${sessionId}`));
+        const session = JSON.parse(sessionData);
+        const user = session.user;
+        return { user };
+    }
+    catch (error) {
+        console.log({ error });
+        return { user: undefined };
+    }
 });
 exports.handleGetSession = handleGetSession;
 //# sourceMappingURL=getSession.js.map

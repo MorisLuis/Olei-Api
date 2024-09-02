@@ -73,7 +73,7 @@ class Server {
 
     configureRedis() {
         this.redis = new Redis({
-            host:  process.env.REDIS_HOST || '127.0.0.1',
+            host: process.env.REDIS_HOST || '127.0.0.1',
             port: parseFloat(process.env.REDIS_PORT as string) || 6379,
             password: process.env.REDIS_PASSWORD
         });
@@ -95,11 +95,18 @@ class Server {
             });
 
             this.app.use(session({
-                store: store,
                 secret: process.env.REDIS_SECRET as string,
+                name: 'sid',
+                store: store,
                 resave: false,
                 saveUninitialized: false,
-                cookie: { secure: false }
+                cookie: {
+                    secure: process.env.ENVIRONMENT === "production" ? true : 'auto',
+                    httpOnly: true,
+                    maxAge: parseFloat(process.env.REDIS_SESSION_EXPIRATION as string),
+                    //maxAge: 60,
+                    sameSite: process.env.ENVIRONMENT === "production" ? "none" : 'lax'
+                }
             }));
         } else {
             console.error('Redis no está configurado, las sesiones no se almacenarán en Redis');

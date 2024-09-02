@@ -84,11 +84,18 @@ class Server {
                 ttl: parseFloat(process.env.REDIS_SESSION_EXPIRATION)
             });
             this.app.use((0, express_session_1.default)({
-                store: store,
                 secret: process.env.REDIS_SECRET,
+                name: 'sid',
+                store: store,
                 resave: false,
                 saveUninitialized: false,
-                cookie: { secure: false }
+                cookie: {
+                    secure: process.env.ENVIRONMENT === "production" ? true : 'auto',
+                    httpOnly: true,
+                    maxAge: parseFloat(process.env.REDIS_SESSION_EXPIRATION),
+                    //maxAge: 60,
+                    sameSite: process.env.ENVIRONMENT === "production" ? "none" : 'lax'
+                }
             }));
         }
         else {

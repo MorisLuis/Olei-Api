@@ -7,10 +7,14 @@ interface handleGetSessionInterface {
 
 export const handleGetSession = async ({ sessionId }: handleGetSessionInterface) => {
 
-    const sessionData = await redisClient?.get(`sess:${sessionId}`);
-    const session = JSON.parse(sessionData as string);
-
-    return {
-        user: session.user as UserSessionInterface
+    try {
+        const sessionData = await redisClient?.get(`sess:${sessionId}`);
+        const session = JSON.parse(sessionData as string);
+        const user : UserSessionInterface = session.user;    
+        return { user }
+    } catch (error) {
+        console.log({error})
+        return { user : undefined }
     }
+
 }

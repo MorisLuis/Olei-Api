@@ -1,19 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken';
 
-/* interface Req extends Request {
-    serverclientes: string;
-    baseclientes: string;
-    IdUsuarioOLEI: string;
-    id: string;
-    rol: number;
-    server: string;
-    base: string;
-
-    serverweb: string;
-    baseweb: string;
-} */
-
 
 // Middleware to validate JWT from first login. (App)
 const validateJWTDB = async (req: Request, res: Response, next: NextFunction) => {

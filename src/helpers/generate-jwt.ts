@@ -10,7 +10,7 @@ const generateJWTDB = ({ IdUsuarioOLEI }: generateJWTDBProps) => {
     return new Promise((resolve, reject) => {
         const payload = { IdUsuarioOLEI }
         jwt.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
-            expiresIn: '365d'
+            expiresIn: '31536000s' // 1 year
         }, (error, token) => {
             if (error) {
                 console.log(error)
@@ -36,7 +36,6 @@ const generateJWT = ({ id }: generateJWTProps) => {
                 console.log(error)
                 reject('No se pudo generar el token')
             }
-
             resolve(token)
         })
     })

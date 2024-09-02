@@ -9,8 +9,8 @@ router.get('/renewWeb', validateJWTWeb, renewWeb)
 
 router.post("/loginDB", loginDB);
 router.post("/login", validateJWTDB, login);
-router.post("/logout", logout);
 router.get('/renew', validateJWTDB, renewDB)
 router.get('/renewLogin', validateJWT, renewLogin)
+router.post("/logout", logout);
 
 export default router;
