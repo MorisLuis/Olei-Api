@@ -3,20 +3,18 @@ import { dbConnection, querys } from '../../database';
 import { productsQuerys } from '../../database/querys/products';
 import fetch from 'node-fetch';
 import { guessBarcodeType } from '../../utils/identifyBarcodeType';
-import { Req } from '../auth/auth';
 
 
 const getProducById = async (req: Request, res: Response) => {
 
     const { id } = req.params;
     const { Marca } = req.query;
-
-    const serverclientes = req.server;
-    const baseclientes = req.base;
     const Id_Usuario = req.id;
+    const { server, base } = req.session!.user;
+
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes);
+        const pool = await dbConnection(server, base);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
@@ -36,7 +34,7 @@ const getProducById = async (req: Request, res: Response) => {
         const product = result?.recordset[0];
 
         //if (user?.SwImagenes) {
-        const baseSQL = baseclientes.trim().toLowerCase().split(',');
+        const baseSQL = base.trim().toLowerCase().split(',');
 
         if (baseSQL && baseSQL.length > 0) {
             const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
@@ -83,22 +81,19 @@ const getProducById = async (req: Request, res: Response) => {
 
 const getTotalProducts = async (req: Request, res: Response) => {
     const pool = await dbConnection();
-
     const result = await pool?.request().query(productsQuerys.getTotalProducts);
-
     res.json(result?.recordset[0][""]);
 };
 
-const getProductsByStock = async (req: Req, res: Response) => {
+const getProductsByStock = async (req: Request, res: Response) => {
 
     const { PageNumber, PageSize } = req.query;
 
-    const serverclientes = req.server;
-    const baseclientes = req.base;
+    const { server, base } = req.session!.user;
     const Id_Usuario = req.id;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes);
+        const pool = await dbConnection(server, base);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
@@ -121,7 +116,7 @@ const getProductsByStock = async (req: Req, res: Response) => {
         const productsByStock = request.recordset;
 
         const { products } = await getImagesFromProducts({
-            base: baseclientes,
+            base,
             products: productsByStock
         })
 
@@ -133,14 +128,13 @@ const getProductsByStock = async (req: Req, res: Response) => {
     }
 }
 
-const getTotalOfProductsByStock = async (req: Req, res: Response) => {
+const getTotalOfProductsByStock = async (req: Request, res: Response) => {
 
-    const serverclientes = req.server;
-    const baseclientes = req.base;
+    const { server, base } = req.session!.user;
     const Id_Usuario = req.id;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes);
+        const pool = await dbConnection(server, base);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
@@ -170,13 +164,11 @@ const getTotalOfProductsByStock = async (req: Req, res: Response) => {
 const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
 
     const { CodBar, Codigo } = req.query;
-
-    const serverclientes = req.server;
-    const baseclientes = req.base;
+    const { server, base } = req.session!.user;
     const Id_Usuario = req.id;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes);
+        const pool = await dbConnection(server, base);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)

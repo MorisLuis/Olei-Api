@@ -16,11 +16,10 @@ exports.getTypeofmovements = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const getTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverclientes = req.server;
-    const baseclientes = req.base;
+    const { server, base } = req.session.user;
     const userId = req.id;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const pool = yield (0, database_1.dbConnection)(server, base);
         const request = pool.request();
         request.input('Id_Usuario', mssql_1.default.VarChar(50), userId);
         const resultData = yield request.execute('fn_GetTypeOfMovement');

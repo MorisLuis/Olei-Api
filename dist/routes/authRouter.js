@@ -5,12 +5,16 @@ const auth_1 = require("../controllers/auth/auth");
 const validate_jwt_1 = require("../helpers/validate-jwt");
 const authWeb_1 = require("../controllers/auth/authWeb");
 const router = (0, express_1.Router)();
-router.post("/loginDB", auth_1.loginDB);
+// Web
 router.post("/loginWeb", authWeb_1.loginWeb);
-router.post("/login", validate_jwt_1.validateJWTDB, auth_1.login);
+router.get('/renewWeb', validate_jwt_1.validateJWTWeb, authWeb_1.renewWeb);
 router.post("/logout", authWeb_1.logout);
+// App
+router.post("/loginDB", auth_1.loginDB);
+router.post("/login", validate_jwt_1.validateJWTDB, auth_1.login);
 router.get('/renew', validate_jwt_1.validateJWTDB, auth_1.renewDB);
 router.get('/renewLogin', validate_jwt_1.validateJWT, auth_1.renewLogin);
-router.get('/renewWeb', validate_jwt_1.validateJWTWeb, authWeb_1.renewWeb);
+router.get('/logoutApp', validate_jwt_1.validateJWT, auth_1.logoutUser);
+router.get('/logoutAppDB', validate_jwt_1.validateJWTDB, auth_1.logoutDB);
 exports.default = router;
 //# sourceMappingURL=authRouter.js.map

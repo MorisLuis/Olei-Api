@@ -7,12 +7,11 @@ import { convertArrayToXml } from "../utils/convertArrayToXml";
 
 const postInventory = async (req: Request, res: Response) => {
 
-    const serverclientes = req.server;
-    const baseclientes = req.base;
+    const { server, base } = req.session!.user;
     const Id_Usuario = req.id;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes);
+        const pool = await dbConnection(server, base);
         const { inventoryDetails, typeOfMovement } = req.body;
         const Accion = typeOfMovement?.Accion;
         const Id_TipoMovInv = typeOfMovement?.Id_TipoMovInv;

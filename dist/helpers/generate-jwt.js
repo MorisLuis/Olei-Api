@@ -5,11 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateWebJWT = exports.generateJWTDB = exports.generateJWT = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const generateJWTDB = ({ serverclientes, baseclientes, IdUsuarioOLEI }) => {
+const generateJWTDB = ({ IdUsuarioOLEI }) => {
     return new Promise((resolve, reject) => {
-        const payload = { serverclientes, baseclientes, IdUsuarioOLEI };
+        const payload = { IdUsuarioOLEI };
         jsonwebtoken_1.default.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
-            expiresIn: '1y'
+            expiresIn: '31536000s' // 1 year
         }, (error, token) => {
             if (error) {
                 console.log(error);
@@ -20,11 +20,11 @@ const generateJWTDB = ({ serverclientes, baseclientes, IdUsuarioOLEI }) => {
     });
 };
 exports.generateJWTDB = generateJWTDB;
-const generateJWT = ({ id, rol, server, base }) => {
+const generateJWT = ({ id }) => {
     return new Promise((resolve, reject) => {
-        const payload = { id, rol, server, base };
+        const payload = { id };
         jsonwebtoken_1.default.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
-            expiresIn: '1y'
+            expiresIn: process.env.JWT_EXPIRATION
         }, (error, token) => {
             if (error) {
                 console.log(error);
@@ -39,7 +39,7 @@ const generateWebJWT = ({ id, rol, serverweb, baseweb, clientid }) => {
     return new Promise((resolve, reject) => {
         const payload = { id, rol, serverweb, baseweb, clientid };
         jsonwebtoken_1.default.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
-            expiresIn: '1y'
+            expiresIn: process.env.JWT_EXPIRATION
         }, (error, token) => {
             if (error) {
                 console.log(error);

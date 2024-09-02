@@ -1,41 +1,31 @@
 import { Request, Response } from 'express';
+import sql from "mssql";
 import { closeDbConnection, dbConnection, querys } from '../../database';
 import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
 import config from '../../config';
-import moment from 'moment';
-import { getClienteData, setClienteData } from '../../Storage/storageApp';
-import sql from "mssql";
-import { MovementDetail, ValidationResult } from '../../interface/user';
+import { MovementDetail, UserSessionInterface, ValidationResult } from '../../interface/user';
+import { redisClient } from '../../models/server';
+import { handleGetSession } from '../../utils/Redis/getSession';
+import { handleDeleteRedisSession } from '../../utils/Redis/deleteRedis';
 
-export interface Req extends Request {
-    serverclientes: string;
-    baseclientes: string;
-    id: string;
-    rol: number;
-}
-
-const loginDB = async (req: Req, res: Response) => {
+const loginDB = async (req: Request, res: Response) => {
 
     // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
-    const mainPool = await dbConnection(config.dbServer, config.dbDatabase);
+    const { IdUsuarioOLEI, PasswordOLEI } = req.body;
 
+    const mainPool = await dbConnection(config.dbServer, config.dbDatabase);
     if (!mainPool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
     }
 
+    if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
+        return res.status(400).json({ error: 'Necesario enviar usuario y contraseña' });
+    }
+
     try {
-        const { IdUsuarioOLEI, PasswordOLEI } = req.body;
-
-        if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
-            return res.status(400).json({ error: 'Necesario enviar usuario y contraseña' });
-        }
-
         const query_DB = querys.authDatabase;
         const result = await mainPool.request().input('IdUsuarioOLEI', IdUsuarioOLEI).query(query_DB);
-        console.log({result})
         const cleanResult = result?.recordset[0];
-
-        console.log({cleanResult})
 
         if (!cleanResult) {
             return res.status(401).json({ error: `No se encontro el usuario: ${IdUsuarioOLEI}` });
@@ -46,33 +36,26 @@ const loginDB = async (req: Req, res: Response) => {
         }
 
         const user = {
-            ServidorSQL: cleanResult.ServidorSQL,
             BaseSQL: cleanResult.BaseSQL,
             RazonSocial: cleanResult.RazonSocial
         };
 
-        const tokenDB = await generateJWTDB({
+        const tokenDB = await generateJWTDB({ IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim() });
+
+        req.session!.user = {
             serverclientes: cleanResult.ServidorSQL.trim(),
             baseclientes: cleanResult.BaseSQL.trim(),
-            IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim()
-        });
-
-
-        const dataDB = {
-            RazonSocial: cleanResult.RazonSocial,
+            UsuarioSQL: cleanResult.UsuarioSQL.trim(),
+            PasswordSQL: cleanResult.PasswordSQL.trim(),
+            IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim(),
+            RazonSocial: cleanResult.RazonSocial.trim(),
             SwImagenes: cleanResult.SwImagenes,
             Vigencia: cleanResult.Vigencia
         }
 
-        setClienteData(cleanResult.IdUsuarioOLEI, dataDB)
-
         return res.json({
             tokenDB,
-            user,
-            userDB: {
-                servidor: cleanResult.ServidorSQL,
-                database: cleanResult.BaseSQL
-            }
+            user
         });
 
     } catch (error: any) {
@@ -81,16 +64,22 @@ const loginDB = async (req: Req, res: Response) => {
     } finally {
         await closeDbConnection()
     }
-
 }
 
-const login = async (req: Req, res: Response) => {
+const login = async (req: Request, res: Response) => {
 
-    const serverclientes = req.serverclientes;
-    const baseclientes = req.baseclientes;
+    const sessionId = req.sessionID;
+    const sessionData = await redisClient?.get(`sess:${sessionId}`);
+    const session = JSON.parse(sessionData as string)
+
+    if (!session.user) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = session.user as UserSessionInterface;
 
     // STEP 1 - LOGIN
-    const mainPool = await dbConnection(serverclientes, baseclientes);
+    const mainPool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
 
     if (!mainPool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
@@ -121,12 +110,13 @@ const login = async (req: Req, res: Response) => {
 
         const User = (resultData.recordsets as any)[1][0] as MovementDetail;
 
-        const token = await generateJWT({
-            id: Id_Usuario.trim(),
-            rol: User.Id_Perfil,
-            server: serverclientes,
-            base: baseclientes
-        });
+        const token = await generateJWT({ id: Id_Usuario.trim() });
+
+        req.session!.user = {
+            ...req.session!.user,
+            userId: Id_Usuario.trim(),
+            userRol: User.Id_Perfil
+        }
 
         const userStorage = {
             Id_Usuario,
@@ -149,51 +139,47 @@ const login = async (req: Req, res: Response) => {
     }
 };
 
-const renewDB = async (req: Req, res: Response) => {
+const renewDB = async (req: Request, res: Response) => {
 
-    const serverclientes = req.serverclientes;
-    const baseclientes = req.baseclientes;
-    const IdUsuarioOLEI = req.IdUsuarioOLEI;
+    console.log("renewDB");
+
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+    console.log({userFR})
+
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    const { baseclientes, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
 
     try {
-        if (!serverclientes && !baseclientes) {
-            return res.status(401).json({ message: 'UserDB not authenticated' });
-        };
-
-        const token = await generateJWTDB({
-            serverclientes: serverclientes,
-            baseclientes: baseclientes,
-            IdUsuarioOLEI
-        });
+        const token = await generateJWTDB({ IdUsuarioOLEI });
 
         if (!token) {
             return res.status(401).json({ message: 'Failed to generate token' });
         };
 
-
-        //To get 'Vigencia', SwImagenes and 'RazonSocial'.
-        const dataFromDatabase = getClienteData(IdUsuarioOLEI)
-        const user = {
-            ServidorSQL: serverclientes,
-            BaseSQL: baseclientes,
-            Vigencia: dataFromDatabase?.Vigencia,
-            SwImagenes: dataFromDatabase?.SwImagenes,
-            RazonSocial: dataFromDatabase?.RazonSocial
+        // User to Redis.
+        const userRedis: UserSessionInterface = {
+            ...userFR,
+            userId: userId ? userId : undefined,
+            userRol: userRol ? userRol : undefined
         };
 
-        if (!user) {
+        // User to Frontend.
+        const user = {
+            BaseSQL: baseclientes,
+            RazonSocial: RazonSocial
+        };
+
+        if (!userFR) {
             return res.status(401).json({ message: 'User data is neccesary' });
         };
 
-        if (!dataFromDatabase?.Vigencia) {
-            return res.status(401).json({ error: 'Necesario tener una cuenta vigente' });
-        };
-
-        // Get the user's subscription expiration date.
-        const dueDate = await isSubscriptionExpired(dataFromDatabase?.Vigencia);
-        if (dueDate) {
-            return res.status(401).json({ error: 'Subscripción ha expirado' });
-        }
+        req.session!.user = userRedis
 
         res.json({
             token,
@@ -206,12 +192,16 @@ const renewDB = async (req: Req, res: Response) => {
     }
 }
 
-const renewLogin = async (req: Req, res: Response) => {
+const renewLogin = async (req: Request, res: Response) => {
 
-    const userId = req.id;
-    const userRol = req.rol;
-    const server = req.server;
-    const base = req.base;
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    const { serverclientes, baseclientes, userId, userRol } = userFR;
 
     try {
 
@@ -219,33 +209,18 @@ const renewLogin = async (req: Req, res: Response) => {
             return res.status(401).json({ message: 'User not authenticated' });
         };
 
-        if (!server && !base) {
+        if (!serverclientes && !baseclientes) {
             return res.status(401).json({ message: 'Server and base data is neccessary' });
         };
 
-        const token = await generateJWT({
-            id: userId,
-            rol: userRol,
-            server,
-            base
-        });
+        const token = await generateJWT({ id: userId as string });
 
         if (!token) {
             return res.status(401).json({ message: 'Failed to generate token' });
         };
 
-        // Get user data.
-        const mainPool = await dbConnection(server, base);
-        const userDB = await getUserByEmail(mainPool, userId);
-
         const user = {
-            ...userDB,
-            ServidorSQL: server,
-            BaseSQL: base,
-        };
-
-        if (!userDB) {
-            return res.status(401).json({ message: 'User data is neccesary' });
+            Id_Usuario: userId
         };
 
         res.json({
@@ -259,22 +234,62 @@ const renewLogin = async (req: Req, res: Response) => {
     }
 }
 
-// Utils
-const getUserByEmail = async (mainPool: any, Id_Usuario: string) => {
-    const query_DB = querys.auth;
-    const result = await mainPool.request().input('Id_Usuario', Id_Usuario.trim()).query(query_DB);
-    return result?.recordset[0];
-};
+const logoutUser = async (req: Request, res: Response) => {
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetSession({ sessionId });
 
-const isSubscriptionExpired = (dueDate: string) => {
-    const today = moment().startOf('day');
-    const isExpired = moment(dueDate).startOf('day').isBefore(today);
-    return isExpired;
-};
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    try {
+
+        req.session!.user = {
+            ...req.session!.user,
+            userId: undefined,
+            userRol: undefined
+        }
+
+        res.json({
+            user: userFR
+        })
+
+    } catch (error: any) {
+        console.log({ error })
+        res.status(500).send(error.message);
+    }
+}
+
+
+const logoutDB = async (req: Request, res: Response) => {
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    if (!sessionId) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    try {
+
+        await handleDeleteRedisSession({sessionId})
+
+        res.json({ ok: true })
+
+    } catch (error: any) {
+        console.log({ error })
+        res.status(500).send(error.message);
+    }
+}
 
 export {
     loginDB,
     login,
     renewDB,
-    renewLogin
+    renewLogin,
+    logoutUser,
+    logoutDB
 }

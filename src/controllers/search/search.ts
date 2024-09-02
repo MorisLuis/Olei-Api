@@ -6,12 +6,12 @@ import { productsQuerys } from '../../database/querys/products';
 const searchProductInventory = async (req: Request, res: Response) => {
 
     const { searchTerm } = req.query;
-    const serverclientes = req.server;
-    const baseclientes = req.base;
+    const { server, base } = req.session!.user;
+
     const Id_Usuario = req.id;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes);
+        const pool = await dbConnection(server, base);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)

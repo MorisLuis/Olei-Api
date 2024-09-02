@@ -5,12 +5,11 @@ import sql from "mssql";
 
 const getTypeofmovements = async (req: Request, res: Response) => {
 
-    const serverclientes = req.server;
-    const baseclientes = req.base;
+    const { server, base } = req.session!.user;
     const userId = req.id;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes);
+        const pool = await dbConnection(server, base);
 
         const request = pool.request();
         request.input('Id_Usuario', sql.VarChar(50), userId);

@@ -29,9 +29,7 @@ const validateJWTDB = (req, res, next) => __awaiter(void 0, void 0, void 0, func
             if (err) {
                 return res.status(500).json({ success: false, message: 'Failed to authenticate token' });
             }
-            const { serverclientes, baseclientes, IdUsuarioOLEI } = decoded;
-            req.serverclientes = serverclientes;
-            req.baseclientes = baseclientes;
+            const { IdUsuarioOLEI } = decoded;
             req.IdUsuarioOLEI = IdUsuarioOLEI;
             next();
         });
@@ -57,11 +55,8 @@ const validateJWT = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
             if (err) {
                 return res.status(500).json({ success: false, message: 'Failed to authenticate token' });
             }
-            const { server, base, id, rol } = decoded;
+            const { id } = decoded;
             req.id = id;
-            req.rol = rol;
-            req.server = server;
-            req.base = base;
             next();
         });
     }
