@@ -81,7 +81,7 @@ class Server {
         if (this.redis) {
             const store = new connect_redis_1.default({
                 client: this.redis,
-                ttl: parseFloat(process.env.REDIS_SESSION_EXPIRATION)
+                ttl: parseFloat(process.env.REDIS_SESSION_EXPIRATION),
             });
             this.app.use((0, express_session_1.default)({
                 secret: process.env.REDIS_SECRET,
@@ -93,7 +93,6 @@ class Server {
                     secure: process.env.ENVIRONMENT === "production" ? true : 'auto',
                     httpOnly: true,
                     maxAge: parseFloat(process.env.REDIS_SESSION_EXPIRATION),
-                    //maxAge: 60,
                     sameSite: process.env.ENVIRONMENT === "production" ? "none" : 'lax'
                 }
             }));

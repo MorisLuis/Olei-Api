@@ -5,16 +5,6 @@ declare global {
     interface Request {
       IdUsuarioOLEI: string;
 
-      //app properties
-/*       serverclientes: string;
-      baseclientes: string;
-      server: string;
-      base: string;
-
-      IdUsuarioOLEI: string;
-      id: string;
-      rol: number;
- */
       // web properties
       id: string;
       rol: number;

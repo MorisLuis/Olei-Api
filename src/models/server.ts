@@ -3,7 +3,7 @@ import express, { Application } from "express";
 import cors from 'cors';
 import Redis from 'ioredis';
 import RedisStore from 'connect-redis';
-import session from 'express-session';
+import session, { Store } from 'express-session';
 import { dbConnection } from "../database/connection";
 
 // Rutas
@@ -91,8 +91,8 @@ class Server {
         if (this.redis) {
             const store = new RedisStore({
                 client: this.redis,
-                ttl: parseFloat(process.env.REDIS_SESSION_EXPIRATION as string)
-            });
+                ttl: parseFloat(process.env.REDIS_SESSION_EXPIRATION as string),
+            }) as unknown as Store;
 
             this.app.use(session({
                 secret: process.env.REDIS_SECRET as string,
@@ -104,7 +104,6 @@ class Server {
                     secure: process.env.ENVIRONMENT === "production" ? true : 'auto',
                     httpOnly: true,
                     maxAge: parseFloat(process.env.REDIS_SESSION_EXPIRATION as string),
-                    //maxAge: 60,
                     sameSite: process.env.ENVIRONMENT === "production" ? "none" : 'lax'
                 }
             }));
