@@ -19,11 +19,10 @@ const inventory_1 = require("../database/querys/inventory");
 const currentTime_1 = require("../utils/currentTime");
 const convertArrayToXml_1 = require("../utils/convertArrayToXml");
 const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverclientes = req.server;
-    const baseclientes = req.base;
+    const { server, base } = req.session.user;
     const Id_Usuario = req.id;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const pool = yield (0, database_1.dbConnection)(server, base);
         const { inventoryDetails, typeOfMovement } = req.body;
         const Accion = typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion;
         const Id_TipoMovInv = typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Id_TipoMovInv;

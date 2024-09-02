@@ -14,11 +14,10 @@ const database_1 = require("../../database");
 const products_1 = require("../../database/querys/products");
 const searchProductInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerm } = req.query;
-    const serverclientes = req.server;
-    const baseclientes = req.base;
+    const { server, base } = req.session.user;
     const Id_Usuario = req.id;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const pool = yield (0, database_1.dbConnection)(server, base);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];

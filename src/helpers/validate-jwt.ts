@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken';
 
-interface Req extends Request {
+/* interface Req extends Request {
     serverclientes: string;
     baseclientes: string;
     IdUsuarioOLEI: string;
@@ -12,7 +12,7 @@ interface Req extends Request {
 
     serverweb: string;
     baseweb: string;
-}
+} */
 
 
 // Middleware to validate JWT from first login. (App)
@@ -32,10 +32,8 @@ const validateJWTDB = async (req: Request, res: Response, next: NextFunction) =>
                 return res.status(500).json({ success: false, message: 'Failed to authenticate token' });
             }
 
-            const { serverclientes, baseclientes, IdUsuarioOLEI } = decoded as { serverclientes: string; baseclientes: string, IdUsuarioOLEI: string };
+            const { IdUsuarioOLEI } = decoded as { IdUsuarioOLEI: string };
 
-            req.serverclientes = serverclientes;
-            req.baseclientes = baseclientes;
             req.IdUsuarioOLEI = IdUsuarioOLEI;
             next();
         });
@@ -47,7 +45,7 @@ const validateJWTDB = async (req: Request, res: Response, next: NextFunction) =>
 
 
 // Middleware to validate JWT from second login. (App)
-const validateJWT = async (req: Req, res: Response, next: NextFunction) => {
+const validateJWT = async (req: Request, res: Response, next: NextFunction) => {
 
     const token = req.headers['authorization']?.split(' ')[1];
 
@@ -64,12 +62,9 @@ const validateJWT = async (req: Req, res: Response, next: NextFunction) => {
                 return res.status(500).json({ success: false, message: 'Failed to authenticate token' });
             }
 
-            const { server, base, id, rol } = decoded as { server: string; base: string, id: string, rol: number };
+            const { id } = decoded as { id: string };
 
             req.id = id;
-            req.rol = rol;
-            req.server = server;
-            req.base = base;
             next();
         });
     } catch (error) {
@@ -79,7 +74,7 @@ const validateJWT = async (req: Req, res: Response, next: NextFunction) => {
 };
 
 // (Web)
-const validateJWTWeb = async (req: Req, res: Response, next: NextFunction) => {
+const validateJWTWeb = async (req: Request, res: Response, next: NextFunction) => {
 
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];

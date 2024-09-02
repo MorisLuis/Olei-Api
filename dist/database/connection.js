@@ -16,11 +16,11 @@ exports.closeDbConnection = exports.dbConnection = void 0;
 const mssql_1 = __importDefault(require("mssql"));
 const config_1 = __importDefault(require("../config"));
 let pool = null;
-const dbConnection = (server, database) => __awaiter(void 0, void 0, void 0, function* () {
+const dbConnection = (server, database, password, user) => __awaiter(void 0, void 0, void 0, function* () {
     if (!pool) {
         const dbConfig = {
-            user: config_1.default.dbUser,
-            password: config_1.default.dbPassword,
+            user: user || config_1.default.dbUser,
+            password: password || config_1.default.dbPassword,
             server: server || config_1.default.dbServer,
             database: database || config_1.default.dbDatabase,
             options: {

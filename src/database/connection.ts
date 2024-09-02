@@ -5,11 +5,11 @@ import config from "../config";
 
 let pool: sql.ConnectionPool | null = null;
 
-export const dbConnection = async (server?: string, database?: string) => {
+export const dbConnection = async (server?: string, database?: string, password?: string, user?: string) => {
     if (!pool) {
         const dbConfig = {
-            user: config.dbUser,
-            password: config.dbPassword,
+            user: user || config.dbUser,
+            password:  password || config.dbPassword,
             server: server || config.dbServer,
             database: database || config.dbDatabase,
             options: {

@@ -13,28 +13,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.renewLogin = exports.renewDB = exports.login = exports.loginDB = void 0;
+const mssql_1 = __importDefault(require("mssql"));
 const database_1 = require("../../database");
 const generate_jwt_1 = require("../../helpers/generate-jwt");
 const config_1 = __importDefault(require("../../config"));
-const moment_1 = __importDefault(require("moment"));
-const storageApp_1 = require("../../Storage/storageApp");
-const mssql_1 = __importDefault(require("mssql"));
+const server_1 = require("../../models/server");
+const getSession_1 = require("../../utils/Redis/getSession");
 const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
+    const { IdUsuarioOLEI, PasswordOLEI } = req.body;
     const mainPool = yield (0, database_1.dbConnection)(config_1.default.dbServer, config_1.default.dbDatabase);
     if (!mainPool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
     }
+    if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
+        return res.status(400).json({ error: 'Necesario enviar usuario y contraseña' });
+    }
     try {
-        const { IdUsuarioOLEI, PasswordOLEI } = req.body;
-        if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
-            return res.status(400).json({ error: 'Necesario enviar usuario y contraseña' });
-        }
         const query_DB = database_1.querys.authDatabase;
         const result = yield mainPool.request().input('IdUsuarioOLEI', IdUsuarioOLEI).query(query_DB);
-        console.log({ result });
         const cleanResult = result === null || result === void 0 ? void 0 : result.recordset[0];
-        console.log({ cleanResult });
         if (!cleanResult) {
             return res.status(401).json({ error: `No se encontro el usuario: ${IdUsuarioOLEI}` });
         }
@@ -42,28 +40,23 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
         const user = {
-            ServidorSQL: cleanResult.ServidorSQL,
             BaseSQL: cleanResult.BaseSQL,
             RazonSocial: cleanResult.RazonSocial
         };
-        const tokenDB = yield (0, generate_jwt_1.generateJWTDB)({
+        const tokenDB = yield (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim() });
+        req.session.user = {
             serverclientes: cleanResult.ServidorSQL.trim(),
             baseclientes: cleanResult.BaseSQL.trim(),
-            IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim()
-        });
-        const dataDB = {
-            RazonSocial: cleanResult.RazonSocial,
+            UsuarioSQL: cleanResult.UsuarioSQL.trim(),
+            PasswordSQL: cleanResult.PasswordSQL.trim(),
+            IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim(),
+            RazonSocial: cleanResult.RazonSocial.trim(),
             SwImagenes: cleanResult.SwImagenes,
             Vigencia: cleanResult.Vigencia
         };
-        (0, storageApp_1.setClienteData)(cleanResult.IdUsuarioOLEI, dataDB);
         return res.json({
             tokenDB,
-            user,
-            userDB: {
-                servidor: cleanResult.ServidorSQL,
-                database: cleanResult.BaseSQL
-            }
+            user
         });
     }
     catch (error) {
@@ -76,10 +69,15 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.loginDB = loginDB;
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverclientes = req.serverclientes;
-    const baseclientes = req.baseclientes;
+    const sessionId = req.sessionID;
+    const sessionData = yield (server_1.redisClient === null || server_1.redisClient === void 0 ? void 0 : server_1.redisClient.get(`sess:${sessionId}`));
+    const session = JSON.parse(sessionData);
+    if (!session.user) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = session.user;
     // STEP 1 - LOGIN
-    const mainPool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+    const mainPool = yield (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
     if (!mainPool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
     }
@@ -101,12 +99,8 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
         const User = resultData.recordsets[1][0];
-        const token = yield (0, generate_jwt_1.generateJWT)({
-            id: Id_Usuario.trim(),
-            rol: User.Id_Perfil,
-            server: serverclientes,
-            base: baseclientes
-        });
+        const token = yield (0, generate_jwt_1.generateJWT)({ id: Id_Usuario.trim() });
+        req.session.user = Object.assign(Object.assign({}, req.session.user), { userId: Id_Usuario.trim(), userRol: User.Id_Perfil });
         const userStorage = {
             Id_Usuario,
             Id_TipoMovInv: {
@@ -128,45 +122,33 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.login = login;
 const renewDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverclientes = req.serverclientes;
-    const baseclientes = req.baseclientes;
-    const IdUsuarioOLEI = req.IdUsuarioOLEI;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    if (!sessionId)
+        return;
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { baseclientes, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
     try {
-        if (!serverclientes && !baseclientes) {
-            return res.status(401).json({ message: 'UserDB not authenticated' });
-        }
-        ;
-        const token = yield (0, generate_jwt_1.generateJWTDB)({
-            serverclientes: serverclientes,
-            baseclientes: baseclientes,
-            IdUsuarioOLEI
-        });
+        const token = yield (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI });
         if (!token) {
             return res.status(401).json({ message: 'Failed to generate token' });
         }
         ;
-        //To get 'Vigencia', SwImagenes and 'RazonSocial'.
-        const dataFromDatabase = (0, storageApp_1.getClienteData)(IdUsuarioOLEI);
+        // User to Redis.
+        const userRedis = Object.assign(Object.assign({}, userFR), { userId: userId ? userId : undefined, userRol: userRol ? userRol : undefined });
+        // User to Frontend.
         const user = {
-            ServidorSQL: serverclientes,
             BaseSQL: baseclientes,
-            Vigencia: dataFromDatabase === null || dataFromDatabase === void 0 ? void 0 : dataFromDatabase.Vigencia,
-            SwImagenes: dataFromDatabase === null || dataFromDatabase === void 0 ? void 0 : dataFromDatabase.SwImagenes,
-            RazonSocial: dataFromDatabase === null || dataFromDatabase === void 0 ? void 0 : dataFromDatabase.RazonSocial
+            RazonSocial: RazonSocial
         };
-        if (!user) {
+        if (!userFR) {
             return res.status(401).json({ message: 'User data is neccesary' });
         }
         ;
-        if (!(dataFromDatabase === null || dataFromDatabase === void 0 ? void 0 : dataFromDatabase.Vigencia)) {
-            return res.status(401).json({ error: 'Necesario tener una cuenta vigente' });
-        }
-        ;
-        // Get the user's subscription expiration date.
-        const dueDate = yield isSubscriptionExpired(dataFromDatabase === null || dataFromDatabase === void 0 ? void 0 : dataFromDatabase.Vigencia);
-        if (dueDate) {
-            return res.status(401).json({ error: 'Subscripción ha expirado' });
-        }
+        req.session.user = userRedis;
         res.json({
             token,
             user
@@ -179,37 +161,32 @@ const renewDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.renewDB = renewDB;
 const renewLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const userId = req.id;
-    const userRol = req.rol;
-    const server = req.server;
-    const base = req.base;
+    const sessionId = req.sessionID;
+    const sessionData = yield (server_1.redisClient === null || server_1.redisClient === void 0 ? void 0 : server_1.redisClient.get(`sess:${sessionId}`));
+    const session = JSON.parse(sessionData);
+    if (!session.user) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { serverclientes, baseclientes, userId, userRol } = session.user;
     try {
         if (!userId && !userRol) {
             return res.status(401).json({ message: 'User not authenticated' });
         }
         ;
-        if (!server && !base) {
+        if (!serverclientes && !baseclientes) {
             return res.status(401).json({ message: 'Server and base data is neccessary' });
         }
         ;
-        const token = yield (0, generate_jwt_1.generateJWT)({
-            id: userId,
-            rol: userRol,
-            server,
-            base
-        });
+        const token = yield (0, generate_jwt_1.generateJWT)({ id: userId });
         if (!token) {
             return res.status(401).json({ message: 'Failed to generate token' });
         }
         ;
-        // Get user data.
-        const mainPool = yield (0, database_1.dbConnection)(server, base);
-        const userDB = yield getUserByEmail(mainPool, userId);
-        const user = Object.assign(Object.assign({}, userDB), { ServidorSQL: server, BaseSQL: base });
-        if (!userDB) {
-            return res.status(401).json({ message: 'User data is neccesary' });
-        }
-        ;
+        const user = {
+            Id_Usuario: userId
+            //ServidorSQL: serverclientes,
+            //BaseSQL: baseclientes,
+        };
         res.json({
             user,
             token
@@ -221,15 +198,4 @@ const renewLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.renewLogin = renewLogin;
-// Utils
-const getUserByEmail = (mainPool, Id_Usuario) => __awaiter(void 0, void 0, void 0, function* () {
-    const query_DB = database_1.querys.auth;
-    const result = yield mainPool.request().input('Id_Usuario', Id_Usuario.trim()).query(query_DB);
-    return result === null || result === void 0 ? void 0 : result.recordset[0];
-});
-const isSubscriptionExpired = (dueDate) => {
-    const today = (0, moment_1.default)().startOf('day');
-    const isExpired = (0, moment_1.default)(dueDate).startOf('day').isBefore(today);
-    return isExpired;
-};
 //# sourceMappingURL=auth.js.map

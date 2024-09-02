@@ -87,3 +87,19 @@ export type MovementDetail = {
     Accion: number;
     Id_AlmDest: number;
 };
+
+
+export interface UserSessionInterface {
+    serverclientes: string;
+    baseclientes: string;
+    PasswordSQL: string;
+    UsuarioSQL: string;
+    IdUsuarioOLEI: string;
+    RazonSocial: string;
+    SwImagenes: string;
+    Vigencia: string;
+
+
+    userId?: string;
+    userRol?: string;
+}

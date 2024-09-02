@@ -14,6 +14,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateJWTWeb = exports.validateJWT = exports.validateJWTDB = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+/* interface Req extends Request {
+    serverclientes: string;
+    baseclientes: string;
+    IdUsuarioOLEI: string;
+    id: string;
+    rol: number;
+    server: string;
+    base: string;
+
+    serverweb: string;
+    baseweb: string;
+} */
 // Middleware to validate JWT from first login. (App)
 const validateJWTDB = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -29,9 +41,7 @@ const validateJWTDB = (req, res, next) => __awaiter(void 0, void 0, void 0, func
             if (err) {
                 return res.status(500).json({ success: false, message: 'Failed to authenticate token' });
             }
-            const { serverclientes, baseclientes, IdUsuarioOLEI } = decoded;
-            req.serverclientes = serverclientes;
-            req.baseclientes = baseclientes;
+            const { IdUsuarioOLEI } = decoded;
             req.IdUsuarioOLEI = IdUsuarioOLEI;
             next();
         });
@@ -57,11 +67,8 @@ const validateJWT = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
             if (err) {
                 return res.status(500).json({ success: false, message: 'Failed to authenticate token' });
             }
-            const { server, base, id, rol } = decoded;
+            const { id } = decoded;
             req.id = id;
-            req.rol = rol;
-            req.server = server;
-            req.base = base;
             next();
         });
     }

@@ -20,11 +20,10 @@ const identifyBarcodeType_1 = require("../../utils/identifyBarcodeType");
 const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const { Marca } = req.query;
-    const serverclientes = req.server;
-    const baseclientes = req.base;
     const Id_Usuario = req.id;
+    const { server, base } = req.session.user;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const pool = yield (0, database_1.dbConnection)(server, base);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
@@ -39,7 +38,7 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             .query(products_1.productsQuerys.getProducById);
         const product = result === null || result === void 0 ? void 0 : result.recordset[0];
         //if (user?.SwImagenes) {
-        const baseSQL = baseclientes.trim().toLowerCase().split(',');
+        const baseSQL = base.trim().toLowerCase().split(',');
         if (baseSQL && baseSQL.length > 0) {
             const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
             const imageDB = formatImageDB[formatImageDB.length - 1];
@@ -86,11 +85,10 @@ const getTotalProducts = (req, res) => __awaiter(void 0, void 0, void 0, functio
 exports.getTotalProducts = getTotalProducts;
 const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { PageNumber, PageSize } = req.query;
-    const serverclientes = req.server;
-    const baseclientes = req.base;
+    const { server, base } = req.session.user;
     const Id_Usuario = req.id;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const pool = yield (0, database_1.dbConnection)(server, base);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
@@ -106,7 +104,7 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
             .query(query);
         const productsByStock = request.recordset;
         const { products } = yield getImagesFromProducts({
-            base: baseclientes,
+            base,
             products: productsByStock
         });
         res.json(products);
@@ -118,11 +116,10 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.getProductsByStock = getProductsByStock;
 const getTotalOfProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverclientes = req.server;
-    const baseclientes = req.base;
+    const { server, base } = req.session.user;
     const Id_Usuario = req.id;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const pool = yield (0, database_1.dbConnection)(server, base);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
@@ -145,11 +142,10 @@ const getTotalOfProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0
 exports.getTotalOfProductsByStock = getTotalOfProductsByStock;
 const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { CodBar, Codigo } = req.query;
-    const serverclientes = req.server;
-    const baseclientes = req.base;
+    const { server, base } = req.session.user;
     const Id_Usuario = req.id;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const pool = yield (0, database_1.dbConnection)(server, base);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];

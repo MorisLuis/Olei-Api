@@ -13,11 +13,10 @@ export default interface ExtendedCostosInterface extends CostosInterface {
 
 const updateCostos = async (req: Request, res: Response) => {
 
-    const serverclientes = req.server;
-    const baseclientes = req.base;
+    const { server, base } = req.session!.user;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes);
+        const pool = await dbConnection(server, base);
         const transaction = new sql.Transaction(pool);
         await transaction.begin();
 

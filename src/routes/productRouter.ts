@@ -1,5 +1,5 @@
 // Importar los tipos extendidos explícitamente
-/// <reference path="../../typings/express.d.ts" />
+/// <reference path="../types/express.d.ts" />
 
 import Router from "express";
 
