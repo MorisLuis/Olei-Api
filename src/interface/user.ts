@@ -99,7 +99,6 @@ export interface UserSessionInterface {
     SwImagenes: string;
     Vigencia: string;
 
-
     userId?: string;
     userRol?: string;
 }

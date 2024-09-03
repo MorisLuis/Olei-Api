@@ -18,11 +18,17 @@ const mssql_1 = __importDefault(require("mssql"));
 const inventory_1 = require("../database/querys/inventory");
 const currentTime_1 = require("../utils/currentTime");
 const convertArrayToXml_1 = require("../utils/convertArrayToXml");
+const getSession_1 = require("../utils/Redis/getSession");
 const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { server, base } = req.session.user;
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { serverclientes, baseclientes } = userFR;
     const Id_Usuario = req.id;
     try {
-        const pool = yield (0, database_1.dbConnection)(server, base);
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const { inventoryDetails, typeOfMovement } = req.body;
         const Accion = typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion;
         const Id_TipoMovInv = typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Id_TipoMovInv;

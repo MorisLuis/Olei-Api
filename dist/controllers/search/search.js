@@ -12,12 +12,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchProductInventory = void 0;
 const database_1 = require("../../database");
 const products_1 = require("../../database/querys/products");
+const getSession_1 = require("../../utils/Redis/getSession");
 const searchProductInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerm } = req.query;
-    const { server, base } = req.session.user;
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { serverclientes, baseclientes } = userFR;
     const Id_Usuario = req.id;
     try {
-        const pool = yield (0, database_1.dbConnection)(server, base);
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];

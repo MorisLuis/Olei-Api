@@ -15,11 +15,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTypeofmovements = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
+const getSession_1 = require("../utils/Redis/getSession");
 const getTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { server, base } = req.session.user;
-    const userId = req.id;
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { serverclientes, baseclientes, userId } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(server, base);
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const request = pool.request();
         request.input('Id_Usuario', mssql_1.default.VarChar(50), userId);
         const resultData = yield request.execute('fn_GetTypeOfMovement');

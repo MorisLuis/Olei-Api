@@ -17,7 +17,6 @@ const mssql_1 = __importDefault(require("mssql"));
 const database_1 = require("../../database");
 const generate_jwt_1 = require("../../helpers/generate-jwt");
 const config_1 = __importDefault(require("../../config"));
-const server_1 = require("../../models/server");
 const getSession_1 = require("../../utils/Redis/getSession");
 const deleteRedis_1 = require("../../utils/Redis/deleteRedis");
 const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -53,7 +52,9 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim(),
             RazonSocial: cleanResult.RazonSocial.trim(),
             SwImagenes: cleanResult.SwImagenes,
-            Vigencia: cleanResult.Vigencia
+            Vigencia: cleanResult.Vigencia,
+            userId: "",
+            userRol: ""
         };
         return res.json({
             tokenDB,
@@ -71,12 +72,11 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.loginDB = loginDB;
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const sessionId = req.sessionID;
-    const sessionData = yield (server_1.redisClient === null || server_1.redisClient === void 0 ? void 0 : server_1.redisClient.get(`sess:${sessionId}`));
-    const session = JSON.parse(sessionData);
-    if (!session.user) {
+    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = session.user;
+    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     // STEP 1 - LOGIN
     const mainPool = yield (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
     if (!mainPool) {
@@ -127,7 +127,6 @@ const renewDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // Get session from REDIS.
     const sessionId = req.sessionID;
     const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
-    console.log({ userFR });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }

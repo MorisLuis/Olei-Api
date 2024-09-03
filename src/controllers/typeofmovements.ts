@@ -1,15 +1,23 @@
 import { Request, Response } from 'express'
 import { dbConnection } from '../database';
 import sql from "mssql";
+import { handleGetSession } from '../utils/Redis/getSession';
 
 
 const getTypeofmovements = async (req: Request, res: Response) => {
 
-    const { server, base } = req.session!.user;
-    const userId = req.id;
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    const { serverclientes, baseclientes, userId } = userFR;
+
 
     try {
-        const pool = await dbConnection(server, base);
+        const pool = await dbConnection(serverclientes, baseclientes);
 
         const request = pool.request();
         request.input('Id_Usuario', sql.VarChar(50), userId);

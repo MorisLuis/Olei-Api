@@ -23,7 +23,7 @@ import typeofmovementsRouter from "../routes/typeofmovementsRouter";
 class Server {
     public app: Application;
     private port: string;
-    public redis: Redis | null;  // Cambiado a public para exportar
+    public redis: Redis | null;
 
     private paths: {
         product: string,

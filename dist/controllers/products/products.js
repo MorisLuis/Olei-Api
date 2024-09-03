@@ -17,13 +17,19 @@ const database_1 = require("../../database");
 const products_1 = require("../../database/querys/products");
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const identifyBarcodeType_1 = require("../../utils/identifyBarcodeType");
+const getSession_1 = require("../../utils/Redis/getSession");
 const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const { Marca } = req.query;
     const Id_Usuario = req.id;
-    const { server, base } = req.session.user;
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { serverclientes, baseclientes } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(server, base);
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
@@ -38,7 +44,7 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             .query(products_1.productsQuerys.getProducById);
         const product = result === null || result === void 0 ? void 0 : result.recordset[0];
         //if (user?.SwImagenes) {
-        const baseSQL = base.trim().toLowerCase().split(',');
+        const baseSQL = baseclientes.trim().toLowerCase().split(',');
         if (baseSQL && baseSQL.length > 0) {
             const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
             const imageDB = formatImageDB[formatImageDB.length - 1];
@@ -85,12 +91,17 @@ const getTotalProducts = (req, res) => __awaiter(void 0, void 0, void 0, functio
 exports.getTotalProducts = getTotalProducts;
 const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { PageNumber, PageSize } = req.query;
-    const { server, base } = req.session.user;
-    const Id_Usuario = req.id;
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { serverclientes, baseclientes, userId } = userFR;
+    ///const Id_Usuario = req.id;
     try {
-        const pool = yield (0, database_1.dbConnection)(server, base);
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const userquery = database_1.querys.getAuthLimitData;
-        const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
+        const requestUser = yield pool.request().input('Id_Usuario', userId).query(userquery);
         const user = requestUser.recordset[0];
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -104,7 +115,7 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
             .query(query);
         const productsByStock = request.recordset;
         const { products } = yield getImagesFromProducts({
-            base,
+            base: baseclientes,
             products: productsByStock
         });
         res.json(products);
@@ -116,10 +127,15 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.getProductsByStock = getProductsByStock;
 const getTotalOfProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { server, base } = req.session.user;
     const Id_Usuario = req.id;
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { serverclientes, baseclientes } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(server, base);
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
@@ -142,12 +158,17 @@ const getTotalOfProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0
 exports.getTotalOfProductsByStock = getTotalOfProductsByStock;
 const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { CodBar, Codigo } = req.query;
-    const { server, base } = req.session.user;
-    const Id_Usuario = req.id;
+    //const Id_Usuario = req.id;
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { serverclientes, baseclientes, userId } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(server, base);
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const userquery = database_1.querys.getAuthLimitData;
-        const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
+        const requestUser = yield pool.request().input('Id_Usuario', userId).query(userquery);
         const user = requestUser.recordset[0];
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });

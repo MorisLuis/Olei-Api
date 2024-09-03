@@ -5,6 +5,7 @@ import CostosInterface from '../interface/costos';
 import { costosQuerys } from '../database/querys/costos';
 import { v4 as uuidv4 } from 'uuid';
 import { verifyIfIsEAN13 } from '../utils/identifyBarcodeType';
+import { handleGetSession } from '../utils/Redis/getSession';
 
 export default interface ExtendedCostosInterface extends CostosInterface {
     [key: string]: any;
@@ -13,10 +14,18 @@ export default interface ExtendedCostosInterface extends CostosInterface {
 
 const updateCostos = async (req: Request, res: Response) => {
 
-    const { server, base } = req.session!.user;
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetSession({ sessionId });
 
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    const { serverclientes, baseclientes } = userFR;
+
+    
     try {
-        const pool = await dbConnection(server, base);
+        const pool = await dbConnection(serverclientes, baseclientes);
         const transaction = new sql.Transaction(pool);
         await transaction.begin();
 

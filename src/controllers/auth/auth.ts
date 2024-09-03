@@ -7,6 +7,7 @@ import { MovementDetail, UserSessionInterface, ValidationResult } from '../../in
 import { redisClient } from '../../models/server';
 import { handleGetSession } from '../../utils/Redis/getSession';
 import { handleDeleteRedisSession } from '../../utils/Redis/deleteRedis';
+import { SessionData } from 'express-session';
 
 const loginDB = async (req: Request, res: Response) => {
 
@@ -42,7 +43,7 @@ const loginDB = async (req: Request, res: Response) => {
 
         const tokenDB = await generateJWTDB({ IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim() });
 
-        req.session!.user = {
+        (req.session as any).user = {
             serverclientes: cleanResult.ServidorSQL.trim(),
             baseclientes: cleanResult.BaseSQL.trim(),
             UsuarioSQL: cleanResult.UsuarioSQL.trim(),
@@ -50,7 +51,9 @@ const loginDB = async (req: Request, res: Response) => {
             IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim(),
             RazonSocial: cleanResult.RazonSocial.trim(),
             SwImagenes: cleanResult.SwImagenes,
-            Vigencia: cleanResult.Vigencia
+            Vigencia: cleanResult.Vigencia,
+            userId: "",
+            userRol: ""
         }
 
         return res.json({
@@ -69,14 +72,13 @@ const loginDB = async (req: Request, res: Response) => {
 const login = async (req: Request, res: Response) => {
 
     const sessionId = req.sessionID;
-    const sessionData = await redisClient?.get(`sess:${sessionId}`);
-    const session = JSON.parse(sessionData as string)
+    const { user: userFR } = await handleGetSession({ sessionId });
 
-    if (!session.user) {
+    if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
 
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = session.user as UserSessionInterface;
+    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
 
     // STEP 1 - LOGIN
     const mainPool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
@@ -112,8 +114,8 @@ const login = async (req: Request, res: Response) => {
 
         const token = await generateJWT({ id: Id_Usuario.trim() });
 
-        req.session!.user = {
-            ...req.session!.user,
+        (req.session as any).user = {
+            ...(req.session as any).user ,
             userId: Id_Usuario.trim(),
             userRol: User.Id_Perfil
         }
@@ -147,7 +149,6 @@ const renewDB = async (req: Request, res: Response) => {
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
 
-    console.log({userFR})
 
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
@@ -179,7 +180,7 @@ const renewDB = async (req: Request, res: Response) => {
             return res.status(401).json({ message: 'User data is neccesary' });
         };
 
-        req.session!.user = userRedis
+        (req.session as any).user = userRedis
 
         res.json({
             token,
@@ -244,11 +245,12 @@ const logoutUser = async (req: Request, res: Response) => {
 
     try {
 
-        req.session!.user = {
-            ...req.session!.user,
+        (req.session as any).user = {
+            ...(req.session as any).user,
             userId: undefined,
             userRol: undefined
-        }
+        };
+
 
         res.json({
             user: userFR
@@ -275,7 +277,7 @@ const logoutDB = async (req: Request, res: Response) => {
 
     try {
 
-        await handleDeleteRedisSession({sessionId})
+        await handleDeleteRedisSession({ sessionId })
 
         res.json({ ok: true })
 

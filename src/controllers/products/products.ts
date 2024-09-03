@@ -3,6 +3,8 @@ import { dbConnection, querys } from '../../database';
 import { productsQuerys } from '../../database/querys/products';
 import fetch from 'node-fetch';
 import { guessBarcodeType } from '../../utils/identifyBarcodeType';
+import { redisClient } from '../../models/server';
+import { handleGetSession } from '../../utils/Redis/getSession';
 
 
 const getProducById = async (req: Request, res: Response) => {
@@ -10,11 +12,19 @@ const getProducById = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { Marca } = req.query;
     const Id_Usuario = req.id;
-    const { server, base } = req.session!.user;
 
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    const { serverclientes, baseclientes } = userFR;
 
     try {
-        const pool = await dbConnection(server, base);
+        const pool = await dbConnection(serverclientes, baseclientes);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
@@ -34,7 +44,7 @@ const getProducById = async (req: Request, res: Response) => {
         const product = result?.recordset[0];
 
         //if (user?.SwImagenes) {
-        const baseSQL = base.trim().toLowerCase().split(',');
+        const baseSQL = baseclientes.trim().toLowerCase().split(',');
 
         if (baseSQL && baseSQL.length > 0) {
             const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
@@ -89,14 +99,23 @@ const getProductsByStock = async (req: Request, res: Response) => {
 
     const { PageNumber, PageSize } = req.query;
 
-    const { server, base } = req.session!.user;
-    const Id_Usuario = req.id;
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    const { serverclientes, baseclientes, userId } = userFR;
+
+    ///const Id_Usuario = req.id;
 
     try {
-        const pool = await dbConnection(server, base);
+        const pool = await dbConnection(serverclientes, baseclientes);
 
         const userquery = querys.getAuthLimitData;
-        const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
+        const requestUser: any = await pool.request().input('Id_Usuario', userId).query(userquery)
         const user = requestUser.recordset[0]
 
         if (!pool) {
@@ -116,7 +135,7 @@ const getProductsByStock = async (req: Request, res: Response) => {
         const productsByStock = request.recordset;
 
         const { products } = await getImagesFromProducts({
-            base,
+            base: baseclientes,
             products: productsByStock
         })
 
@@ -130,11 +149,19 @@ const getProductsByStock = async (req: Request, res: Response) => {
 
 const getTotalOfProductsByStock = async (req: Request, res: Response) => {
 
-    const { server, base } = req.session!.user;
     const Id_Usuario = req.id;
 
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    const { serverclientes, baseclientes } = userFR;
+
     try {
-        const pool = await dbConnection(server, base);
+        const pool = await dbConnection(serverclientes, baseclientes);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
@@ -164,14 +191,23 @@ const getTotalOfProductsByStock = async (req: Request, res: Response) => {
 const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
 
     const { CodBar, Codigo } = req.query;
-    const { server, base } = req.session!.user;
-    const Id_Usuario = req.id;
+    //const Id_Usuario = req.id;
+
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    const { serverclientes, baseclientes, userId } = userFR;
+
 
     try {
-        const pool = await dbConnection(server, base);
+        const pool = await dbConnection(serverclientes, baseclientes);
 
         const userquery = querys.getAuthLimitData;
-        const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
+        const requestUser: any = await pool.request().input('Id_Usuario', userId).query(userquery)
         const user = requestUser.recordset[0]
 
         if (!pool) {

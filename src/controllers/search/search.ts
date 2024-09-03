@@ -1,17 +1,27 @@
 import { Request, Response } from 'express'
 import { dbConnection, querys } from '../../database';
 import { productsQuerys } from '../../database/querys/products';
+import { handleGetSession } from '../../utils/Redis/getSession';
 
 
 const searchProductInventory = async (req: Request, res: Response) => {
 
     const { searchTerm } = req.query;
-    const { server, base } = req.session!.user;
+
+
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    const { serverclientes, baseclientes } = userFR;
 
     const Id_Usuario = req.id;
 
     try {
-        const pool = await dbConnection(server, base);
+        const pool = await dbConnection(serverclientes, baseclientes);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)

@@ -4,14 +4,23 @@ import sql from 'mssql';
 import { inventoryQuerys } from "../database/querys/inventory";
 import { currentTime } from "../utils/currentTime";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
+import { handleGetSession } from "../utils/Redis/getSession";
 
 const postInventory = async (req: Request, res: Response) => {
 
-    const { server, base } = req.session!.user;
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    const { serverclientes, baseclientes } = userFR;
+
     const Id_Usuario = req.id;
 
     try {
-        const pool = await dbConnection(server, base);
+        const pool = await dbConnection(serverclientes, baseclientes);
         const { inventoryDetails, typeOfMovement } = req.body;
         const Accion = typeOfMovement?.Accion;
         const Id_TipoMovInv = typeOfMovement?.Id_TipoMovInv;

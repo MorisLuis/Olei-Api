@@ -1,9 +1,9 @@
+// src/types/session.d.ts
 import session from "express-session";
+import { UserSessionInterface } from "../interface/user";
 
-export = session;
-
-declare module 'express-session' {
-    export interface SessionData {
-        user?: UserSessionInterface; // Define aquí el tipo correcto para tu propiedad 'user'
+declare module "express-session" {
+    interface SessionData {
+        user?: UserSessionInterface
     }
 }

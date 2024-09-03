@@ -18,11 +18,17 @@ const mssql_1 = __importDefault(require("mssql"));
 const costos_1 = require("../database/querys/costos");
 const uuid_1 = require("uuid");
 const identifyBarcodeType_1 = require("../utils/identifyBarcodeType");
+const getSession_1 = require("../utils/Redis/getSession");
 const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const { server, base } = req.session.user;
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { serverclientes, baseclientes } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(server, base);
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
         const transaction = new mssql_1.default.Transaction(pool);
         yield transaction.begin();
         if (!pool) {
