@@ -104,7 +104,8 @@ class Server {
                     secure: process.env.ENVIRONMENT === "production" ? true : 'auto',
                     httpOnly: true,
                     maxAge: parseFloat(process.env.REDIS_SESSION_EXPIRATION as string),
-                    sameSite: process.env.ENVIRONMENT === "production" ? "none" : 'lax'
+                    //sameSite: process.env.ENVIRONMENT === "production" ? "none" : 'lax'
+                    sameSite: 'lax'
                 }
             }));
         } else {
