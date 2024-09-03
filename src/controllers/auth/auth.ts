@@ -4,10 +4,8 @@ import { closeDbConnection, dbConnection, querys } from '../../database';
 import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
 import config from '../../config';
 import { MovementDetail, UserSessionInterface, ValidationResult } from '../../interface/user';
-import { redisClient } from '../../models/server';
 import { handleGetSession } from '../../utils/Redis/getSession';
 import { handleDeleteRedisSession } from '../../utils/Redis/deleteRedis';
-import { SessionData } from 'express-session';
 
 const loginDB = async (req: Request, res: Response) => {
 
@@ -143,6 +141,8 @@ const login = async (req: Request, res: Response) => {
 
 const renewDB = async (req: Request, res: Response) => {
 
+    console.log("renewDB")
+
     // Get session from REDIS.
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
@@ -192,6 +192,7 @@ const renewDB = async (req: Request, res: Response) => {
 }
 
 const renewLogin = async (req: Request, res: Response) => {
+    console.log("renewLogin")
 
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
@@ -235,6 +236,7 @@ const renewLogin = async (req: Request, res: Response) => {
 
 const logoutUser = async (req: Request, res: Response) => {
     const sessionId = req.sessionID;
+
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {

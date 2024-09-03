@@ -93,7 +93,7 @@ class Server {
                 resave: false,
                 saveUninitialized: false,
                 cookie: {
-                    secure: process.env.ENVIRONMENT === "production" ? true : 'auto',
+                    secure: 'auto',
                     httpOnly: true,
                     maxAge: oneYearInMilliseconds, // MaxAge en milisegundos para la cookie
                     sameSite: 'lax'
