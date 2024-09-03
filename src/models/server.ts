@@ -74,7 +74,7 @@ class Server {
     configureRedis() {
         this.redis = new Redis({
             host: process.env.REDIS_HOST || '127.0.0.1',
-            port: parseFloat(process.env.REDIS_PORT as string) || 6379,
+            port: Number(process.env.REDIS_PORT as string) || 6379,
             password: process.env.REDIS_PASSWORD
         });
 
@@ -89,11 +89,15 @@ class Server {
 
     configureSessions() {
         if (this.redis) {
+            // Define el TTL y maxAge en segundos y milisegundos
+            const oneYearInSeconds = 31536000; // 1 año en segundos
+            const oneYearInMilliseconds = oneYearInSeconds * 1000; // 1 año en milisegundos
+    
             const store = new RedisStore({
                 client: this.redis,
-                ttl: parseFloat(process.env.REDIS_SESSION_EXPIRATION as string),
-            }) as unknown as Store;
-
+                ttl: oneYearInSeconds,
+            }) as Store;
+    
             this.app.use(session({
                 secret: process.env.REDIS_SECRET as string,
                 name: 'sid',
@@ -103,8 +107,7 @@ class Server {
                 cookie: {
                     secure: process.env.ENVIRONMENT === "production" ? true : 'auto',
                     httpOnly: true,
-                    maxAge: parseFloat(process.env.REDIS_SESSION_EXPIRATION as string),
-                    //sameSite: process.env.ENVIRONMENT === "production" ? "none" : 'lax'
+                    maxAge: oneYearInMilliseconds, // MaxAge en milisegundos para la cookie
                     sameSite: 'lax'
                 }
             }));
@@ -112,6 +115,7 @@ class Server {
             console.error('Redis no está configurado, las sesiones no se almacenarán en Redis');
         }
     }
+    
 
     middlewares() {
         this.app.use(cors());

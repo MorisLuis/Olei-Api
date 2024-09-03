@@ -67,7 +67,7 @@ class Server {
     configureRedis() {
         this.redis = new ioredis_1.default({
             host: process.env.REDIS_HOST || '127.0.0.1',
-            port: parseFloat(process.env.REDIS_PORT) || 6379,
+            port: Number(process.env.REDIS_PORT) || 6379,
             password: process.env.REDIS_PASSWORD
         });
         this.redis.on('connect', () => {
@@ -79,9 +79,12 @@ class Server {
     }
     configureSessions() {
         if (this.redis) {
+            // Define el TTL y maxAge en segundos y milisegundos
+            const oneYearInSeconds = 31536000; // 1 año en segundos
+            const oneYearInMilliseconds = oneYearInSeconds * 1000; // 1 año en milisegundos
             const store = new connect_redis_1.default({
                 client: this.redis,
-                ttl: parseFloat(process.env.REDIS_SESSION_EXPIRATION),
+                ttl: oneYearInSeconds,
             });
             this.app.use((0, express_session_1.default)({
                 secret: process.env.REDIS_SECRET,
@@ -92,8 +95,7 @@ class Server {
                 cookie: {
                     secure: process.env.ENVIRONMENT === "production" ? true : 'auto',
                     httpOnly: true,
-                    maxAge: parseFloat(process.env.REDIS_SESSION_EXPIRATION),
-                    //sameSite: process.env.ENVIRONMENT === "production" ? "none" : 'lax'
+                    maxAge: oneYearInMilliseconds, // MaxAge en milisegundos para la cookie
                     sameSite: 'lax'
                 }
             }));

@@ -52,8 +52,8 @@ const loginDB = async (req: Request, res: Response) => {
             RazonSocial: cleanResult.RazonSocial.trim(),
             SwImagenes: cleanResult.SwImagenes,
             Vigencia: cleanResult.Vigencia,
-            userId: "",
-            userRol: ""
+            userId: undefined,
+            userRol: undefined
         }
 
         return res.json({
@@ -142,8 +142,6 @@ const login = async (req: Request, res: Response) => {
 };
 
 const renewDB = async (req: Request, res: Response) => {
-
-    console.log("renewDB");
 
     // Get session from REDIS.
     const sessionId = req.sessionID;
@@ -261,7 +259,6 @@ const logoutUser = async (req: Request, res: Response) => {
         res.status(500).send(error.message);
     }
 }
-
 
 const logoutDB = async (req: Request, res: Response) => {
     const sessionId = req.sessionID;

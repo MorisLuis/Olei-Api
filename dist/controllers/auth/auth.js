@@ -53,8 +53,8 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             RazonSocial: cleanResult.RazonSocial.trim(),
             SwImagenes: cleanResult.SwImagenes,
             Vigencia: cleanResult.Vigencia,
-            userId: "",
-            userRol: ""
+            userId: undefined,
+            userRol: undefined
         };
         return res.json({
             tokenDB,
@@ -123,7 +123,6 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.login = login;
 const renewDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("renewDB");
     // Get session from REDIS.
     const sessionId = req.sessionID;
     const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
