@@ -225,6 +225,7 @@ const logoutDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     try {
         yield (0, deleteRedis_1.handleDeleteRedisSession)({ sessionId });
+        yield (0, database_1.closeDbConnection)();
         res.json({ ok: true });
     }
     catch (error) {

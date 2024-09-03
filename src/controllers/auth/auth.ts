@@ -276,7 +276,9 @@ const logoutDB = async (req: Request, res: Response) => {
 
     try {
 
-        await handleDeleteRedisSession({ sessionId })
+        await handleDeleteRedisSession({ sessionId });
+
+        await closeDbConnection()
 
         res.json({ ok: true })
 
