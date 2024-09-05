@@ -8,7 +8,6 @@ const searchProductInventory = async (req: Request, res: Response) => {
 
     const { searchTerm } = req.query;
 
-
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
 
@@ -16,12 +15,12 @@ const searchProductInventory = async (req: Request, res: Response) => {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
 
-    const { serverclientes, baseclientes } = userFR;
+    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL} = userFR;
 
     const Id_Usuario = req.id;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes);
+        const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)

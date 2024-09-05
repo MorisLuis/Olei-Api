@@ -83,6 +83,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.status(500).json({ error: 'Error connecting to the main database' });
     }
     try {
+        const result = yield mainPool.request().query("SELECT *   FROM [dbo].[USUARIOS]");
         // Search for the user in the database using their email.
         const { Id_Usuario, password } = req.body;
         if (Id_Usuario.trim() === "" || password.trim() === "") {
@@ -157,6 +158,9 @@ const renewDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     catch (error) {
         res.status(500).send(error.message);
         console.log({ error });
+    }
+    finally {
+        yield (0, database_1.closeDbConnection)();
     }
 });
 exports.renewDB = renewDB;

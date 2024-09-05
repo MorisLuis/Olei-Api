@@ -21,11 +21,10 @@ const updateCostos = async (req: Request, res: Response) => {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
 
-    const { serverclientes, baseclientes } = userFR;
+    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL} = userFR;
 
-    
     try {
-        const pool = await dbConnection(serverclientes, baseclientes);
+        const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
         const transaction = new sql.Transaction(pool);
         await transaction.begin();
 

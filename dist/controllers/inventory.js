@@ -25,10 +25,10 @@ const postInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
-    const { serverclientes, baseclientes } = userFR;
+    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     const Id_Usuario = req.id;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
         const { inventoryDetails, typeOfMovement } = req.body;
         const Accion = typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Accion;
         const Id_TipoMovInv = typeOfMovement === null || typeOfMovement === void 0 ? void 0 : typeOfMovement.Id_TipoMovInv;

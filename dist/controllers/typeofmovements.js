@@ -22,9 +22,9 @@ const getTypeofmovements = (req, res) => __awaiter(void 0, void 0, void 0, funct
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
-    const { serverclientes, baseclientes, userId } = userFR;
+    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL, userId } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
         const request = pool.request();
         request.input('Id_Usuario', mssql_1.default.VarChar(50), userId);
         const resultData = yield request.execute('fn_GetTypeOfMovement');

@@ -13,11 +13,11 @@ const getTypeofmovements = async (req: Request, res: Response) => {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
 
-    const { serverclientes, baseclientes, userId } = userFR;
+    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL, userId } = userFR;
 
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes);
+        const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
 
         const request = pool.request();
         request.input('Id_Usuario', sql.VarChar(50), userId);

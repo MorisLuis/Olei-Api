@@ -3,7 +3,6 @@ import { dbConnection, querys } from '../../database';
 import { productsQuerys } from '../../database/querys/products';
 import fetch from 'node-fetch';
 import { guessBarcodeType } from '../../utils/identifyBarcodeType';
-import { redisClient } from '../../models/server';
 import { handleGetSession } from '../../utils/Redis/getSession';
 
 
@@ -21,10 +20,10 @@ const getProducById = async (req: Request, res: Response) => {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
 
-    const { serverclientes, baseclientes } = userFR;
+    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL} = userFR;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes);
+        const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
@@ -37,13 +36,12 @@ const getProducById = async (req: Request, res: Response) => {
         const result = await pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)
-            .input("ListaPrecios", user.Id_ListPre)
+            .input("ListaPrecios",  user.Id_ListPre)
             .input("Almacen", user.Id_Almacen)
             .query(productsQuerys.getProducById);
 
         const product = result?.recordset[0];
 
-        //if (user?.SwImagenes) {
         const baseSQL = baseclientes.trim().toLowerCase().split(',');
 
         if (baseSQL && baseSQL.length > 0) {
@@ -90,7 +88,15 @@ const getProducById = async (req: Request, res: Response) => {
 }
 
 const getTotalProducts = async (req: Request, res: Response) => {
-    const pool = await dbConnection();
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL} = userFR;
+    const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
     const result = await pool?.request().query(productsQuerys.getTotalProducts);
     res.json(result?.recordset[0][""]);
 };
@@ -98,21 +104,17 @@ const getTotalProducts = async (req: Request, res: Response) => {
 const getProductsByStock = async (req: Request, res: Response) => {
 
     const { PageNumber, PageSize } = req.query;
-
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
-
 
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
 
-    const { serverclientes, baseclientes, userId } = userFR;
-
-    ///const Id_Usuario = req.id;
+    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL} = userFR;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes);
+        const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', userId).query(userquery)
@@ -123,13 +125,11 @@ const getProductsByStock = async (req: Request, res: Response) => {
         }
 
         let query = productsQuerys.getAllProductsByStock;
-
         const request = await pool.request()
             .input('PageSize', Number(PageSize))
             .input('PageNumber', PageNumber)
             .input('Id_ListaPrecios', user.Id_ListPre)
             .input('Almacen', user.Id_Almacen)
-
             .query(query);
 
         const productsByStock = request.recordset;
@@ -145,7 +145,7 @@ const getProductsByStock = async (req: Request, res: Response) => {
         console.log({ error })
         res.status(500).json({ error: error.message });
     }
-}
+};
 
 const getTotalOfProductsByStock = async (req: Request, res: Response) => {
 
@@ -158,10 +158,10 @@ const getTotalOfProductsByStock = async (req: Request, res: Response) => {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
 
-    const { serverclientes, baseclientes } = userFR;
+    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes);
+        const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
@@ -174,7 +174,7 @@ const getTotalOfProductsByStock = async (req: Request, res: Response) => {
         let query = productsQuerys.getTotalOfAllProductsByStock;
 
         const request = await pool.request()
-            .input('Id_ListaPrecios', user.Id_ListPre)
+            .input('Id_ListaPrecios',  user.Id_ListPre)
             .input('Almacen', user.Id_Almacen)
             .query(query);
 
@@ -186,13 +186,11 @@ const getTotalOfProductsByStock = async (req: Request, res: Response) => {
         console.log({ error })
         res.status(500).json({ error: error.message });
     }
-}
+};
 
 const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
 
     const { CodBar, Codigo } = req.query;
-    //const Id_Usuario = req.id;
-
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
 
@@ -200,11 +198,11 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
 
-    const { serverclientes, baseclientes, userId } = userFR;
+    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL} = userFR;
 
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes);
+        const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', userId).query(userquery)
@@ -247,7 +245,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
         console.log({ error })
         return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud / getProductByStockAndCodeBar' });
     }
-}
+};
 
 
 // Utils

@@ -1,8 +1,6 @@
 import sql from "mssql";
 import config from "../config";
 
-
-
 let pool: sql.ConnectionPool | null = null;
 
 export const dbConnection = async (server?: string, database?: string, password?: string, user?: string) => {
@@ -14,10 +12,9 @@ export const dbConnection = async (server?: string, database?: string, password?
             database: database || config.dbDatabase,
             options: {
                 encrypt: true,
-                trustServerCertificate: true,
+                trustServerCertificate: true
             },
         };
-
         try {
             pool = await sql.connect(dbConfig);
         } catch (error: any) {

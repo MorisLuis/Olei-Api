@@ -20,10 +20,10 @@ const searchProductInventory = (req, res) => __awaiter(void 0, void 0, void 0, f
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
-    const { serverclientes, baseclientes } = userFR;
+    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
     const Id_Usuario = req.id;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];

@@ -86,6 +86,9 @@ const login = async (req: Request, res: Response) => {
     }
 
     try {
+
+        const result = await mainPool.request().query("SELECT *   FROM [dbo].[USUARIOS]");
+
         // Search for the user in the database using their email.
         const { Id_Usuario, password } = req.body;
 
@@ -188,6 +191,8 @@ const renewDB = async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(500).send(error.message);
         console.log({ error })
+    } finally {
+        await closeDbConnection()
     }
 }
 

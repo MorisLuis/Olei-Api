@@ -26,9 +26,9 @@ const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
-    const { serverclientes, baseclientes } = userFR;
+    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes);
+        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
         const transaction = new mssql_1.default.Transaction(pool);
         yield transaction.begin();
         if (!pool) {

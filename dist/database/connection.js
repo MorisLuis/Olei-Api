@@ -25,7 +25,7 @@ const dbConnection = (server, database, password, user) => __awaiter(void 0, voi
             database: database || config_1.default.dbDatabase,
             options: {
                 encrypt: true,
-                trustServerCertificate: true,
+                trustServerCertificate: true
             },
         };
         try {
