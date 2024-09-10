@@ -11,11 +11,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUsers = void 0;
 const database_1 = require("../database");
+const getSession_1 = require("../utils/Redis/getSession");
 const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { Serverweb, Baseweb } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
+        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
         const result = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(database_1.querys.getAllUsers));
         const users = result === null || result === void 0 ? void 0 : result.recordset;
         const total = result === null || result === void 0 ? void 0 : result.rowsAffected[0];

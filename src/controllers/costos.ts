@@ -9,7 +9,6 @@ import { handleGetSession } from '../utils/Redis/getSession';
 
 export default interface ExtendedCostosInterface extends CostosInterface {
     [key: string]: any;
-    // Puedes agregar nuevas propiedades aquí, si es necesario
 }
 
 const updateCostos = async (req: Request, res: Response) => {

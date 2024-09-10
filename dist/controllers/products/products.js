@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProductByStockAndCodeBar = exports.getTotalOfProductsByStock = exports.getProductsByStock = exports.getTotalProducts = exports.getProducById = void 0;
+exports.getProductByStockAndCodeBar = exports.getTotalOfProductsByStock = exports.getProductsByStock = exports.getProducById = void 0;
 const database_1 = require("../../database");
 const products_1 = require("../../database/querys/products");
 const node_fetch_1 = __importDefault(require("node-fetch"));
@@ -82,18 +82,19 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.getProducById = getProducById;
-const getTotalProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+/* const getTotalProducts = async (req: Request, res: Response) => {
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    const { user: userFR } = await handleGetSession({ sessionId });
+
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
-    const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
-    const result = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(products_1.productsQuerys.getTotalProducts));
-    res.json(result === null || result === void 0 ? void 0 : result.recordset[0][""]);
-});
-exports.getTotalProducts = getTotalProducts;
+
+    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL} = userFR;
+    const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+    const result = await pool?.request().query(productsQuerys.getTotalProducts);
+    res.json(result?.recordset[0][""]);
+}; */
 const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { PageNumber, PageSize } = req.query;
     const sessionId = req.sessionID;

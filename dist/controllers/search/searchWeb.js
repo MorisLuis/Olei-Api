@@ -16,33 +16,21 @@ exports.searchClient = exports.searchProduct = void 0;
 const database_1 = require("../../database");
 const mssql_1 = __importDefault(require("mssql"));
 const products_1 = require("../../database/querys/products");
-const storageWeb_1 = require("../../Storage/storageWeb");
+const getSession_1 = require("../../utils/Redis/getSession");
 const searchProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { nombre, familia, codigo, enStock, marca } = req.query;
-    // Get the user's almacen (storage) ID, default to 1 if not available
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
-    if (!clientid)
-        return;
-    // Get the user information from shared data, including the user's warehouse (Almacen)
-    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseWeb.trim());
-    const currentClient = (0, storageWeb_1.getClientData)(`${baseWeb.trim()}_${clientid}`);
-    let userAlmacen;
-    let userListPrice;
-    if (currentClient) {
-        userAlmacen = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_Almacen;
-        userListPrice = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_ListPre;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
     }
-    else {
-        userAlmacen = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_Almacen;
-        userListPrice = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_ListPre;
-    }
+    const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, Id_Almacen } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
+        const { nombre, familia, codigo, enStock, marca } = req.query;
+        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
         // Define query parameters for the SQL query
         const params = {
-            ListaPrecios: userListPrice,
+            ListaPrecios: Id_ListPre,
         };
         if (!pool) {
             return res.status(500).json({ error: 'Unable to establish a connection to the database' });
@@ -64,7 +52,7 @@ const searchProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 if (marca) {
                     query += ` JOIN [OLEIDB1].[dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca`;
                 }
-                query += ` WHERE (${whereClause}) AND PR.Id_ListaPrecios = 1 AND E.Id_Almacen = ${userAlmacen}`;
+                query += ` WHERE (${whereClause}) AND PR.Id_ListaPrecios = 1 AND E.Id_Almacen = ${Id_Almacen}`;
                 if (codigo) {
                     query += ` AND (LOWER(P.Codigo) LIKE '%' + LOWER('${codigo}') + '%')`;
                 }
@@ -80,14 +68,14 @@ const searchProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             }
             else {
                 // If no specific parameters are provided, apply the WHERE clause with search terms and default filters
-                query += ` WHERE (${whereClause}) AND PR.Id_ListaPrecios = @ListaPrecios AND E.Id_Almacen = ${userAlmacen}`;
+                query += ` WHERE (${whereClause}) AND PR.Id_ListaPrecios = @ListaPrecios AND E.Id_Almacen = ${Id_Almacen}`;
             }
             // Dont show products without stock
-            if (!(currentUser === null || currentUser === void 0 ? void 0 : currentUser.SwSinStock)) {
+            if (!SwSinStock) {
                 query += ' AND E.Existencia > 0 ';
             }
             // Dont show products without price
-            if (!(currentUser === null || currentUser === void 0 ? void 0 : currentUser.SwsinPrecio)) {
+            if (!SwsinPrecio) {
                 query += 'AND PR.Precio > 0';
             }
         }
@@ -115,11 +103,16 @@ const searchProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 });
 exports.searchProduct = searchProduct;
 const searchClient = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { term } = req.query;
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { Serverweb, Baseweb } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
+        const { term } = req.query;
+        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
             return res.status(500).json({ error: 'Unable to establish a connection to the database' });
         }

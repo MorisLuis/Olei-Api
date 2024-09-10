@@ -29,7 +29,7 @@ export default interface UserInterface {
     BaseSQL: string;
 
     // Represents whether the user is an employee or a direct client. (1) Represent client and (2) represent employee
-    TipoUsuario: number;
+    //TipoUsuario: number;
 
     // Represents some privileges associated with the user.
     PrivilegioTipoCliente: number;
@@ -101,4 +101,20 @@ export interface UserSessionInterface {
 
     userId?: string;
     userRol?: string;
+}
+
+export interface UserWebSessionInterface {
+    Id: string,
+    Nombre: string,
+    TipoUsuario: string,
+    Serverweb: string,
+    Baseweb: string,
+    Id_Cliente: number,
+    Id_ListPre: number,
+    Vigencia: string,
+    SwImagenes: number, 
+    SwSinStock: number, 
+    SwsinPrecio: number, 
+    TipoDocOO: number,
+    Id_Almacen: number
 }

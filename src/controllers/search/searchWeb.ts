@@ -2,37 +2,28 @@ import { Request, Response } from 'express'
 import { closeDbConnection, dbConnection, querys } from '../../database';
 import sql from 'mssql';
 import { productsQuerys } from '../../database/querys/products';
-import { getClientData, getUserDataWeb } from '../../Storage/storageWeb';
+import { handleGetWebSession } from '../../utils/Redis/getSession';
 
 const searchProduct = async (req: Request, res: Response) => {
-    const { nombre, familia, codigo, enStock, marca } = req.query;
 
-    // Get the user's almacen (storage) ID, default to 1 if not available
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetWebSession({ sessionId });
 
-    if(!clientid) return;
-    // Get the user information from shared data, including the user's warehouse (Almacen)
-    const currentUser = getUserDataWeb(baseWeb.trim())
-    const currentClient = getClientData(`${baseWeb.trim()}_${clientid}`)
-
-    let userAlmacen;
-    let userListPrice;
-    if(currentClient){
-        userAlmacen = currentClient?.Id_Almacen;
-        userListPrice = currentClient?.Id_ListPre;
-    } else {
-        userAlmacen = currentUser?.Id_Almacen;
-        userListPrice = currentUser?.Id_ListPre;
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
     }
 
+    const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, Id_Almacen } = userFR;
+
+
     try {
-        const pool = await dbConnection(serverWeb, baseWeb);
+        const { nombre, familia, codigo, enStock, marca } = req.query;
+        const pool = await dbConnection(Serverweb, Baseweb);
 
         // Define query parameters for the SQL query
         const params = {
-            ListaPrecios: userListPrice,
+            ListaPrecios: Id_ListPre,
         };
 
 
@@ -62,7 +53,7 @@ const searchProduct = async (req: Request, res: Response) => {
                     query += ` JOIN [OLEIDB1].[dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca`;
                 }
 
-                query += ` WHERE (${whereClause}) AND PR.Id_ListaPrecios = 1 AND E.Id_Almacen = ${userAlmacen}`;
+                query += ` WHERE (${whereClause}) AND PR.Id_ListaPrecios = 1 AND E.Id_Almacen = ${Id_Almacen}`;
 
                 if (codigo) {
                     query += ` AND (LOWER(P.Codigo) LIKE '%' + LOWER('${codigo}') + '%')`;
@@ -81,16 +72,16 @@ const searchProduct = async (req: Request, res: Response) => {
                 }
             } else {
                 // If no specific parameters are provided, apply the WHERE clause with search terms and default filters
-                query += ` WHERE (${whereClause}) AND PR.Id_ListaPrecios = @ListaPrecios AND E.Id_Almacen = ${userAlmacen}`;
+                query += ` WHERE (${whereClause}) AND PR.Id_ListaPrecios = @ListaPrecios AND E.Id_Almacen = ${Id_Almacen}`;
             }
 
             // Dont show products without stock
-            if (!currentUser?.SwSinStock) {
+            if (!SwSinStock) {
                 query += ' AND E.Existencia > 0 ';
             }
 
             // Dont show products without price
-            if (!currentUser?.SwsinPrecio) {
+            if (!SwsinPrecio) {
                 query += 'AND PR.Precio > 0'
             }
         }
@@ -121,12 +112,19 @@ const searchProduct = async (req: Request, res: Response) => {
 
 const searchClient = async (req: Request, res: Response) => {
 
-    const { term } = req.query
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetWebSession({ sessionId });
+
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    const { Serverweb, Baseweb } = userFR;
 
     try {
-        const pool = await dbConnection(serverWeb, baseWeb);
+        const { term } = req.query
+        const pool = await dbConnection(Serverweb, Baseweb);
 
         if (!pool) {
             return res.status(500).json({ error: 'Unable to establish a connection to the database' });

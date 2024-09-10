@@ -81,12 +81,8 @@ const validateJWTWeb = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
             if (err) {
                 return res.status(500).json({ success: false, message: 'Failed to authenticate token' });
             }
-            const { serverweb, baseweb, id, rol, clientid } = decoded;
-            req.id = id;
-            req.rol = rol;
-            req.serverweb = serverweb;
-            req.baseweb = baseweb;
-            req.clientid = clientid;
+            const { Id } = decoded;
+            req.Id = Id;
             next();
         });
     }

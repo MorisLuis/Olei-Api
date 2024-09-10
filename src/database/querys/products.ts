@@ -1,6 +1,6 @@
 export const productsQuerys = {
 
-    // Get all products ***
+    // Get all products.
     getAllProducts: `
         SELECT DISTINCT
         TRIM(P.Descripcion) AS Descripcion,

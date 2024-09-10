@@ -17,35 +17,29 @@ const database_1 = require("../../database");
 const products_1 = require("../../database/querys/products");
 const mssql_1 = __importDefault(require("mssql"));
 const node_fetch_1 = __importDefault(require("node-fetch"));
-const storageWeb_1 = require("../../Storage/storageWeb");
+const getSession_1 = require("../../utils/Redis/getSession");
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
-    // Get the user information from shared data, including the user's warehouse (Almacen)
-    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseWeb.trim());
-    const currentClient = (0, storageWeb_1.getClientData)(`${baseWeb.trim()}_${clientid}`);
-    let userAlmacen;
-    let userListPrice;
-    if (currentClient) {
-        userAlmacen = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_Almacen;
-        userListPrice = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_ListPre;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    console.log({ sessionId });
+    console.log({ SsessionInproduct: req.session });
+    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
     }
-    else {
-        userAlmacen = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_Almacen;
-        userListPrice = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_ListPre;
-    }
+    const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
+    console.log({ Serverweb, Baseweb });
     try {
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
+        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
+        const { nombre, marca, familia, folio, enStock, page, limit } = req.query;
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
         // Define query parameters for the SQL query
         const params = {
-            ListaPrecios: userListPrice, // Default ListaPrecios value
-            Almacen: userAlmacen, // User's warehouse
+            ListaPrecios: Id_ListPre, // Default ListaPrecios value
+            Almacen: Id_Almacen, // User's warehouse
         };
         let query = products_1.productsQuerys.getAllProducts;
         if (nombre) {
@@ -64,11 +58,11 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             query += ' AND E.Existencia > 0';
         }
         // Dont show products without stock
-        if (!(currentUser === null || currentUser === void 0 ? void 0 : currentUser.SwSinStock)) {
+        if (!SwSinStock) {
             query += ' AND E.Existencia > 0';
         }
         // Dont show products without price
-        if (!(currentUser === null || currentUser === void 0 ? void 0 : currentUser.SwsinPrecio)) {
+        if (!SwsinPrecio) {
             query += 'AND PR.Precio > 0';
         }
         let paginationQuery = '';
@@ -90,11 +84,11 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const finalQuery = paginationQuery || query;
         // Execute the parameterized query
         const products = yield executeQuery(pool, finalQuery, params);
-        if (currentUser === null || currentUser === void 0 ? void 0 : currentUser.SwImagenes) {
+        if (SwImagenes) {
             // Ahora, para cada producto, agrega la propiedad "imagen"
             for (const product of products) {
                 // Supongamos que la URL de la imagen se basa en la propiedad "Codigo" del producto
-                const baseSQL = baseWeb.trim().toLowerCase().split(',');
+                const baseSQL = Baseweb.trim().toLowerCase().split(',');
                 if (baseSQL && baseSQL.length > 0) {
                     const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
                     const imageDB = formatImageDB[formatImageDB.length - 1];
@@ -128,41 +122,29 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 });
 exports.getProducts = getProducts;
 const getProducByIdWeb = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    const { Marca } = req.query;
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
-    // Get the user information from shared data, including the user's warehouse (Almacen)
-    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseWeb.trim());
-    const currentClient = (0, storageWeb_1.getClientData)(`${baseWeb.trim()}_${clientid}`);
-    let userAlmacen;
-    let userListPrice;
-    if (currentClient) {
-        userAlmacen = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_Almacen;
-        userListPrice = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_ListPre;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
     }
-    else {
-        userAlmacen = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_Almacen;
-        userListPrice = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_ListPre;
-    }
+    const { Serverweb, Baseweb, Id_ListPre, Id_Almacen } = userFR;
     try {
-        if (!currentUser && !currentClient) {
-            return res.status(500).json({ error: 'No se pudo obtener el usuario actual' });
-        }
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
+        const { id } = req.params;
+        const { Marca } = req.query;
+        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
         const result = yield pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)
-            .input("ListaPrecios", userListPrice)
-            .input("Almacen", userAlmacen)
+            .input("ListaPrecios", Id_ListPre)
+            .input("Almacen", Id_Almacen)
             .query(products_1.productsQuerys.getProducById);
         const product = result === null || result === void 0 ? void 0 : result.recordset[0];
         //if (user?.SwImagenes) {
-        const baseSQL = baseWeb.trim().toLowerCase().split(',');
+        const baseSQL = Baseweb.trim().toLowerCase().split(',');
         if (baseSQL && baseSQL.length > 0) {
             const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
             const imageDB = formatImageDB[formatImageDB.length - 1];
@@ -205,10 +187,16 @@ const getProducByIdWeb = (req, res) => __awaiter(void 0, void 0, void 0, functio
 });
 exports.getProducByIdWeb = getProducByIdWeb;
 const getTotalProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    console.log({ sessionId });
+    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { Serverweb, Baseweb } = userFR;
     try {
-        const serverWeb = req.serverweb;
-        const baseWeb = req.baseweb;
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
+        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
         const result = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(products_1.productsQuerys.getTotalProducts));
         res.json(result === null || result === void 0 ? void 0 : result.recordset[0][""]);
     }

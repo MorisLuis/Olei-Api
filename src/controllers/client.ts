@@ -1,18 +1,23 @@
 import { Request, Response } from 'express';
 import { generateWebJWT } from '../helpers/generate-jwt';
-import { setClientData } from '../Storage/storageWeb';
 import { closeDbConnection } from '../database';
+import { handleGetWebSession } from '../utils/Redis/getSession';
 
 const selectClient = async (req: Request, res: Response) => {
 
-    const baseweb = req.baseweb;
-    const serverweb = req.serverweb;
-    const id = req.id;
-    const rol = req.rol;
 
-    const { Id_Cliente, Id_Almacen, Id_ListPre } = req.body;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetWebSession({ sessionId });
+
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+
+    const { Id } = userFR;
 
     try {
+        const { Id_Cliente, Id_Almacen, Id_ListPre } = req.body;
 
         const client = {
             Id_Almacen: Id_Almacen,
@@ -21,15 +26,7 @@ const selectClient = async (req: Request, res: Response) => {
             IsEmploye: true
         }
 
-        setClientData(`${baseweb}_${Id_Cliente}`, client)
-
-        const token = await generateWebJWT({
-            id,
-            rol,
-            serverweb,
-            baseweb,
-            clientid: Id_Cliente
-        });
+        const token = await generateWebJWT({ Id: Id });
 
         return res.json({
             client,
@@ -37,7 +34,7 @@ const selectClient = async (req: Request, res: Response) => {
         })
 
     } catch (error: any) {
-        console.log({error})
+        console.log({ error })
         return res.status(500).send(error.message);
     } finally {
         await closeDbConnection()

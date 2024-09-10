@@ -11,11 +11,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTables = void 0;
 const database_1 = require("../database");
+const getSession_1 = require("../utils/Redis/getSession");
 const getTables = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { Serverweb, Baseweb } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
+        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
         const FamiliasResult = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(database_1.querys.getFamilias));
         const Familias = FamiliasResult === null || FamiliasResult === void 0 ? void 0 : FamiliasResult.recordset.map(familia => familia.Nombre);
         const MarcaResult = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(database_1.querys.getMarcas));

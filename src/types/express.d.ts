@@ -4,13 +4,11 @@ declare global {
   namespace Express {
     interface Request {
       IdUsuarioOLEI: string;
+      id: string;
 
       // web properties
-      id: string;
-      rol: number;
-      serverweb: string;
-      baseweb: string;
-      clientid: number;
+      Id: string;
+
     }
   }
 }

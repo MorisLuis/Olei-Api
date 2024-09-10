@@ -16,35 +16,18 @@ exports.getOrderDetails = exports.postOrderDetails = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const orders_1 = require("../database/querys/orders");
-const storageWeb_1 = require("../Storage/storageWeb");
+const getSession_1 = require("../utils/Redis/getSession");
 const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
-    // Get the user information from shared data, including the user's warehouse (Almacen)
-    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseWeb.trim());
-    const currentClient = (0, storageWeb_1.getClientData)(`${baseWeb.trim()}_${clientid}`);
-    let userAlmacen;
-    let userListPrice;
-    if (currentClient === null || currentClient === void 0 ? void 0 : currentClient.IsEmploye) {
-        userAlmacen = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_Almacen;
-        userListPrice = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_ListPre;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
     }
-    else {
-        userAlmacen = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_Almacen;
-        userListPrice = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_ListPre;
-    }
-    if (!currentClient) {
-        res.status(500).json({ error: 'Es necesario tener la información de el cliente' });
-        return;
-    }
-    ;
+    const { Serverweb, Baseweb, TipoDocOO, Id_Cliente, Id_Almacen, Id_ListPre } = userFR;
     try {
+        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
         const postArray = req.body;
-        const Id_Almacen = userAlmacen;
-        const Id_ListPre = userListPrice;
-        const Id_Cliente = currentClient.Id_Cliente;
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
@@ -71,7 +54,7 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
                     return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
                 }
                 postData.Id_Almacen = Id_Almacen;
-                postData.TipoDoc = currentUser === null || currentUser === void 0 ? void 0 : currentUser.TipoDocOO;
+                postData.TipoDoc = TipoDocOO;
                 postData.Serie = SerieActiva ? SerieActiva : "";
                 postData.Folio = (Folio ? Folio : 0) + 1;
                 postData.Id_ListaPrecios = Id_ListPre;
@@ -132,34 +115,40 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
 });
 exports.postOrderDetails = postOrderDetails;
 const getOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
-    const { folio } = req.query;
-    if (!folio) {
-        res.status(500).json({ error: 'No se envio el folio' });
-        return;
-    }
-    try {
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
-        if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
-            return;
-        }
-        ;
-        const query = orders_1.orderQuerys.getOrderDetails;
-        const request = yield pool.request()
-            .input('folio', mssql_1.default.Int, folio)
-            .query(query);
-        let orderDetails = request.recordset;
-        res.json(orderDetails);
-    }
-    catch (error) {
-        res.status(500).json({ error: error });
-    }
-    finally {
-        yield (0, database_1.closeDbConnection)();
-    }
+    /*  const serverWeb = req.serverweb;
+     const baseWeb = req.baseweb;
+     const clientid = req.clientid;
+ 
+     const { folio } = req.query;
+ 
+     if (!folio) {
+         res.status(500).json({ error: 'No se envio el folio' });
+         return;
+     }
+ 
+     try {
+         const pool = await dbConnection(serverWeb, baseWeb);
+ 
+         if (!pool) {
+             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+             return;
+         };
+ 
+         const query = orderQuerys.getOrderDetails;
+ 
+         const request = await pool.request()
+             .input('folio', sql.Int, folio)
+             .query(query);
+ 
+         let orderDetails: PorductInterface[] = request.recordset;
+ 
+         res.json(orderDetails)
+ 
+     } catch (error) {
+         res.status(500).json({ error: error });
+     } finally {
+         await closeDbConnection()
+     } */
 });
 exports.getOrderDetails = getOrderDetails;
 //# sourceMappingURL=orderDetails.js.map

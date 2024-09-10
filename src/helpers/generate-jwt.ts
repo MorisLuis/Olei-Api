@@ -42,17 +42,13 @@ const generateJWT = ({ id }: generateJWTProps) => {
 }
 
 interface generateJWTPropsWeb {
-    id: string,
-    rol: number,
-    serverweb?: string,
-    baseweb?: string,
-    clientid?: number
+    Id: string,
 }
 
 
-const generateWebJWT = ({ id, rol, serverweb, baseweb, clientid }: generateJWTPropsWeb) => {
+const generateWebJWT = ({ Id }: generateJWTPropsWeb) => {
     return new Promise((resolve, reject) => {
-        const payload = { id, rol, serverweb, baseweb, clientid }
+        const payload = { Id }
         jwt.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
             expiresIn: process.env.JWT_EXPIRATION
         }, (error, token) => {

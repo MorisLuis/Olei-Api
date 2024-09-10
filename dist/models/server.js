@@ -31,7 +31,6 @@ const orderDetailsRouter_1 = __importDefault(require("../routes/orderDetailsRout
 const clientRouter_1 = __importDefault(require("../routes/clientRouter"));
 const inventoryRouter_1 = __importDefault(require("../routes/inventoryRouter"));
 const costosRouter_1 = __importDefault(require("../routes/costosRouter"));
-const statisticsRouter_1 = __importDefault(require("../routes/statisticsRouter"));
 const typeofmovementsRouter_1 = __importDefault(require("../routes/typeofmovementsRouter"));
 class Server {
     constructor() {
@@ -49,7 +48,6 @@ class Server {
             client: "/api/client",
             inventory: "/api/inventory",
             costos: "/api/costos",
-            statistics: "/api/statistics",
             typeofmovements: "/api/typeofmovements"
         };
         this.connectDB();
@@ -120,7 +118,6 @@ class Server {
         this.app.use(this.paths.client, clientRouter_1.default);
         this.app.use(this.paths.inventory, inventoryRouter_1.default);
         this.app.use(this.paths.costos, costosRouter_1.default);
-        this.app.use(this.paths.statistics, statisticsRouter_1.default);
         this.app.use(this.paths.typeofmovements, typeofmovementsRouter_1.default);
     }
     errorHandler() {

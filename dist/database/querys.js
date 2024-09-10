@@ -21,8 +21,24 @@ exports.querys = {
         WHERE Id_Usuario = @Id_Usuario
     `,
     authWeb: ` 
-        SELECT U.*, UC.SwImagenes, UC.SwSinStock, UC.SwsinPrecio, UC.TipoDocOO, UC.IdOLEI,
-        TRIM(UC.Nombre) AS Company
+        SELECT 
+            U.Id_UsuarioOOL,
+            U.PasswordOOL,
+            U.ServidorSQL,
+            U.BaseSQL,
+            U.TipoUsuario,
+            U.Id_UsuarioOLEI,
+            U.PasswordOLEI,
+            U.Id_ClienteDBCLIENTES,
+            U.Id_Almacen, 
+            UC.SwImagenes, 
+            UC.SwSinStock, 
+            UC.SwsinPrecio, 
+            UC.TipoDocOO, 
+            UC.IdOLEI,
+            UC.Nombre,
+            UC.Vigencia,
+            UC.Id_ListPre
         FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
         JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] UC on U.Id_ClienteDBCLIENTES = UC.Id_Cliente
         WHERE U.Id_UsuarioOOL = @email

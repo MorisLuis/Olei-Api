@@ -15,6 +15,7 @@ export const dbConnection = async (server?: string, database?: string, password?
                 trustServerCertificate: true
             },
         };
+
         try {
             pool = await sql.connect(dbConfig);
         } catch (error: any) {

@@ -35,9 +35,9 @@ const generateJWT = ({ id }) => {
     });
 };
 exports.generateJWT = generateJWT;
-const generateWebJWT = ({ id, rol, serverweb, baseweb, clientid }) => {
+const generateWebJWT = ({ Id }) => {
     return new Promise((resolve, reject) => {
-        const payload = { id, rol, serverweb, baseweb, clientid };
+        const payload = { Id };
         jsonwebtoken_1.default.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
             expiresIn: process.env.JWT_EXPIRATION
         }, (error, token) => {

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handleGetSession = void 0;
+exports.handleGetWebSession = exports.handleGetSession = void 0;
 const server_1 = require("../../models/server");
 const handleGetSession = (_a) => __awaiter(void 0, [_a], void 0, function* ({ sessionId }) {
     try {
@@ -24,4 +24,17 @@ const handleGetSession = (_a) => __awaiter(void 0, [_a], void 0, function* ({ se
     }
 });
 exports.handleGetSession = handleGetSession;
+const handleGetWebSession = (_b) => __awaiter(void 0, [_b], void 0, function* ({ sessionId }) {
+    try {
+        const sessionData = yield (server_1.redisClient === null || server_1.redisClient === void 0 ? void 0 : server_1.redisClient.get(`sess:${sessionId}`));
+        const session = JSON.parse(sessionData);
+        const user = session.userWeb;
+        return { user };
+    }
+    catch (error) {
+        console.log({ error });
+        return { user: undefined };
+    }
+});
+exports.handleGetWebSession = handleGetWebSession;
 //# sourceMappingURL=getSession.js.map

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.productsQuerys = void 0;
 exports.productsQuerys = {
-    // Get all products ***
+    // Get all products.
     getAllProducts: `
         SELECT DISTINCT
         TRIM(P.Descripcion) AS Descripcion,

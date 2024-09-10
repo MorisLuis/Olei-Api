@@ -17,37 +17,19 @@ const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const orders_1 = require("../database/querys/orders");
 const currentTime_1 = require("../utils/currentTime");
-const storageWeb_1 = require("../Storage/storageWeb");
+const getSession_1 = require("../utils/Redis/getSession");
 const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
-    // Get the user information from shared data, including the user's warehouse (Almacen)
-    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseWeb.trim());
-    const currentClient = (0, storageWeb_1.getClientData)(`${baseWeb.trim()}_${clientid}`);
-    let userAlmacen;
-    let userListPrice;
-    if (currentClient === null || currentClient === void 0 ? void 0 : currentClient.IsEmploye) {
-        userAlmacen = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_Almacen;
-        userListPrice = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_ListPre;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
     }
-    else {
-        userAlmacen = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_Almacen;
-        userListPrice = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_ListPre;
-    }
-    if (!currentClient) {
-        res.status(500).json({ error: 'Es necesario tener la información de el cliente' });
-        return;
-    }
-    ;
+    const { Serverweb, Baseweb, Id_ListPre, SwSinStock, TipoDocOO, Id_Cliente, Id_Almacen } = userFR;
     try {
+        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
         const postData = req.body;
-        const Id_Almacen = userAlmacen;
-        const Id_ListPre = userListPrice;
         const Id_Usuario = process.env.DB_USER;
-        const TipoDocOO = currentUser === null || currentUser === void 0 ? void 0 : currentUser.TipoDocOO;
-        const Id_Cliente = currentClient.Id_Cliente;
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
@@ -182,22 +164,16 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.postOrder = postOrder;
 const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
-    // Get the user information from shared data, including the user's warehouse (Almacen)
-    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseWeb.trim());
-    const currentClient = (0, storageWeb_1.getClientData)(`${baseWeb.trim()}_${clientid}`);
-    const { folio } = req.params;
-    const Id_Cliente = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_Cliente;
-    const TipoDocOO = currentUser === null || currentUser === void 0 ? void 0 : currentUser.TipoDocOO;
-    if (!currentClient) {
-        res.status(500).json({ error: 'Es necesario tener la información de el cliente' });
-        return;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
     }
-    ;
+    const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
+        const { folio } = req.params;
+        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
@@ -220,21 +196,15 @@ const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getOrder = getOrder;
 const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
-    // Get the user information from shared data, including the user's warehouse (Almacen)
-    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseWeb.trim());
-    const currentClient = (0, storageWeb_1.getClientData)(`${baseWeb.trim()}_${clientid}`);
-    const Id_Cliente = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_Cliente;
-    const TipoDocOO = currentUser === null || currentUser === void 0 ? void 0 : currentUser.TipoDocOO;
-    if (!currentClient) {
-        res.status(500).json({ error: 'Es necesario tener la información de el cliente' });
-        return;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
     }
-    ;
+    const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
+        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;

@@ -87,7 +87,7 @@ const getProducById = async (req: Request, res: Response) => {
     }
 }
 
-const getTotalProducts = async (req: Request, res: Response) => {
+/* const getTotalProducts = async (req: Request, res: Response) => {
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
 
@@ -99,7 +99,7 @@ const getTotalProducts = async (req: Request, res: Response) => {
     const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
     const result = await pool?.request().query(productsQuerys.getTotalProducts);
     res.json(result?.recordset[0][""]);
-};
+}; */
 
 const getProductsByStock = async (req: Request, res: Response) => {
 
@@ -298,7 +298,7 @@ const getImagesFromProducts = async ({
 
 export {
     getProducById,
-    getTotalProducts,
+    //getTotalProducts,
     getProductsByStock,
     getTotalOfProductsByStock,
     getProductByStockAndCodeBar

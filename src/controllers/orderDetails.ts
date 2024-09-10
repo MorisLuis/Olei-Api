@@ -3,41 +3,25 @@ import { closeDbConnection, dbConnection } from "../database";
 import sql from 'mssql';
 import PorductInterface from "../interface/product";
 import { orderQuerys } from "../database/querys/orders";
-import { getClientData, getUserDataWeb } from "../Storage/storageWeb";
+import { handleGetWebSession } from "../utils/Redis/getSession";
 
 
 const postOrderDetails = async (req: Request, res: Response) => {
 
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetWebSession({ sessionId });
 
-    // Get the user information from shared data, including the user's warehouse (Almacen)
-    const currentUser = getUserDataWeb(baseWeb.trim())
-    const currentClient = getClientData(`${baseWeb.trim()}_${clientid}`);
-
-    let userAlmacen;
-    let userListPrice;
-    if (currentClient?.IsEmploye) {
-        userAlmacen = currentClient?.Id_Almacen;
-        userListPrice = currentClient?.Id_ListPre;
-    } else {
-        userAlmacen = currentUser?.Id_Almacen;
-        userListPrice = currentUser?.Id_ListPre;
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
     }
 
-    if (!currentClient) {
-        res.status(500).json({ error: 'Es necesario tener la información de el cliente' });
-        return;
-    };
+    const { Serverweb, Baseweb, TipoDocOO, Id_Cliente, Id_Almacen, Id_ListPre } = userFR;
+
 
     try {
+        const pool = await dbConnection(Serverweb, Baseweb);
         const postArray = req.body;
-        const Id_Almacen = userAlmacen;
-        const Id_ListPre = userListPrice;
-        const Id_Cliente = currentClient.Id_Cliente;
-
-        const pool = await dbConnection(serverWeb, baseWeb);
 
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -75,7 +59,7 @@ const postOrderDetails = async (req: Request, res: Response) => {
                 }
 
                 postData.Id_Almacen = Id_Almacen;
-                postData.TipoDoc = currentUser?.TipoDocOO;
+                postData.TipoDoc = TipoDocOO;
                 postData.Serie = SerieActiva ? SerieActiva : "";
                 postData.Folio = (Folio ? Folio : 0) + 1;
                 postData.Id_ListaPrecios = Id_ListPre;
@@ -142,7 +126,7 @@ const postOrderDetails = async (req: Request, res: Response) => {
 
 const getOrderDetails = async (req: Request, res: Response) => {
 
-    const serverWeb = req.serverweb;
+   /*  const serverWeb = req.serverweb;
     const baseWeb = req.baseweb;
     const clientid = req.clientid;
 
@@ -175,7 +159,7 @@ const getOrderDetails = async (req: Request, res: Response) => {
         res.status(500).json({ error: error });
     } finally {
         await closeDbConnection()
-    }
+    } */
 }
 
 export {

@@ -124,7 +124,6 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.login = login;
 const renewDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("renewDB");
     // Get session from REDIS.
     const sessionId = req.sessionID;
     const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
@@ -165,7 +164,6 @@ const renewDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.renewDB = renewDB;
 const renewLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("renewLogin");
     const sessionId = req.sessionID;
     const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
@@ -220,10 +218,6 @@ const logoutUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 exports.logoutUser = logoutUser;
 const logoutDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
-    if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
-    }
     if (!sessionId) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
