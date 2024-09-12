@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -17,110 +8,64 @@ const database_1 = require("../../database");
 const mssql_1 = __importDefault(require("mssql"));
 const products_1 = require("../../database/querys/products");
 const getSession_1 = require("../../utils/Redis/getSession");
-const searchProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const searchProduct = async (req, res) => {
     // Get session from REDIS.
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, Id_Almacen } = userFR;
     try {
-        const { nombre, familia, codigo, enStock, marca } = req.query;
-        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
-        // Define query parameters for the SQL query
-        const params = {
-            ListaPrecios: Id_ListPre,
-        };
+        const { nombre, familia, codigo, marca } = req.query;
+        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
             return res.status(500).json({ error: 'Unable to establish a connection to the database' });
         }
-        // Initialize the base query with the common part
-        let query = `${products_1.productsQuerys.getProductsBySearch}`;
-        // Split the search term into individual words
-        const searchTerms = typeof nombre === 'string' ? nombre.split(' ') : [];
-        // Check if there are search terms
-        if (searchTerms.length > 0) {
-            // Create an array of LIKE conditions for each search term
-            const likeConditions = searchTerms.map(word => `LOWER(P.Descripcion) LIKE '%' + LOWER('${word}') + '%'`);
-            const whereClause = likeConditions.join(' AND ');
-            // Build the dynamic SQL query based on query parameters
-            if (codigo || familia || marca || (enStock === 'true' && codigo === undefined)) {
-                if (familia) {
-                    query += ` JOIN [OLEIDB1].[dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia`;
-                }
-                if (marca) {
-                    query += ` JOIN [OLEIDB1].[dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca`;
-                }
-                query += ` WHERE (${whereClause}) AND PR.Id_ListaPrecios = 1 AND E.Id_Almacen = ${Id_Almacen}`;
-                if (codigo) {
-                    query += ` AND (LOWER(P.Codigo) LIKE '%' + LOWER('${codigo}') + '%')`;
-                }
-                if (familia) {
-                    query += ` AND (LOWER(F.Nombre) LIKE '%' + LOWER('${familia}') + '%')`;
-                }
-                if (marca) {
-                    query += ` AND (LOWER(M.Nombre) LIKE '%' + LOWER('${marca}') + '%')`;
-                }
-                if (enStock === 'true') {
-                    query += ' AND E.Existencia > 0';
-                }
-            }
-            else {
-                // If no specific parameters are provided, apply the WHERE clause with search terms and default filters
-                query += ` WHERE (${whereClause}) AND PR.Id_ListaPrecios = @ListaPrecios AND E.Id_Almacen = ${Id_Almacen}`;
-            }
-            // Dont show products without stock
-            if (!SwSinStock) {
-                query += ' AND E.Existencia > 0 ';
-            }
-            // Dont show products without price
-            if (!SwsinPrecio) {
-                query += 'AND PR.Precio > 0';
-            }
-        }
         // Execute the SQL query
-        const result = yield pool.request()
-            .input('ListaPrecios', mssql_1.default.Int, params.ListaPrecios)
-            .query(query);
-        // Calculate the total number of results
-        const total = result.recordset.length;
-        // Extract the descriptions of the first 10 products for response
-        const descriptions = result.recordset.slice(0, 10).map(product => product.Descripcion);
-        // Send the response with total results and product descriptions
+        const result = await pool.request()
+            .input('Descripcion', mssql_1.default.VarChar, nombre)
+            .input('Id_ListaPrecios', mssql_1.default.Int, Id_ListPre)
+            .input('Id_Almacen', mssql_1.default.Int, Id_Almacen)
+            .input('Codigo', mssql_1.default.VarChar, codigo || "")
+            .input('familia', mssql_1.default.VarChar, familia || "")
+            .input('marca', mssql_1.default.VarChar, marca || "")
+            .input('SwSinStock', mssql_1.default.Bit, SwSinStock === true ? 1 : 0)
+            .input('SwsinPrecio', mssql_1.default.Bit, SwsinPrecio === true ? 1 : 0)
+            .query(products_1.productsQuerys.getProductsBySearch);
+        const products = result.recordset.map(row => row.Descripcion);
         res.json({
-            total,
-            products: descriptions
+            total: products.length,
+            products
         });
     }
     catch (error) {
-        // Handle errors and send an error response if necessary
+        console.log({ error });
         res.status(500).json({ error: error.message });
     }
-    finally {
-        yield (0, database_1.closeDbConnection)();
-    }
-});
+};
 exports.searchProduct = searchProduct;
-const searchClient = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const searchClient = async (req, res) => {
     // Get session from REDIS.
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     const { Serverweb, Baseweb } = userFR;
     try {
-        const { term } = req.query;
-        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
+        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
             return res.status(500).json({ error: 'Unable to establish a connection to the database' });
         }
+        ;
+        const { term } = req.query;
         let query = database_1.querys.getClientBySearch;
-        query += `WHERE LOWER(C.Nombre) LIKE '%' + LOWER('${term}') + '%'`;
-        // Execute the SQL query
-        const result = yield pool.request().query(query);
+        const result = await pool.request()
+            .input('nombre', mssql_1.default.VarChar, term)
+            .query(query);
         const Clients = result.recordset;
+        //const Clients = result.recordset.map(row => row.Descripcion);
         res.json({
             Clients
         });
@@ -129,8 +74,8 @@ const searchClient = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         res.status(500).json({ error: error.message });
     }
     finally {
-        yield (0, database_1.closeDbConnection)();
+        await (0, database_1.closeDbConnection)();
     }
-});
+};
 exports.searchClient = searchClient;
 //# sourceMappingURL=searchWeb.js.map

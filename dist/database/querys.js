@@ -30,7 +30,8 @@ exports.querys = {
             U.Id_UsuarioOLEI,
             U.PasswordOLEI,
             U.Id_ClienteDBCLIENTES,
-            U.Id_Almacen, 
+            U.Id_Almacen,
+            U.Id_Cliente,
             UC.SwImagenes, 
             UC.SwSinStock, 
             UC.SwsinPrecio, 
@@ -80,7 +81,6 @@ exports.querys = {
     `,
     // Users
     getAllUsers: "SELECT TOP(500) * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS]",
-    //getUser: "SELECT * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS] WHERE Nombre = ?",
     // Tables
     getFamilias: `SELECT TRIM(F.Nombre) AS Nombre FROM [dbo].[FAMILIAS] F`,
     getMarcas: `SELECT TRIM(M.Nombre) AS Nombre FROM [dbo].[MARCAS] M`,
@@ -107,6 +107,7 @@ exports.querys = {
     getClientBySearch: `
         SELECT TOP(20) TRIM(C.Nombre) AS Nombre, C.Id_Cliente, C.Id_Almacen, C.Id_ListPre
         FROM [dbo].[CLIENTES] C
+        WHERE LOWER(C.Nombre) LIKE '%' + LOWER(@nombre) + '%'
     `
 };
 //# sourceMappingURL=querys.js.map

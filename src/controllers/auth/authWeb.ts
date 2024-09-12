@@ -40,7 +40,7 @@ const loginWeb = async (req: Request, res: Response) => {
             Nombre: user.Nombre.trim(),
             Serverweb: ServidorSQL.trim(),
             Baseweb: BaseSQL.trim(),
-            Id_Cliente: user.Id_ClienteDBCLIENTES || 0,
+            Id_Cliente: user.Id_Cliente || 0,
             Id_ListPre,
             Vigencia: Vigencia,
             SwImagenes: user.SwImagenes,
@@ -51,7 +51,7 @@ const loginWeb = async (req: Request, res: Response) => {
             Id_Almacen: user.Id_Almacen
         };
 
-        (req.session as any).user = datosDelUsuario;
+        (req.session as any).userWeb = datosDelUsuario;
 
         // Generar token JWT
         const token = await generateWebJWT({ Id: user.Id_UsuarioOOL.trim() });
@@ -111,8 +111,6 @@ const renewWeb = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.log({ errorRW: error })
         res.status(500).send(error.message);
-    } finally {
-        await closeDbConnection()
     }
 }
 
@@ -126,8 +124,7 @@ const logout = async (req: Request, res: Response) => {
 
     try {
 
-        //await handleDeleteRedisSession({ sessionId });
-        await closeDbConnection()
+        await handleDeleteRedisSession({ sessionId });
         res.json({ ok: true })
 
     } catch (error) {

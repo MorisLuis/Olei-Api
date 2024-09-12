@@ -126,40 +126,37 @@ const postOrderDetails = async (req: Request, res: Response) => {
 
 const getOrderDetails = async (req: Request, res: Response) => {
 
-   /*  const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = await handleGetWebSession({ sessionId });
 
-    const { folio } = req.query;
-
-    if (!folio) {
-        res.status(500).json({ error: 'No se envio el folio' });
-        return;
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
     }
-
+    const { Serverweb, Baseweb } = userFR;
+    
     try {
-        const pool = await dbConnection(serverWeb, baseWeb);
+        const { folio } = req.query;
 
+        const pool = await dbConnection(Serverweb, Baseweb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         };
 
         const query = orderQuerys.getOrderDetails;
-
         const request = await pool.request()
             .input('folio', sql.Int, folio)
             .query(query);
 
         let orderDetails: PorductInterface[] = request.recordset;
-
         res.json(orderDetails)
 
     } catch (error) {
         res.status(500).json({ error: error });
     } finally {
         await closeDbConnection()
-    } */
+    }
 }
 
 export {

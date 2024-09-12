@@ -2,9 +2,9 @@ import { Request, Response } from 'express';
 import { generateWebJWT } from '../helpers/generate-jwt';
 import { closeDbConnection } from '../database';
 import { handleGetWebSession } from '../utils/Redis/getSession';
+import { UserWebSessionInterface } from '../interface/user';
 
 const selectClient = async (req: Request, res: Response) => {
-
 
     // Get session from REDIS.
     const sessionId = req.sessionID;
@@ -13,7 +13,6 @@ const selectClient = async (req: Request, res: Response) => {
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
-
     const { Id } = userFR;
 
     try {
@@ -26,10 +25,14 @@ const selectClient = async (req: Request, res: Response) => {
             IsEmploye: true
         }
 
-        const token = await generateWebJWT({ Id: Id });
+        const datosDelUsuario: UserWebSessionInterface = {
+            ...userFR,
+            ...client
+        };
 
+        (req.session as any).userWeb = datosDelUsuario;
+        const token = await generateWebJWT({ Id: Id });
         return res.json({
-            client,
             token
         })
 

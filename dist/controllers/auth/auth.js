@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -19,10 +10,10 @@ const generate_jwt_1 = require("../../helpers/generate-jwt");
 const config_1 = __importDefault(require("../../config"));
 const getSession_1 = require("../../utils/Redis/getSession");
 const deleteRedis_1 = require("../../utils/Redis/deleteRedis");
-const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const loginDB = async (req, res) => {
     // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
     const { IdUsuarioOLEI, PasswordOLEI } = req.body;
-    const mainPool = yield (0, database_1.dbConnection)(config_1.default.dbServer, config_1.default.dbDatabase);
+    const mainPool = await (0, database_1.dbConnection)(config_1.default.dbServer, config_1.default.dbDatabase);
     if (!mainPool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
     }
@@ -31,8 +22,8 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     try {
         const query_DB = database_1.querys.authDatabase;
-        const result = yield mainPool.request().input('IdUsuarioOLEI', IdUsuarioOLEI).query(query_DB);
-        const cleanResult = result === null || result === void 0 ? void 0 : result.recordset[0];
+        const result = await mainPool.request().input('IdUsuarioOLEI', IdUsuarioOLEI).query(query_DB);
+        const cleanResult = result?.recordset[0];
         if (!cleanResult) {
             return res.status(401).json({ error: `No se encontro el usuario: ${IdUsuarioOLEI}` });
         }
@@ -43,7 +34,7 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             BaseSQL: cleanResult.BaseSQL,
             RazonSocial: cleanResult.RazonSocial
         };
-        const tokenDB = yield (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim() });
+        const tokenDB = await (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim() });
         req.session.user = {
             serverclientes: cleanResult.ServidorSQL.trim(),
             baseclientes: cleanResult.BaseSQL.trim(),
@@ -66,24 +57,24 @@ const loginDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.status(500).send(error.message);
     }
     finally {
-        yield (0, database_1.closeDbConnection)();
+        await (0, database_1.closeDbConnection)();
     }
-});
+};
 exports.loginDB = loginDB;
-const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const login = async (req, res) => {
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     // STEP 1 - LOGIN
-    const mainPool = yield (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+    const mainPool = await (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
     if (!mainPool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
     }
     try {
-        const result = yield mainPool.request().query("SELECT *   FROM [dbo].[USUARIOS]");
+        const result = await mainPool.request().query("SELECT *   FROM [dbo].[USUARIOS]");
         // Search for the user in the database using their email.
         const { Id_Usuario, password } = req.body;
         if (Id_Usuario.trim() === "" || password.trim() === "") {
@@ -92,7 +83,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const request = mainPool.request();
         request.input('Id_Usuario', mssql_1.default.VarChar(50), Id_Usuario);
         request.input('Password', mssql_1.default.VarChar(50), password);
-        const resultData = yield request.execute('sp_AuthenticateAndGetMovement');
+        const resultData = await request.execute('sp_AuthenticateAndGetMovement');
         const Validations = resultData.recordsets[0];
         if (Validations[0].Tipo === "usuario" && Validations[0].Resultado !== 1) {
             return res.status(404).json({ error: 'Correo no encontrado' });
@@ -101,8 +92,12 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
         const User = resultData.recordsets[1][0];
-        const token = yield (0, generate_jwt_1.generateJWT)({ id: Id_Usuario.trim() });
-        req.session.user = Object.assign(Object.assign({}, req.session.user), { userId: Id_Usuario.trim(), userRol: User.Id_Perfil });
+        const token = await (0, generate_jwt_1.generateJWT)({ id: Id_Usuario.trim() });
+        req.session.user = {
+            ...req.session.user,
+            userId: Id_Usuario.trim(),
+            userRol: User.Id_Perfil
+        };
         const userStorage = {
             Id_Usuario,
             Id_TipoMovInv: {
@@ -121,24 +116,28 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         console.log({ error });
         return res.status(500).json({ error: error.message || 'Unexpected error' });
     }
-});
+};
 exports.login = login;
-const renewDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const renewDB = async (req, res) => {
     // Get session from REDIS.
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     const { baseclientes, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
     try {
-        const token = yield (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI });
+        const token = await (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI });
         if (!token) {
             return res.status(401).json({ message: 'Failed to generate token' });
         }
         ;
         // User to Redis.
-        const userRedis = Object.assign(Object.assign({}, userFR), { userId: userId ? userId : undefined, userRol: userRol ? userRol : undefined });
+        const userRedis = {
+            ...userFR,
+            userId: userId ? userId : undefined,
+            userRol: userRol ? userRol : undefined
+        };
         // User to Frontend.
         const user = {
             BaseSQL: baseclientes,
@@ -159,13 +158,13 @@ const renewDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         console.log({ error });
     }
     finally {
-        yield (0, database_1.closeDbConnection)();
+        await (0, database_1.closeDbConnection)();
     }
-});
+};
 exports.renewDB = renewDB;
-const renewLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const renewLogin = async (req, res) => {
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
@@ -179,7 +178,7 @@ const renewLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             return res.status(401).json({ message: 'Server and base data is neccessary' });
         }
         ;
-        const token = yield (0, generate_jwt_1.generateJWT)({ id: userId });
+        const token = await (0, generate_jwt_1.generateJWT)({ id: userId });
         if (!token) {
             return res.status(401).json({ message: 'Failed to generate token' });
         }
@@ -196,16 +195,20 @@ const renewLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         console.log({ error });
         res.status(500).send(error.message);
     }
-});
+};
 exports.renewLogin = renewLogin;
-const logoutUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const logoutUser = async (req, res) => {
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     try {
-        req.session.user = Object.assign(Object.assign({}, req.session.user), { userId: undefined, userRol: undefined });
+        req.session.user = {
+            ...req.session.user,
+            userId: undefined,
+            userRol: undefined
+        };
         res.json({
             user: userFR
         });
@@ -214,22 +217,22 @@ const logoutUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         console.log({ error });
         res.status(500).send(error.message);
     }
-});
+};
 exports.logoutUser = logoutUser;
-const logoutDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const logoutDB = async (req, res) => {
     const sessionId = req.sessionID;
     if (!sessionId) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     try {
-        yield (0, deleteRedis_1.handleDeleteRedisSession)({ sessionId });
-        yield (0, database_1.closeDbConnection)();
+        await (0, deleteRedis_1.handleDeleteRedisSession)({ sessionId });
+        await (0, database_1.closeDbConnection)();
         res.json({ ok: true });
     }
     catch (error) {
         console.log({ error });
         res.status(500).send(error.message);
     }
-});
+};
 exports.logoutDB = logoutDB;
 //# sourceMappingURL=auth.js.map

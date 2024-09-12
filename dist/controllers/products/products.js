@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -18,31 +9,31 @@ const products_1 = require("../../database/querys/products");
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const identifyBarcodeType_1 = require("../../utils/identifyBarcodeType");
 const getSession_1 = require("../../utils/Redis/getSession");
-const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getProducById = async (req, res) => {
     const { id } = req.params;
     const { Marca } = req.query;
     const Id_Usuario = req.id;
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
         const userquery = database_1.querys.getAuthLimitData;
-        const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
+        const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
-        const result = yield pool.request()
+        const result = await pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)
             .input("ListaPrecios", user.Id_ListPre)
             .input("Almacen", user.Id_Almacen)
             .query(products_1.productsQuerys.getProducById);
-        const product = result === null || result === void 0 ? void 0 : result.recordset[0];
+        const product = result?.recordset[0];
         const baseSQL = baseclientes.trim().toLowerCase().split(',');
         if (baseSQL && baseSQL.length > 0) {
             const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
@@ -54,13 +45,13 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             while (attempt < maxAttempts) {
                 let imageUrl;
                 if (attempt === 0) {
-                    imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product === null || product === void 0 ? void 0 : product.Codigo.trim()}.jpg`;
+                    imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product?.Codigo.trim()}.jpg`;
                 }
                 else {
-                    imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product === null || product === void 0 ? void 0 : product.Codigo.trim()}_${attempt}.jpg`;
+                    imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product?.Codigo.trim()}_${attempt}.jpg`;
                 }
                 // Verifica si la imagen existe
-                const imageExists = yield checkImageExists(imageUrl);
+                const imageExists = await checkImageExists(imageUrl);
                 if (imageExists) {
                     images.push({
                         url: imageUrl,
@@ -80,7 +71,7 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         console.log({ error });
         return res.status(500).json({ error });
     }
-});
+};
 exports.getProducById = getProducById;
 /* const getTotalProducts = async (req: Request, res: Response) => {
     const sessionId = req.sessionID;
@@ -95,31 +86,31 @@ exports.getProducById = getProducById;
     const result = await pool?.request().query(productsQuerys.getTotalProducts);
     res.json(result?.recordset[0][""]);
 }; */
-const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getProductsByStock = async (req, res) => {
     const { PageNumber, PageSize } = req.query;
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
         const userquery = database_1.querys.getAuthLimitData;
-        const requestUser = yield pool.request().input('Id_Usuario', userId).query(userquery);
+        const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery);
         const user = requestUser.recordset[0];
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
         let query = products_1.productsQuerys.getAllProductsByStock;
-        const request = yield pool.request()
+        const request = await pool.request()
             .input('PageSize', Number(PageSize))
             .input('PageNumber', PageNumber)
             .input('Id_ListaPrecios', user.Id_ListPre)
             .input('Almacen', user.Id_Almacen)
             .query(query);
         const productsByStock = request.recordset;
-        const { products } = yield getImagesFromProducts({
+        const { products } = await getImagesFromProducts({
             base: baseclientes,
             products: productsByStock
         });
@@ -129,26 +120,26 @@ const getProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, funct
         console.log({ error });
         res.status(500).json({ error: error.message });
     }
-});
+};
 exports.getProductsByStock = getProductsByStock;
-const getTotalOfProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getTotalOfProductsByStock = async (req, res) => {
     const Id_Usuario = req.id;
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
         const userquery = database_1.querys.getAuthLimitData;
-        const requestUser = yield pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
+        const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
         let query = products_1.productsQuerys.getTotalOfAllProductsByStock;
-        const request = yield pool.request()
+        const request = await pool.request()
             .input('Id_ListaPrecios', user.Id_ListPre)
             .input('Almacen', user.Id_Almacen)
             .query(query);
@@ -159,20 +150,20 @@ const getTotalOfProductsByStock = (req, res) => __awaiter(void 0, void 0, void 0
         console.log({ error });
         res.status(500).json({ error: error.message });
     }
-});
+};
 exports.getTotalOfProductsByStock = getTotalOfProductsByStock;
-const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getProductByStockAndCodeBar = async (req, res) => {
     const { CodBar, Codigo } = req.query;
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
         const userquery = database_1.querys.getAuthLimitData;
-        const requestUser = yield pool.request().input('Id_Usuario', userId).query(userquery);
+        const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery);
         const user = requestUser.recordset[0];
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
@@ -184,7 +175,7 @@ const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void
         let request;
         if (isEAN13orUPC14) {
             let query = products_1.productsQuerys.getProductByStockAndCodeBarDV;
-            request = yield pool.request()
+            request = await pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)
                 .input('Id_ListaPrecios', user.Id_ListPre)
                 .input('Id_Almacen', user.Id_Almacen)
@@ -192,7 +183,7 @@ const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void
         }
         else {
             let query = products_1.productsQuerys.getProductByStockAndCodeBar;
-            request = yield pool.request()
+            request = await pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)
                 .input("Codigo", Codigo === 'undefined' ? null : Codigo)
                 .input('Id_ListaPrecios', user.Id_ListPre)
@@ -206,30 +197,30 @@ const getProductByStockAndCodeBar = (req, res) => __awaiter(void 0, void 0, void
         console.log({ error });
         return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud / getProductByStockAndCodeBar' });
     }
-});
+};
 exports.getProductByStockAndCodeBar = getProductByStockAndCodeBar;
 // Utils
-const checkImageExists = (url) => __awaiter(void 0, void 0, void 0, function* () {
+const checkImageExists = async (url) => {
     try {
-        const response = yield (0, node_fetch_1.default)(url, { method: 'HEAD' });
+        const response = await (0, node_fetch_1.default)(url, { method: 'HEAD' });
         return response.ok;
     }
     catch (error) {
         console.error('Error during image check:', error);
         return false;
     }
-});
-const getImagesFromProducts = (_a) => __awaiter(void 0, [_a], void 0, function* ({ base, products }) {
+};
+const getImagesFromProducts = async ({ base, products }) => {
     // Ahora, para cada producto, agrega la propiedad "imagen"
     for (const product of products) {
         // Supongamos que la URL de la imagen se basa en la propiedad "Codigo" del producto
-        const baseSQL = base === null || base === void 0 ? void 0 : base.trim().toLowerCase().split(',');
+        const baseSQL = base?.trim().toLowerCase().split(',');
         if (baseSQL && baseSQL.length > 0) {
             const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
             const imageDB = formatImageDB[formatImageDB.length - 1];
             const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
             // Verifica si la imagen existe antes de agregarla al producto
-            const imageExists = yield checkImageExists(imageUrl);
+            const imageExists = await checkImageExists(imageUrl);
             if (imageExists) {
                 product.imagen = [{
                         url: imageUrl,
@@ -239,5 +230,5 @@ const getImagesFromProducts = (_a) => __awaiter(void 0, [_a], void 0, function* 
         }
     }
     return { products };
-});
+};
 //# sourceMappingURL=products.js.map

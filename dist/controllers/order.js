@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -18,16 +9,16 @@ const mssql_1 = __importDefault(require("mssql"));
 const orders_1 = require("../database/querys/orders");
 const currentTime_1 = require("../utils/currentTime");
 const getSession_1 = require("../utils/Redis/getSession");
-const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const postOrder = async (req, res) => {
     // Get session from REDIS.
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     const { Serverweb, Baseweb, Id_ListPre, SwSinStock, TipoDocOO, Id_Cliente, Id_Almacen } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
+        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         const postData = req.body;
         const Id_Usuario = process.env.DB_USER;
         if (!pool) {
@@ -39,11 +30,11 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return;
         }
         const transaction = new mssql_1.default.Transaction(pool);
-        yield transaction.begin();
+        await transaction.begin();
         try {
             const request = new mssql_1.default.Request(transaction);
             const currentDate = (0, currentTime_1.currentTime)();
-            const previewDataToPostOrder = yield request
+            const previewDataToPostOrder = await request
                 .input("Id_Almacen_Preview", Id_Almacen)
                 .input("Id_Cliente_Preview", Id_Cliente)
                 .query(orders_1.orderQuerys.getPreviewDataToPostOrder);
@@ -78,7 +69,7 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             postData.Id_TipoPago = 1;
             postData.TipoDocOrigen = 11;
             const postOrderQuery = orders_1.orderQuerys.insertOrder;
-            const result = yield request
+            const result = await request
                 .input("Id_Almacen", mssql_1.default.Int, Id_Almacen)
                 .input("TipoDoc", mssql_1.default.SmallInt, postData.TipoDoc)
                 .input("Serie", mssql_1.default.NChar(10), postData.Serie)
@@ -139,18 +130,18 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 .input("Id_Chofer", mssql_1.default.Int, postData.Id_Chofer)
                 .input("FechaEntrega", mssql_1.default.DateTime, postData.FechaEntrega)
                 .query(postOrderQuery);
-            yield transaction.commit();
+            await transaction.commit();
             const order = result.recordset[0];
             res.status(201).json(order);
         }
         catch (error) {
             console.log({ error });
-            yield transaction.rollback();
+            await transaction.rollback();
             throw error;
         }
         finally {
             if (pool) {
-                yield pool.close();
+                await pool.close();
             }
         }
     }
@@ -159,27 +150,27 @@ const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(500).json({ error: error });
     }
     finally {
-        yield (0, database_1.closeDbConnection)();
+        await (0, database_1.closeDbConnection)();
     }
-});
+};
 exports.postOrder = postOrder;
-const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getOrder = async (req, res) => {
     // Get session from REDIS.
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
     try {
         const { folio } = req.params;
-        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
+        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
         const getOrderQuery = orders_1.orderQuerys.getOrder;
-        const request = yield pool.request()
+        const request = await pool.request()
             .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
             .input('folio', mssql_1.default.Int, folio)
             .input('TipoDocOO', TipoDocOO)
@@ -191,26 +182,26 @@ const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(500).json({ error: error });
     }
     finally {
-        yield (0, database_1.closeDbConnection)();
+        await (0, database_1.closeDbConnection)();
     }
-});
+};
 exports.getOrder = getOrder;
-const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getAllOrders = async (req, res) => {
     // Get session from REDIS.
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetWebSession)({ sessionId });
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(Serverweb, Baseweb);
+        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
         const query = orders_1.orderQuerys.getAllOrders;
-        const request = yield pool.request()
+        const request = await pool.request()
             .input('TipoDocOO', TipoDocOO)
             .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
             .query(query);
@@ -222,8 +213,8 @@ const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         res.status(500).json({ error: error });
     }
     finally {
-        yield (0, database_1.closeDbConnection)();
+        await (0, database_1.closeDbConnection)();
     }
-});
+};
 exports.getAllOrders = getAllOrders;
 //# sourceMappingURL=order.js.map

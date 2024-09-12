@@ -217,7 +217,6 @@ const getAllOrders = async (req: Request, res: Response) => {
 
     const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
 
-
     try {
         const pool = await dbConnection(Serverweb, Baseweb);
 

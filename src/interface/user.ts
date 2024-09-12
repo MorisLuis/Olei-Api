@@ -112,9 +112,10 @@ export interface UserWebSessionInterface {
     Id_Cliente: number,
     Id_ListPre: number,
     Vigencia: string,
-    SwImagenes: number, 
-    SwSinStock: number, 
-    SwsinPrecio: number, 
+    SwImagenes: boolean, 
+    SwSinStock: boolean, 
+    SwsinPrecio: boolean, 
     TipoDocOO: number,
-    Id_Almacen: number
+    Id_Almacen: number,
+    IsEmploye?: boolean
 }
