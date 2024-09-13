@@ -1,14 +1,11 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProductByStockAndCodeBar = exports.getTotalOfProductsByStock = exports.getProductsByStock = exports.getProducById = void 0;
+exports.getProductByStockAndCodeBar = exports.getTotalOfProductsByStock = exports.getProductsByStock = exports.getProducById = exports.checkImageExists = void 0;
 const database_1 = require("../../database");
 const products_1 = require("../../database/querys/products");
-const node_fetch_1 = __importDefault(require("node-fetch"));
 const identifyBarcodeType_1 = require("../../utils/identifyBarcodeType");
 const getSession_1 = require("../../utils/Redis/getSession");
+const productsWeb_1 = require("../../database/querys/productsWeb");
 const getProducById = async (req, res) => {
     const { id } = req.params;
     const { Marca } = req.query;
@@ -32,7 +29,7 @@ const getProducById = async (req, res) => {
             .input("Marca", Marca)
             .input("ListaPrecios", user.Id_ListPre)
             .input("Almacen", user.Id_Almacen)
-            .query(products_1.productsQuerys.getProducById);
+            .query(productsWeb_1.productsWebQuerys.getProducById);
         const product = result?.recordset[0];
         const baseSQL = baseclientes.trim().toLowerCase().split(',');
         if (baseSQL && baseSQL.length > 0) {
@@ -51,7 +48,7 @@ const getProducById = async (req, res) => {
                     imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product?.Codigo.trim()}_${attempt}.jpg`;
                 }
                 // Verifica si la imagen existe
-                const imageExists = await checkImageExists(imageUrl);
+                const imageExists = await (0, exports.checkImageExists)(imageUrl);
                 if (imageExists) {
                     images.push({
                         url: imageUrl,
@@ -62,7 +59,7 @@ const getProducById = async (req, res) => {
             }
             if (images.length > 0) {
                 // Se encontraron imágenes existentes
-                product.imagen = images;
+                product.imagenes = images;
             }
         }
         return res.json(product);
@@ -73,19 +70,6 @@ const getProducById = async (req, res) => {
     }
 };
 exports.getProducById = getProducById;
-/* const getTotalProducts = async (req: Request, res: Response) => {
-    const sessionId = req.sessionID;
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
-    }
-
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL} = userFR;
-    const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
-    const result = await pool?.request().query(productsQuerys.getTotalProducts);
-    res.json(result?.recordset[0][""]);
-}; */
 const getProductsByStock = async (req, res) => {
     const { PageNumber, PageSize } = req.query;
     const sessionId = req.sessionID;
@@ -199,17 +183,6 @@ const getProductByStockAndCodeBar = async (req, res) => {
     }
 };
 exports.getProductByStockAndCodeBar = getProductByStockAndCodeBar;
-// Utils
-const checkImageExists = async (url) => {
-    try {
-        const response = await (0, node_fetch_1.default)(url, { method: 'HEAD' });
-        return response.ok;
-    }
-    catch (error) {
-        console.error('Error during image check:', error);
-        return false;
-    }
-};
 const getImagesFromProducts = async ({ base, products }) => {
     // Ahora, para cada producto, agrega la propiedad "imagen"
     for (const product of products) {
@@ -220,7 +193,7 @@ const getImagesFromProducts = async ({ base, products }) => {
             const imageDB = formatImageDB[formatImageDB.length - 1];
             const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
             // Verifica si la imagen existe antes de agregarla al producto
-            const imageExists = await checkImageExists(imageUrl);
+            const imageExists = await (0, exports.checkImageExists)(imageUrl);
             if (imageExists) {
                 product.imagen = [{
                         url: imageUrl,
@@ -231,4 +204,15 @@ const getImagesFromProducts = async ({ base, products }) => {
     }
     return { products };
 };
+const checkImageExists = async (url) => {
+    try {
+        const response = await fetch(url, { method: 'HEAD' });
+        return response.ok;
+    }
+    catch (error) {
+        console.error('Error during image check:', error);
+        return false;
+    }
+};
+exports.checkImageExists = checkImageExists;
 //# sourceMappingURL=products.js.map

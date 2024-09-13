@@ -19,7 +19,7 @@ exports.productsWebQuerys = {
                 PR.Precio,
                 TRIM(E.Codigo) AS CodigoExistencia,
                 CT.Impto AS Impuesto,
-                'https://oleistorage.blob.core.windows.net/' + @baseSQL + '/' + TRIM(P.Codigo) + '.jpg' AS imagen,
+                'https://oleistorage.blob.core.windows.net/' +  LOWER(SUBSTRING(@baseSQL, CHARINDEX('_', @baseSQL) + 1, LEN(@baseSQL))) + '/' + TRIM(P.Codigo) + '.jpg' AS imagen,
                 ROW_NUMBER() OVER (ORDER BY P.Codigo) AS RowNum
             FROM [dbo].[PRODUCTOS] P
             JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
@@ -38,6 +38,36 @@ exports.productsWebQuerys = {
         SELECT *
         FROM PagedProducts
         WHERE RowNum BETWEEN (@page - 1) * @limit + 1 AND @page * @limit;
+    `,
+    // Get product by id.
+    getProducById: `
+        SELECT
+            TRIM(P.Descripcion) AS Descripcion,
+            TRIM(P.Codigo) AS Codigo,
+            E.Existencia,
+            E.Id_Almacen,
+            M.Id_Marca,
+            TRIM(M.Nombre) AS Marca,
+            PR.Id_ListaPrecios,
+            P.Id_Familia,
+            TRIM(F.Nombre) AS Familia,
+            TRIM(PR.Codigo) AS CodigoPrecio,
+            PR.Precio,
+            TRIM(E.Codigo) AS CodigoExistencia,
+            CT.Impto AS Impuesto,
+            P.Observaciones,
+            TRIM(CT.CodBar) AS CodBar,
+            'https://oleistorage.blob.core.windows.net/' +  LOWER(SUBSTRING(@baseSQL, CHARINDEX('_', @baseSQL) + 1, LEN(@baseSQL))) + '/' + TRIM(P.Codigo) + '.jpg' AS imagen
+            FROM [dbo].[PRODUCTOS] P
+        JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
+        JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+        JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+        JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+        JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
+        WHERE P.Codigo = @Codigo 
+        AND M.Nombre = @Marca 
+        AND PR.Id_ListaPrecios = @ListaPrecios 
+        AND E.Id_Almacen = @Almacen
     `,
     getTotalProducts: `
         SELECT COUNT(*)

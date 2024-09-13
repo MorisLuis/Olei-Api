@@ -13,10 +13,12 @@ export default interface PorductInterface {
     Id_ListaPrecios: number;
     Piezas: number;
     Impto: number;
-    imagen: [{
-        url: string,
+    imagen: string;   
+    imagenes: [{
+        url: string;
         id: number
-    }];
+    }]
+
 }
 
 export interface ProductInterfaceBag {

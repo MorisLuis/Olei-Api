@@ -1,9 +1,10 @@
 import { Request, Response } from 'express'
-import { closeDbConnection, dbConnection } from '../../database';
-import { productsQuerys } from '../../database/querys/products';
+import { dbConnection } from '../../database';
 import sql from 'mssql';
 import { handleGetWebSession } from '../../utils/Redis/getSession';
 import { productsWebQuerys } from '../../database/querys/productsWeb';
+import PorductInterface from '../../interface/product';
+import { checkImageExist, getProductWithImages, getProductsWithImage } from '../../utils/checkImageExists';
 
 const getProducts = async (req: Request, res: Response) => {
 
@@ -18,7 +19,7 @@ const getProducts = async (req: Request, res: Response) => {
 
     try {
         const pool = await dbConnection(Serverweb, Baseweb);
-        
+
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
@@ -47,18 +48,18 @@ const getProducts = async (req: Request, res: Response) => {
             .query(query);
 
         const products = result.recordset;
+        const productsWithImages = await getProductsWithImage(products);
 
         res.json({
-            total: products.length,
-            products
+            total: productsWithImages.length,
+            products: productsWithImages
         });
 
     } catch (error: any) {
-        console.log({ errorGP: error })
+        console.log({ errorGP: error });
         res.status(500).json({ error: error.message });
     }
 };
-
 
 const getProducByIdWeb = async (req: Request, res: Response) => {
 
@@ -89,9 +90,14 @@ const getProducByIdWeb = async (req: Request, res: Response) => {
             .input("ListaPrecios", Id_ListPre)
             .input("Almacen", Id_Almacen)
             .input('baseSQL', sql.VarChar, Baseweb || '')
-            .query(productsQuerys.getProducById);
+            .query(productsWebQuerys.getProducById);
 
-        const product = result?.recordset[0];
+        const productBefore = result?.recordset[0];
+        const product = await getProductWithImages({
+            baseSQL: Baseweb, 
+            Codigo: productBefore.Codigo,  
+            product: productBefore
+        });
 
         return res.json(product);
     } catch (error) {
@@ -124,19 +130,19 @@ const getTotalProducts = async (req: Request, res: Response) => {
         const { nombre, marca, familia, folio } = req.query;
 
         const result = await pool?.request()
-        .input('nombre', sql.VarChar, nombre || '')
-        .input('marca', sql.VarChar, marca || '')
-        .input('familia', sql.VarChar, familia || '')
-        .input('codigo', sql.VarChar, folio || '')
-        .input('SwSinStock', sql.Bit, SwSinStock === true ? 1 : 0)
-        .input('SwsinPrecio', sql.Bit, SwsinPrecio === true ? 1 : 0)
-        .input('SwImagenes', sql.Bit, SwImagenes === true ? 1 : 0)
-        .input('Id_ListPre', sql.Int, Id_ListPre)
-        .input('Id_Almacen', sql.Int, Id_Almacen)
-        .query(productsWebQuerys.getTotalProducts);
+            .input('nombre', sql.VarChar, nombre || '')
+            .input('marca', sql.VarChar, marca || '')
+            .input('familia', sql.VarChar, familia || '')
+            .input('codigo', sql.VarChar, folio || '')
+            .input('SwSinStock', sql.Bit, SwSinStock === true ? 1 : 0)
+            .input('SwsinPrecio', sql.Bit, SwsinPrecio === true ? 1 : 0)
+            .input('SwImagenes', sql.Bit, SwImagenes === true ? 1 : 0)
+            .input('Id_ListPre', sql.Int, Id_ListPre)
+            .input('Id_Almacen', sql.Int, Id_Almacen)
+            .query(productsWebQuerys.getTotalProducts);
 
 
-        res.json({total: result?.recordset[0][""]});
+        res.json({ total: result?.recordset[0][""] });
 
     } catch (error) {
         console.log({ errorTP: error })
@@ -144,31 +150,6 @@ const getTotalProducts = async (req: Request, res: Response) => {
     }
 };
 
-
-// Utils
-/* const checkImageExists = async (url: string): Promise<boolean> => {
-    try {
-        const response = await fetch(url, { method: 'HEAD' });
-        return response.ok;
-    } catch (error) {
-        console.error('Error during image check:', error);
-        return false;
-    }
-};
-
-async function executeQuery(pool: sql.ConnectionPool, query: string, params: any) {
-    try {
-        // Execute the query with provided parameters
-        const result = await pool.request()
-            .input('ListaPrecios', sql.Int, params.ListaPrecios)
-            .input('Almacen', sql.Int, params.Almacen)
-            .query(query);
-
-        return result.recordset;
-    } catch (error) {
-        throw error;
-    }
-} */
 
 export {
     getProducts,

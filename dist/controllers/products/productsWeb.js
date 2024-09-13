@@ -5,10 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTotalProducts = exports.getProducByIdWeb = exports.getProducts = void 0;
 const database_1 = require("../../database");
-const products_1 = require("../../database/querys/products");
 const mssql_1 = __importDefault(require("mssql"));
 const getSession_1 = require("../../utils/Redis/getSession");
 const productsWeb_1 = require("../../database/querys/productsWeb");
+const checkImageExists_1 = require("../../utils/checkImageExists");
 const getProducts = async (req, res) => {
     const sessionId = req.sessionID;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
@@ -41,9 +41,10 @@ const getProducts = async (req, res) => {
             .input('baseSQL', mssql_1.default.VarChar, Baseweb || '')
             .query(query);
         const products = result.recordset;
+        const productsWithImages = await (0, checkImageExists_1.getProductsWithImage)(products);
         res.json({
-            total: products.length,
-            products
+            total: productsWithImages.length,
+            products: productsWithImages
         });
     }
     catch (error) {
@@ -73,8 +74,13 @@ const getProducByIdWeb = async (req, res) => {
             .input("ListaPrecios", Id_ListPre)
             .input("Almacen", Id_Almacen)
             .input('baseSQL', mssql_1.default.VarChar, Baseweb || '')
-            .query(products_1.productsQuerys.getProducById);
-        const product = result?.recordset[0];
+            .query(productsWeb_1.productsWebQuerys.getProducById);
+        const productBefore = result?.recordset[0];
+        const product = await (0, checkImageExists_1.getProductWithImages)({
+            baseSQL: Baseweb,
+            Codigo: productBefore.Codigo,
+            product: productBefore
+        });
         return res.json(product);
     }
     catch (error) {
