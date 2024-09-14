@@ -70,8 +70,8 @@ class Server {
 
     configureRedis() {
         this.redis = new Redis({
-            host: process.env.REDIS_HOST || '127.0.0.1',
-            port: Number(process.env.REDIS_PORT as string) || 6379,
+            host: process.env.ENVIRONMENT === 'production' ? process.env.REDIS_HOST : '127.0.0.1',
+            port: process.env.ENVIRONMENT === 'production' ? Number(process.env.REDIS_PORT as string) : 6379,
             /* host: '127.0.0.1',
             port: 6379, */
             password: process.env.REDIS_PASSWORD
@@ -118,7 +118,7 @@ class Server {
 
     middlewares() {
         this.app.use(cors({
-            origin: 'https://www.oleionline.com' || 'http://localhost:3000', // Ajusta según sea necesario
+            origin:  process.env.ENVIRONMENT === 'production' ? 'https://www.oleionline.com' : 'http://localhost:3000', // Ajusta según sea necesario
             credentials: true // Esto es importante para las cookies de sesión
         }));
         this.app.use(express.json({ limit: '50mb' }));
