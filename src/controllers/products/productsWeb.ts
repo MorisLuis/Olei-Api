@@ -10,6 +10,9 @@ const getProducts = async (req: Request, res: Response) => {
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
+    console.log({sessionId})
+    console.log({userFR})
+
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
