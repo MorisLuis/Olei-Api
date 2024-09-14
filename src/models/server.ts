@@ -107,7 +107,7 @@ class Server {
                 resave: false,
                 saveUninitialized: false,
                 cookie: {
-                    secure:  false, /* 'auto' */
+                    secure:  true, /* 'auto' */
                     httpOnly: true,
                     //maxAge: oneYearInMilliseconds,
                     sameSite: 'lax'
@@ -127,6 +127,12 @@ class Server {
         }));
         this.app.use(express.json({ limit: '50mb' }));
         this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+        // Middleware para registrar el sessionId
+        this.app.use((req, res, next) => {
+            console.log('Session ID:', req.sessionID);
+            next();
+        });
     }
 
     routes() {
