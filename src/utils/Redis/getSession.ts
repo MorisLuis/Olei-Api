@@ -22,6 +22,8 @@ export const handleGetSession = async ({ sessionId }: handleGetSessionInterface)
 
 export const handleGetWebSession = async ({ sessionId }: handleGetSessionInterface) => {
 
+    console.log({sessionIdHGS: sessionId})
+
     try {
         const sessionData = await redisClient?.get(`sess:${sessionId}`);
         const session = JSON.parse(sessionData as string);
