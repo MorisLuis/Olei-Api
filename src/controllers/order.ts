@@ -35,7 +35,7 @@ const postOrder = async (req: Request, res: Response) => {
         await transaction.begin();
         const request = new sql.Request(transaction);
 
-        const TotalImpuesto = Total - Subtotal;
+        const TotalImpuesto = Total - Subtotal + 1;
         const CantLetra = numeroALetra(Total);
 
         const xmlDataSales = await convertArrayToXml(sellsData);
