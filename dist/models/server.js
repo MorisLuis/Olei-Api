@@ -59,7 +59,7 @@ class Server {
             port: 6379, */
             host: 'redis-15399.c82.us-east-1-2.ec2.redns.redis-cloud.com',
             port: 15399,
-            password: process.env.REDIS_PASSWORD
+            password: 'y48lv9CO4k0wVaUnW6W5MIbas9e0pjuq'
         });
         this.redis.on('connect', () => {
             console.log('Conectado a Redis');
@@ -78,7 +78,7 @@ class Server {
                 ttl: oneYearInSeconds,
             });
             this.app.use((0, express_session_1.default)({
-                secret: process.env.REDIS_SECRET,
+                secret: 's3Cr3tperra1112132*',
                 name: 'sid',
                 store: store,
                 resave: false,
