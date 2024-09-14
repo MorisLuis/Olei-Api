@@ -118,7 +118,7 @@ class Server {
 
     middlewares() {
         this.app.use(cors({
-            origin: 'http://localhost:3000', // Ajusta según sea necesario
+            origin: 'https://www.oleionline.com' || 'http://localhost:3000', // Ajusta según sea necesario
             credentials: true // Esto es importante para las cookies de sesión
         }));
         this.app.use(express.json({ limit: '50mb' }));
