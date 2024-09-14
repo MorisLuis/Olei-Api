@@ -82,7 +82,7 @@ class Server {
                 name: 'sid',
                 store: store,
                 resave: false,
-                saveUninitialized: false,
+                saveUninitialized: true,
                 cookie: {
                     secure: true, /* 'auto' */
                     httpOnly: true,
