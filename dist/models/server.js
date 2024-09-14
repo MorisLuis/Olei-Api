@@ -84,9 +84,9 @@ class Server {
                 resave: false,
                 saveUninitialized: false,
                 cookie: {
-                    secure: 'auto',
+                    secure: false, /* 'auto' */
                     httpOnly: true,
-                    maxAge: oneYearInMilliseconds, // MaxAge en milisegundos para la cookie
+                    //maxAge: oneYearInMilliseconds,
                     sameSite: 'lax'
                 }
             }));

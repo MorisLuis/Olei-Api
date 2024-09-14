@@ -75,6 +75,7 @@ class Server {
             /* host: '127.0.0.1',
             port: 6379, */
             host: 'redis-15399.c82.us-east-1-2.ec2.redns.redis-cloud.com',
+            
             port: 15399,
             password: 'y48lv9CO4k0wVaUnW6W5MIbas9e0pjuq'
         });
@@ -106,9 +107,9 @@ class Server {
                 resave: false,
                 saveUninitialized: false,
                 cookie: {
-                    secure:  'auto',
+                    secure:  false, /* 'auto' */
                     httpOnly: true,
-                    maxAge: oneYearInMilliseconds, // MaxAge en milisegundos para la cookie
+                    //maxAge: oneYearInMilliseconds,
                     sameSite: 'lax'
                 }
             }));
