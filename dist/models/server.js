@@ -18,11 +18,11 @@ const authRouter_1 = __importDefault(require("../routes/authRouter"));
 const searchRouter_1 = __importDefault(require("../routes/searchRouter"));
 const tablesRouter_1 = __importDefault(require("../routes/tablesRouter"));
 const orderRouter_1 = __importDefault(require("../routes/orderRouter"));
-const orderDetailsRouter_1 = __importDefault(require("../routes/orderDetailsRouter"));
 const clientRouter_1 = __importDefault(require("../routes/clientRouter"));
 const inventoryRouter_1 = __importDefault(require("../routes/inventoryRouter"));
 const costosRouter_1 = __importDefault(require("../routes/costosRouter"));
 const typeofmovementsRouter_1 = __importDefault(require("../routes/typeofmovementsRouter"));
+const utilsRouter_1 = __importDefault(require("../routes/utilsRouter"));
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -35,11 +35,11 @@ class Server {
             search: "/api/search",
             tables: "/api/tables",
             order: "/api/order",
-            orderDetails: "/api/orderDetails",
             client: "/api/client",
             inventory: "/api/inventory",
             costos: "/api/costos",
-            typeofmovements: "/api/typeofmovements"
+            typeofmovements: "/api/typeofmovements",
+            utils: "/api/utils"
         };
         this.connectDB();
         this.configureRedis();
@@ -108,11 +108,11 @@ class Server {
         this.app.use(this.paths.search, searchRouter_1.default);
         this.app.use(this.paths.tables, tablesRouter_1.default);
         this.app.use(this.paths.order, orderRouter_1.default);
-        this.app.use(this.paths.orderDetails, orderDetailsRouter_1.default);
         this.app.use(this.paths.client, clientRouter_1.default);
         this.app.use(this.paths.inventory, inventoryRouter_1.default);
         this.app.use(this.paths.costos, costosRouter_1.default);
         this.app.use(this.paths.typeofmovements, typeofmovementsRouter_1.default);
+        this.app.use(this.paths.utils, utilsRouter_1.default);
     }
     errorHandler() {
         this.app.use((err, req, res, next) => {

@@ -25,7 +25,6 @@ const postInventory = async (req, res) => {
         const Id_TipoMovInv = typeOfMovement?.Id_TipoMovInv;
         const ExpectedRows = inventoryDetails.length;
         const ExpectedTotalQuantity = inventoryDetails.reduce((sum, item) => sum + item.Cantidad, 0);
-        ;
         const transaction = new mssql_1.default.Transaction(pool);
         await transaction.begin();
         const request = new mssql_1.default.Request(transaction);

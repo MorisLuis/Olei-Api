@@ -20,7 +20,7 @@ const loginWeb = async (req, res) => {
         if (!mainPool) {
             return res.status(500).json({ error: 'Error connecting to the main database' });
         }
-        const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, ...user } = await getUserByEmailWeb(mainPool, email);
+        const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await getUserByEmailWeb(mainPool, email);
         if (!user) {
             return res.status(404).json({ error: 'Correo no encontrado' });
         }
@@ -44,7 +44,9 @@ const loginWeb = async (req, res) => {
             SwsinPrecio,
             TipoDocOO,
             TipoUsuario: user.TipoUsuario,
-            Id_Almacen: user.Id_Almacen
+            Id_Almacen: user.Id_Almacen,
+            Id_Usuario: UsuarioSQL,
+            PrecioIncIVA: 0
         };
         req.session.userWeb = datosDelUsuario;
         // Generar token JWT

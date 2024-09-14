@@ -1,41 +1,11 @@
-import { Request, Response } from 'express';
-import { closeDbConnection, dbConnection } from '../database';
 
 
-
-const getUtils = async (req: Request, res: Response) => {
-
-
-    try {
-
-        console.log(numeroALetra(500));        // Quinientos
-        console.log(numeroALetra(1234));       // Mil doscientos treinta y cuatro
-        console.log(numeroALetra(1234567));    // Un millón doscientos treinta y cuatro mil quinientos sesenta y siete
-        console.log(numeroALetra(123456789));
-
-
-        res.json({
-            ok: true
-        })
-
-    } catch (error: any) {
-        console.log({ getUtilsError: error });
-        res.status(500).send(error.message);
-    } finally {
-        await closeDbConnection();
-    }
-};
-
-export {
-    getUtils
-};
-
-function numeroALetra(num: number): string {
+export const numeroALetra = (num: number) => {
     const unidades: string[] = ["", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
     const decenas: string[] = ["", "diez", "veinte", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"];
     const especiales: string[] = ["", "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve"];
     const centenas: string[] = ["", "cien", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos"];
-    
+
     function convertirCentenas(num: number): string {
         if (num < 10) return unidades[num];
         if (num < 20) return especiales[num - 10];

@@ -3,8 +3,7 @@ import { dbConnection } from '../../database';
 import sql from 'mssql';
 import { handleGetWebSession } from '../../utils/Redis/getSession';
 import { productsWebQuerys } from '../../database/querys/productsWeb';
-import PorductInterface from '../../interface/product';
-import { checkImageExist, getProductWithImages, getProductsWithImage } from '../../utils/checkImageExists';
+import { getProductWithImages, getProductsWithImage } from '../../utils/checkImageExists';
 
 const getProducts = async (req: Request, res: Response) => {
 

@@ -39,6 +39,7 @@ export const querys = {
             UC.IdOLEI,
             UC.Nombre,
             UC.Vigencia,
+            UC.UsuarioSQL,
             UC.Id_ListPre
         FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
         JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] UC on U.Id_ClienteDBCLIENTES = UC.Id_Cliente
