@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -19,18 +10,17 @@ const costos_1 = require("../database/querys/costos");
 const uuid_1 = require("uuid");
 const identifyBarcodeType_1 = require("../utils/identifyBarcodeType");
 const getSession_1 = require("../utils/Redis/getSession");
-const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+const updateCostos = async (req, res) => {
     const sessionId = req.sessionID;
-    const { user: userFR } = yield (0, getSession_1.handleGetSession)({ sessionId });
+    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
         const transaction = new mssql_1.default.Transaction(pool);
-        yield transaction.begin();
+        await transaction.begin();
         if (!pool) {
             return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
         }
@@ -42,10 +32,10 @@ const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 isEAN13 = (0, identifyBarcodeType_1.verifyIfIsEAN13)(body.CodBar);
             }
             if (isEAN13) {
-                body.CodBar = (_a = body.CodBar) === null || _a === void 0 ? void 0 : _a.substring(1);
+                body.CodBar = body.CodBar?.substring(1);
             }
             if (!codigoParam || !Id_Marca) {
-                yield transaction.rollback();
+                await transaction.rollback();
                 return res.status(400).json({ error: 'Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.' });
             }
             const request = new mssql_1.default.Request(transaction);
@@ -68,15 +58,15 @@ const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                     request.input(key, mssql_1.default.NVarChar, body[key]);
                 }
             });
-            yield request.query(query);
-            yield transaction.commit();
+            await request.query(query);
+            await transaction.commit();
             res.json({
                 ok: true
             });
         }
         catch (error) {
             console.error({ error: error.stack || error.message });
-            yield transaction.rollback();
+            await transaction.rollback();
             res.status(500).json({ error: 'Hubo un error en la actualización de costos.' });
         }
     }
@@ -84,6 +74,6 @@ const updateCostos = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         console.error({ error: error.stack || error.message });
         res.status(500).json({ error: 'Hubo un error en la actualización de costos.' });
     }
-});
+};
 exports.updateCostos = updateCostos;
 //# sourceMappingURL=costos.js.map

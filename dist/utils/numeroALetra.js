@@ -1,27 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUtils = void 0;
-const database_1 = require("../database");
-const getUtils = async (req, res) => {
-    try {
-        console.log(numeroALetra(500)); // Quinientos
-        console.log(numeroALetra(1234)); // Mil doscientos treinta y cuatro
-        console.log(numeroALetra(1234567)); // Un millón doscientos treinta y cuatro mil quinientos sesenta y siete
-        console.log(numeroALetra(123456789));
-        res.json({
-            ok: true
-        });
-    }
-    catch (error) {
-        console.log({ getUtilsError: error });
-        res.status(500).send(error.message);
-    }
-    finally {
-        await (0, database_1.closeDbConnection)();
-    }
-};
-exports.getUtils = getUtils;
-function numeroALetra(num) {
+exports.numeroALetra = void 0;
+const numeroALetra = (num) => {
     const unidades = ["", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
     const decenas = ["", "diez", "veinte", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"];
     const especiales = ["", "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve"];
@@ -59,5 +39,6 @@ function numeroALetra(num) {
         return "Número fuera de rango"; // Para números mayores a mil millones
     }
     return convertirMiles(num).trim();
-}
-//# sourceMappingURL=utils.js.map
+};
+exports.numeroALetra = numeroALetra;
+//# sourceMappingURL=numeroALetra.js.map

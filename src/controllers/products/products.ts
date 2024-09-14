@@ -1,9 +1,9 @@
 import { Request, Response } from 'express'
 import { dbConnection, querys } from '../../database';
 import { productsQuerys } from '../../database/querys/products';
-import fetch from 'node-fetch';
 import { guessBarcodeType } from '../../utils/identifyBarcodeType';
 import { handleGetSession } from '../../utils/Redis/getSession';
+import { productsWebQuerys } from '../../database/querys/productsWeb';
 
 
 const getProducById = async (req: Request, res: Response) => {
@@ -38,10 +38,9 @@ const getProducById = async (req: Request, res: Response) => {
             .input("Marca", Marca)
             .input("ListaPrecios",  user.Id_ListPre)
             .input("Almacen", user.Id_Almacen)
-            .query(productsQuerys.getProducById);
+            .query(productsWebQuerys.getProducById);
 
         const product = result?.recordset[0];
-
         const baseSQL = baseclientes.trim().toLowerCase().split(',');
 
         if (baseSQL && baseSQL.length > 0) {
@@ -76,7 +75,7 @@ const getProducById = async (req: Request, res: Response) => {
 
             if (images.length > 0) {
                 // Se encontraron imágenes existentes
-                product.imagen = images;
+                product.imagenes = images;
             }
         }
 
@@ -87,19 +86,6 @@ const getProducById = async (req: Request, res: Response) => {
     }
 }
 
-const getTotalProducts = async (req: Request, res: Response) => {
-    const sessionId = req.sessionID;
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
-    }
-
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL} = userFR;
-    const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
-    const result = await pool?.request().query(productsQuerys.getTotalProducts);
-    res.json(result?.recordset[0][""]);
-};
 
 const getProductsByStock = async (req: Request, res: Response) => {
 
@@ -249,16 +235,6 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
 
 
 // Utils
-const checkImageExists = async (url: string): Promise<boolean> => {
-    try {
-        const response = await fetch(url, { method: 'HEAD' });
-        return response.ok;
-    } catch (error) {
-        console.error('Error during image check:', error);
-        return false;
-    }
-};
-
 interface getImageInterface {
     base?: string,
     products: any
@@ -294,11 +270,21 @@ const getImagesFromProducts = async ({
     return { products }
 }
 
+export const checkImageExists = async (url: string): Promise<boolean> => {
+    try {
+        const response = await fetch(url, { method: 'HEAD' });
+        return response.ok;
+    } catch (error) {
+        console.error('Error during image check:', error);
+        return false;
+    }
+};
+
 
 
 export {
     getProducById,
-    getTotalProducts,
+    //getTotalProducts,
     getProductsByStock,
     getTotalOfProductsByStock,
     getProductByStockAndCodeBar

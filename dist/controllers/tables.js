@@ -1,27 +1,24 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTables = void 0;
 const database_1 = require("../database");
-const getTables = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
+const getSession_1 = require("../utils/Redis/getSession");
+const getTables = async (req, res) => {
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    const { Serverweb, Baseweb } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
-        const FamiliasResult = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(database_1.querys.getFamilias));
-        const Familias = FamiliasResult === null || FamiliasResult === void 0 ? void 0 : FamiliasResult.recordset.map(familia => familia.Nombre);
-        const MarcaResult = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(database_1.querys.getMarcas));
-        const Marca = MarcaResult === null || MarcaResult === void 0 ? void 0 : MarcaResult.recordset.map(marca => marca.Nombre);
-        const FolioResult = yield (pool === null || pool === void 0 ? void 0 : pool.request().query(database_1.querys.getFolios));
-        const Folio = FolioResult === null || FolioResult === void 0 ? void 0 : FolioResult.recordset.map(folio => folio.Codigo);
+        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+        const FamiliasResult = await pool?.request().query(database_1.querys.getFamilias);
+        const Familias = FamiliasResult?.recordset.map(familia => familia.Nombre);
+        const MarcaResult = await pool?.request().query(database_1.querys.getMarcas);
+        const Marca = MarcaResult?.recordset.map(marca => marca.Nombre);
+        const FolioResult = await pool?.request().query(database_1.querys.getFolios);
+        const Folio = FolioResult?.recordset.map(folio => folio.Codigo);
         res.json({
             Familias,
             Marca,
@@ -33,8 +30,8 @@ const getTables = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.send(error.message);
     }
     finally {
-        yield (0, database_1.closeDbConnection)();
+        await (0, database_1.closeDbConnection)();
     }
-});
+};
 exports.getTables = getTables;
 //# sourceMappingURL=tables.js.map

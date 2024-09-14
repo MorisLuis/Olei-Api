@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -16,42 +7,25 @@ exports.getOrderDetails = exports.postOrderDetails = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const orders_1 = require("../database/querys/orders");
-const storageWeb_1 = require("../Storage/storageWeb");
-const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
-    // Get the user information from shared data, including the user's warehouse (Almacen)
-    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseWeb.trim());
-    const currentClient = (0, storageWeb_1.getClientData)(`${baseWeb.trim()}_${clientid}`);
-    let userAlmacen;
-    let userListPrice;
-    if (currentClient === null || currentClient === void 0 ? void 0 : currentClient.IsEmploye) {
-        userAlmacen = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_Almacen;
-        userListPrice = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_ListPre;
+const getSession_1 = require("../utils/Redis/getSession");
+const postOrderDetails = async (req, res) => {
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
     }
-    else {
-        userAlmacen = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_Almacen;
-        userListPrice = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_ListPre;
-    }
-    if (!currentClient) {
-        res.status(500).json({ error: 'Es necesario tener la información de el cliente' });
-        return;
-    }
-    ;
+    const { Serverweb, Baseweb, TipoDocOO, Id_Cliente, Id_Almacen, Id_ListPre } = userFR;
     try {
+        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         const postArray = req.body;
-        const Id_Almacen = userAlmacen;
-        const Id_ListPre = userListPrice;
-        const Id_Cliente = currentClient.Id_Cliente;
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
         const transaction = new mssql_1.default.Transaction(pool);
         try {
-            yield transaction.begin();
+            await transaction.begin();
             let count = 0;
             const orderDetails = []; // Store every orderDetails from the for.
             for (const postData of postArray) {
@@ -59,7 +33,7 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 count++;
                 postData.Cantidad = postData.Piezas;
                 const previewDataToPostOrderDetails = orders_1.orderQuerys.getPreviewDataToPostOrderDetails;
-                const result = yield request
+                const result = await request
                     .input("Codigo_Preview", postData.Codigo)
                     .input("Id_Marca_Preview", postData.Id_Marca)
                     .input("Id_Almacen_Preview", Id_Almacen)
@@ -71,7 +45,7 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
                     return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
                 }
                 postData.Id_Almacen = Id_Almacen;
-                postData.TipoDoc = currentUser === null || currentUser === void 0 ? void 0 : currentUser.TipoDocOO;
+                postData.TipoDoc = TipoDocOO;
                 postData.Serie = SerieActiva ? SerieActiva : "";
                 postData.Folio = (Folio ? Folio : 0) + 1;
                 postData.Id_ListaPrecios = Id_ListPre;
@@ -85,7 +59,7 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 postData.Impuesto = (postData.Precio * postData.Piezas * (postData.Impto / 100));
                 postData.Costo = Costo;
                 const postOrderDetailsQuery = orders_1.orderQuerys.insertOrderDetails;
-                const resultOrderPost = yield request
+                const resultOrderPost = await request
                     .input("Id_Almacen", mssql_1.default.Int, Id_Almacen)
                     .input("TipoDoc", mssql_1.default.SmallInt, 3)
                     .input("Serie", mssql_1.default.NChar(10), postData.Serie)
@@ -108,17 +82,17 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
                     .query(postOrderDetailsQuery);
                 orderDetails.push(resultOrderPost.recordset[0]);
             }
-            yield transaction.commit();
+            await transaction.commit();
             res.json(orderDetails);
         }
         catch (error) {
             console.log({ error });
-            yield transaction.rollback();
+            await transaction.rollback();
             throw error;
         }
         finally {
             if (pool) {
-                yield pool.close();
+                await pool.close();
             }
         }
     }
@@ -127,28 +101,28 @@ const postOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, functio
         res.status(500).json({ error: error });
     }
     finally {
-        yield (0, database_1.closeDbConnection)();
+        await (0, database_1.closeDbConnection)();
     }
-});
+};
 exports.postOrderDetails = postOrderDetails;
-const getOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
-    const { folio } = req.query;
-    if (!folio) {
-        res.status(500).json({ error: 'No se envio el folio' });
-        return;
+const getOrderDetails = async (req, res) => {
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
     }
+    const { Serverweb, Baseweb } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
+        const { folio } = req.query;
+        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
         ;
         const query = orders_1.orderQuerys.getOrderDetails;
-        const request = yield pool.request()
+        const request = await pool.request()
             .input('folio', mssql_1.default.Int, folio)
             .query(query);
         let orderDetails = request.recordset;
@@ -158,8 +132,8 @@ const getOrderDetails = (req, res) => __awaiter(void 0, void 0, void 0, function
         res.status(500).json({ error: error });
     }
     finally {
-        yield (0, database_1.closeDbConnection)();
+        await (0, database_1.closeDbConnection)();
     }
-});
+};
 exports.getOrderDetails = getOrderDetails;
 //# sourceMappingURL=orderDetails.js.map

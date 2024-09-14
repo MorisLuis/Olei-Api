@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -27,12 +18,11 @@ const authRouter_1 = __importDefault(require("../routes/authRouter"));
 const searchRouter_1 = __importDefault(require("../routes/searchRouter"));
 const tablesRouter_1 = __importDefault(require("../routes/tablesRouter"));
 const orderRouter_1 = __importDefault(require("../routes/orderRouter"));
-const orderDetailsRouter_1 = __importDefault(require("../routes/orderDetailsRouter"));
 const clientRouter_1 = __importDefault(require("../routes/clientRouter"));
 const inventoryRouter_1 = __importDefault(require("../routes/inventoryRouter"));
 const costosRouter_1 = __importDefault(require("../routes/costosRouter"));
-const statisticsRouter_1 = __importDefault(require("../routes/statisticsRouter"));
 const typeofmovementsRouter_1 = __importDefault(require("../routes/typeofmovementsRouter"));
+const utilsRouter_1 = __importDefault(require("../routes/utilsRouter"));
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -45,12 +35,11 @@ class Server {
             search: "/api/search",
             tables: "/api/tables",
             order: "/api/order",
-            orderDetails: "/api/orderDetails",
             client: "/api/client",
             inventory: "/api/inventory",
             costos: "/api/costos",
-            statistics: "/api/statistics",
-            typeofmovements: "/api/typeofmovements"
+            typeofmovements: "/api/typeofmovements",
+            utils: "/api/utils"
         };
         this.connectDB();
         this.configureRedis();
@@ -59,15 +48,15 @@ class Server {
         this.routes();
         this.errorHandler();
     }
-    connectDB() {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield (0, connection_1.dbConnection)();
-        });
+    async connectDB() {
+        await (0, connection_1.dbConnection)();
     }
     configureRedis() {
         this.redis = new ioredis_1.default({
-            host: process.env.REDIS_HOST || '127.0.0.1',
-            port: Number(process.env.REDIS_PORT) || 6379,
+            /* host: process.env.REDIS_HOST || '127.0.0.1',
+            port: Number(process.env.REDIS_PORT as string) || 6379, */
+            host: '127.0.0.1',
+            port: 6379,
             password: process.env.REDIS_PASSWORD
         });
         this.redis.on('connect', () => {
@@ -105,7 +94,10 @@ class Server {
         }
     }
     middlewares() {
-        this.app.use((0, cors_1.default)());
+        this.app.use((0, cors_1.default)({
+            origin: 'http://localhost:3000', // Ajusta según sea necesario
+            credentials: true // Esto es importante para las cookies de sesión
+        }));
         this.app.use(express_1.default.json({ limit: '50mb' }));
         this.app.use(express_1.default.urlencoded({ extended: true, limit: '50mb' }));
     }
@@ -116,12 +108,11 @@ class Server {
         this.app.use(this.paths.search, searchRouter_1.default);
         this.app.use(this.paths.tables, tablesRouter_1.default);
         this.app.use(this.paths.order, orderRouter_1.default);
-        this.app.use(this.paths.orderDetails, orderDetailsRouter_1.default);
         this.app.use(this.paths.client, clientRouter_1.default);
         this.app.use(this.paths.inventory, inventoryRouter_1.default);
         this.app.use(this.paths.costos, costosRouter_1.default);
-        this.app.use(this.paths.statistics, statisticsRouter_1.default);
         this.app.use(this.paths.typeofmovements, typeofmovementsRouter_1.default);
+        this.app.use(this.paths.utils, utilsRouter_1.default);
     }
     errorHandler() {
         this.app.use((err, req, res, next) => {

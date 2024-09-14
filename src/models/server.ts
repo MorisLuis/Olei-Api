@@ -13,12 +13,11 @@ import authRouter from "../routes/authRouter";
 import searchRouter from "../routes/searchRouter";
 import tablesRouter from "../routes/tablesRouter";
 import orderRouter from "../routes/orderRouter";
-import orderDetailsRouter from "../routes/orderDetailsRouter";
 import clientRouter from "../routes/clientRouter";
 import inventoryRouter from "../routes/inventoryRouter";
 import costosRouter from "../routes/costosRouter";
-import statisticsRouter from "../routes/statisticsRouter";
 import typeofmovementsRouter from "../routes/typeofmovementsRouter";
+import utilsRouter from "../routes/utilsRouter";
 
 class Server {
     public app: Application;
@@ -32,12 +31,11 @@ class Server {
         search: string,
         tables: string,
         order: string,
-        orderDetails: string,
         client: string,
         inventory: string,
         costos: string,
-        statistics: string,
-        typeofmovements: string
+        typeofmovements: string,
+        utils: string,
     };
 
     constructor() {
@@ -51,12 +49,11 @@ class Server {
             search: "/api/search",
             tables: "/api/tables",
             order: "/api/order",
-            orderDetails: "/api/orderDetails",
             client: "/api/client",
             inventory: "/api/inventory",
             costos: "/api/costos",
-            statistics: "/api/statistics",
-            typeofmovements: "/api/typeofmovements"
+            typeofmovements: "/api/typeofmovements",
+            utils: "/api/utils"
         };
 
         this.connectDB();
@@ -73,8 +70,10 @@ class Server {
 
     configureRedis() {
         this.redis = new Redis({
-            host: process.env.REDIS_HOST || '127.0.0.1',
-            port: Number(process.env.REDIS_PORT as string) || 6379,
+            /* host: process.env.REDIS_HOST || '127.0.0.1',
+            port: Number(process.env.REDIS_PORT as string) || 6379, */
+            host: '127.0.0.1',
+            port: 6379,
             password: process.env.REDIS_PASSWORD
         });
 
@@ -118,7 +117,10 @@ class Server {
     
 
     middlewares() {
-        this.app.use(cors());
+        this.app.use(cors({
+            origin: 'http://localhost:3000', // Ajusta según sea necesario
+            credentials: true // Esto es importante para las cookies de sesión
+        }));
         this.app.use(express.json({ limit: '50mb' }));
         this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));
     }
@@ -130,12 +132,12 @@ class Server {
         this.app.use(this.paths.search, searchRouter);
         this.app.use(this.paths.tables, tablesRouter);
         this.app.use(this.paths.order, orderRouter);
-        this.app.use(this.paths.orderDetails, orderDetailsRouter);
         this.app.use(this.paths.client, clientRouter);
         this.app.use(this.paths.inventory, inventoryRouter);
         this.app.use(this.paths.costos, costosRouter);
-        this.app.use(this.paths.statistics, statisticsRouter);
         this.app.use(this.paths.typeofmovements, typeofmovementsRouter);
+        this.app.use(this.paths.utils, utilsRouter);
+
     }
 
     errorHandler() {

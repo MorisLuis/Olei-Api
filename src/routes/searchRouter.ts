@@ -6,10 +6,11 @@ import { searchProductInventory } from "../controllers/search/search";
 
 const router = Router()
 
-router.get("/", validateJWTWeb, searchProduct)
-
+// App endpoints
 router.get("/inventory", validateJWT, searchProductInventory)
 
+// Web endpoints
+router.get("/", validateJWTWeb, searchProduct)
 router.get("/client", validateJWTWeb, searchClient)
 
 export default router;

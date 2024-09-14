@@ -1,209 +1,84 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllOrders = exports.getOrder = exports.postOrder = void 0;
+exports.getOrderDetails = exports.getAllOrders = exports.getOrder = exports.postOrder = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const orders_1 = require("../database/querys/orders");
-const currentTime_1 = require("../utils/currentTime");
-const storageWeb_1 = require("../Storage/storageWeb");
-const postOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
-    // Get the user information from shared data, including the user's warehouse (Almacen)
-    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseWeb.trim());
-    const currentClient = (0, storageWeb_1.getClientData)(`${baseWeb.trim()}_${clientid}`);
-    let userAlmacen;
-    let userListPrice;
-    if (currentClient === null || currentClient === void 0 ? void 0 : currentClient.IsEmploye) {
-        userAlmacen = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_Almacen;
-        userListPrice = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_ListPre;
+const getSession_1 = require("../utils/Redis/getSession");
+const convertArrayToXml_1 = require("../utils/convertArrayToXml");
+const numeroALetra_1 = require("../utils/numeroALetra");
+const postOrder = async (req, res) => {
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
     }
-    else {
-        userAlmacen = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_Almacen;
-        userListPrice = currentUser === null || currentUser === void 0 ? void 0 : currentUser.Id_ListPre;
-    }
-    if (!currentClient) {
-        res.status(500).json({ error: 'Es necesario tener la información de el cliente' });
-        return;
-    }
-    ;
+    const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
     try {
-        const postData = req.body;
-        const Id_Almacen = userAlmacen;
-        const Id_ListPre = userListPrice;
-        const Id_Usuario = process.env.DB_USER;
-        const TipoDocOO = currentUser === null || currentUser === void 0 ? void 0 : currentUser.TipoDocOO;
-        const Id_Cliente = currentClient.Id_Cliente;
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
+        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
-        if (!TipoDocOO) {
-            res.status(500).json({ error: 'No se tiene TipoDocOO' });
-            return;
-        }
+        ;
+        const { sellsDetails, sellsData } = req.body;
+        const { Subtotal, Total } = sellsData ?? {};
         const transaction = new mssql_1.default.Transaction(pool);
-        yield transaction.begin();
-        try {
-            const request = new mssql_1.default.Request(transaction);
-            const currentDate = (0, currentTime_1.currentTime)();
-            const previewDataToPostOrder = yield request
-                .input("Id_Almacen_Preview", Id_Almacen)
-                .input("Id_Cliente_Preview", Id_Cliente)
-                .query(orders_1.orderQuerys.getPreviewDataToPostOrder);
-            const results = previewDataToPostOrder.recordset[0];
-            if (!results) {
-                return res.status(404).json({ error: 'No se encontraron resultados en la consulta.' });
-            }
-            const { SerieActiva, Folio, Id_Descuento, Id_CondVta, Id_Vendedor, Id_FormaPago, Id_Transporte } = results;
-            postData.TipoDoc = TipoDocOO;
-            postData.Serie = SerieActiva ? SerieActiva : "";
-            postData.Folio = (Folio ? Folio : 0) + 1;
-            postData.Id_Cliente = Id_Cliente;
-            postData.Id_AlmacenClte = Id_Almacen;
-            postData.Fecha = currentDate;
-            postData.Total = postData.Total;
-            postData.Impuesto = postData.Total - postData.Subtotal;
-            postData.Subtotal = postData.Subtotal;
-            postData.Saldo = postData.Total;
-            postData.Id_Descuento = Id_Descuento;
-            postData.Id_CondVta = Id_CondVta;
-            postData.Id_Vendedor = Id_Vendedor;
-            postData.Id_FormaPago = Id_FormaPago;
-            postData.Id_Transporte = Id_Transporte;
-            postData.FechaLiq = postData.Fecha;
-            postData.Estado = 1;
-            postData.Moneda = 1;
-            postData.Paridad = 1;
-            postData.Suma = postData.Subtotal;
-            postData.Id_Usuario = Id_Usuario;
-            postData.CantDescuento = 0;
-            postData.Id_ListPre = Id_ListPre;
-            postData.Id_TipoPago = 1;
-            postData.TipoDocOrigen = 11;
-            const postOrderQuery = orders_1.orderQuerys.insertOrder;
-            const result = yield request
-                .input("Id_Almacen", mssql_1.default.Int, Id_Almacen)
-                .input("TipoDoc", mssql_1.default.SmallInt, postData.TipoDoc)
-                .input("Serie", mssql_1.default.NChar(10), postData.Serie)
-                .input("Folio", mssql_1.default.Int, postData.Folio)
-                .input("Id_Cliente", mssql_1.default.Int, postData.Id_Cliente)
-                .input("Id_AlmacenClte", mssql_1.default.Int, postData.Id_AlmacenClte)
-                .input("Fecha", mssql_1.default.DateTime, postData.Fecha)
-                .input("Subtotal", mssql_1.default.Money, postData.Subtotal)
-                .input("Impuesto", mssql_1.default.Decimal(18, 6), postData.Impuesto)
-                .input("Total", mssql_1.default.Money, postData.Total)
-                .input("Saldo", mssql_1.default.Money, postData.Saldo)
-                .input("Id_Descuento", mssql_1.default.Int, postData.Id_Descuento)
-                .input("Id_CondVta", mssql_1.default.Int, postData.Id_CondVta)
-                .input("Id_Vendedor", mssql_1.default.Int, postData.Id_Vendedor)
-                .input("Id_Formapago", mssql_1.default.Int, postData.Id_Formapago)
-                .input("Id_Transporte", mssql_1.default.Int, postData.Id_Transporte)
-                .input("FechaLiq", mssql_1.default.DateTime, postData.FechaLiq)
-                .input("Estado", mssql_1.default.SmallInt, postData.Estado)
-                .input("Notas", mssql_1.default.VarChar(4000), postData.Notas)
-                .input("DocsOrigen", mssql_1.default.VarChar(4000), postData.DocsOrigen)
-                .input("DocsDestino", mssql_1.default.VarChar(4000), postData.DocsDestino)
-                .input("TipoDocOrigen", mssql_1.default.SmallInt, postData.TipoDocOrigen)
-                .input("TipoDocDestino", mssql_1.default.SmallInt, postData.TipoDocDestino)
-                .input("Piezas", mssql_1.default.Numeric(18, 2), postData.Piezas)
-                .input("Retencion", mssql_1.default.Decimal(18, 6), postData.Retencion)
-                .input("RetencionIVA", mssql_1.default.Decimal(18, 6), postData.RetencionIVA)
-                .input("Moneda", mssql_1.default.Int, postData.Moneda)
-                .input("Paridad", mssql_1.default.Decimal(18, 6), postData.Paridad)
-                .input("TipoEntrega", mssql_1.default.SmallInt, postData.TipoEntrega)
-                .input("DatoOB1", mssql_1.default.NChar(100), postData.DatoOB1)
-                .input("DatoOB2", mssql_1.default.NChar(100), postData.DatoOB2)
-                .input("DatoOB3", mssql_1.default.NChar(100), postData.DatoOB3)
-                .input("NumCtaPago", mssql_1.default.NChar(30), postData.NumCtaPago)
-                .input("Suma", mssql_1.default.Decimal(18, 6), postData.Suma)
-                .input("SwImpOrg", mssql_1.default.Bit, postData.SwImpOrg)
-                .input("SwPag", mssql_1.default.Bit, postData.SwPag)
-                .input("Id_Usuario", mssql_1.default.NChar(50), postData.Id_Usuario)
-                .input("CantDescuento", mssql_1.default.Decimal(18, 6), postData.CantDescuento)
-                .input("Id_ListPre", mssql_1.default.Int, postData.Id_ListPre)
-                .input("CantLetra", mssql_1.default.VarChar(200), postData.CantLetra)
-                .input("Id_TipoPago", mssql_1.default.Int, postData.Id_TipoPago)
-                .input("Id_Uso", mssql_1.default.Int, postData.Id_Uso)
-                .input("ClaveConfirm", mssql_1.default.NChar(20), postData.ClaveConfirm)
-                .input("SwAnticipo", mssql_1.default.Bit, postData.SwAnticipo)
-                .input("SaldoAnticipo", mssql_1.default.Decimal(18, 6), postData.SaldoAnticipo)
-                .input("DocsRel", mssql_1.default.VarChar(200), postData.DocsRel)
-                .input("SwNotaAnticipo", mssql_1.default.Bit, postData.SwNotaAnticipo)
-                .input("ImporteNotaAnticipo", mssql_1.default.Decimal(18, 6), postData.ImporteNotaAnticipo)
-                .input("TipoRel", mssql_1.default.Int, postData.TipoRel)
-                .input("Id_FormaPago2", mssql_1.default.Int, postData.Id_FormaPago2)
-                .input("Id_FormaPago3", mssql_1.default.Int, postData.Id_FormaPago3)
-                .input("Pago1", mssql_1.default.Decimal(18, 6), postData.Pago1)
-                .input("Pago2", mssql_1.default.Decimal(18, 6), postData.Pago2)
-                .input("Pago3", mssql_1.default.Decimal(18, 6), postData.Pago3)
-                .input("Cambio", mssql_1.default.Decimal(18, 6), postData.Cambio)
-                .input("SwPagada", mssql_1.default.Bit, postData.SwPagada)
-                .input("FolioCaja", mssql_1.default.Int, postData.FolioCaja)
-                .input("Id_Chofer", mssql_1.default.Int, postData.Id_Chofer)
-                .input("FechaEntrega", mssql_1.default.DateTime, postData.FechaEntrega)
-                .query(postOrderQuery);
-            yield transaction.commit();
-            const order = result.recordset[0];
-            res.status(201).json(order);
-        }
-        catch (error) {
-            console.log({ error });
-            yield transaction.rollback();
-            throw error;
-        }
-        finally {
-            if (pool) {
-                yield pool.close();
-            }
-        }
+        await transaction.begin();
+        const request = new mssql_1.default.Request(transaction);
+        const TotalImpuesto = Total - Subtotal + 1;
+        const CantLetra = (0, numeroALetra_1.numeroALetra)(Total);
+        const xmlDataSales = await (0, convertArrayToXml_1.convertArrayToXml)(sellsData);
+        const xmlDataSalesDetails = await (0, convertArrayToXml_1.convertArrayToXml)(sellsDetails);
+        const result = await request
+            .input('xmlDataSales', mssql_1.default.Xml, xmlDataSales)
+            .input('xmlDataSalesDetails', mssql_1.default.Xml, xmlDataSalesDetails)
+            .input('Id_Usuario', mssql_1.default.Int, 1)
+            .input('Id_Almacen', mssql_1.default.Int, Id_Almacen)
+            .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
+            .input('Id_ListPre', mssql_1.default.Int, Id_ListPre)
+            .input('TipoDoc', mssql_1.default.Int, TipoDocOO)
+            .input('CantLetra', mssql_1.default.VarChar, CantLetra)
+            .input('TotalImpuesto', mssql_1.default.Decimal, TotalImpuesto)
+            .output('Folio', mssql_1.default.Int)
+            .execute('fn_ExecuteSales');
+        await transaction.commit();
+        const folio = result.recordset[0].Folio;
+        res.status(201).json({
+            ok: true,
+            folio
+        });
     }
     catch (error) {
         console.error('Error al crear el post:', error);
         res.status(500).json({ error: error });
     }
     finally {
-        yield (0, database_1.closeDbConnection)();
+        await (0, database_1.closeDbConnection)();
     }
-});
+};
 exports.postOrder = postOrder;
-const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
-    // Get the user information from shared data, including the user's warehouse (Almacen)
-    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseWeb.trim());
-    const currentClient = (0, storageWeb_1.getClientData)(`${baseWeb.trim()}_${clientid}`);
-    const { folio } = req.params;
-    const Id_Cliente = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_Cliente;
-    const TipoDocOO = currentUser === null || currentUser === void 0 ? void 0 : currentUser.TipoDocOO;
-    if (!currentClient) {
-        res.status(500).json({ error: 'Es necesario tener la información de el cliente' });
-        return;
+const getOrder = async (req, res) => {
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
     }
-    ;
+    const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
+        const { folio } = req.params;
+        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
         const getOrderQuery = orders_1.orderQuerys.getOrder;
-        const request = yield pool.request()
+        const request = await pool.request()
             .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
             .input('folio', mssql_1.default.Int, folio)
             .input('TipoDocOO', TipoDocOO)
@@ -215,32 +90,26 @@ const getOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(500).json({ error: error });
     }
     finally {
-        yield (0, database_1.closeDbConnection)();
+        await (0, database_1.closeDbConnection)();
     }
-});
+};
 exports.getOrder = getOrder;
-const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const serverWeb = req.serverweb;
-    const baseWeb = req.baseweb;
-    const clientid = req.clientid;
-    // Get the user information from shared data, including the user's warehouse (Almacen)
-    const currentUser = (0, storageWeb_1.getUserDataWeb)(baseWeb.trim());
-    const currentClient = (0, storageWeb_1.getClientData)(`${baseWeb.trim()}_${clientid}`);
-    const Id_Cliente = currentClient === null || currentClient === void 0 ? void 0 : currentClient.Id_Cliente;
-    const TipoDocOO = currentUser === null || currentUser === void 0 ? void 0 : currentUser.TipoDocOO;
-    if (!currentClient) {
-        res.status(500).json({ error: 'Es necesario tener la información de el cliente' });
-        return;
+const getAllOrders = async (req, res) => {
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
     }
-    ;
+    const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
     try {
-        const pool = yield (0, database_1.dbConnection)(serverWeb, baseWeb);
+        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
             res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
             return;
         }
         const query = orders_1.orderQuerys.getAllOrders;
-        const request = yield pool.request()
+        const request = await pool.request()
             .input('TipoDocOO', TipoDocOO)
             .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
             .query(query);
@@ -252,8 +121,40 @@ const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         res.status(500).json({ error: error });
     }
     finally {
-        yield (0, database_1.closeDbConnection)();
+        await (0, database_1.closeDbConnection)();
     }
-});
+};
 exports.getAllOrders = getAllOrders;
+const getOrderDetails = async (req, res) => {
+    // Get session from REDIS.
+    const sessionId = req.sessionID;
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        return res.status(400).json({ error: 'Sesion terminada' });
+    }
+    ;
+    const { Serverweb, Baseweb } = userFR;
+    try {
+        const { folio } = req.query;
+        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+        if (!pool) {
+            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            return;
+        }
+        ;
+        const query = orders_1.orderQuerys.getOrderDetails;
+        const request = await pool.request()
+            .input('folio', mssql_1.default.Int, folio)
+            .query(query);
+        let orderDetails = request.recordset;
+        res.json(orderDetails);
+    }
+    catch (error) {
+        res.status(500).json({ error: error });
+    }
+    finally {
+        await (0, database_1.closeDbConnection)();
+    }
+};
+exports.getOrderDetails = getOrderDetails;
 //# sourceMappingURL=order.js.map

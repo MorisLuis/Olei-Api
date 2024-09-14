@@ -131,6 +131,8 @@ const login = async (req: Request, res: Response) => {
             }
         }
 
+
+
         return res.json({
             userStorage,
             token
@@ -143,8 +145,6 @@ const login = async (req: Request, res: Response) => {
 };
 
 const renewDB = async (req: Request, res: Response) => {
-
-    console.log("renewDB")
 
     // Get session from REDIS.
     const sessionId = req.sessionID;
@@ -197,7 +197,6 @@ const renewDB = async (req: Request, res: Response) => {
 }
 
 const renewLogin = async (req: Request, res: Response) => {
-    console.log("renewLogin")
 
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
@@ -268,13 +267,8 @@ const logoutUser = async (req: Request, res: Response) => {
 }
 
 const logoutDB = async (req: Request, res: Response) => {
+
     const sessionId = req.sessionID;
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
-    }
-
     if (!sessionId) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
@@ -282,9 +276,7 @@ const logoutDB = async (req: Request, res: Response) => {
     try {
 
         await handleDeleteRedisSession({ sessionId });
-
         await closeDbConnection()
-
         res.json({ ok: true })
 
     } catch (error: any) {
