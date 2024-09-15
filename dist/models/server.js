@@ -85,9 +85,9 @@ class Server {
                 saveUninitialized: true,
                 cookie: {
                     secure: false,
-                    httpOnly: false,
+                    httpOnly: true,
                     maxAge: 1000 * 60 * 30, // session max age in milliseconds
-                    sameSite: 'none'
+                    sameSite: process.env.ENVIRONMENT === 'production' ? 'none' : 'lax', // 'none' para permitir cross-site cookies
                 }
             }));
         }
