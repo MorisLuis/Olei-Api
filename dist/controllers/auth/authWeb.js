@@ -12,7 +12,6 @@ const getSession_1 = require("../../utils/Redis/getSession");
 const deleteRedis_1 = require("../../utils/Redis/deleteRedis");
 const loginWeb = async (req, res) => {
     const { email, password } = req.body;
-    console.log({ req: req.headers });
     if (email === "" || password === "") {
         return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
     }
@@ -50,10 +49,8 @@ const loginWeb = async (req, res) => {
             PrecioIncIVA: 0
         };
         const sessionId1 = req.sessionID;
-        console.log({ sessionId1 });
         req.session.userWeb = datosDelUsuario;
         const sessionId2 = req.sessionID;
-        console.log({ sessionId2 });
         // Generar token JWT
         const token = await (0, generate_jwt_1.generateWebJWT)({ Id: user.Id_UsuarioOOL.trim() });
         return res.json({

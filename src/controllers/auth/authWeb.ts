@@ -9,7 +9,6 @@ import { handleDeleteRedisSession } from '../../utils/Redis/deleteRedis';
 
 const loginWeb = async (req: Request, res: Response) => {
     const { email, password } = req.body;
-    console.log({req: req.headers})
 
     if (email === "" || password === "") {
         return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
@@ -55,11 +54,9 @@ const loginWeb = async (req: Request, res: Response) => {
         };
 
         const sessionId1 = req.sessionID;
-        console.log({sessionId1});
 
         (req.session as any).userWeb = datosDelUsuario;
         const sessionId2 = req.sessionID;
-        console.log({sessionId2})
 
         // Generar token JWT
         const token = await generateWebJWT({ Id: user.Id_UsuarioOOL.trim() });
