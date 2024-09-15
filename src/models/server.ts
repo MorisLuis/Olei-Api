@@ -104,7 +104,7 @@ class Server {
                 name: 'sid',
                 store: store,
                 resave: false,
-                saveUninitialized: true,
+                saveUninitialized: false,
                 cookie: {
                     secure: false,
                     httpOnly: true,
