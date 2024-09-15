@@ -19,8 +19,22 @@ export const handleGetSession = async ({ sessionId }: handleGetSessionInterface)
 
 }
 
-
 export const handleGetWebSession = async ({ sessionId }: handleGetSessionInterface) => {
+
+
+    try {
+        const sessionData = await redisClient?.get(`sess:${sessionId}`);
+        const session = JSON.parse(sessionData as string);
+        const user = session.user;    
+        return { user }
+    } catch (error) {
+        console.log({error})
+        return { user : undefined }
+    }
+
+}
+
+/* export const handleGetWebSession = async ({ sessionId }: handleGetSessionInterface) => {
 
     try {
         const sessionData = await redisClient?.get(`sess:${sessionId}`);
@@ -32,4 +46,4 @@ export const handleGetWebSession = async ({ sessionId }: handleGetSessionInterfa
         return { user : undefined }
     }
 
-}
+} */

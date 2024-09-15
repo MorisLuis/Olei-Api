@@ -19,13 +19,26 @@ const handleGetWebSession = async ({ sessionId }) => {
     try {
         const sessionData = await server_1.redisClient?.get(`sess:${sessionId}`);
         const session = JSON.parse(sessionData);
-        const user = session.userWeb;
+        const user = session.user;
         return { user };
     }
     catch (error) {
-        console.log({ errorGS: error });
+        console.log({ error });
         return { user: undefined };
     }
 };
 exports.handleGetWebSession = handleGetWebSession;
+/* export const handleGetWebSession = async ({ sessionId }: handleGetSessionInterface) => {
+
+    try {
+        const sessionData = await redisClient?.get(`sess:${sessionId}`);
+        const session = JSON.parse(sessionData as string);
+        const user : UserWebSessionInterface = session.userWeb;
+        return { user }
+    } catch (error) {
+        console.log({errorGS: error})
+        return { user : undefined }
+    }
+
+} */ 
 //# sourceMappingURL=getSession.js.map

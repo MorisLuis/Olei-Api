@@ -50,7 +50,7 @@ const loginWeb = async (req, res) => {
         };
         const sessionId1 = req.sessionID;
         console.log({ sessionId1 });
-        req.session.userWeb = datosDelUsuario;
+        req.session.user = datosDelUsuario;
         const sessionId2 = req.sessionID;
         console.log({ sessionId2 });
         // Generar token JWT

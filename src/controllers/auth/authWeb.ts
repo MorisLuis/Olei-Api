@@ -56,7 +56,7 @@ const loginWeb = async (req: Request, res: Response) => {
         const sessionId1 = req.sessionID;
         console.log({sessionId1});
 
-        (req.session as any).userWeb = datosDelUsuario;
+        (req.session as any).user = datosDelUsuario;
         const sessionId2 = req.sessionID;
         console.log({sessionId2})
 
