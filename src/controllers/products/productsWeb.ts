@@ -8,7 +8,10 @@ import { getProductWithImages, getProductsWithImage } from '../../utils/checkIma
 const getProducts = async (req: Request, res: Response) => {
 
     const sessionId = req.sessionID;
+    const session = req.session;
     console.log({req});
+    console.log("__________")
+    console.log({session})
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
