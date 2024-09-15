@@ -96,7 +96,7 @@ class Server {
         }
     }
     middlewares() {
-        const allowedOrigins = ['https://www.oleionline.com', 'http://localhost:3000'];
+        const allowedOrigins = ['https://www.oleionline.com', 'http://localhost:3000', 'https://seahorse-app-spuvc.ondigitalocean.app'];
         const corsOptions = {
             origin: (origin, callback) => {
                 if (!origin || allowedOrigins.includes(origin)) {
