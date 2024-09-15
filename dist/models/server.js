@@ -78,8 +78,8 @@ class Server {
                 ttl: oneYearInSeconds,
             });
             this.app.use((0, express_session_1.default)({
-                secret: 's3Cr3tperra1112132*',
-                name: 'sessionId',
+                secret: 's3Cr3tperra1112132',
+                name: 'sessionID',
                 store: store,
                 resave: false,
                 saveUninitialized: true,
@@ -87,7 +87,7 @@ class Server {
                     secure: 'auto',
                     httpOnly: true,
                     maxAge: 1000 * 60 * 30, // session max age in milliseconds
-                    sameSite: 'none'
+                    sameSite: 'lax'
                 }
             }));
         }

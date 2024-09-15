@@ -109,7 +109,7 @@ class Server {
                     secure: 'auto',
                     httpOnly: true,
                     maxAge: 1000 * 60 * 30, // session max age in milliseconds
-                    sameSite: 'none'
+                    sameSite: 'lax'
                 }
             }));
         } else {
