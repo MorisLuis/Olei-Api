@@ -106,7 +106,7 @@ class Server {
                 resave: false,
                 saveUninitialized: true,
                 cookie: {
-                    secure: true,
+                    secure: false,
                     httpOnly: false,
                     maxAge: 1000 * 60 * 30, // session max age in milliseconds
                     sameSite: 'none'
