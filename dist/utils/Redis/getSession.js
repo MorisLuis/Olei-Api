@@ -18,6 +18,7 @@ exports.handleGetSession = handleGetSession;
 const handleGetWebSession = async ({ sessionId }) => {
     try {
         const sessionData = await server_1.redisClient?.get(`sess:${sessionId}`);
+        console.log({ sessionData });
         const session = JSON.parse(sessionData);
         const user = session.userWeb;
         return { user };

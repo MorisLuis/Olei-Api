@@ -12,8 +12,7 @@ const checkImageExists_1 = require("../../utils/checkImageExists");
 const getProducts = async (req, res) => {
     const sessionId = req.sessionID;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    console.log({ sessionId });
-    console.log({ req: req.headers });
+    console.log("getProducts======");
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }

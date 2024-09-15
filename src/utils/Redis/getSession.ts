@@ -23,6 +23,7 @@ export const handleGetWebSession = async ({ sessionId }: handleGetSessionInterfa
 
     try {
         const sessionData = await redisClient?.get(`sess:${sessionId}`);
+        console.log({sessionData})
         const session = JSON.parse(sessionData as string);
         const user : UserWebSessionInterface = session.userWeb;    
         return { user }
