@@ -8,9 +8,8 @@ import { getProductWithImages, getProductsWithImage } from '../../utils/checkIma
 const getProducts = async (req: Request, res: Response) => {
 
     const sessionId = req.sessionID;
+    console.log({req});
     const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    console.log("getProducts======")
 
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
