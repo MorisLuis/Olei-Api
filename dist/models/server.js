@@ -84,10 +84,10 @@ class Server {
                 resave: false,
                 saveUninitialized: true,
                 cookie: {
-                    secure: false,
+                    secure: 'auto',
                     httpOnly: true,
                     maxAge: 1000 * 60 * 30, // session max age in milliseconds
-                    sameSite: 'lax'
+                    sameSite: 'none'
                 }
             }));
         }
