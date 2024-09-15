@@ -100,8 +100,8 @@ class Server {
             }) as Store;
 
             this.app.use(session({
-                secret: 's3Cr3tperra1112132*',
-                name: 'sessionId',
+                secret: 's3Cr3tperra1112132',
+                name: 'sessionID',
                 store: store,
                 resave: false,
                 saveUninitialized: true,
