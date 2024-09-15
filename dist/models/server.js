@@ -79,14 +79,14 @@ class Server {
             });
             this.app.use((0, express_session_1.default)({
                 secret: 's3Cr3tperra1112132*',
-                name: 'sid',
+                name: 'sessionId',
                 store: store,
                 resave: false,
                 saveUninitialized: true,
                 cookie: {
-                    secure: 'auto', /* 'auto' */
+                    secure: false,
                     httpOnly: true,
-                    //maxAge: oneYearInMilliseconds,
+                    maxAge: 1000 * 60 * 30, // session max age in milliseconds
                     sameSite: 'lax'
                 }
             }));
@@ -96,11 +96,19 @@ class Server {
         }
     }
     middlewares() {
-        this.app.use((0, cors_1.default)({
-            //origin:  process.env.ENVIRONMENT === 'production' ? 'https://www.oleionline.com' : 'http://localhost:3000', // Ajusta según sea necesario
-            origin: 'https://www.oleionline.com',
-            credentials: true // Esto es importante para las cookies de sesión
-        }));
+        const allowedOrigins = ['https://www.oleionline.com', 'http://localhost:3000'];
+        const corsOptions = {
+            origin: (origin, callback) => {
+                if (!origin || allowedOrigins.includes(origin)) {
+                    callback(null, true);
+                }
+                else {
+                    callback(new Error('Not allowed by CORS'));
+                }
+            },
+            credentials: true
+        };
+        this.app.use((0, cors_1.default)(corsOptions));
         this.app.use(express_1.default.json({ limit: '50mb' }));
         this.app.use(express_1.default.urlencoded({ extended: true, limit: '50mb' }));
         // Middleware para registrar el sessionId

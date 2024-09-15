@@ -21,14 +21,13 @@ export const handleGetSession = async ({ sessionId }: handleGetSessionInterface)
 
 export const handleGetWebSession = async ({ sessionId }: handleGetSessionInterface) => {
 
-
     try {
         const sessionData = await redisClient?.get(`sess:${sessionId}`);
         const session = JSON.parse(sessionData as string);
-        const user = session.user;    
+        const user : UserWebSessionInterface = session.userWeb;    
         return { user }
     } catch (error) {
-        console.log({error})
+        console.log({errorGS: error})
         return { user : undefined }
     }
 

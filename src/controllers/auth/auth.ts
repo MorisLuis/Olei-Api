@@ -69,6 +69,7 @@ const loginDB = async (req: Request, res: Response) => {
 
 const login = async (req: Request, res: Response) => {
 
+
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
 

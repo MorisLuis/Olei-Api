@@ -11,7 +11,7 @@ const validate_jwt_1 = require("../helpers/validate-jwt");
 const productsWeb_1 = require("../controllers/products/productsWeb");
 const router = (0, express_1.default)();
 // Web endpoints
-router.get("/", validate_jwt_1.validateJWTWeb, productsWeb_1.getProducts);
+router.get("/", productsWeb_1.getProducts);
 router.get("/web/:id", validate_jwt_1.validateJWTWeb, productsWeb_1.getProducByIdWeb);
 router.get("/count", productsWeb_1.getTotalProducts);
 // App endpoints

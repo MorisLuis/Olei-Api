@@ -19,11 +19,11 @@ const handleGetWebSession = async ({ sessionId }) => {
     try {
         const sessionData = await server_1.redisClient?.get(`sess:${sessionId}`);
         const session = JSON.parse(sessionData);
-        const user = session.user;
+        const user = session.userWeb;
         return { user };
     }
     catch (error) {
-        console.log({ error });
+        console.log({ errorGS: error });
         return { user: undefined };
     }
 };

@@ -75,7 +75,6 @@ class Server {
             /* host: '127.0.0.1',
             port: 6379, */
             host: 'redis-15399.c82.us-east-1-2.ec2.redns.redis-cloud.com',
-            
             port: 15399,
             password: 'y48lv9CO4k0wVaUnW6W5MIbas9e0pjuq'
         });
@@ -94,22 +93,22 @@ class Server {
             // Define el TTL y maxAge en segundos y milisegundos
             const oneYearInSeconds = 31536000; // 1 año en segundos
             const oneYearInMilliseconds = oneYearInSeconds * 1000; // 1 año en milisegundos
-    
+
             const store = new RedisStore({
                 client: this.redis,
                 ttl: oneYearInSeconds,
             }) as Store;
-    
+
             this.app.use(session({
                 secret: 's3Cr3tperra1112132*',
-                name: 'sid',
+                name: 'sessionId',
                 store: store,
                 resave: false,
                 saveUninitialized: true,
                 cookie: {
-                    secure:  'auto', /* 'auto' */
+                    secure: false,
                     httpOnly: true,
-                    //maxAge: oneYearInMilliseconds,
+                    maxAge: 1000 * 60 * 30, // session max age in milliseconds
                     sameSite: 'lax'
                 }
             }));
@@ -117,14 +116,24 @@ class Server {
             console.error('Redis no está configurado, las sesiones no se almacenarán en Redis');
         }
     }
-    
+
 
     middlewares() {
-        this.app.use(cors({
-            //origin:  process.env.ENVIRONMENT === 'production' ? 'https://www.oleionline.com' : 'http://localhost:3000', // Ajusta según sea necesario
-            origin: 'https://www.oleionline.com',
-            credentials: true // Esto es importante para las cookies de sesión
-        }));
+        const allowedOrigins = ['https://www.oleionline.com', 'http://localhost:3000'];
+
+        const corsOptions = {
+            origin: (origin: any, callback: any) => {
+                if (!origin || allowedOrigins.includes(origin)) {
+                    callback(null, true);
+                } else {
+                    callback(new Error('Not allowed by CORS'));
+                }
+            },
+            credentials: true
+        };
+
+        this.app.use(cors(corsOptions));
+
         this.app.use(express.json({ limit: '50mb' }));
         this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
