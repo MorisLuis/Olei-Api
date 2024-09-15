@@ -79,15 +79,15 @@ class Server {
             });
             this.app.use((0, express_session_1.default)({
                 secret: 's3Cr3tperra1112132',
-                name: 'sessionID',
+                name: 'sid',
                 store: store,
                 resave: false,
                 saveUninitialized: true,
                 cookie: {
-                    secure: 'auto',
-                    httpOnly: false,
+                    secure: true,
+                    httpOnly: true,
                     maxAge: 1000 * 60 * 30, // session max age in milliseconds
-                    sameSite: 'lax'
+                    sameSite: 'none'
                 }
             }));
         }
