@@ -120,7 +120,7 @@ class Server {
             'http://localhost:3000'
         ];
 
-        const corsOptions = {
+        /* const corsOptions = {
             origin: (origin: any, callback: any) => {
                 if (!origin || allowedOrigins.includes(origin)) {
                     callback(null, true);
@@ -129,9 +129,12 @@ class Server {
                 }
             },
             credentials: true
-        };
+        }; */
 
-        this.app.use(cors(corsOptions));
+        this.app.use(cors({
+            origin: 'https://www.oleionline.com/',
+            credentials: true
+        }));
 
         this.app.use(express.json({ limit: '50mb' }));
         this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));

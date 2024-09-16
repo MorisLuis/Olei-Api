@@ -96,18 +96,20 @@ class Server {
             'https://www.oleionline.com/',
             'http://localhost:3000'
         ];
-        const corsOptions = {
-            origin: (origin, callback) => {
+        /* const corsOptions = {
+            origin: (origin: any, callback: any) => {
                 if (!origin || allowedOrigins.includes(origin)) {
                     callback(null, true);
-                }
-                else {
+                } else {
                     callback(new Error('Not allowed by CORS'));
                 }
             },
             credentials: true
-        };
-        this.app.use((0, cors_1.default)(corsOptions));
+        }; */
+        this.app.use((0, cors_1.default)({
+            origin: 'https://www.oleionline.com/',
+            credentials: true
+        }));
         this.app.use(express_1.default.json({ limit: '50mb' }));
         this.app.use(express_1.default.urlencoded({ extended: true, limit: '50mb' }));
         // Middleware para registrar el sessionId
