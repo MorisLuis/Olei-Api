@@ -53,10 +53,7 @@ const loginWeb = async (req: Request, res: Response) => {
             PrecioIncIVA: 0
         };
 
-        const sessionId1 = req.sessionID;
-
         (req.session as any).userWeb = datosDelUsuario;
-        const sessionId2 = req.sessionID;
 
         // Generar token JWT
         const token = await generateWebJWT({ Id: user.Id_UsuarioOOL.trim() });

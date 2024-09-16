@@ -103,8 +103,8 @@ class Server {
                 saveUninitialized: false,
                 cookie: {
                     secure: true,
-                    httpOnly: true,
-                    maxAge: oneYearInMilliseconds,
+                    httpOnly: false,
+                    maxAge: 3600000,
                     sameSite: 'lax'
                 }
             }));
