@@ -83,7 +83,7 @@ class Server {
                     secure: 'auto',
                     httpOnly: true,
                     maxAge: oneYearInMilliseconds,
-                    sameSite: 'lax'
+                    sameSite: 'none'
                 }
             }));
         }
