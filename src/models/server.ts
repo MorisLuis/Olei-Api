@@ -99,7 +99,7 @@ class Server {
                 secret: process.env.REDIS_SECRET as string,
                 name: 'sid',
                 store: store,
-                resave: true,
+                resave: false,
                 saveUninitialized: false,
                 cookie: {
                     secure: 'auto',
