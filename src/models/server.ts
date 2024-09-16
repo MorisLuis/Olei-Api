@@ -102,7 +102,8 @@ class Server {
                 resave: false,
                 saveUninitialized: false,
                 cookie: {
-                    secure:  'auto',
+                    domain: '.oleionline.com/',
+                    secure:  true,
                     httpOnly: true,
                     sameSite: 'none'
                 }
