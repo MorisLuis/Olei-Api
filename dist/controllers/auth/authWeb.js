@@ -49,6 +49,15 @@ const loginWeb = async (req, res) => {
             PrecioIncIVA: 0
         };
         req.session.userWeb = datosDelUsuario;
+        // Guardar manualmente la sesión después de modificarla
+        req.session.save((err) => {
+            if (err) {
+                console.error('Error al guardar la sesión:', err);
+            }
+            else {
+                console.log('Sesión guardada exitosamente.');
+            }
+        });
         // Generar token JWT
         const token = await (0, generate_jwt_1.generateWebJWT)({ Id: user.Id_UsuarioOOL.trim() });
         return res.json({
