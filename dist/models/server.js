@@ -53,13 +53,9 @@ class Server {
     }
     configureRedis() {
         this.redis = new ioredis_1.default({
-            /* host: process.env.ENVIRONMENT === 'production' ? process.env.REDIS_HOST : '127.0.0.1',
-            port: process.env.ENVIRONMENT === 'production' ? Number(process.env.REDIS_PORT as string) : 6379, */
-            /* host: '127.0.0.1',
-            port: 6379, */
-            host: 'redis-15399.c82.us-east-1-2.ec2.redns.redis-cloud.com',
-            port: 15399,
-            password: 'y48lv9CO4k0wVaUnW6W5MIbas9e0pjuq'
+            host: process.env.REDIS_HOST || '127.0.0.1',
+            port: Number(process.env.REDIS_PORT) || 6379,
+            password: process.env.REDIS_PASSWORD
         });
         this.redis.on('connect', () => {
             console.log('Conectado a Redis');
@@ -71,23 +67,23 @@ class Server {
     configureSessions() {
         if (this.redis) {
             // Define el TTL y maxAge en segundos y milisegundos
-            const oneYearInSeconds = 31536000; // 1 año en segundos
-            const oneYearInMilliseconds = oneYearInSeconds * 1000; // 1 año en milisegundos
+            const oneYearInSeconds = 28800; // 8 horas
+            const oneYearInMilliseconds = oneYearInSeconds * 1000; // 8 horas en milisegundos
             const store = new connect_redis_1.default({
                 client: this.redis,
                 ttl: oneYearInSeconds,
             });
             this.app.use((0, express_session_1.default)({
-                secret: 's3Cr3tperra1112132',
+                secret: process.env.REDIS_SECRET,
                 name: 'sid',
                 store: store,
-                resave: false,
+                resave: true,
                 saveUninitialized: false,
                 cookie: {
-                    secure: false,
+                    secure: 'auto',
                     httpOnly: true,
-                    maxAge: 1000 * 60 * 30, // session max age in milliseconds
-                    sameSite: process.env.ENVIRONMENT === 'production' ? 'none' : 'lax', // 'none' para permitir cross-site cookies
+                    maxAge: oneYearInMilliseconds,
+                    sameSite: 'lax'
                 }
             }));
         }
@@ -98,8 +94,7 @@ class Server {
     middlewares() {
         const allowedOrigins = [
             'https://www.oleionline.com',
-            'http://localhost:3000',
-            'www.oleionline.com'
+            'http://localhost:3000'
         ];
         const corsOptions = {
             origin: (origin, callback) => {
