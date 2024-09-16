@@ -4,6 +4,6 @@ import { validateJWTWeb } from "../helpers/validate-jwt";
 
 
 const router = Router();
-router.post('/', validateJWTWeb, selectClient)
+router.post('/', selectClient)
 
 export default router;
