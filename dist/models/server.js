@@ -82,7 +82,7 @@ class Server {
                 cookie: {
                     secure: 'auto',
                     httpOnly: true,
-                    sameSite: 'lax'
+                    sameSite: 'none'
                 }
             }));
         }
