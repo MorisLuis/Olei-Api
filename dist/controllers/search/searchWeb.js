@@ -48,6 +48,7 @@ exports.searchProduct = searchProduct;
 const searchClient = async (req, res) => {
     // Get session from REDIS.
     const sessionId = req.sessionID;
+    console.log({ sessionINSEARCHCLIENT: sessionId });
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });

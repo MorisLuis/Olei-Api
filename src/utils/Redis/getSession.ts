@@ -27,7 +27,7 @@ export const handleGetWebSession = async ({ sessionId }: handleGetSessionInterfa
         const user : UserWebSessionInterface = session.userWeb;    
         return { user }
     } catch (error) {
-        console.log({errorGS: error})
+        //console.log({errorGS: error})
         return { user : undefined }
     }
 

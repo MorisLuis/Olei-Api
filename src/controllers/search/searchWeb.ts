@@ -52,6 +52,7 @@ const searchClient = async (req: Request, res: Response) => {
 
     // Get session from REDIS.
     const sessionId = req.sessionID;
+    console.log({sessionINSEARCHCLIENT: sessionId})
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
