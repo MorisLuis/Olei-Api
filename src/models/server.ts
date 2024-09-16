@@ -132,7 +132,7 @@ class Server {
         }; */
 
         this.app.use(cors({
-            origin: 'https://www.oleionline.com/',
+            origin: 'https://www.oleionline.com',
             credentials: true
         }));
 

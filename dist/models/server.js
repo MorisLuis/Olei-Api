@@ -107,7 +107,7 @@ class Server {
             credentials: true
         }; */
         this.app.use((0, cors_1.default)({
-            origin: 'https://www.oleionline.com/',
+            origin: 'https://www.oleionline.com',
             credentials: true
         }));
         this.app.use(express_1.default.json({ limit: '50mb' }));
