@@ -102,10 +102,7 @@ class Server {
                 resave: false,
                 saveUninitialized: false,
                 cookie: {
-                    secure: false,
-                    httpOnly: false,
-                    maxAge: 3600000,
-                    sameSite: 'lax'
+                    secure: true
                 }
             }));
         } else {
