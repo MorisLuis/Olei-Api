@@ -80,7 +80,7 @@ class Server {
                 resave: false,
                 saveUninitialized: false,
                 cookie: {
-                    secure: 'auto',
+                    secure: true,
                     httpOnly: true,
                     maxAge: oneYearInMilliseconds,
                     sameSite: 'lax'
