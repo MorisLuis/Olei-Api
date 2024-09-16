@@ -81,7 +81,7 @@ class Server {
                 saveUninitialized: false,
                 cookie: {
                     secure: true,
-                    httpOnly: false,
+                    httpOnly: true,
                     maxAge: 3600000,
                     sameSite: 'lax'
                 }
