@@ -55,14 +55,8 @@ const loginWeb = async (req: Request, res: Response) => {
 
         (req.session as any).userWeb = datosDelUsuario;
 
-        // Guardar manualmente la sesión después de modificarla
-        req.session.save((err: any) => {
-            if (err) {
-                console.error('Error al guardar la sesión:', err);
-            } else {
-                console.log('Sesión guardada exitosamente.');
-            }
-        });
+        console.log({session: req.sessionID})
+
 
         // Generar token JWT
         const token = await generateWebJWT({ Id: user.Id_UsuarioOOL.trim() });
