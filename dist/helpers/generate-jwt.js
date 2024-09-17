@@ -35,9 +35,9 @@ const generateJWT = ({ id }) => {
     });
 };
 exports.generateJWT = generateJWT;
-const generateWebJWT = ({ Id, sessionID }) => {
+const generateWebJWT = ({ Id, sessionRedis }) => {
     return new Promise((resolve, reject) => {
-        const payload = { Id, sessionID };
+        const payload = { Id, sessionRedis };
         jsonwebtoken_1.default.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
             expiresIn: process.env.JWT_EXPIRATION
         }, (error, token) => {

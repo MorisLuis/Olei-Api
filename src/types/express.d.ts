@@ -8,6 +8,7 @@ declare global {
 
       // web properties
       Id: string;
+      sessionRedis: string
 
     }
   }

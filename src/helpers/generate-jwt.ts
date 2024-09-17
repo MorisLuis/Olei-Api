@@ -43,13 +43,13 @@ const generateJWT = ({ id }: generateJWTProps) => {
 
 interface generateJWTPropsWeb {
     Id: string,
-    sessionID: string
+    sessionRedis: string
 }
 
 
-const generateWebJWT = ({ Id, sessionID }: generateJWTPropsWeb) => {
+const generateWebJWT = ({ Id, sessionRedis }: generateJWTPropsWeb) => {
     return new Promise((resolve, reject) => {
-        const payload = { Id, sessionID }
+        const payload = { Id, sessionRedis }
         jwt.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
             expiresIn: process.env.JWT_EXPIRATION
         }, (error, token) => {

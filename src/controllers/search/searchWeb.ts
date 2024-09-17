@@ -51,9 +51,9 @@ const searchProduct = async (req: Request, res: Response) => {
 const searchClient = async (req: Request, res: Response) => {
 
     // Get session from REDIS.
-    const sessionId = req.sessionID;
-    console.log({sessionINSEARCHCLIENT: sessionId})
-    const { user: userFR } = await handleGetWebSession({ sessionId });
+    const sessionRedis = req.sessionRedis
+    console.log({sessionINSEARCHCLIENT: sessionRedis})
+    const { user: userFR } = await handleGetWebSession({ sessionId: sessionRedis });
 
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
@@ -75,8 +75,6 @@ const searchClient = async (req: Request, res: Response) => {
             .query(query);
 
         const Clients = result.recordset
-
-        //const Clients = result.recordset.map(row => row.Descripcion);
 
         res.json({
             Clients

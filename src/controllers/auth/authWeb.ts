@@ -59,7 +59,7 @@ const loginWeb = async (req: Request, res: Response) => {
 
 
         // Generar token JWT
-        const token = await generateWebJWT({ Id: user.Id_UsuarioOOL.trim(), sessionID: req.sessionID });
+        const token = await generateWebJWT({ Id: user.Id_UsuarioOOL.trim(), sessionRedis: req.sessionID });
 
         return res.json({
             user: {
@@ -103,7 +103,7 @@ const renewWeb = async (req: Request, res: Response) => {
         };
 
         let token
-        token = await generateWebJWT({ Id, sessionID: req.sessionID });
+        token = await generateWebJWT({ Id, sessionRedis: req.sessionID });
 
         if (!token) {
             return res.status(401).json({ message: 'Failed to generate token' });

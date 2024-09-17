@@ -6,8 +6,8 @@ const database_1 = require("../database");
 const getSession_1 = require("../utils/Redis/getSession");
 const selectClient = async (req, res) => {
     // Get session from REDIS.
-    const sessionId = req.sessionID;
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+    const sessionRedis = req.sessionRedis;
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId: sessionRedis });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
@@ -25,7 +25,7 @@ const selectClient = async (req, res) => {
             ...client
         };
         req.session.userWeb = datosDelUsuario;
-        const token = await (0, generate_jwt_1.generateWebJWT)({ Id: Id, sessionID: req.sessionID });
+        const token = await (0, generate_jwt_1.generateWebJWT)({ Id: Id, sessionRedis: req.sessionRedis });
         return res.json({
             token
         });
