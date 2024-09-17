@@ -78,9 +78,9 @@ const validateJWTWeb = async (req: Request, res: Response, next: NextFunction) =
                 return res.status(500).json({ success: false, message: 'Failed to authenticate token' });
             }
 
-            const {  Id, sessionID  } = decoded as {  Id: string, sessionID: string };
+            const {  Id, sessionRedis  } = decoded as {  Id: string, sessionRedis: string };
             req.Id = Id;
-            req.sessionID = sessionID;
+            req.sessionRedis = sessionRedis;
             next();
         });
     } catch (error) {
