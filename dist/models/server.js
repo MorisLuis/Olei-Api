@@ -66,6 +66,7 @@ class Server {
     }
     configureSessions() {
         if (this.redis) {
+            const isProduction = process.env.ENVIRONMENT === 'production';
             // Define el TTL y maxAge en segundos y milisegundos
             const oneYearInSeconds = 28800; // 8 horas
             const oneYearInMilliseconds = oneYearInSeconds * 1000; // 8 horas en milisegundos
@@ -80,10 +81,11 @@ class Server {
                 resave: false,
                 saveUninitialized: false,
                 cookie: {
-                    domain: '.oleionline.com/',
-                    secure: true,
+                    domain: isProduction ? '.oleionline.com' : undefined, // En producción, definir el dominio
+                    secure: isProduction, // true en producción, false en local
                     httpOnly: true,
-                    sameSite: 'none'
+                    sameSite: isProduction ? 'none' : 'lax', // 'none' para producción, 'lax' para local
+                    maxAge: oneYearInMilliseconds
                 }
             }));
         }
@@ -94,23 +96,20 @@ class Server {
     middlewares() {
         const allowedOrigins = [
             'https://www.oleionline.com',
-            'https://www.oleionline.com/',
             'http://localhost:3000'
         ];
-        /* const corsOptions = {
-            origin: (origin: any, callback: any) => {
+        const corsOptions = {
+            origin: (origin, callback) => {
                 if (!origin || allowedOrigins.includes(origin)) {
                     callback(null, true);
-                } else {
+                }
+                else {
                     callback(new Error('Not allowed by CORS'));
                 }
             },
             credentials: true
-        }; */
-        this.app.use((0, cors_1.default)({
-            origin: 'https://www.oleionline.com',
-            credentials: true
-        }));
+        };
+        this.app.use((0, cors_1.default)(corsOptions));
         this.app.use(express_1.default.json({ limit: '50mb' }));
         this.app.use(express_1.default.urlencoded({ extended: true, limit: '50mb' }));
         // Middleware para registrar el sessionId

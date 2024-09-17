@@ -86,10 +86,12 @@ class Server {
 
     configureSessions() {
         if (this.redis) {
+            const isProduction = process.env.ENVIRONMENT === 'production';
+
             // Define el TTL y maxAge en segundos y milisegundos
             const oneYearInSeconds = 28800; // 8 horas
             const oneYearInMilliseconds = oneYearInSeconds * 1000; // 8 horas en milisegundos
-    
+
             const store = new RedisStore({
                 client: this.redis,
                 ttl: oneYearInSeconds,
@@ -102,10 +104,11 @@ class Server {
                 resave: false,
                 saveUninitialized: false,
                 cookie: {
-                    domain: '.oleionline.com/',
-                    secure:  true,
+                    domain: isProduction ? '.oleionline.com' : undefined, // En producción, definir el dominio
+                    secure: isProduction, // true en producción, false en local
                     httpOnly: true,
-                    sameSite: 'none'
+                    sameSite: isProduction ? 'none' : 'lax', // 'none' para producción, 'lax' para local
+                    maxAge: oneYearInMilliseconds
                 }
             }));
         } else {
@@ -116,12 +119,11 @@ class Server {
 
     middlewares() {
         const allowedOrigins = [
-            'https://www.oleionline.com', 
-            'https://www.oleionline.com/',
+            'https://www.oleionline.com',
             'http://localhost:3000'
         ];
 
-        /* const corsOptions = {
+        const corsOptions = {
             origin: (origin: any, callback: any) => {
                 if (!origin || allowedOrigins.includes(origin)) {
                     callback(null, true);
@@ -130,12 +132,9 @@ class Server {
                 }
             },
             credentials: true
-        }; */
+        };
 
-        this.app.use(cors({
-            origin: 'https://www.oleionline.com',
-            credentials: true
-        }));
+        this.app.use(cors(corsOptions));
 
         this.app.use(express.json({ limit: '50mb' }));
         this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));
