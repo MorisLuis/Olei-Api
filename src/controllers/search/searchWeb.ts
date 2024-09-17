@@ -7,7 +7,7 @@ import { handleGetWebSession } from '../../utils/Redis/getSession';
 const searchProduct = async (req: Request, res: Response) => {
 
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
@@ -51,9 +51,8 @@ const searchProduct = async (req: Request, res: Response) => {
 const searchClient = async (req: Request, res: Response) => {
 
     // Get session from REDIS.
-    const sessionRedis = req.sessionRedis
-    console.log({sessionINSEARCHCLIENT: sessionRedis})
-    const { user: userFR } = await handleGetWebSession({ sessionId: sessionRedis });
+    const sessionId = req.sessionRedis
+    const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });

@@ -7,8 +7,8 @@ import { UserWebSessionInterface } from '../interface/user';
 const selectClient = async (req: Request, res: Response) => {
 
     // Get session from REDIS.
-    const sessionRedis = req.sessionRedis
-    const { user: userFR } = await handleGetWebSession({ sessionId: sessionRedis });
+    const sessionId = req.sessionRedis
+    const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });

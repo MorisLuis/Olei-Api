@@ -12,7 +12,7 @@ const convertArrayToXml_1 = require("../utils/convertArrayToXml");
 const numeroALetra_1 = require("../utils/numeroALetra");
 const postOrder = async (req, res) => {
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
@@ -64,7 +64,7 @@ const postOrder = async (req, res) => {
 exports.postOrder = postOrder;
 const getOrder = async (req, res) => {
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
@@ -96,7 +96,7 @@ const getOrder = async (req, res) => {
 exports.getOrder = getOrder;
 const getAllOrders = async (req, res) => {
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
@@ -127,7 +127,7 @@ const getAllOrders = async (req, res) => {
 exports.getAllOrders = getAllOrders;
 const getOrderDetails = async (req, res) => {
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });

@@ -5,7 +5,7 @@ const database_1 = require("../database");
 const getSession_1 = require("../utils/Redis/getSession");
 const getTables = async (req, res) => {
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });

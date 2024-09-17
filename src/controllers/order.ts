@@ -12,7 +12,7 @@ import PorductInterface from "../interface/product";
 const postOrder = async (req: Request, res: Response) => {
 
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
@@ -74,7 +74,7 @@ const postOrder = async (req: Request, res: Response) => {
 const getOrder = async (req: Request, res: Response) => {
 
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
@@ -114,7 +114,7 @@ const getOrder = async (req: Request, res: Response) => {
 const getAllOrders = async (req: Request, res: Response) => {
 
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
@@ -154,7 +154,7 @@ const getAllOrders = async (req: Request, res: Response) => {
 const getOrderDetails = async (req: Request, res: Response) => {
 
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {

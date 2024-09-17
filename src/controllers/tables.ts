@@ -5,7 +5,7 @@ import { handleGetWebSession } from '../utils/Redis/getSession';
 const getTables = async (req: Request, res: Response) => {
 
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {

@@ -13,7 +13,7 @@ export default interface ExtendedCostosInterface extends CostosInterface {
 
 const updateCostos = async (req: Request, res: Response) => {
 
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {

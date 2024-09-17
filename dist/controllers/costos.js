@@ -11,7 +11,7 @@ const uuid_1 = require("uuid");
 const identifyBarcodeType_1 = require("../utils/identifyBarcodeType");
 const getSession_1 = require("../utils/Redis/getSession");
 const updateCostos = async (req, res) => {
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });

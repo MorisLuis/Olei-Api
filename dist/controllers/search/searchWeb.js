@@ -10,7 +10,7 @@ const products_1 = require("../../database/querys/products");
 const getSession_1 = require("../../utils/Redis/getSession");
 const searchProduct = async (req, res) => {
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
@@ -47,9 +47,8 @@ const searchProduct = async (req, res) => {
 exports.searchProduct = searchProduct;
 const searchClient = async (req, res) => {
     // Get session from REDIS.
-    const sessionRedis = req.sessionRedis;
-    console.log({ sessionINSEARCHCLIENT: sessionRedis });
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId: sessionRedis });
+    const sessionId = req.sessionRedis;
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }

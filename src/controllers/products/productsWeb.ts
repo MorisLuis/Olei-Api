@@ -7,10 +7,8 @@ import { getProductWithImages, getProductsWithImage } from '../../utils/checkIma
 
 const getProducts = async (req: Request, res: Response) => {
 
-    const sessionId = req.sessionID;
-    console.log({sessionId})
+    const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
-    console.log({userFR})
 
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
@@ -65,7 +63,7 @@ const getProducts = async (req: Request, res: Response) => {
 const getProducByIdWeb = async (req: Request, res: Response) => {
 
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
@@ -110,7 +108,7 @@ const getProducByIdWeb = async (req: Request, res: Response) => {
 const getTotalProducts = async (req: Request, res: Response) => {
 
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {

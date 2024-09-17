@@ -36,7 +36,6 @@ const generateJWT = ({ id }) => {
 };
 exports.generateJWT = generateJWT;
 const generateWebJWT = ({ Id, sessionRedis }) => {
-    console.log({ sessionSAVED: sessionRedis });
     return new Promise((resolve, reject) => {
         const payload = { Id, sessionRedis };
         jsonwebtoken_1.default.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
