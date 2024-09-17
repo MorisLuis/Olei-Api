@@ -25,7 +25,7 @@ const selectClient = async (req, res) => {
             ...client
         };
         req.session.userWeb = datosDelUsuario;
-        const token = await (0, generate_jwt_1.generateWebJWT)({ Id: Id });
+        const token = await (0, generate_jwt_1.generateWebJWT)({ Id: Id, sessionID: req.sessionID });
         return res.json({
             token
         });

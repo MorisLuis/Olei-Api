@@ -31,7 +31,7 @@ const selectClient = async (req: Request, res: Response) => {
         };
 
         (req.session as any).userWeb = datosDelUsuario;
-        const token = await generateWebJWT({ Id: Id });
+        const token = await generateWebJWT({ Id: Id, sessionID: req.sessionID });
         return res.json({
             token
         })

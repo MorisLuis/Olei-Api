@@ -11,6 +11,6 @@ router.get("/inventory", validateJWT, searchProductInventory)
 
 // Web endpoints
 router.get("/", validateJWTWeb, searchProduct)
-router.get("/client", searchClient)
+router.get("/client", validateJWTWeb, searchClient)
 
 export default router;

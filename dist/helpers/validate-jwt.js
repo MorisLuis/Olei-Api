@@ -70,8 +70,9 @@ const validateJWTWeb = async (req, res, next) => {
             if (err) {
                 return res.status(500).json({ success: false, message: 'Failed to authenticate token' });
             }
-            const { Id } = decoded;
+            const { Id, sessionID } = decoded;
             req.Id = Id;
+            req.sessionID = sessionID;
             next();
         });
     }
