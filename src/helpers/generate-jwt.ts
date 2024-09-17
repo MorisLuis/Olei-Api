@@ -48,6 +48,7 @@ interface generateJWTPropsWeb {
 
 
 const generateWebJWT = ({ Id, sessionRedis }: generateJWTPropsWeb) => {
+    console.log({sessionSAVED: sessionRedis});
     return new Promise((resolve, reject) => {
         const payload = { Id, sessionRedis }
         jwt.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
