@@ -8,7 +8,7 @@ const router = Router();
 // Web
 router.post("/loginWeb", loginWeb);
 router.get('/renewWeb', validateJWTWeb, renewWeb)
-router.get("/logout", logout);
+router.get("/logout", validateJWTWeb, logout);
 
 // App
 router.post("/loginDB", loginDB);

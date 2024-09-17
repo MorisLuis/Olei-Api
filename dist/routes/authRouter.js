@@ -8,7 +8,7 @@ const router = (0, express_1.Router)();
 // Web
 router.post("/loginWeb", authWeb_1.loginWeb);
 router.get('/renewWeb', validate_jwt_1.validateJWTWeb, authWeb_1.renewWeb);
-router.get("/logout", authWeb_1.logout);
+router.get("/logout", validate_jwt_1.validateJWTWeb, authWeb_1.logout);
 // App
 router.post("/loginDB", auth_1.loginDB);
 router.post("/login", validate_jwt_1.validateJWTDB, auth_1.login);

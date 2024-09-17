@@ -41,18 +41,21 @@ const loginDB = async (req: Request, res: Response) => {
 
         const tokenDB = await generateJWTDB({ IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim() });
 
-        (req.session as any).user = {
+        const datosDelUsuario : UserSessionInterface = {
             serverclientes: cleanResult.ServidorSQL.trim(),
             baseclientes: cleanResult.BaseSQL.trim(),
-            UsuarioSQL: cleanResult.UsuarioSQL.trim(),
             PasswordSQL: cleanResult.PasswordSQL.trim(),
+            UsuarioSQL: cleanResult.UsuarioSQL.trim(),
             IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim(),
             RazonSocial: cleanResult.RazonSocial.trim(),
             SwImagenes: cleanResult.SwImagenes,
             Vigencia: cleanResult.Vigencia,
             userId: undefined,
-            userRol: undefined
-        }
+            userRol: undefined,
+            from: 'mobil'
+        };
+
+        (req.session as any).user = datosDelUsuario;
 
         return res.json({
             tokenDB,

@@ -35,18 +35,20 @@ const loginDB = async (req, res) => {
             RazonSocial: cleanResult.RazonSocial
         };
         const tokenDB = await (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim() });
-        req.session.user = {
+        const datosDelUsuario = {
             serverclientes: cleanResult.ServidorSQL.trim(),
             baseclientes: cleanResult.BaseSQL.trim(),
-            UsuarioSQL: cleanResult.UsuarioSQL.trim(),
             PasswordSQL: cleanResult.PasswordSQL.trim(),
+            UsuarioSQL: cleanResult.UsuarioSQL.trim(),
             IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim(),
             RazonSocial: cleanResult.RazonSocial.trim(),
             SwImagenes: cleanResult.SwImagenes,
             Vigencia: cleanResult.Vigencia,
             userId: undefined,
-            userRol: undefined
+            userRol: undefined,
+            from: 'mobil'
         };
+        req.session.user = datosDelUsuario;
         return res.json({
             tokenDB,
             user

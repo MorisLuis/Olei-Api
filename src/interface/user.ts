@@ -10,6 +10,8 @@ export interface UserSessionInterface {
 
     userId?: string;
     userRol?: string;
+
+    from: 'web' | 'mobil'
 }
 
 export interface UserWebSessionInterface {
@@ -28,7 +30,9 @@ export interface UserWebSessionInterface {
     Id_Almacen: number,
     PrecioIncIVA: number,
     Id_Usuario: string,
-    IsEmploye?: boolean
+    IsEmploye?: boolean,
+    from: 'web' | 'mobil'
+
 }
 
 export type ValidationResult = {

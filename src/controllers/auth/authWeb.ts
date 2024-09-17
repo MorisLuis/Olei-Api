@@ -50,7 +50,8 @@ const loginWeb = async (req: Request, res: Response) => {
             TipoUsuario: user.TipoUsuario,
             Id_Almacen: user.Id_Almacen,
             Id_Usuario: UsuarioSQL,
-            PrecioIncIVA: 0
+            PrecioIncIVA: 0,
+            from: 'web'
         };
 
         (req.session as any).userWeb = datosDelUsuario;

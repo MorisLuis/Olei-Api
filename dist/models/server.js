@@ -67,27 +67,40 @@ class Server {
     configureSessions() {
         if (this.redis) {
             const isProduction = process.env.ENVIRONMENT === 'production';
-            // Define el TTL y maxAge en segundos y milisegundos
-            const oneYearInSeconds = 28800; // 8 horas
-            const oneYearInMilliseconds = oneYearInSeconds * 1000; // 8 horas en milisegundos
+            // Define el TTL y maxAge para móvil y web
+            const webMaxAgeInSeconds = 8 * 60 * 60; // 8 horas para la web
+            const mobileMaxAgeInSeconds = 365 * 24 * 60 * 60; // 1 año en mobil
             const store = new connect_redis_1.default({
                 client: this.redis,
-                ttl: oneYearInSeconds,
+                ttl: webMaxAgeInSeconds, // Default ttl
             });
-            this.app.use((0, express_session_1.default)({
-                secret: process.env.REDIS_SECRET,
-                name: 'sid',
-                store: store,
-                resave: false,
-                saveUninitialized: false,
-                cookie: {
-                    //domain: isProduction ? '.oleionline.com' : undefined, // En producción, definir el dominio
-                    //secure: isProduction, // true en producción, false en local
-                    //httpOnly: true,
-                    //sameSite: isProduction ? 'none' : 'lax', // 'none' para producción, 'lax' para local
-                    maxAge: oneYearInMilliseconds
+            // Middleware para personalizar maxAge según la fuente de la petición
+            this.app.use((req, res, next) => {
+                const userAgent = req.headers['user-agent'];
+                let maxAge;
+                if (userAgent && (userAgent.includes('Mobile') || userAgent.includes('OleiApp'))) {
+                    console.log('Petición desde una app móvil');
+                    maxAge = mobileMaxAgeInSeconds * 1000; // Convertir a milisegundos
                 }
-            }));
+                else {
+                    console.log('Petición desde una web');
+                    maxAge = webMaxAgeInSeconds * 1000; // Convertir a milisegundos
+                }
+                // Configurar la sesión con maxAge dinámico
+                (0, express_session_1.default)({
+                    secret: process.env.REDIS_SECRET,
+                    name: 'sid',
+                    store: store,
+                    resave: false,
+                    saveUninitialized: false,
+                    cookie: {
+                        secure: isProduction, // true en producción, false en local
+                        httpOnly: true,
+                        sameSite: isProduction ? 'none' : 'lax', // 'none' para producción, 'lax' para local
+                        maxAge: maxAge // Aquí establecemos el maxAge dinámico
+                    }
+                })(req, res, next);
+            });
         }
         else {
             console.error('Redis no está configurado, las sesiones no se almacenarán en Redis');

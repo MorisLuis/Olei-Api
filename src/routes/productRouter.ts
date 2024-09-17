@@ -17,9 +17,9 @@ import { getProducByIdWeb, getProducts, getTotalProducts } from "../controllers/
 const router = Router()
 
 // Web endpoints
-router.get("/", getProducts)
+router.get("/", validateJWTWeb, getProducts)
 router.get("/web/:id", validateJWTWeb, getProducByIdWeb)
-router.get("/count", getTotalProducts)
+router.get("/count", validateJWTWeb, getTotalProducts)
 
 // App endpoints
 router.get("/byStock", validateJWT, getProductsByStock);
