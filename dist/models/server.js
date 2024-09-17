@@ -82,8 +82,8 @@ class Server {
                 saveUninitialized: false,
                 cookie: {
                     //domain: isProduction ? '.oleionline.com' : undefined, // En producción, definir el dominio
-                    secure: isProduction, // true en producción, false en local
-                    httpOnly: true,
+                    //secure: isProduction, // true en producción, false en local
+                    //httpOnly: true,
                     //sameSite: isProduction ? 'none' : 'lax', // 'none' para producción, 'lax' para local
                     maxAge: oneYearInMilliseconds
                 }
