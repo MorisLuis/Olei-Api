@@ -62,7 +62,9 @@ const loginDB = async (req, res) => {
 exports.loginDB = loginDB;
 const login = async (req, res) => {
     const sessionId = req.sessionID;
+    console.log({ sessionId });
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
+    console.log({ userFR });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }

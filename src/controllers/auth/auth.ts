@@ -72,8 +72,10 @@ const login = async (req: Request, res: Response) => {
 
 
     const sessionId = req.sessionID;
+    console.log({sessionId})
     const { user: userFR } = await handleGetSession({ sessionId });
 
+    console.log({userFR})
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
