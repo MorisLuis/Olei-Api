@@ -61,16 +61,13 @@ const loginDB = async (req, res) => {
 exports.loginDB = loginDB;
 const login = async (req, res) => {
     const sessionId = req.sessionID;
-    console.log({ sessionId });
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
-    console.log({ userFR });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     // STEP 1 - LOGIN
     const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
-    console.log({ pool });
     if (!pool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
     }

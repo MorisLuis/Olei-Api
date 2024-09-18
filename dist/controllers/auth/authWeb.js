@@ -14,9 +14,8 @@ const loginWeb = async (req, res) => {
     if (email === "" || password === "") {
         return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
     }
-    let mainPool;
     try {
-        mainPool = await (0, database_1.dbConnectionMain)();
+        const mainPool = await (0, database_1.dbConnectionMain)();
         if (!mainPool) {
             return res.status(500).json({ error: 'Error connecting to the main database' });
         }
@@ -54,7 +53,7 @@ const loginWeb = async (req, res) => {
         const token = await (0, generate_jwt_1.generateWebJWT)({ Id: user.Id_UsuarioOOL.trim(), sessionRedis: req.sessionID });
         return res.json({
             user: {
-                ...user,
+                ...datosDelUsuario,
                 Id_ListPre
             },
             token

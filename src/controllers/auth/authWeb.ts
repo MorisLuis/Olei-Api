@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import { closeDbConnection, dbConnection, dbConnectionMain, querys } from '../../database';
+import { closeDbConnection, dbConnectionMain, querys } from '../../database';
 import { generateWebJWT } from '../../helpers/generate-jwt';
-import config from '../../config';
 import moment from 'moment';
 import { UserWebSessionInterface } from '../../interface/user';
 import { handleGetWebSession } from '../../utils/Redis/getSession';
@@ -14,10 +13,9 @@ const loginWeb = async (req: Request, res: Response) => {
         return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
     }
 
-    let mainPool;
 
     try {
-        mainPool = await dbConnectionMain()
+        const mainPool = await dbConnectionMain()
 
         if (!mainPool) {
             return res.status(500).json({ error: 'Error connecting to the main database' });
@@ -63,7 +61,7 @@ const loginWeb = async (req: Request, res: Response) => {
 
         return res.json({
             user: {
-                ...user,
+                ...datosDelUsuario,
                 Id_ListPre
             },
             token

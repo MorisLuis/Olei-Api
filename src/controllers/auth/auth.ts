@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import sql from "mssql";
 import { closeDbConnection, dbConnection, dbConnectionMain, querys } from '../../database';
 import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
-import config from '../../config';
 import { MovementDetail, UserSessionInterface, ValidationResult } from '../../interface/user';
 import { handleGetSession } from '../../utils/Redis/getSession';
 import { handleDeleteRedisSession } from '../../utils/Redis/deleteRedis';
@@ -72,10 +71,8 @@ const login = async (req: Request, res: Response) => {
 
 
     const sessionId = req.sessionID;
-    console.log({sessionId})
     const { user: userFR } = await handleGetSession({ sessionId });
 
-    console.log({userFR})
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
@@ -84,8 +81,6 @@ const login = async (req: Request, res: Response) => {
 
     // STEP 1 - LOGIN
     const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
-
-    console.log({pool})
 
     if (!pool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
