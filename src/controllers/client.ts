@@ -25,18 +25,14 @@ const selectClient = async (req: Request, res: Response) => {
             IsEmploye: true
         }
 
-
         const datosDelUsuario: UserWebSessionInterface = {
             ...userFR,
             ...client
         };
 
-
-
         (req.session as any).userWeb = datosDelUsuario;
 
         const token = await generateWebJWT({ Id: Id, sessionRedis: req.sessionID });
-
         handleDeleteRedisSession({ sessionId })
 
         return res.json({

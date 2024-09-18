@@ -7,7 +7,7 @@ import { getProductWithImages, getProductsWithImage } from '../../utils/checkIma
 
 const getProducts = async (req: Request, res: Response) => {
 
-    const sessionId = req.sessionRedis
+    const sessionId = req.sessionRedis;
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
