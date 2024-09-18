@@ -23,7 +23,7 @@ const updateCostos = async (req: Request, res: Response) => {
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL} = userFR;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
         const transaction = new sql.Transaction(pool);
         await transaction.begin();
 

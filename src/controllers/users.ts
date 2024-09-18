@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { closeDbConnection, dbConnection, querys } from '../database';
+import { dbConnection, querys } from '../database';
 import { handleGetWebSession } from '../utils/Redis/getSession';
 
 

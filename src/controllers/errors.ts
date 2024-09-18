@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { closeDbConnection, dbConnection, dbConnectionMain, querys } from '../database';
+import { dbConnectionMain, querys } from '../database';
 import sql from 'mssql';
 
 const handleErrors = async (req: Request, res: Response) => {

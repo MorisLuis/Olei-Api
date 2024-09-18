@@ -19,7 +19,7 @@ const postInventory = async (req: Request, res: Response) => {
     const Id_Usuario = req.id;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
         const { inventoryDetails, typeOfMovement } = req.body;
         const Accion = typeOfMovement?.Accion;
         const Id_TipoMovInv = typeOfMovement?.Id_TipoMovInv;

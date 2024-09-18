@@ -68,12 +68,11 @@ const login = async (req, res) => {
     }
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     // STEP 1 - LOGIN
-    const mainPool = await (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+    const mainPool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
     if (!mainPool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
     }
     try {
-        const result = await mainPool.request().query("SELECT *   FROM [dbo].[USUARIOS]");
         // Search for the user in the database using their email.
         const { Id_Usuario, password } = req.body;
         if (Id_Usuario.trim() === "" || password.trim() === "") {

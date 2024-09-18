@@ -23,7 +23,7 @@ const getProducById = async (req: Request, res: Response) => {
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL} = userFR;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
@@ -99,7 +99,7 @@ const getProductsByStock = async (req: Request, res: Response) => {
     const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL} = userFR;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', userId).query(userquery)
@@ -146,7 +146,7 @@ const getTotalOfProductsByStock = async (req: Request, res: Response) => {
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
@@ -185,9 +185,8 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
 
     const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL} = userFR;
 
-
     try {
-        const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
         const requestUser: any = await pool.request().input('Id_Usuario', userId).query(userquery)

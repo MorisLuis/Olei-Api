@@ -17,7 +17,7 @@ const getTypeofmovements = async (req: Request, res: Response) => {
 
 
     try {
-        const pool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
         const request = pool.request();
         request.input('Id_Usuario', sql.VarChar(50), userId);

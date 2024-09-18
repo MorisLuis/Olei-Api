@@ -81,16 +81,14 @@ const login = async (req: Request, res: Response) => {
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
 
     // STEP 1 - LOGIN
-    const mainPool = await dbConnection(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+    const mainPool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+
 
     if (!mainPool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
     }
 
     try {
-
-        const result = await mainPool.request().query("SELECT *   FROM [dbo].[USUARIOS]");
-
         // Search for the user in the database using their email.
         const { Id_Usuario, password } = req.body;
 
@@ -133,8 +131,6 @@ const login = async (req: Request, res: Response) => {
             }
         }
 
-
-
         return res.json({
             userStorage,
             token
@@ -151,7 +147,6 @@ const renewDB = async (req: Request, res: Response) => {
     // Get session from REDIS.
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
-
 
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });

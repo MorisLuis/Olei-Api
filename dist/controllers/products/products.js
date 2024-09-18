@@ -17,7 +17,7 @@ const getProducById = async (req, res) => {
     }
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     try {
-        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
@@ -79,7 +79,7 @@ const getProductsByStock = async (req, res) => {
     }
     const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
     try {
-        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery);
         const user = requestUser.recordset[0];
@@ -115,7 +115,7 @@ const getTotalOfProductsByStock = async (req, res) => {
     }
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     try {
-        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
@@ -145,7 +145,7 @@ const getProductByStockAndCodeBar = async (req, res) => {
     }
     const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
     try {
-        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery);
         const user = requestUser.recordset[0];

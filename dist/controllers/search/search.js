@@ -14,7 +14,7 @@ const searchProductInventory = async (req, res) => {
     const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
     const Id_Usuario = req.id;
     try {
-        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, PasswordSQL, UsuarioSQL);
+        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
