@@ -29,39 +29,9 @@ const getProducById = async (req, res) => {
             .input("Marca", Marca)
             .input("ListaPrecios", user.Id_ListPre)
             .input("Almacen", user.Id_Almacen)
+            .input("baseSQL", baseclientes)
             .query(productsWeb_1.productsWebQuerys.getProducById);
         const product = result?.recordset[0];
-        const baseSQL = baseclientes.trim().toLowerCase().split(',');
-        if (baseSQL && baseSQL.length > 0) {
-            const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
-            const imageDB = formatImageDB[formatImageDB.length - 1];
-            // Número máximo de intentos para encontrar la imagen
-            const maxAttempts = 5;
-            let attempt = 0;
-            let images = [];
-            while (attempt < maxAttempts) {
-                let imageUrl;
-                if (attempt === 0) {
-                    imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product?.Codigo.trim()}.jpg`;
-                }
-                else {
-                    imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product?.Codigo.trim()}_${attempt}.jpg`;
-                }
-                // Verifica si la imagen existe
-                const imageExists = await (0, exports.checkImageExists)(imageUrl);
-                if (imageExists) {
-                    images.push({
-                        url: imageUrl,
-                        id: attempt
-                    });
-                }
-                attempt++;
-            }
-            if (images.length > 0) {
-                // Se encontraron imágenes existentes
-                product.imagenes = images;
-            }
-        }
         return res.json(product);
     }
     catch (error) {
