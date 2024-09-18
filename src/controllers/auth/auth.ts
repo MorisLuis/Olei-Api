@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import sql from "mssql";
-import { closeDbConnection, dbConnection, querys } from '../../database';
+import { closeDbConnection, dbConnection, dbConnectionMain, querys } from '../../database';
 import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
 import config from '../../config';
 import { MovementDetail, UserSessionInterface, ValidationResult } from '../../interface/user';
@@ -12,7 +12,7 @@ const loginDB = async (req: Request, res: Response) => {
     // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
     const { IdUsuarioOLEI, PasswordOLEI } = req.body;
 
-    const mainPool = await dbConnection(config.dbServer, config.dbDatabase);
+    const mainPool = await dbConnectionMain();
     if (!mainPool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
     }

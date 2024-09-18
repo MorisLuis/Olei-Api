@@ -7,13 +7,12 @@ exports.logoutDB = exports.logoutUser = exports.renewLogin = exports.renewDB = e
 const mssql_1 = __importDefault(require("mssql"));
 const database_1 = require("../../database");
 const generate_jwt_1 = require("../../helpers/generate-jwt");
-const config_1 = __importDefault(require("../../config"));
 const getSession_1 = require("../../utils/Redis/getSession");
 const deleteRedis_1 = require("../../utils/Redis/deleteRedis");
 const loginDB = async (req, res) => {
     // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
     const { IdUsuarioOLEI, PasswordOLEI } = req.body;
-    const mainPool = await (0, database_1.dbConnection)(config_1.default.dbServer, config_1.default.dbDatabase);
+    const mainPool = await (0, database_1.dbConnectionMain)();
     if (!mainPool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
     }
