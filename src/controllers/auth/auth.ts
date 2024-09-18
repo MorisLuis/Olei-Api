@@ -83,10 +83,11 @@ const login = async (req: Request, res: Response) => {
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
 
     // STEP 1 - LOGIN
-    const mainPool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+    const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
+    console.log({pool})
 
-    if (!mainPool) {
+    if (!pool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
     }
 
@@ -98,7 +99,7 @@ const login = async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
         }
 
-        const request = mainPool.request();
+        const request = pool.request();
         request.input('Id_Usuario', sql.VarChar(50), Id_Usuario);
         request.input('Password', sql.VarChar(50), password);
 

@@ -70,8 +70,9 @@ const login = async (req, res) => {
     }
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     // STEP 1 - LOGIN
-    const mainPool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
-    if (!mainPool) {
+    const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+    console.log({ pool });
+    if (!pool) {
         return res.status(500).json({ error: 'Error connecting to the main database' });
     }
     try {
@@ -80,7 +81,7 @@ const login = async (req, res) => {
         if (Id_Usuario.trim() === "" || password.trim() === "") {
             return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
         }
-        const request = mainPool.request();
+        const request = pool.request();
         request.input('Id_Usuario', mssql_1.default.VarChar(50), Id_Usuario);
         request.input('Password', mssql_1.default.VarChar(50), password);
         const resultData = await request.execute('sp_AuthenticateAndGetMovement');
