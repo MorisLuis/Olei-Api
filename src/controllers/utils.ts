@@ -21,8 +21,6 @@ const getUtils = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.log({ getUtilsError: error });
         res.status(500).send(error.message);
-    } finally {
-        await closeDbConnection();
     }
 };
 

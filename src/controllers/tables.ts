@@ -34,8 +34,6 @@ const getTables = async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(500);
         res.send(error.message);
-    } finally {
-        await closeDbConnection()
     }
 }
 

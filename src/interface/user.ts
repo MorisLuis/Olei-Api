@@ -32,7 +32,6 @@ export interface UserWebSessionInterface {
     Id_Usuario: string,
     IsEmploye?: boolean,
     from: 'web' | 'mobil'
-
 }
 
 export type ValidationResult = {

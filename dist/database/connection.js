@@ -3,34 +3,63 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.closeDbConnection = exports.dbConnection = void 0;
+exports.closeDbConnection = exports.dbConnectionMain = exports.dbConnection = void 0;
 const mssql_1 = __importDefault(require("mssql"));
 const config_1 = __importDefault(require("../config"));
+let mainPool = null;
 let pool = null;
-const dbConnection = async (server, database, password, user) => {
+const dbConnection = async (server, base, user, pass) => {
     if (!pool) {
         const dbConfig = {
             user: user || config_1.default.dbUser,
-            password: password || config_1.default.dbPassword,
-            server: server || config_1.default.dbServer,
-            database: database || config_1.default.dbDatabase,
+            password: pass || config_1.default.dbPassword,
+            server: server,
+            database: base,
             options: {
                 encrypt: true,
                 trustServerCertificate: true
             },
         };
         try {
-            pool = await mssql_1.default.connect(dbConfig);
+            pool = new mssql_1.default.ConnectionPool(dbConfig);
+            await pool.connect();
         }
         catch (error) {
-            console.error('Error al conectar a la base de datos:', error.message);
+            console.error('Error al conectar a Servidor 2:', error.message);
             throw error;
         }
     }
     return pool;
 };
 exports.dbConnection = dbConnection;
+const dbConnectionMain = async () => {
+    if (!mainPool) {
+        const dbConfig = {
+            user: config_1.default.dbUser,
+            password: config_1.default.dbPassword,
+            server: config_1.default.dbServer,
+            database: config_1.default.dbDatabase,
+            options: {
+                encrypt: true,
+                trustServerCertificate: true
+            },
+        };
+        try {
+            mainPool = await mssql_1.default.connect(dbConfig);
+        }
+        catch (error) {
+            console.error('Error al conectar a Servidor 1:', error.message);
+            throw error;
+        }
+    }
+    return mainPool;
+};
+exports.dbConnectionMain = dbConnectionMain;
 const closeDbConnection = async () => {
+    if (mainPool) {
+        await mainPool.close();
+        mainPool = null;
+    }
     if (pool) {
         await pool.close();
         pool = null;

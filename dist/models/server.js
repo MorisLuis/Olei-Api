@@ -23,6 +23,7 @@ const inventoryRouter_1 = __importDefault(require("../routes/inventoryRouter"));
 const costosRouter_1 = __importDefault(require("../routes/costosRouter"));
 const typeofmovementsRouter_1 = __importDefault(require("../routes/typeofmovementsRouter"));
 const utilsRouter_1 = __importDefault(require("../routes/utilsRouter"));
+const errorsRouter_1 = __importDefault(require("../routes/errorsRouter"));
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -39,7 +40,8 @@ class Server {
             inventory: "/api/inventory",
             costos: "/api/costos",
             typeofmovements: "/api/typeofmovements",
-            utils: "/api/utils"
+            utils: "/api/utils",
+            errors: "/api/errors"
         };
         this.connectDB();
         this.configureRedis();
@@ -49,7 +51,7 @@ class Server {
         this.errorHandler();
     }
     async connectDB() {
-        await (0, connection_1.dbConnection)();
+        await (0, connection_1.dbConnectionMain)();
     }
     configureRedis() {
         this.redis = new ioredis_1.default({
@@ -68,38 +70,35 @@ class Server {
         if (this.redis) {
             const isProduction = process.env.ENVIRONMENT === 'production';
             // Define el TTL y maxAge para móvil y web
-            const webMaxAgeInSeconds = 8 * 60 * 60; // 8 horas para la web
-            const mobileMaxAgeInSeconds = 365 * 24 * 60 * 60; // 1 año en mobil
+            const webMaxAgeInSeconds = 12 * 60 * 60; // 8 horas para la web
+            const mobileMaxAgeInSeconds = 365 * 24 * 60 * 60; // 1 año en móvil
+            // Define el store de Redis, una sola vez
             const store = new connect_redis_1.default({
                 client: this.redis,
-                ttl: webMaxAgeInSeconds, // Default ttl
+                ttl: webMaxAgeInSeconds // Default ttl
             });
-            // Middleware para personalizar maxAge según la fuente de la petición
+            // Configurar express-session una vez para toda la aplicación
+            this.app.use((0, express_session_1.default)({
+                secret: process.env.REDIS_SECRET,
+                name: 'sid',
+                store: store,
+                resave: false,
+                saveUninitialized: false,
+                cookie: {
+                    secure: isProduction ? 'auto' : false, // true en producción, false en local
+                    httpOnly: true,
+                    sameSite: isProduction ? 'none' : 'lax', // 'none' para producción, 'lax' para local
+                    maxAge: webMaxAgeInSeconds * 1000 // Default maxAge
+                }
+            }));
+            // Middleware personalizado para ajustar el maxAge según el User-Agent
             this.app.use((req, res, next) => {
                 const userAgent = req.headers['user-agent'];
-                let maxAge;
                 if (userAgent && (userAgent.includes('Mobile') || userAgent.includes('OleiApp'))) {
-                    console.log('Petición desde una app móvil');
-                    maxAge = mobileMaxAgeInSeconds * 1000; // Convertir a milisegundos
+                    // Si es una app móvil, ajustamos maxAge
+                    req.session.cookie.maxAge = mobileMaxAgeInSeconds * 1000;
                 }
-                else {
-                    console.log('Petición desde una web');
-                    maxAge = webMaxAgeInSeconds * 1000; // Convertir a milisegundos
-                }
-                // Configurar la sesión con maxAge dinámico
-                (0, express_session_1.default)({
-                    secret: process.env.REDIS_SECRET,
-                    name: 'sid',
-                    store: store,
-                    resave: false,
-                    saveUninitialized: false,
-                    cookie: {
-                        secure: isProduction, // true en producción, false en local
-                        httpOnly: true,
-                        sameSite: isProduction ? 'none' : 'lax', // 'none' para producción, 'lax' para local
-                        maxAge: maxAge // Aquí establecemos el maxAge dinámico
-                    }
-                })(req, res, next);
+                next();
             });
         }
         else {
@@ -125,11 +124,6 @@ class Server {
         this.app.use((0, cors_1.default)(corsOptions));
         this.app.use(express_1.default.json({ limit: '50mb' }));
         this.app.use(express_1.default.urlencoded({ extended: true, limit: '50mb' }));
-        // Middleware para registrar el sessionId
-        this.app.use((req, res, next) => {
-            console.log('Session ID:', req.sessionID);
-            next();
-        });
     }
     routes() {
         this.app.use(this.paths.product, productRouter_1.default);
@@ -142,7 +136,16 @@ class Server {
         this.app.use(this.paths.inventory, inventoryRouter_1.default);
         this.app.use(this.paths.costos, costosRouter_1.default);
         this.app.use(this.paths.typeofmovements, typeofmovementsRouter_1.default);
+        this.app.use(this.paths.errors, errorsRouter_1.default);
         this.app.use(this.paths.utils, utilsRouter_1.default);
+    }
+    async closeConnections() {
+        if (this.redis) {
+            await this.redis.quit();
+            console.log('Conexión a Redis cerrada');
+        }
+        await (0, connection_1.dbConnectionMain)().then(pool => pool.close()).catch(() => { });
+        console.log('Conexión a la base de datos cerrada');
     }
     errorHandler() {
         this.app.use((err, req, res, next) => {
@@ -159,4 +162,9 @@ exports.default = Server;
 // Exportar la instancia de Redis
 const server = new Server();
 exports.redisClient = server.redis;
+process.on('SIGINT', async () => {
+    console.log('Cerrando conexiones...');
+    await server.closeConnections();
+    process.exit(0);
+});
 //# sourceMappingURL=server.js.map

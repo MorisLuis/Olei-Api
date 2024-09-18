@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { closeDbConnection, dbConnection, querys } from '../../database';
+import { closeDbConnection, dbConnection, dbConnectionMain, querys } from '../../database';
 import { generateWebJWT } from '../../helpers/generate-jwt';
 import config from '../../config';
 import moment from 'moment';
@@ -14,8 +14,10 @@ const loginWeb = async (req: Request, res: Response) => {
         return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
     }
 
+    let mainPool;
+
     try {
-        const mainPool = await dbConnection(config.dbServer, config.dbDatabase);
+        mainPool = await dbConnectionMain()
 
         if (!mainPool) {
             return res.status(500).json({ error: 'Error connecting to the main database' });
@@ -56,9 +58,6 @@ const loginWeb = async (req: Request, res: Response) => {
 
         (req.session as any).userWeb = datosDelUsuario;
 
-        console.log({session: req.sessionID})
-
-
         // Generar token JWT
         const token = await generateWebJWT({ Id: user.Id_UsuarioOOL.trim(), sessionRedis: req.sessionID });
 
@@ -73,18 +72,13 @@ const loginWeb = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.error('Login error:', error);
         return res.status(500).json({ error: error.message || 'Unexpected error' });
-    } finally {
-        await closeDbConnection();
     }
 };
 
-
-
 const renewWeb = async (req: Request, res: Response) => {
 
-    console.log("renewweb")
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis;
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
@@ -121,22 +115,19 @@ const renewWeb = async (req: Request, res: Response) => {
 }
 
 const logout = async (req: Request, res: Response) => {
-
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis;
 
     if (!sessionId) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
 
     try {
-
+        await closeDbConnection()
         await handleDeleteRedisSession({ sessionId });
         res.json({ ok: true })
 
     } catch (error) {
-        console.log({ error })
-    } finally {
-        await closeDbConnection()
+        console.log({ errorLogout: error })
     }
 }
 

@@ -7,7 +7,7 @@ import { UserWebSessionInterface } from '../interface/user';
 const selectClient = async (req: Request, res: Response) => {
 
     // Get session from REDIS.
-    const sessionId = req.sessionRedis
+    const sessionId = req.sessionRedis;
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
@@ -32,15 +32,15 @@ const selectClient = async (req: Request, res: Response) => {
 
         (req.session as any).userWeb = datosDelUsuario;
         const token = await generateWebJWT({ Id: Id, sessionRedis: req.sessionRedis });
+
         return res.json({
+            ok: true,
             token
         })
 
     } catch (error: any) {
         console.log({ error })
         return res.status(500).send(error.message);
-    } finally {
-        await closeDbConnection()
     }
 
 }

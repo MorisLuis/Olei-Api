@@ -13,29 +13,13 @@ export const handleGetSession = async ({ sessionId }: handleGetSessionInterface)
         const user : UserSessionInterface = session.user;    
         return { user }
     } catch (error) {
-        console.log({error})
+        console.log({errorGS: error})
         return { user : undefined }
     }
 
 }
 
 export const handleGetWebSession = async ({ sessionId }: handleGetSessionInterface) => {
-
-    console.log({sessionTOGETSESSION: sessionId})
-    try {
-        const sessionData = await redisClient?.get(`sess:${sessionId}`);
-        const session = JSON.parse(sessionData as string);
-        const user : UserWebSessionInterface = session.userWeb;    
-        return { user }
-    } catch (error) {
-        //console.log({errorGS: error})
-        return { user : undefined }
-    }
-
-}
-
-/* export const handleGetWebSession = async ({ sessionId }: handleGetSessionInterface) => {
-
     try {
         const sessionData = await redisClient?.get(`sess:${sessionId}`);
         const session = JSON.parse(sessionData as string);
@@ -46,4 +30,4 @@ export const handleGetWebSession = async ({ sessionId }: handleGetSessionInterfa
         return { user : undefined }
     }
 
-} */
+}

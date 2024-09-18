@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.logout = exports.renewWeb = exports.loginWeb = void 0;
 const database_1 = require("../../database");
 const generate_jwt_1 = require("../../helpers/generate-jwt");
-const config_1 = __importDefault(require("../../config"));
 const moment_1 = __importDefault(require("moment"));
 const getSession_1 = require("../../utils/Redis/getSession");
 const deleteRedis_1 = require("../../utils/Redis/deleteRedis");
@@ -15,8 +14,9 @@ const loginWeb = async (req, res) => {
     if (email === "" || password === "") {
         return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
     }
+    let mainPool;
     try {
-        const mainPool = await (0, database_1.dbConnection)(config_1.default.dbServer, config_1.default.dbDatabase);
+        mainPool = await (0, database_1.dbConnectionMain)();
         if (!mainPool) {
             return res.status(500).json({ error: 'Error connecting to the main database' });
         }
@@ -50,7 +50,6 @@ const loginWeb = async (req, res) => {
             from: 'web'
         };
         req.session.userWeb = datosDelUsuario;
-        console.log({ session: req.sessionID });
         // Generar token JWT
         const token = await (0, generate_jwt_1.generateWebJWT)({ Id: user.Id_UsuarioOOL.trim(), sessionRedis: req.sessionID });
         return res.json({
@@ -65,15 +64,11 @@ const loginWeb = async (req, res) => {
         console.error('Login error:', error);
         return res.status(500).json({ error: error.message || 'Unexpected error' });
     }
-    finally {
-        await (0, database_1.closeDbConnection)();
-    }
 };
 exports.loginWeb = loginWeb;
 const renewWeb = async (req, res) => {
-    console.log("renewweb");
     // Get session from REDIS.
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
@@ -106,19 +101,17 @@ const renewWeb = async (req, res) => {
 };
 exports.renewWeb = renewWeb;
 const logout = async (req, res) => {
-    const sessionId = req.sessionID;
+    const sessionId = req.sessionRedis;
     if (!sessionId) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     try {
+        await (0, database_1.closeDbConnection)();
         await (0, deleteRedis_1.handleDeleteRedisSession)({ sessionId });
         res.json({ ok: true });
     }
     catch (error) {
-        console.log({ error });
-    }
-    finally {
-        await (0, database_1.closeDbConnection)();
+        console.log({ errorLogout: error });
     }
 };
 exports.logout = logout;

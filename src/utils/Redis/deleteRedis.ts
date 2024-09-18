@@ -8,7 +8,7 @@ interface handleDeleteRedisSessionInterface {
 
 export const handleDeleteRedisSession = async ({ sessionId } : handleDeleteRedisSessionInterface )  => {
 
-    /* await redisClient?.del(`sess:${sessionId}`, (err, response) => {
+    await redisClient?.del(`sess:${sessionId}`, (err, response) => {
         if (err) {
             console.error('Error al eliminar la sesión:', err);
         } else {
@@ -18,6 +18,6 @@ export const handleDeleteRedisSession = async ({ sessionId } : handleDeleteRedis
                 console.log('Sesión no encontrada en Redis');
             }
         }
-    }); */
+    });
 
 }

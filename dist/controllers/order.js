@@ -57,9 +57,6 @@ const postOrder = async (req, res) => {
         console.error('Error al crear el post:', error);
         res.status(500).json({ error: error });
     }
-    finally {
-        await (0, database_1.closeDbConnection)();
-    }
 };
 exports.postOrder = postOrder;
 const getOrder = async (req, res) => {
@@ -89,9 +86,6 @@ const getOrder = async (req, res) => {
     catch (error) {
         res.status(500).json({ error: error });
     }
-    finally {
-        await (0, database_1.closeDbConnection)();
-    }
 };
 exports.getOrder = getOrder;
 const getAllOrders = async (req, res) => {
@@ -119,9 +113,6 @@ const getAllOrders = async (req, res) => {
     catch (error) {
         console.log({ error });
         res.status(500).json({ error: error });
-    }
-    finally {
-        await (0, database_1.closeDbConnection)();
     }
 };
 exports.getAllOrders = getAllOrders;
@@ -151,9 +142,6 @@ const getOrderDetails = async (req, res) => {
     }
     catch (error) {
         res.status(500).json({ error: error });
-    }
-    finally {
-        await (0, database_1.closeDbConnection)();
     }
 };
 exports.getOrderDetails = getOrderDetails;

@@ -58,9 +58,6 @@ const loginDB = async (req, res) => {
         console.log({ error });
         return res.status(500).send(error.message);
     }
-    finally {
-        await (0, database_1.closeDbConnection)();
-    }
 };
 exports.loginDB = loginDB;
 const login = async (req, res) => {
@@ -158,9 +155,6 @@ const renewDB = async (req, res) => {
     catch (error) {
         res.status(500).send(error.message);
         console.log({ error });
-    }
-    finally {
-        await (0, database_1.closeDbConnection)();
     }
 };
 exports.renewDB = renewDB;

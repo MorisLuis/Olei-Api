@@ -86,7 +86,6 @@ const getProducById = async (req: Request, res: Response) => {
     }
 }
 
-
 const getProductsByStock = async (req: Request, res: Response) => {
 
     const { PageNumber, PageSize } = req.query;

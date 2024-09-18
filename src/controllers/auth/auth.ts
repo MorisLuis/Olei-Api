@@ -65,8 +65,6 @@ const loginDB = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.log({ error })
         return res.status(500).send(error.message);
-    } finally {
-        await closeDbConnection()
     }
 }
 
@@ -195,8 +193,6 @@ const renewDB = async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(500).send(error.message);
         console.log({ error })
-    } finally {
-        await closeDbConnection()
     }
 }
 

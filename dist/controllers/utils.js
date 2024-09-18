@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUtils = void 0;
-const database_1 = require("../database");
 const getUtils = async (req, res) => {
     try {
         console.log(numeroALetra(500)); // Quinientos
@@ -15,9 +14,6 @@ const getUtils = async (req, res) => {
     catch (error) {
         console.log({ getUtilsError: error });
         res.status(500).send(error.message);
-    }
-    finally {
-        await (0, database_1.closeDbConnection)();
     }
 };
 exports.getUtils = getUtils;

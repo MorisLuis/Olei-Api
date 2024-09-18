@@ -29,8 +29,6 @@ const getUsers = async (req: Request, res: Response) => {
         console.log({ getUsersError: error })
         res.status(500);
         res.send(error.message);
-    } finally {
-        await closeDbConnection()
     }
 
 }

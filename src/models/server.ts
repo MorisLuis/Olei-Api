@@ -4,7 +4,7 @@ import cors from 'cors';
 import Redis from 'ioredis';
 import RedisStore from 'connect-redis';
 import session, { Store } from 'express-session';
-import { dbConnection } from "../database/connection";
+import { dbConnection, dbConnectionMain } from "../database/connection";
 
 // Rutas
 import userRouter from "../routes/userRouter";
@@ -18,6 +18,7 @@ import inventoryRouter from "../routes/inventoryRouter";
 import costosRouter from "../routes/costosRouter";
 import typeofmovementsRouter from "../routes/typeofmovementsRouter";
 import utilsRouter from "../routes/utilsRouter";
+import errorsRouter from "../routes/errorsRouter";
 
 class Server {
     public app: Application;
@@ -36,6 +37,7 @@ class Server {
         costos: string,
         typeofmovements: string,
         utils: string,
+        errors: string
     };
 
     constructor() {
@@ -53,7 +55,8 @@ class Server {
             inventory: "/api/inventory",
             costos: "/api/costos",
             typeofmovements: "/api/typeofmovements",
-            utils: "/api/utils"
+            utils: "/api/utils",
+            errors: "/api/errors"
         };
 
         this.connectDB();
@@ -65,7 +68,7 @@ class Server {
     }
 
     async connectDB() {
-        await dbConnection();
+        await dbConnectionMain();
     }
 
     configureRedis() {
@@ -87,49 +90,48 @@ class Server {
     configureSessions() {
         if (this.redis) {
             const isProduction = process.env.ENVIRONMENT === 'production';
-
+    
             // Define el TTL y maxAge para móvil y web
-            const webMaxAgeInSeconds = 8 * 60 * 60; // 8 horas para la web
-            const mobileMaxAgeInSeconds = 365 * 24 * 60 * 60; // 1 año en mobil
-
+            const webMaxAgeInSeconds = 12 * 60 * 60; // 8 horas para la web
+            const mobileMaxAgeInSeconds = 365 * 24 * 60 * 60; // 1 año en móvil
+    
+            // Define el store de Redis, una sola vez
             const store = new RedisStore({
                 client: this.redis,
-                ttl: webMaxAgeInSeconds, // Default ttl
+                ttl: webMaxAgeInSeconds // Default ttl
             }) as Store;
-
-            // Middleware para personalizar maxAge según la fuente de la petición
+    
+            // Configurar express-session una vez para toda la aplicación
+            this.app.use(session({
+                secret: process.env.REDIS_SECRET as string,
+                name: 'sid',
+                store: store,
+                resave: false,
+                saveUninitialized: false,
+                cookie: {
+                    secure: isProduction ? 'auto' : false, // true en producción, false en local
+                    httpOnly: true,
+                    sameSite: isProduction ? 'none' : 'lax', // 'none' para producción, 'lax' para local
+                    maxAge: webMaxAgeInSeconds * 1000 // Default maxAge
+                }
+            }));
+    
+            // Middleware personalizado para ajustar el maxAge según el User-Agent
             this.app.use((req, res, next) => {
                 const userAgent = req.headers['user-agent'];
-                let maxAge: number;
-
+    
                 if (userAgent && (userAgent.includes('Mobile') || userAgent.includes('OleiApp'))) {
-                    console.log('Petición desde una app móvil');
-                    maxAge = mobileMaxAgeInSeconds * 1000; // Convertir a milisegundos
-                } else {
-                    console.log('Petición desde una web');
-                    maxAge = webMaxAgeInSeconds * 1000; // Convertir a milisegundos
+                    // Si es una app móvil, ajustamos maxAge
+                    req.session.cookie.maxAge = mobileMaxAgeInSeconds * 1000;
                 }
-
-                // Configurar la sesión con maxAge dinámico
-                session({
-                    secret: process.env.REDIS_SECRET as string,
-                    name: 'sid',
-                    store: store,
-                    resave: false,
-                    saveUninitialized: false,
-                    cookie: {
-                        secure: isProduction, // true en producción, false en local
-                        httpOnly: true,
-                        sameSite: isProduction ? 'none' : 'lax', // 'none' para producción, 'lax' para local
-                        maxAge: maxAge // Aquí establecemos el maxAge dinámico
-                    }
-                })(req, res, next);
+    
+                next();
             });
         } else {
             console.error('Redis no está configurado, las sesiones no se almacenarán en Redis');
         }
     }
-
+    
 
 
     middlewares() {
@@ -153,12 +155,6 @@ class Server {
 
         this.app.use(express.json({ limit: '50mb' }));
         this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
-        // Middleware para registrar el sessionId
-        this.app.use((req, res, next) => {
-            console.log('Session ID:', req.sessionID);
-            next();
-        });
     }
 
     routes() {
@@ -172,8 +168,17 @@ class Server {
         this.app.use(this.paths.inventory, inventoryRouter);
         this.app.use(this.paths.costos, costosRouter);
         this.app.use(this.paths.typeofmovements, typeofmovementsRouter);
+        this.app.use(this.paths.errors, errorsRouter);
         this.app.use(this.paths.utils, utilsRouter);
+    }
 
+    async closeConnections() {
+        if (this.redis) {
+            await this.redis.quit();
+            console.log('Conexión a Redis cerrada');
+        }
+        await dbConnectionMain().then(pool => pool.close()).catch(() => {});
+        console.log('Conexión a la base de datos cerrada');
     }
 
     errorHandler() {
@@ -187,6 +192,8 @@ class Server {
             console.log("Servidor corriendo en puerto " + this.port);
         });
     }
+
+    
 }
 
 export default Server;
@@ -194,3 +201,9 @@ export default Server;
 // Exportar la instancia de Redis
 const server = new Server();
 export const redisClient = server.redis;
+
+process.on('SIGINT', async () => {
+    console.log('Cerrando conexiones...');
+    await server.closeConnections();
+    process.exit(0);
+});

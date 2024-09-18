@@ -66,8 +66,6 @@ const postOrder = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.error('Error al crear el post:', error);
         res.status(500).json({ error: error });
-    } finally {
-        await closeDbConnection()
     }
 };
 
@@ -106,8 +104,6 @@ const getOrder = async (req: Request, res: Response) => {
 
     } catch (error) {
         res.status(500).json({ error: error });
-    } finally {
-        await closeDbConnection()
     }
 }
 
@@ -146,8 +142,6 @@ const getAllOrders = async (req: Request, res: Response) => {
     } catch (error) {
         console.log({ error })
         res.status(500).json({ error: error });
-    } finally {
-        await closeDbConnection()
     }
 }
 
@@ -181,8 +175,6 @@ const getOrderDetails = async (req: Request, res: Response) => {
 
     } catch (error) {
         res.status(500).json({ error: error });
-    } finally {
-        await closeDbConnection()
     }
 }
 

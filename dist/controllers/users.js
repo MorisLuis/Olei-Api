@@ -26,9 +26,6 @@ const getUsers = async (req, res) => {
         res.status(500);
         res.send(error.message);
     }
-    finally {
-        await (0, database_1.closeDbConnection)();
-    }
 };
 exports.getUsers = getUsers;
 //# sourceMappingURL=users.js.map
