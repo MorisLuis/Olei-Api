@@ -49,14 +49,12 @@ const searchClient = async (req, res) => {
     // Get session from REDIS.
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    console.log({ userFR });
     if (!userFR) {
         return res.status(400).json({ error: 'Sesion terminada' });
     }
     const { Serverweb, Baseweb } = userFR;
     try {
         const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
-        console.log({ pool });
         if (!pool) {
             return res.status(500).json({ error: 'Unable to establish a connection to the database' });
         }

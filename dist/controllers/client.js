@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.selectClient = void 0;
 const generate_jwt_1 = require("../helpers/generate-jwt");
 const getSession_1 = require("../utils/Redis/getSession");
+const deleteRedis_1 = require("../utils/Redis/deleteRedis");
 const selectClient = async (req, res) => {
     // Get session from REDIS.
     const sessionId = req.sessionRedis;
@@ -24,7 +25,8 @@ const selectClient = async (req, res) => {
             ...client
         };
         req.session.userWeb = datosDelUsuario;
-        const token = await (0, generate_jwt_1.generateWebJWT)({ Id: Id, sessionRedis: req.sessionRedis });
+        const token = await (0, generate_jwt_1.generateWebJWT)({ Id: Id, sessionRedis: req.sessionID });
+        (0, deleteRedis_1.handleDeleteRedisSession)({ sessionId });
         return res.json({
             ok: true,
             token

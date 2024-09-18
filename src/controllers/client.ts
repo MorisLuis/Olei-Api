@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { generateWebJWT } from '../helpers/generate-jwt';
-import { closeDbConnection } from '../database';
 import { handleGetWebSession } from '../utils/Redis/getSession';
 import { UserWebSessionInterface } from '../interface/user';
+import { handleDeleteRedisSession } from '../utils/Redis/deleteRedis';
 
 const selectClient = async (req: Request, res: Response) => {
 
@@ -25,13 +25,19 @@ const selectClient = async (req: Request, res: Response) => {
             IsEmploye: true
         }
 
+
         const datosDelUsuario: UserWebSessionInterface = {
             ...userFR,
             ...client
         };
 
+
+
         (req.session as any).userWeb = datosDelUsuario;
-        const token = await generateWebJWT({ Id: Id, sessionRedis: req.sessionRedis });
+
+        const token = await generateWebJWT({ Id: Id, sessionRedis: req.sessionID });
+
+        handleDeleteRedisSession({ sessionId })
 
         return res.json({
             ok: true,
