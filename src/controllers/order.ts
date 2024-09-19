@@ -16,7 +16,7 @@ const postOrder = async (req: Request, res: Response) => {
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
 
     const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
@@ -76,7 +76,7 @@ const getOrder = async (req: Request, res: Response) => {
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
 
     const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
@@ -114,7 +114,7 @@ const getAllOrders = async (req: Request, res: Response) => {
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
 
     const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
@@ -152,7 +152,7 @@ const getOrderDetails = async (req: Request, res: Response) => {
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     };
     const { Serverweb, Baseweb } = userFR;
 

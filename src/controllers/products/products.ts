@@ -17,7 +17,7 @@ const getProducById = async (req: Request, res: Response) => {
 
 
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
 
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL} = userFR;
@@ -57,7 +57,7 @@ const getProductsByStock = async (req: Request, res: Response) => {
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
 
     const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL} = userFR;
@@ -104,7 +104,7 @@ const getTotalOfProductsByStock = async (req: Request, res: Response) => {
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
 
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
@@ -144,7 +144,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
 
     const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL} = userFR;

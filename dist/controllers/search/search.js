@@ -9,7 +9,7 @@ const searchProductInventory = async (req, res) => {
     const sessionId = req.sessionID;
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
     const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
     const Id_Usuario = req.id;

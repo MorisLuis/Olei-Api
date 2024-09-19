@@ -15,7 +15,7 @@ const postOrder = async (req, res) => {
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
     const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
     try {
@@ -64,7 +64,7 @@ const getOrder = async (req, res) => {
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
     const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
     try {
@@ -93,7 +93,7 @@ const getAllOrders = async (req, res) => {
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
     const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
     try {
@@ -121,7 +121,7 @@ const getOrderDetails = async (req, res) => {
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
     ;
     const { Serverweb, Baseweb } = userFR;

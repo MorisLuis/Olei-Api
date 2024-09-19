@@ -17,7 +17,7 @@ const loginDB = async (req: Request, res: Response) => {
     }
 
     if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
-        return res.status(400).json({ error: 'Necesario enviar usuario y contraseña' });
+        return res.status(401).json({ error: 'Necesario enviar usuario y contraseña' });
     }
 
     try {
@@ -74,7 +74,7 @@ const login = async (req: Request, res: Response) => {
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
 
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
@@ -91,7 +91,7 @@ const login = async (req: Request, res: Response) => {
         const { Id_Usuario, password } = req.body;
 
         if (Id_Usuario.trim() === "" || password.trim() === "") {
-            return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
+            return res.status(401).json({ error: 'Necesario escribir correo y contraseña' });
         }
 
         const request = pool.request();
@@ -147,7 +147,7 @@ const renewDB = async (req: Request, res: Response) => {
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
 
     const { baseclientes, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
@@ -195,7 +195,7 @@ const renewLogin = async (req: Request, res: Response) => {
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
 
     const { serverclientes, baseclientes, userId, userRol } = userFR;
@@ -237,7 +237,7 @@ const logoutUser = async (req: Request, res: Response) => {
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
 
     try {
@@ -263,7 +263,7 @@ const logoutDB = async (req: Request, res: Response) => {
 
     const sessionId = req.sessionID;
     if (!sessionId) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
 
     try {

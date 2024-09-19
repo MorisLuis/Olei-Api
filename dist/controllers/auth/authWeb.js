@@ -70,7 +70,7 @@ const renewWeb = async (req, res) => {
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        return res.status(401).json({ error: 'Sesion terminada' });
     }
     const { Id, TipoUsuario, Serverweb, Baseweb } = userFR;
     try {
