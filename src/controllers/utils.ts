@@ -18,9 +18,8 @@ const getUtils = async (req: Request, res: Response) => {
             ok: true
         })
 
-    } catch (error: any) {
-        console.log({ getUtilsError: error });
-        res.status(500).send(error.message);
+    } catch (error) {
+        res.status(500).send(error);
     }
 };
 

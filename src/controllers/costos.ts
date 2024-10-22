@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { dbConnection } from '../database';
 import sql from 'mssql';
 import CostosInterface from '../interface/costos';
@@ -6,18 +6,19 @@ import { costosQuerys } from '../database/querys/costos';
 import { v4 as uuidv4 } from 'uuid';
 import { verifyIfIsEAN13 } from '../utils/identifyBarcodeType';
 import { handleGetSession } from '../utils/Redis/getSession';
+import BadRequestError from '../errors/BadRequestError';
 
 export default interface ExtendedCostosInterface extends CostosInterface {
     [key: string]: any;
 }
 
-const updateCostos = async (req: Request, res: Response) => {
+const updateCostos = async (req: Request, res: Response, next: NextFunction) => {
 
     const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL} = userFR;
@@ -28,7 +29,7 @@ const updateCostos = async (req: Request, res: Response) => {
         await transaction.begin();
 
         if (!pool) {
-            return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
         }
 
         try {
@@ -46,7 +47,7 @@ const updateCostos = async (req: Request, res: Response) => {
 
             if (!codigoParam || !Id_Marca) {
                 await transaction.rollback();
-                return res.status(400).json({ error: 'Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.' });
+                throw new BadRequestError({ code: 400, message: `Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.`, logging: true });
             }
 
             const request = new sql.Request(transaction);
@@ -73,20 +74,15 @@ const updateCostos = async (req: Request, res: Response) => {
             });
 
             await request.query(query);
-
             await transaction.commit();
+            res.json({ ok: true });
 
-            res.json({
-                ok: true
-            });
-        } catch (error: any) {
-            console.error({ error: error.stack || error.message });
+        } catch (error) {
             await transaction.rollback();
             res.status(500).json({ error: 'Hubo un error en la actualización de costos.' });
         }
-    } catch (error: any) {
-        console.error({ error: error.stack || error.message });
-        res.status(500).json({ error: 'Hubo un error en la actualización de costos.' });
+    } catch (error) {
+        next(error)
     }
 };
 

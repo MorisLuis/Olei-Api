@@ -1,10 +1,11 @@
-import { Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { dbConnection, querys } from '../../database';
 import { productsQuerys } from '../../database/querys/products';
 import { handleGetSession } from '../../utils/Redis/getSession';
+import BadRequestError from '../../errors/BadRequestError';
 
 
-const searchProductInventory = async (req: Request, res: Response) => {
+const searchProductInventory = async (req: Request, res: Response, next: NextFunction) => {
 
     const { searchTerm } = req.query;
 
@@ -12,7 +13,7 @@ const searchProductInventory = async (req: Request, res: Response) => {
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
     const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL} = userFR;
@@ -27,7 +28,7 @@ const searchProductInventory = async (req: Request, res: Response) => {
         const user = requestUser.recordset[0]
 
         if (!pool) {
-            return res.status(500).json({ error: 'Unable to establish a connection to the database' });
+            throw new BadRequestError({ code: 500, message: "Unable to establish a connection to the database", logging: true });
         }
 
         const query = productsQuerys.getProductsBySearchInventory;
@@ -40,9 +41,8 @@ const searchProductInventory = async (req: Request, res: Response) => {
 
         res.json(products)
 
-
     } catch (error) {
-        console.log({ error })
+        next(error)
     }
 }
 

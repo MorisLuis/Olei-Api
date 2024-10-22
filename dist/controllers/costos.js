@@ -10,11 +10,12 @@ const costos_1 = require("../database/querys/costos");
 const uuid_1 = require("uuid");
 const identifyBarcodeType_1 = require("../utils/identifyBarcodeType");
 const getSession_1 = require("../utils/Redis/getSession");
-const updateCostos = async (req, res) => {
+const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
+const updateCostos = async (req, res, next) => {
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     try {
@@ -22,7 +23,7 @@ const updateCostos = async (req, res) => {
         const transaction = new mssql_1.default.Transaction(pool);
         await transaction.begin();
         if (!pool) {
-            return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
         }
         try {
             const { codigo: codigoParam, Id_Marca } = req.query;
@@ -36,7 +37,7 @@ const updateCostos = async (req, res) => {
             }
             if (!codigoParam || !Id_Marca) {
                 await transaction.rollback();
-                return res.status(400).json({ error: 'Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.' });
+                throw new BadRequestError_1.default({ code: 400, message: `Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.`, logging: true });
             }
             const request = new mssql_1.default.Request(transaction);
             request.input('codigo', mssql_1.default.NVarChar, codigoParam);
@@ -60,19 +61,15 @@ const updateCostos = async (req, res) => {
             });
             await request.query(query);
             await transaction.commit();
-            res.json({
-                ok: true
-            });
+            res.json({ ok: true });
         }
         catch (error) {
-            console.error({ error: error.stack || error.message });
             await transaction.rollback();
             res.status(500).json({ error: 'Hubo un error en la actualización de costos.' });
         }
     }
     catch (error) {
-        console.error({ error: error.stack || error.message });
-        res.status(500).json({ error: 'Hubo un error en la actualización de costos.' });
+        next(error);
     }
 };
 exports.updateCostos = updateCostos;

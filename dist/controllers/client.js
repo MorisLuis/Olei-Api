@@ -1,15 +1,19 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.selectClient = void 0;
 const generate_jwt_1 = require("../helpers/generate-jwt");
 const getSession_1 = require("../utils/Redis/getSession");
 const deleteRedis_1 = require("../utils/Redis/deleteRedis");
-const selectClient = async (req, res) => {
+const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
+const selectClient = async (req, res, next) => {
     // Get session from REDIS.
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { Id } = userFR;
     try {
@@ -33,8 +37,7 @@ const selectClient = async (req, res) => {
         });
     }
     catch (error) {
-        console.log({ error });
-        return res.status(500).send(error.message);
+        next(error);
     }
 };
 exports.selectClient = selectClient;

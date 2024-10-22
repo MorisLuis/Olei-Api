@@ -28,9 +28,8 @@ const handleErrors = async (req: Request, res: Response) => {
             ok: true
         })
 
-    } catch (error: any) {
-        console.log({ error })
-        return res.status(500).send(error.message);
+    } catch (error) {
+        return res.status(500).send(error);
     }
 
 }

@@ -9,26 +9,27 @@ const generate_jwt_1 = require("../../helpers/generate-jwt");
 const moment_1 = __importDefault(require("moment"));
 const getSession_1 = require("../../utils/Redis/getSession");
 const deleteRedis_1 = require("../../utils/Redis/deleteRedis");
-const loginWeb = async (req, res) => {
+const BadRequestError_1 = __importDefault(require("../../errors/BadRequestError"));
+const loginWeb = async (req, res, next) => {
     const { email, password } = req.body;
     if (email === "" || password === "") {
-        return res.status(400).json({ error: 'Necesario escribir correo y contraseña' });
+        throw new BadRequestError_1.default({ code: 401, message: "Necesario escribir correo y contraseña", logging: true });
     }
     try {
         const mainPool = await (0, database_1.dbConnectionMain)();
         if (!mainPool) {
-            return res.status(500).json({ error: 'Error connecting to the main database' });
+            throw new BadRequestError_1.default({ code: 500, message: "Error connecting to the main database", logging: true });
         }
         const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await getUserByEmailWeb(mainPool, email);
         if (!user) {
-            return res.status(404).json({ error: 'Correo no encontrado' });
+            throw new BadRequestError_1.default({ code: 401, message: "Correo no encontrado", logging: true });
         }
         if (user.PasswordOOL.trim() !== password) {
-            return res.status(401).json({ error: 'Contraseña incorrecta' });
+            throw new BadRequestError_1.default({ code: 401, message: "Contraseña incorrecta", logging: true });
         }
         const isExpired = await isSubscriptionExpired(Vigencia);
         if (isExpired) {
-            return res.status(401).json({ error: 'Cuenta de usuario vencida.' });
+            throw new BadRequestError_1.default({ code: 401, message: "Cuenta de usuario vencida", logging: true });
         }
         const datosDelUsuario = {
             Id: user.Id_UsuarioOOL.trim(),
@@ -60,17 +61,16 @@ const loginWeb = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Login error:', error);
-        return res.status(500).json({ error: error.message || 'Unexpected error' });
+        next(error);
     }
 };
 exports.loginWeb = loginWeb;
-const renewWeb = async (req, res) => {
+const renewWeb = async (req, res, next) => {
     // Get session from REDIS.
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { Id, TipoUsuario, Serverweb, Baseweb } = userFR;
     try {
@@ -94,15 +94,14 @@ const renewWeb = async (req, res) => {
         });
     }
     catch (error) {
-        console.log({ errorRW: error });
-        res.status(500).send(error.message);
+        next(error);
     }
 };
 exports.renewWeb = renewWeb;
-const logout = async (req, res) => {
+const logout = async (req, res, next) => {
     const sessionId = req.sessionRedis;
     if (!sessionId) {
-        return res.status(400).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     try {
         await (0, database_1.closeDbConnection)();
@@ -110,7 +109,7 @@ const logout = async (req, res) => {
         res.json({ ok: true });
     }
     catch (error) {
-        console.log({ errorLogout: error });
+        next(error);
     }
 };
 exports.logout = logout;
@@ -118,7 +117,11 @@ exports.logout = logout;
 const getUserByEmailWeb = async (mainPool, email) => {
     const query_DB = database_1.querys.authWeb;
     const result = await mainPool.request().input('email', email).query(query_DB);
-    return result?.recordset[0];
+    const user = result?.recordset[0];
+    if (!user) {
+        throw new BadRequestError_1.default({ code: 401, message: "Usuario no encontrado", logging: true });
+    }
+    return user;
 };
 const isSubscriptionExpired = (dueDate) => {
     const today = (0, moment_1.default)().startOf('day');

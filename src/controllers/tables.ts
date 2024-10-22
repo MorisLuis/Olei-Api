@@ -1,15 +1,16 @@
-import { Request, Response } from 'express'
-import { closeDbConnection, dbConnection, querys } from '../database';
+import { NextFunction, Request, Response } from 'express'
+import { dbConnection, querys } from '../database';
 import { handleGetWebSession } from '../utils/Redis/getSession';
+import BadRequestError from '../errors/BadRequestError';
 
-const getTables = async (req: Request, res: Response) => {
+const getTables = async (req: Request, res: Response, next: NextFunction) => {
 
     // Get session from REDIS.
     const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
     const { Serverweb, Baseweb } = userFR;
@@ -31,9 +32,8 @@ const getTables = async (req: Request, res: Response) => {
             Folio
         });
 
-    } catch (error: any) {
-        res.status(500);
-        res.send(error.message);
+    } catch (error) {
+        next(error)
     }
 }
 

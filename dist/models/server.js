@@ -24,6 +24,7 @@ const costosRouter_1 = __importDefault(require("../routes/costosRouter"));
 const typeofmovementsRouter_1 = __importDefault(require("../routes/typeofmovementsRouter"));
 const utilsRouter_1 = __importDefault(require("../routes/utilsRouter"));
 const errorsRouter_1 = __importDefault(require("../routes/errorsRouter"));
+const errorHandler_1 = require("../middleware/errorHandler");
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -148,9 +149,7 @@ class Server {
         console.log('Conexión a la base de datos cerrada');
     }
     errorHandler() {
-        this.app.use((err, req, res, next) => {
-            res.status(500).json({ error: 'Ocurrió un error en el servidor', err });
-        });
+        this.app.use(errorHandler_1.errorHandler);
     }
     listen() {
         this.app.listen(this.port, () => {

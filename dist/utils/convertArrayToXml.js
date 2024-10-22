@@ -46,7 +46,6 @@ const convertArrayToXml = (data) => {
         return root.end({ pretty: true, indent: '        ', newline: '\n' });
     }
     catch (error) {
-        console.log({ error });
         return error;
     }
 };

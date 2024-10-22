@@ -1,15 +1,19 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchProductInventory = void 0;
 const database_1 = require("../../database");
 const products_1 = require("../../database/querys/products");
 const getSession_1 = require("../../utils/Redis/getSession");
-const searchProductInventory = async (req, res) => {
+const BadRequestError_1 = __importDefault(require("../../errors/BadRequestError"));
+const searchProductInventory = async (req, res, next) => {
     const { searchTerm } = req.query;
     const sessionId = req.sessionID;
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
     const Id_Usuario = req.id;
@@ -19,7 +23,7 @@ const searchProductInventory = async (req, res) => {
         const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
         if (!pool) {
-            return res.status(500).json({ error: 'Unable to establish a connection to the database' });
+            throw new BadRequestError_1.default({ code: 500, message: "Unable to establish a connection to the database", logging: true });
         }
         const query = products_1.productsQuerys.getProductsBySearchInventory;
         const result = await pool.request()
@@ -30,7 +34,7 @@ const searchProductInventory = async (req, res) => {
         res.json(products);
     }
     catch (error) {
-        console.log({ error });
+        next(error);
     }
 };
 exports.searchProductInventory = searchProductInventory;

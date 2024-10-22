@@ -19,6 +19,7 @@ import costosRouter from "../routes/costosRouter";
 import typeofmovementsRouter from "../routes/typeofmovementsRouter";
 import utilsRouter from "../routes/utilsRouter";
 import errorsRouter from "../routes/errorsRouter";
+import { errorHandler } from "../middleware/errorHandler";
 
 class Server {
     public app: Application;
@@ -131,8 +132,6 @@ class Server {
             console.error('Redis no está configurado, las sesiones no se almacenarán en Redis');
         }
     }
-    
-
 
     middlewares() {
         const allowedOrigins = [
@@ -182,9 +181,7 @@ class Server {
     }
 
     errorHandler() {
-        this.app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-            res.status(500).json({ error: 'Ocurrió un error en el servidor', err });
-        });
+        this.app.use(errorHandler);
     }
 
     listen() {

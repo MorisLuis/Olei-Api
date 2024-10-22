@@ -1,4 +1,7 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getProductByStockAndCodeBar = exports.getTotalOfProductsByStock = exports.getProductsByStock = exports.getProducById = exports.checkImageExists = void 0;
 const database_1 = require("../../database");
@@ -6,14 +9,15 @@ const products_1 = require("../../database/querys/products");
 const identifyBarcodeType_1 = require("../../utils/identifyBarcodeType");
 const getSession_1 = require("../../utils/Redis/getSession");
 const productsWeb_1 = require("../../database/querys/productsWeb");
-const getProducById = async (req, res) => {
+const BadRequestError_1 = __importDefault(require("../../errors/BadRequestError"));
+const getProducById = async (req, res, next) => {
     const { id } = req.params;
     const { Marca } = req.query;
     const Id_Usuario = req.id;
     const sessionId = req.sessionID;
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     try {
@@ -22,7 +26,7 @@ const getProducById = async (req, res) => {
         const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
         if (!pool) {
-            return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
         const result = await pool.request()
             .input("Codigo", id)
@@ -35,17 +39,16 @@ const getProducById = async (req, res) => {
         return res.json(product);
     }
     catch (error) {
-        console.log({ error });
-        return res.status(500).json({ error });
+        next(error);
     }
 };
 exports.getProducById = getProducById;
-const getProductsByStock = async (req, res) => {
+const getProductsByStock = async (req, res, next) => {
     const { PageNumber, PageSize } = req.query;
     const sessionId = req.sessionID;
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
     try {
@@ -54,7 +57,7 @@ const getProductsByStock = async (req, res) => {
         const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery);
         const user = requestUser.recordset[0];
         if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
         let query = products_1.productsQuerys.getAllProductsByStock;
         const request = await pool.request()
@@ -71,17 +74,16 @@ const getProductsByStock = async (req, res) => {
         res.json(products);
     }
     catch (error) {
-        console.log({ error });
-        res.status(500).json({ error: error.message });
+        next(error);
     }
 };
 exports.getProductsByStock = getProductsByStock;
-const getTotalOfProductsByStock = async (req, res) => {
+const getTotalOfProductsByStock = async (req, res, next) => {
     const Id_Usuario = req.id;
     const sessionId = req.sessionID;
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     try {
@@ -90,7 +92,7 @@ const getTotalOfProductsByStock = async (req, res) => {
         const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
         const user = requestUser.recordset[0];
         if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
         let query = products_1.productsQuerys.getTotalOfAllProductsByStock;
         const request = await pool.request()
@@ -101,17 +103,16 @@ const getTotalOfProductsByStock = async (req, res) => {
         res.json(TotalProductos);
     }
     catch (error) {
-        console.log({ error });
-        res.status(500).json({ error: error.message });
+        next(error);
     }
 };
 exports.getTotalOfProductsByStock = getTotalOfProductsByStock;
-const getProductByStockAndCodeBar = async (req, res) => {
+const getProductByStockAndCodeBar = async (req, res, next) => {
     const { CodBar, Codigo } = req.query;
     const sessionId = req.sessionID;
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
     try {
@@ -120,7 +121,7 @@ const getProductByStockAndCodeBar = async (req, res) => {
         const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery);
         const user = requestUser.recordset[0];
         if (!pool) {
-            return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
         let isEAN13orUPC14 = false;
         if (CodBar) {
@@ -148,8 +149,7 @@ const getProductByStockAndCodeBar = async (req, res) => {
         res.json(productByStockAndCodeBar);
     }
     catch (error) {
-        console.log({ error });
-        return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud / getProductByStockAndCodeBar' });
+        next(error);
     }
 };
 exports.getProductByStockAndCodeBar = getProductByStockAndCodeBar;

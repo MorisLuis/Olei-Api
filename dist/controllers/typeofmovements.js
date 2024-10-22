@@ -7,11 +7,12 @@ exports.getTypeofmovements = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const getSession_1 = require("../utils/Redis/getSession");
-const getTypeofmovements = async (req, res) => {
+const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
+const getTypeofmovements = async (req, res, next) => {
     const sessionId = req.sessionID;
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL, userId } = userFR;
     try {
@@ -23,8 +24,7 @@ const getTypeofmovements = async (req, res) => {
         res.json(TiposMovimiento);
     }
     catch (error) {
-        res.status(500);
-        res.send(error.message);
+        next(error);
     }
 };
 exports.getTypeofmovements = getTypeofmovements;

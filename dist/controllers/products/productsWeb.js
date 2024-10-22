@@ -9,18 +9,18 @@ const mssql_1 = __importDefault(require("mssql"));
 const getSession_1 = require("../../utils/Redis/getSession");
 const productsWeb_1 = require("../../database/querys/productsWeb");
 const checkImageExists_1 = require("../../utils/checkImageExists");
-const getProducts = async (req, res) => {
+const BadRequestError_1 = __importDefault(require("../../errors/BadRequestError"));
+const getProducts = async (req, res, next) => {
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
     try {
         const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
-            return;
+            throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
         const { nombre, marca, familia, folio, page = '1', limit = '10' } = req.query;
         const pageNumber = parseInt(page, 10) || 1;
@@ -48,17 +48,16 @@ const getProducts = async (req, res) => {
         });
     }
     catch (error) {
-        console.log({ errorGP: error });
-        res.status(500).json({ error: error.message });
+        next(error);
     }
 };
 exports.getProducts = getProducts;
-const getProducByIdWeb = async (req, res) => {
+const getProducByIdWeb = async (req, res, next) => {
     // Get session from REDIS.
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { Serverweb, Baseweb, Id_ListPre, Id_Almacen } = userFR;
     try {
@@ -66,7 +65,7 @@ const getProducByIdWeb = async (req, res) => {
         const { Marca } = req.query;
         const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
-            return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
         const result = await pool.request()
             .input("Codigo", id)
@@ -84,24 +83,22 @@ const getProducByIdWeb = async (req, res) => {
         return res.json(product);
     }
     catch (error) {
-        console.log({ error });
-        return res.status(500).json({ error });
+        next(error);
     }
 };
 exports.getProducByIdWeb = getProducByIdWeb;
-const getTotalProducts = async (req, res) => {
+const getTotalProducts = async (req, res, next) => {
     // Get session from REDIS.
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
     try {
         const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
-            return;
+            throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
         const { nombre, marca, familia, folio } = req.query;
         const result = await pool?.request()
@@ -118,8 +115,7 @@ const getTotalProducts = async (req, res) => {
         res.json({ total: result?.recordset[0][""] });
     }
     catch (error) {
-        console.log({ errorTP: error });
-        return res.status(500).json({ error });
+        next(error);
     }
 };
 exports.getTotalProducts = getTotalProducts;

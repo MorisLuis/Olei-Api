@@ -1,12 +1,13 @@
-import { Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { dbConnection, querys } from '../../database';
 import { productsQuerys } from '../../database/querys/products';
 import { guessBarcodeType } from '../../utils/identifyBarcodeType';
 import { handleGetSession } from '../../utils/Redis/getSession';
 import { productsWebQuerys } from '../../database/querys/productsWeb';
+import BadRequestError from '../../errors/BadRequestError';
 
 
-const getProducById = async (req: Request, res: Response) => {
+const getProducById = async (req: Request, res: Response, next: NextFunction) => {
 
     const { id } = req.params;
     const { Marca } = req.query;
@@ -17,26 +18,26 @@ const getProducById = async (req: Request, res: Response) => {
 
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL} = userFR;
+    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
 
     try {
         const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
-        const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
+        const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
         const user = requestUser.recordset[0]
 
         if (!pool) {
-            return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
 
         const result = await pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)
-            .input("ListaPrecios",  user.Id_ListPre)
+            .input("ListaPrecios", user.Id_ListPre)
             .input("Almacen", user.Id_Almacen)
             .input("baseSQL", baseclientes)
             .query(productsWebQuerys.getProducById);
@@ -45,32 +46,31 @@ const getProducById = async (req: Request, res: Response) => {
 
         return res.json(product);
     } catch (error) {
-        console.log({ error })
-        return res.status(500).json({ error });
+        next(error)
     }
 }
 
-const getProductsByStock = async (req: Request, res: Response) => {
+const getProductsByStock = async (req: Request, res: Response, next: NextFunction) => {
 
     const { PageNumber, PageSize } = req.query;
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
-    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL} = userFR;
+    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
 
     try {
         const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
-        const requestUser: any = await pool.request().input('Id_Usuario', userId).query(userquery)
+        const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery)
         const user = requestUser.recordset[0]
 
         if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
 
         let query = productsQuerys.getAllProductsByStock;
@@ -90,13 +90,12 @@ const getProductsByStock = async (req: Request, res: Response) => {
 
         res.json(products);
 
-    } catch (error: any) {
-        console.log({ error })
-        res.status(500).json({ error: error.message });
+    } catch (error) {
+        next(error)
     }
 };
 
-const getTotalOfProductsByStock = async (req: Request, res: Response) => {
+const getTotalOfProductsByStock = async (req: Request, res: Response, next: NextFunction) => {
 
     const Id_Usuario = req.id;
 
@@ -104,7 +103,7 @@ const getTotalOfProductsByStock = async (req: Request, res: Response) => {
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
@@ -113,17 +112,17 @@ const getTotalOfProductsByStock = async (req: Request, res: Response) => {
         const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
-        const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
+        const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
         const user = requestUser.recordset[0]
 
         if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
 
         let query = productsQuerys.getTotalOfAllProductsByStock;
 
         const request = await pool.request()
-            .input('Id_ListaPrecios',  user.Id_ListPre)
+            .input('Id_ListaPrecios', user.Id_ListPre)
             .input('Almacen', user.Id_Almacen)
             .query(query);
 
@@ -131,33 +130,32 @@ const getTotalOfProductsByStock = async (req: Request, res: Response) => {
 
         res.json(TotalProductos);
 
-    } catch (error: any) {
-        console.log({ error })
-        res.status(500).json({ error: error.message });
+    } catch (error) {
+        next(error)
     }
 };
 
-const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
+const getProductByStockAndCodeBar = async (req: Request, res: Response, next: NextFunction) => {
 
     const { CodBar, Codigo } = req.query;
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
-    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL} = userFR;
+    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
 
     try {
         const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
-        const requestUser: any = await pool.request().input('Id_Usuario', userId).query(userquery)
+        const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery)
         const user = requestUser.recordset[0]
 
         if (!pool) {
-            return res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
+            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
 
 
@@ -189,9 +187,8 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response) => {
         const productByStockAndCodeBar = request.recordset;
         res.json(productByStockAndCodeBar)
 
-    } catch (error: any) {
-        console.log({ error })
-        return res.status(500).json({ error: 'Ocurrió un error al procesar la solicitud / getProductByStockAndCodeBar' });
+    } catch (error) {
+        next(error)
     }
 };
 
@@ -243,10 +240,8 @@ export const checkImageExists = async (url: string): Promise<boolean> => {
 };
 
 
-
 export {
     getProducById,
-    //getTotalProducts,
     getProductsByStock,
     getTotalOfProductsByStock,
     getProductByStockAndCodeBar

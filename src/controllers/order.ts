@@ -1,5 +1,5 @@
-import { Request, Response } from "express"
-import { closeDbConnection, dbConnection } from "../database";
+import { NextFunction, Request, Response } from "express"
+import { dbConnection } from "../database";
 import sql from 'mssql';
 import OrderInterface from "../interface/order";
 import { orderQuerys } from "../database/querys/orders";
@@ -7,16 +7,17 @@ import { handleGetWebSession } from "../utils/Redis/getSession";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
 import { numeroALetra } from "../utils/numeroALetra";
 import PorductInterface from "../interface/product";
+import BadRequestError from '../errors/BadRequestError';
 
 
-const postOrder = async (req: Request, res: Response) => {
+const postOrder = async (req: Request, res: Response, next: NextFunction) => {
 
     // Get session from REDIS.
     const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
     const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
@@ -24,8 +25,7 @@ const postOrder = async (req: Request, res: Response) => {
     try {
         const pool = await dbConnection(Serverweb, Baseweb);
         if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
-            return;
+            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         };
 
         const { sellsDetails, sellsData } = req.body;
@@ -63,20 +63,19 @@ const postOrder = async (req: Request, res: Response) => {
             folio
         });
 
-    } catch (error: any) {
-        console.error('Error al crear el post:', error);
-        res.status(500).json({ error: error });
+    } catch (error) {
+        next(error)
     }
 };
 
-const getOrder = async (req: Request, res: Response) => {
+const getOrder = async (req: Request, res: Response, next: NextFunction) => {
 
     // Get session from REDIS.
     const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
     const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
@@ -86,8 +85,7 @@ const getOrder = async (req: Request, res: Response) => {
         const pool = await dbConnection(Serverweb, Baseweb);
 
         if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
-            return;
+            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
 
         const getOrderQuery = orderQuerys.getOrder;
@@ -98,23 +96,23 @@ const getOrder = async (req: Request, res: Response) => {
             .input('TipoDocOO', TipoDocOO)
             .query(getOrderQuery);
 
-        let order: OrderInterface = request.recordset[0];
+        let order = request.recordset[0];
 
         res.json(order)
 
     } catch (error) {
-        res.status(500).json({ error: error });
+        next(error)
     }
 }
 
-const getAllOrders = async (req: Request, res: Response) => {
+const getAllOrders = async (req: Request, res: Response, next: NextFunction) => {
 
     // Get session from REDIS.
     const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
     const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
@@ -123,8 +121,7 @@ const getAllOrders = async (req: Request, res: Response) => {
         const pool = await dbConnection(Serverweb, Baseweb);
 
         if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
-            return;
+            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
 
         const query = orderQuerys.getAllOrders;
@@ -140,19 +137,18 @@ const getAllOrders = async (req: Request, res: Response) => {
         res.json(allOrders);
 
     } catch (error) {
-        console.log({ error })
-        res.status(500).json({ error: error });
+        next(error)
     }
 }
 
-const getOrderDetails = async (req: Request, res: Response) => {
+const getOrderDetails = async (req: Request, res: Response, next: NextFunction) => {
 
     // Get session from REDIS.
     const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     };
     const { Serverweb, Baseweb } = userFR;
 
@@ -161,8 +157,7 @@ const getOrderDetails = async (req: Request, res: Response) => {
 
         const pool = await dbConnection(Serverweb, Baseweb);
         if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
-            return;
+            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         };
 
         const query = orderQuerys.getOrderDetails;
@@ -174,7 +169,7 @@ const getOrderDetails = async (req: Request, res: Response) => {
         res.json(orderDetails)
 
     } catch (error) {
-        res.status(500).json({ error: error });
+        next(error)
     }
 }
 

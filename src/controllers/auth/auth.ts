@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import sql from "mssql";
 import { closeDbConnection, dbConnection, dbConnectionMain, querys } from '../../database';
 import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
@@ -6,18 +6,20 @@ import { MovementDetail, UserSessionInterface, ValidationResult } from '../../in
 import { handleGetSession } from '../../utils/Redis/getSession';
 import { handleDeleteRedisSession } from '../../utils/Redis/deleteRedis';
 
-const loginDB = async (req: Request, res: Response) => {
+import BadRequestError from '../../errors/BadRequestError';
+
+const loginDB = async (req: Request, res: Response, next: NextFunction) => {
 
     // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
     const { IdUsuarioOLEI, PasswordOLEI } = req.body;
 
     const mainPool = await dbConnectionMain();
     if (!mainPool) {
-        return res.status(500).json({ error: 'Error connecting to the main database' });
+        throw new BadRequestError({ code: 400, message: "Error connecting to the main database!", logging: true });
     }
 
     if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
-        return res.status(401).json({ error: 'Necesario enviar usuario y contraseña' });
+        throw new BadRequestError({ code: 401, message: "Necesario enviar usuario y contraseña!", logging: true });
     }
 
     try {
@@ -26,11 +28,11 @@ const loginDB = async (req: Request, res: Response) => {
         const cleanResult = result?.recordset[0];
 
         if (!cleanResult) {
-            return res.status(401).json({ error: `No se encontro el usuario: ${IdUsuarioOLEI}` });
+            throw new BadRequestError({ code: 401, message: `No se encontro el usuario: ${IdUsuarioOLEI}`, logging: true });
         }
 
         if (cleanResult.PasswordOLEI.trim() !== PasswordOLEI) {
-            return res.status(401).json({ error: 'Contraseña incorrecta' });
+            throw new BadRequestError({ code: 401, message: `Contraseña incorrecta`, logging: true });
         }
 
         const user = {
@@ -40,7 +42,7 @@ const loginDB = async (req: Request, res: Response) => {
 
         const tokenDB = await generateJWTDB({ IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim() });
 
-        const datosDelUsuario : UserSessionInterface = {
+        const datosDelUsuario: UserSessionInterface = {
             serverclientes: cleanResult.ServidorSQL.trim(),
             baseclientes: cleanResult.BaseSQL.trim(),
             PasswordSQL: cleanResult.PasswordSQL.trim(),
@@ -61,20 +63,18 @@ const loginDB = async (req: Request, res: Response) => {
             user
         });
 
-    } catch (error: any) {
-        console.log({ error })
-        return res.status(500).send(error.message);
+    } catch (error) {
+        next(error);
     }
 }
 
-const login = async (req: Request, res: Response) => {
-
+const login = async (req: Request, res: Response, next: NextFunction) => {
 
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
@@ -83,7 +83,7 @@ const login = async (req: Request, res: Response) => {
     const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
     if (!pool) {
-        return res.status(500).json({ error: 'Error connecting to the main database' });
+        throw new BadRequestError({ code: 500, message: "Error connecting to the main database", logging: true });
     }
 
     try {
@@ -91,7 +91,7 @@ const login = async (req: Request, res: Response) => {
         const { Id_Usuario, password } = req.body;
 
         if (Id_Usuario.trim() === "" || password.trim() === "") {
-            return res.status(401).json({ error: 'Necesario escribir correo y contraseña' });
+            throw new BadRequestError({ code: 404, message: "Necesario escribir correo y contraseña", logging: true });
         }
 
         const request = pool.request();
@@ -102,11 +102,11 @@ const login = async (req: Request, res: Response) => {
         const Validations = (resultData.recordsets as any)[0] as ValidationResult[];
 
         if (Validations[0].Tipo === "usuario" && Validations[0].Resultado !== 1) {
-            return res.status(404).json({ error: 'Correo no encontrado' });
+            throw new BadRequestError({ code: 404, message: "Correo no encontrada", logging: true });
         }
 
         if (Validations[1].Tipo === "contrasena" && Validations[1].Resultado !== 1) {
-            return res.status(401).json({ error: 'Contraseña incorrecta' });
+            throw new BadRequestError({ code: 404, message: "Contraseña incorrecta", logging: true });
         }
 
         const User = (resultData.recordsets as any)[1][0] as MovementDetail;
@@ -114,7 +114,7 @@ const login = async (req: Request, res: Response) => {
         const token = await generateJWT({ id: Id_Usuario.trim() });
 
         (req.session as any).user = {
-            ...(req.session as any).user ,
+            ...(req.session as any).user,
             userId: Id_Usuario.trim(),
             userRol: User.Id_Perfil
         }
@@ -134,20 +134,19 @@ const login = async (req: Request, res: Response) => {
             token
         });
 
-    } catch (error: any) {
-        console.log({ error })
-        return res.status(500).json({ error: error.message || 'Unexpected error' });
+    } catch (error) {
+        next(error);
     }
 };
 
-const renewDB = async (req: Request, res: Response) => {
+const renewDB = async (req: Request, res: Response, next: NextFunction) => {
 
     // Get session from REDIS.
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
     const { baseclientes, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
@@ -156,7 +155,7 @@ const renewDB = async (req: Request, res: Response) => {
         const token = await generateJWTDB({ IdUsuarioOLEI });
 
         if (!token) {
-            return res.status(401).json({ message: 'Failed to generate token' });
+            throw new BadRequestError({ code: 401, message: "Failed to generate token", logging: true });
         };
 
         // User to Redis.
@@ -173,7 +172,7 @@ const renewDB = async (req: Request, res: Response) => {
         };
 
         if (!userFR) {
-            return res.status(401).json({ message: 'User data is neccesary' });
+            throw new BadRequestError({ code: 401, message: "User data is neccesary", logging: true });
         };
 
         (req.session as any).user = userRedis
@@ -183,19 +182,18 @@ const renewDB = async (req: Request, res: Response) => {
             user
         });
 
-    } catch (error: any) {
-        res.status(500).send(error.message);
-        console.log({ error })
+    } catch (error) {
+        next(error);
     }
 }
 
-const renewLogin = async (req: Request, res: Response) => {
+const renewLogin = async (req: Request, res: Response, next: NextFunction) => {
 
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
     const { serverclientes, baseclientes, userId, userRol } = userFR;
@@ -203,17 +201,17 @@ const renewLogin = async (req: Request, res: Response) => {
     try {
 
         if (!userId && !userRol) {
-            return res.status(401).json({ message: 'User not authenticated' });
+            throw new BadRequestError({ code: 401, message: "User not authenticated", logging: true });
         };
 
         if (!serverclientes && !baseclientes) {
-            return res.status(401).json({ message: 'Server and base data is neccessary' });
+            throw new BadRequestError({ code: 401, message: "Server and base data is neccessary", logging: true });
         };
 
         const token = await generateJWT({ id: userId as string });
 
         if (!token) {
-            return res.status(401).json({ message: 'Failed to generate token' });
+            throw new BadRequestError({ code: 401, message: "Failed to generate token", logging: true });
         };
 
         const user = {
@@ -225,19 +223,18 @@ const renewLogin = async (req: Request, res: Response) => {
             token
         });
 
-    } catch (error: any) {
-        console.log({ error })
-        res.status(500).send(error.message);
+    } catch (error) {
+        next(error);
     }
 }
 
-const logoutUser = async (req: Request, res: Response) => {
+const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
     const sessionId = req.sessionID;
 
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
     try {
@@ -253,28 +250,24 @@ const logoutUser = async (req: Request, res: Response) => {
             user: userFR
         })
 
-    } catch (error: any) {
-        console.log({ error })
-        res.status(500).send(error.message);
+    } catch (error) {
+        next(error);
     }
 }
 
-const logoutDB = async (req: Request, res: Response) => {
+const logoutDB = async (req: Request, res: Response, next: NextFunction) => {
 
     const sessionId = req.sessionID;
     if (!sessionId) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
     try {
-
         await handleDeleteRedisSession({ sessionId });
         await closeDbConnection()
         res.json({ ok: true })
-
-    } catch (error: any) {
-        console.log({ error })
-        res.status(500).send(error.message);
+    } catch (error) {
+        next(error);
     }
 }
 

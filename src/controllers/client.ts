@@ -1,17 +1,18 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { generateWebJWT } from '../helpers/generate-jwt';
 import { handleGetWebSession } from '../utils/Redis/getSession';
 import { UserWebSessionInterface } from '../interface/user';
 import { handleDeleteRedisSession } from '../utils/Redis/deleteRedis';
+import BadRequestError from '../errors/BadRequestError';
 
-const selectClient = async (req: Request, res: Response) => {
+const selectClient = async (req: Request, res: Response, next: NextFunction) => {
 
     // Get session from REDIS.
     const sessionId = req.sessionRedis;
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { Id } = userFR;
 
@@ -40,11 +41,9 @@ const selectClient = async (req: Request, res: Response) => {
             token
         })
 
-    } catch (error: any) {
-        console.log({ error })
-        return res.status(500).send(error.message);
+    } catch (error) {
+        next(error)
     }
-
 }
 
 export {

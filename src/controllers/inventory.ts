@@ -1,18 +1,19 @@
-import { Response, Request } from "express";
-import { dbConnection, querys } from "../database";
+import { Response, Request, NextFunction } from "express";
+import { dbConnection } from "../database";
 import sql from 'mssql';
 import { inventoryQuerys } from "../database/querys/inventory";
 import { currentTime } from "../utils/currentTime";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
 import { handleGetSession } from "../utils/Redis/getSession";
+import BadRequestError from '../errors/BadRequestError';
 
-const postInventory = async (req: Request, res: Response) => {
+const postInventory = async (req: Request, res: Response, next: NextFunction) => {
 
     const sessionId = req.sessionID;
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL} = userFR;
@@ -65,20 +66,18 @@ const postInventory = async (req: Request, res: Response) => {
         res.json({ Folio, inventory })
 
     } catch (error) {
-        console.log({ postInventoryError: error })
-        res.status(500).json({ error: error });
+        next(error)
     }
 }
 
-const getInventory = async (req: Request, res: Response) => {
+const getInventory = async (req: Request, res: Response, next: NextFunction) => {
 
     const { Folio } = req.query;
 
     try {
         const pool = await dbConnection()
         if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
-            return;
+            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
 
         const getInventoryQuery = inventoryQuerys.getInventory;
@@ -91,20 +90,18 @@ const getInventory = async (req: Request, res: Response) => {
         res.json(inventory)
 
     } catch (error) {
-        console.log({ error })
-        res.status(500).json({ error: error });
+        next(error)
     }
 }
 
-const getInventoryDetails = async (req: Request, res: Response) => {
+const getInventoryDetails = async (req: Request, res: Response, next: NextFunction) => {
 
     const { Folio } = req.query;
 
     try {
         const pool = await dbConnection()
         if (!pool) {
-            res.status(500).json({ error: 'No se pudo establecer la conexión con la base de datos' });
-            return;
+            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
 
         const getInventoryQuery = inventoryQuerys.getInventoryDetails;
@@ -112,15 +109,11 @@ const getInventoryDetails = async (req: Request, res: Response) => {
             .input("Folio", Folio)
             .query(getInventoryQuery)
 
-
-        let inventoryDetails = request.recordset;
-
+        const inventoryDetails = request.recordset;
         res.json(inventoryDetails)
 
-
     } catch (error) {
-        console.log({ error })
-        res.status(500).json({ error: error });
+        next(error)
     }
 }
 

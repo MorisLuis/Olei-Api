@@ -1,17 +1,18 @@
-import { Request, Response } from 'express'
-import { closeDbConnection, dbConnection, querys } from '../../database';
+import { NextFunction, Request, Response } from 'express'
+import { dbConnection, querys } from '../../database';
 import sql from 'mssql';
 import { productsQuerys } from '../../database/querys/products';
 import { handleGetWebSession } from '../../utils/Redis/getSession';
+import BadRequestError from '../../errors/BadRequestError';
 
-const searchProduct = async (req: Request, res: Response) => {
+const searchProduct = async (req: Request, res: Response, next: NextFunction) => {
 
     // Get session from REDIS.
     const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
     const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, Id_Almacen } = userFR;
@@ -21,7 +22,7 @@ const searchProduct = async (req: Request, res: Response) => {
         const pool = await dbConnection(Serverweb, Baseweb);
 
         if (!pool) {
-            return res.status(500).json({ error: 'Unable to establish a connection to the database' });
+            throw new BadRequestError({ code: 500, message: "Unable to establish a connection to the database", logging: true })
         }
 
         // Execute the SQL query
@@ -42,20 +43,19 @@ const searchProduct = async (req: Request, res: Response) => {
             total: products.length,
             products
         });
-    } catch (error: any) {
-        console.log({ error })
-        res.status(500).json({ error: error.message });
+    } catch (error) {
+        next(error)
     }
 };
 
-const searchClient = async (req: Request, res: Response) => {
+const searchClient = async (req: Request, res: Response, next: NextFunction) => {
 
     // Get session from REDIS.
     const sessionId = req.sessionRedis
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true })
     }
 
     const { Serverweb, Baseweb } = userFR;
@@ -64,7 +64,7 @@ const searchClient = async (req: Request, res: Response) => {
         const pool = await dbConnection(Serverweb, Baseweb);
 
         if (!pool) {
-            return res.status(500).json({ error: 'Unable to establish a connection to the database' });
+            throw new BadRequestError({ code: 500, message: "Unable to establish a connection to the database", logging: true })
         };
 
         const { term } = req.query
@@ -79,8 +79,8 @@ const searchClient = async (req: Request, res: Response) => {
             Clients
         })
 
-    } catch (error: any) {
-        res.status(500).json({ error: error.message });
+    } catch (error) {
+        next(error)
     }
 };
 

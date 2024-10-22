@@ -8,19 +8,20 @@ const database_1 = require("../../database");
 const mssql_1 = __importDefault(require("mssql"));
 const products_1 = require("../../database/querys/products");
 const getSession_1 = require("../../utils/Redis/getSession");
-const searchProduct = async (req, res) => {
+const BadRequestError_1 = __importDefault(require("../../errors/BadRequestError"));
+const searchProduct = async (req, res, next) => {
     // Get session from REDIS.
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, Id_Almacen } = userFR;
     try {
         const { nombre, familia, codigo, marca } = req.query;
         const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
-            return res.status(500).json({ error: 'Unable to establish a connection to the database' });
+            throw new BadRequestError_1.default({ code: 500, message: "Unable to establish a connection to the database", logging: true });
         }
         // Execute the SQL query
         const result = await pool.request()
@@ -40,23 +41,22 @@ const searchProduct = async (req, res) => {
         });
     }
     catch (error) {
-        console.log({ error });
-        res.status(500).json({ error: error.message });
+        next(error);
     }
 };
 exports.searchProduct = searchProduct;
-const searchClient = async (req, res) => {
+const searchClient = async (req, res, next) => {
     // Get session from REDIS.
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { Serverweb, Baseweb } = userFR;
     try {
         const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
-            return res.status(500).json({ error: 'Unable to establish a connection to the database' });
+            throw new BadRequestError_1.default({ code: 500, message: "Unable to establish a connection to the database", logging: true });
         }
         ;
         const { term } = req.query;
@@ -70,7 +70,7 @@ const searchClient = async (req, res) => {
         });
     }
     catch (error) {
-        res.status(500).json({ error: error.message });
+        next(error);
     }
 };
 exports.searchClient = searchClient;

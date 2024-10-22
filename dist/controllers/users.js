@@ -1,14 +1,18 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUsers = void 0;
 const database_1 = require("../database");
 const getSession_1 = require("../utils/Redis/getSession");
-const getUsers = async (req, res) => {
+const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
+const getUsers = async (req, res, next) => {
     // Get session from REDIS.
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        return res.status(401).json({ error: 'Sesion terminada' });
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     const { Serverweb, Baseweb } = userFR;
     try {
@@ -22,9 +26,7 @@ const getUsers = async (req, res) => {
         });
     }
     catch (error) {
-        console.log({ getUsersError: error });
-        res.status(500);
-        res.send(error.message);
+        next(error);
     }
 };
 exports.getUsers = getUsers;
