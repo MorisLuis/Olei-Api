@@ -10,27 +10,11 @@ const moment_1 = __importDefault(require("moment"));
 const getSession_1 = require("../../utils/Redis/getSession");
 const deleteRedis_1 = require("../../utils/Redis/deleteRedis");
 const BadRequestError_1 = __importDefault(require("../../errors/BadRequestError"));
+const authServices_1 = require("../../services/authServices");
 const loginWeb = async (req, res, next) => {
-    const { email, password } = req.body;
-    if (email === "" || password === "") {
-        throw new BadRequestError_1.default({ code: 401, message: "Necesario escribir correo y contraseña", logging: true });
-    }
     try {
-        const mainPool = await (0, database_1.dbConnectionMain)();
-        if (!mainPool) {
-            throw new BadRequestError_1.default({ code: 500, message: "Error connecting to the main database", logging: true });
-        }
-        const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await getUserByEmailWeb(mainPool, email);
-        if (!user) {
-            throw new BadRequestError_1.default({ code: 401, message: "Correo no encontrado", logging: true });
-        }
-        if (user.PasswordOOL.trim() !== password) {
-            throw new BadRequestError_1.default({ code: 401, message: "Contraseña incorrecta", logging: true });
-        }
-        const isExpired = await isSubscriptionExpired(Vigencia);
-        if (isExpired) {
-            throw new BadRequestError_1.default({ code: 401, message: "Cuenta de usuario vencida", logging: true });
-        }
+        const { email, password } = req.body;
+        const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await (0, authServices_1.loginWebService)(email, password);
         const datosDelUsuario = {
             Id: user.Id_UsuarioOOL.trim(),
             Nombre: user.Nombre.trim(),
@@ -53,10 +37,7 @@ const loginWeb = async (req, res, next) => {
         // Generar token JWT
         const token = await (0, generate_jwt_1.generateWebJWT)({ Id: user.Id_UsuarioOOL.trim(), sessionRedis: req.sessionID });
         return res.json({
-            user: {
-                ...datosDelUsuario,
-                Id_ListPre
-            },
+            user: datosDelUsuario,
             token
         });
     }
