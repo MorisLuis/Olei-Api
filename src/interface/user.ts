@@ -1,3 +1,4 @@
+
 export interface UserSessionInterface {
     serverclientes: string;
     baseclientes: string;
@@ -10,28 +11,30 @@ export interface UserSessionInterface {
 
     userId?: string;
     userRol?: string;
-
-    from: 'web' | 'mobil'
+    from: 'web' | 'mobil' | 'crm',
 }
 
 export interface UserWebSessionInterface {
     Id: string,
     Nombre: string,
-    TipoUsuario: string,
     Serverweb: string,
     Baseweb: string,
+
+    TipoUsuario: string,
     Id_Cliente: number,
     Id_ListPre: number,
     Vigencia: string,
-    SwImagenes: boolean, 
-    SwSinStock: boolean, 
-    SwsinPrecio: boolean, 
     TipoDocOO: number,
     Id_Almacen: number,
     PrecioIncIVA: number,
     Id_Usuario: string,
-    IsEmploye?: boolean,
-    from: 'web' | 'mobil'
+    SwImagenes: boolean, 
+    from: 'web' | 'mobil' | 'crm',
+
+    // Online
+    SwSinStock: boolean, 
+    SwsinPrecio: boolean, 
+    IsEmploye?: boolean
 }
 
 export type ValidationResult = {

@@ -14,21 +14,22 @@ const loginWeb = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email, password } = req.body;
         const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await loginWebService(email, password);
+        const { Id_UsuarioOOL, Nombre, Id_Cliente, SwImagenes, SwSinStock, TipoUsuario, Id_Almacen } = user;
 
         const datosDelUsuario: UserWebSessionInterface = {
-            Id: user.Id_UsuarioOOL.trim(),
-            Nombre: user.Nombre.trim(),
+            Id: Id_UsuarioOOL.trim(),
+            Nombre: Nombre.trim(),
             Serverweb: ServidorSQL.trim(),
             Baseweb: BaseSQL.trim(),
-            Id_Cliente: user.Id_Cliente || 0,
+            Id_Cliente: Id_Cliente || 0,
             Id_ListPre,
             Vigencia: Vigencia,
-            SwImagenes: user.SwImagenes,
-            SwSinStock: user.SwSinStock,
+            SwImagenes: SwImagenes,
+            SwSinStock: SwSinStock,
             SwsinPrecio,
             TipoDocOO,
-            TipoUsuario: user.TipoUsuario,
-            Id_Almacen: user.Id_Almacen,
+            TipoUsuario: TipoUsuario,
+            Id_Almacen: Id_Almacen,
             Id_Usuario: UsuarioSQL,
             PrecioIncIVA: 0,
             from: 'web'
@@ -103,26 +104,6 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
         next(error)
     }
 }
-
-
-//Utils
-const getUserByEmailWeb = async (mainPool: ConnectionPool, email: string) => {
-    const query_DB = querys.authWeb;
-    const result = await mainPool.request().input('email', email).query(query_DB);
-    const user = result?.recordset[0]
-
-    if (!user) {
-        throw new BadRequestError({ code: 401, message: "Usuario no encontrado", logging: true });
-    }
-
-    return user
-};
-
-const isSubscriptionExpired = (dueDate: string) => {
-    const today = moment().startOf('day');
-    const isExpired = moment(dueDate).startOf('day').isBefore(today);
-    return isExpired;
-};
 
 export {
     loginWeb,
