@@ -24,7 +24,7 @@ const searchProductInventory = async (req: Request, res: Response, next: NextFun
         const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
-        const requestUser: any = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
+        const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
         const user = requestUser.recordset[0]
 
         if (!pool) {
