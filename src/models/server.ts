@@ -4,7 +4,7 @@ import cors from 'cors';
 import Redis from 'ioredis';
 import RedisStore from 'connect-redis';
 import session, { Store } from 'express-session';
-import { dbConnection, dbConnectionMain } from "../database/connection";
+import { dbConnectionMain } from "../database/connection";
 
 // Rutas
 import userRouter from "../routes/userRouter";
@@ -18,6 +18,7 @@ import inventoryRouter from "../routes/inventoryRouter";
 import costosRouter from "../routes/costosRouter";
 import typeofmovementsRouter from "../routes/typeofmovementsRouter";
 import utilsRouter from "../routes/utilsRouter";
+import quotesRoutes from "../routes/quotesRoutes";
 import errorsRouter from "../routes/errorsRouter";
 import { errorHandler } from "../middleware/errorHandler";
 
@@ -37,6 +38,9 @@ class Server {
         inventory: string,
         costos: string,
         typeofmovements: string,
+        quotes: string,
+        remissions: string,
+        invoices: string,
         utils: string,
         errors: string
     };
@@ -56,6 +60,9 @@ class Server {
             inventory: "/api/inventory",
             costos: "/api/costos",
             typeofmovements: "/api/typeofmovements",
+            quotes: "/api/quotes",
+            remissions: "/api/remissions",
+            invoices:  "/api/invoices",
             utils: "/api/utils",
             errors: "/api/errors"
         };
@@ -167,6 +174,9 @@ class Server {
         this.app.use(this.paths.inventory, inventoryRouter);
         this.app.use(this.paths.costos, costosRouter);
         this.app.use(this.paths.typeofmovements, typeofmovementsRouter);
+        this.app.use(this.paths.quotes, quotesRoutes);
+        this.app.use(this.paths.remissions, );
+        this.app.use(this.paths.invoices, );
         this.app.use(this.paths.errors, errorsRouter);
         this.app.use(this.paths.utils, utilsRouter);
     }
