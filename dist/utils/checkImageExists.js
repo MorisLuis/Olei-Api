@@ -30,7 +30,7 @@ const getProductWithImages = async ({ baseSQL, Codigo, product }) => {
         ;
         if (images.length > 0) {
             // Se encontraron imágenes existentes
-            product.imagenes = images;
+            product.imagenes = [images[0]];
         }
     }
     return product;

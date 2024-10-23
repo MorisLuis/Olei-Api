@@ -1,6 +1,9 @@
 import PorductInterface from "../interface/product";
 
-
+interface Image {
+    url: string;
+    id: number;
+}
 
 interface getImageInterface {
     baseSQL: string,
@@ -21,7 +24,7 @@ export const getProductWithImages = async ({
         // Número máximo de intentos para encontrar la imagen
         const maxAttempts = 5;
         let attempt = 0;
-        let images : any = [];
+        let images: Image[] = [];
 
         while (attempt < maxAttempts) {
             let imageUrl;
@@ -45,7 +48,7 @@ export const getProductWithImages = async ({
 
         if (images.length > 0) {
             // Se encontraron imágenes existentes
-            product.imagenes = images;
+            product.imagenes = [images[0]];
         }
     }
 

@@ -18,7 +18,6 @@ export default interface PorductInterface {
         url: string;
         id: number
     }]
-
 }
 
 export interface ProductInterfaceBag {
