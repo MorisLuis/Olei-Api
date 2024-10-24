@@ -23,8 +23,10 @@ const inventoryRouter_1 = __importDefault(require("../routes/inventoryRouter"));
 const costosRouter_1 = __importDefault(require("../routes/costosRouter"));
 const typeofmovementsRouter_1 = __importDefault(require("../routes/typeofmovementsRouter"));
 const utilsRouter_1 = __importDefault(require("../routes/utilsRouter"));
-const quotesRoutes_1 = __importDefault(require("../routes/quotesRoutes"));
 const errorsRouter_1 = __importDefault(require("../routes/errorsRouter"));
+const quotesRoutes_1 = __importDefault(require("../routes/quotesRoutes"));
+const remissionsRouter_1 = __importDefault(require("../routes/remissionsRouter"));
+const invoicesRouter_1 = __importDefault(require("../routes/invoicesRouter"));
 const errorHandler_1 = require("../middleware/errorHandler");
 class Server {
     constructor() {
@@ -42,11 +44,11 @@ class Server {
             inventory: "/api/inventory",
             costos: "/api/costos",
             typeofmovements: "/api/typeofmovements",
+            utils: "/api/utils",
+            errors: "/api/errors",
             quotes: "/api/quotes",
             remissions: "/api/remissions",
-            invoices: "/api/invoices",
-            utils: "/api/utils",
-            errors: "/api/errors"
+            invoices: "/api/invoices"
         };
         this.connectDB();
         this.configureRedis();
@@ -141,11 +143,11 @@ class Server {
         this.app.use(this.paths.inventory, inventoryRouter_1.default);
         this.app.use(this.paths.costos, costosRouter_1.default);
         this.app.use(this.paths.typeofmovements, typeofmovementsRouter_1.default);
-        this.app.use(this.paths.quotes, quotesRoutes_1.default);
-        this.app.use(this.paths.remissions);
-        this.app.use(this.paths.invoices);
         this.app.use(this.paths.errors, errorsRouter_1.default);
         this.app.use(this.paths.utils, utilsRouter_1.default);
+        this.app.use(this.paths.quotes, quotesRoutes_1.default);
+        this.app.use(this.paths.remissions, remissionsRouter_1.default);
+        this.app.use(this.paths.invoices, invoicesRouter_1.default);
     }
     async closeConnections() {
         if (this.redis) {

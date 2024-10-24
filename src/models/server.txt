@@ -18,10 +18,10 @@ import inventoryRouter from "../routes/inventoryRouter";
 import costosRouter from "../routes/costosRouter";
 import typeofmovementsRouter from "../routes/typeofmovementsRouter";
 import utilsRouter from "../routes/utilsRouter";
-import errorsRouter from "../routes/errorsRouter";
 import quotesRoutes from "../routes/quotesRoutes";
 import remissionsRouter from "../routes/remissionsRouter";
 import invoicesRouter from "../routes/invoicesRouter";
+import errorsRouter from "../routes/errorsRouter";
 import { errorHandler } from "../middleware/errorHandler";
 
 class Server {
@@ -29,48 +29,35 @@ class Server {
     private port: string;
     public redis: Redis | null;
 
-    private paths: {
-        product: string,
-        user: string,
-        auth: string,
-        search: string,
-        tables: string,
-        order: string,
-        client: string,
-        inventory: string,
-        costos: string,
-        typeofmovements: string,
-        utils: string,
-        errors: string,
-        quotes: string,
-        remissions: string,
-        invoices: string
+    private paths = {
+        product: "/api/product",
+        user: "/api/user",
+        auth: "/api/auth",
+        search: "/api/search",
+        tables: "/api/tables",
+        order: "/api/order",
+        client: "/api/client",
+        inventory: "/api/inventory",
+        costos: "/api/costos",
+        typeofmovements: "/api/typeofmovements",
+        quotes: "/api/quotes",
+        remissions: "/api/remissions",
+        invoices: "/api/invoices",
+        utils: "/api/utils",
+        errors: "/api/errors"
     };
 
     constructor() {
         this.app = express();
         this.port = process.env.PORT || "5001";
         this.redis = null;
-        this.paths = {
-            product: "/api/product",
-            user: "/api/user",
-            auth: "/api/auth",
-            search: "/api/search",
-            tables: "/api/tables",
-            order: "/api/order",
-            client: "/api/client",
-            inventory: "/api/inventory",
-            costos: "/api/costos",
-            typeofmovements: "/api/typeofmovements",
-            utils: "/api/utils",
-            errors: "/api/errors",
-            quotes: "/api/quotes",
-            remissions: "/api/remissions",
-            invoices: "/api/invoices"
-        };
 
-        this.connectDB();
-        this.configureRedis();
+        this.initializeServer();
+    };
+
+    async initializeServer() {
+        await this.connectDB();
+        await this.configureRedis();
         this.configureSessions();
         this.middlewares();
         this.routes();
@@ -78,68 +65,67 @@ class Server {
     }
 
     async connectDB() {
-        await dbConnectionMain();
-    }
+        try {
+            await dbConnectionMain();
+            console.log("2 / 3. Conexión a la base de datos establecida");
+        } catch (error) {
+            console.error("Error al conectar con la base de datos", error);
+        }
+    };
 
-    configureRedis() {
-        this.redis = new Redis({
-            host: process.env.REDIS_HOST || '127.0.0.1',
-            port: Number(process.env.REDIS_PORT as string) || 6379,
-            password: process.env.REDIS_PASSWORD
-        });
+    async configureRedis() {
+        try {
+            this.redis = new Redis({
+                host: process.env.REDIS_HOST || '127.0.0.1',
+                port: Number(process.env.REDIS_PORT) || 6379,
+                password: process.env.REDIS_PASSWORD
+            });
 
-        this.redis.on('connect', () => {
-            console.log('Conectado a Redis');
-        });
+            this.redis.on('connect', () => {
+                console.log('3 / 3. Conectado a Redis');
+            });
 
-        this.redis.on('error', (err) => {
-            console.error('Error de conexión a Redis:', err);
-        });
+            this.redis.on('error', (err) => {
+                console.error('Error de conexión a Redis:', err);
+            });
+        } catch (error) {
+            console.error("Error al configurar Redis", error);
+        }
     }
 
     configureSessions() {
-        if (this.redis) {
-            const isProduction = process.env.ENVIRONMENT === 'production';
-
-            // Define el TTL y maxAge para móvil y web
-            const webMaxAgeInSeconds = 12 * 60 * 60; // 8 horas para la web
-            const mobileMaxAgeInSeconds = 365 * 24 * 60 * 60; // 1 año en móvil
-
-            // Define el store de Redis, una sola vez
-            const store = new RedisStore({
-                client: this.redis,
-                ttl: webMaxAgeInSeconds // Default ttl
-            }) as Store;
-
-            // Configurar express-session una vez para toda la aplicación
-            this.app.use(session({
-                secret: process.env.REDIS_SECRET as string,
-                name: 'sid',
-                store: store,
-                resave: false,
-                saveUninitialized: false,
-                cookie: {
-                    secure: isProduction ? 'auto' : false, // true en producción, false en local
-                    httpOnly: true,
-                    sameSite: isProduction ? 'none' : 'lax', // 'none' para producción, 'lax' para local
-                    maxAge: webMaxAgeInSeconds * 1000 // Default maxAge
-                }
-            }));
-
-            // Middleware personalizado para ajustar el maxAge según el User-Agent
-            this.app.use((req, res, next) => {
-                const userAgent = req.headers['user-agent'];
-
-                if (userAgent && (userAgent.includes('Mobile') || userAgent.includes('OleiApp'))) {
-                    // Si es una app móvil, ajustamos maxAge
-                    req.session.cookie.maxAge = mobileMaxAgeInSeconds * 1000;
-                }
-
-                next();
-            });
-        } else {
+        if (!this.redis) {
             console.error('Redis no está configurado, las sesiones no se almacenarán en Redis');
+            return;
         }
+
+        const isProduction = process.env.ENVIRONMENT === 'production';
+
+        const sessionConfig = {
+            secret: process.env.REDIS_SECRET as string,
+            name: 'sid',
+            store: new RedisStore({ client: this.redis }) as Store,
+            resave: false,
+            saveUninitialized: false,
+            cookie: {
+                secure: isProduction ? 'auto' : false as boolean | "auto",
+                httpOnly: true,
+                sameSite: isProduction ? 'none' as 'none' : 'lax' as 'lax',
+                maxAge: 12 * 60 * 60 * 1000  // 12 horas en milisegundos
+            }
+        };
+        
+
+        this.app.use(session(sessionConfig));
+
+        // Ajustar maxAge para dispositivos móviles
+        this.app.use((req, res, next) => {
+            const userAgent = req.headers['user-agent'];
+            if (userAgent && (userAgent.includes('Mobile') || userAgent.includes('OleiApp'))) {
+                req.session.cookie.maxAge = 365 * 24 * 60 * 60 * 1000; // 1 año en móviles
+            }
+            next();
+        });
     }
 
     middlewares() {
@@ -176,11 +162,11 @@ class Server {
         this.app.use(this.paths.inventory, inventoryRouter);
         this.app.use(this.paths.costos, costosRouter);
         this.app.use(this.paths.typeofmovements, typeofmovementsRouter);
-        this.app.use(this.paths.errors, errorsRouter);
-        this.app.use(this.paths.utils, utilsRouter);
         this.app.use(this.paths.quotes, quotesRoutes);
         this.app.use(this.paths.remissions, remissionsRouter);
         this.app.use(this.paths.invoices, invoicesRouter);
+        this.app.use(this.paths.errors, errorsRouter);
+        this.app.use(this.paths.utils, utilsRouter);
     }
 
     async closeConnections() {
@@ -198,11 +184,9 @@ class Server {
 
     listen() {
         this.app.listen(this.port, () => {
-            console.log("Servidor corriendo en puerto " + this.port);
+            console.log("1 / 3. Servidor corriendo en puerto " + this.port);
         });
     }
-
-
 }
 
 export default Server;
