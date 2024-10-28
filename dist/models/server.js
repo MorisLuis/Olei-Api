@@ -27,6 +27,7 @@ const errorsRouter_1 = __importDefault(require("../routes/errorsRouter"));
 const quotesRoutes_1 = __importDefault(require("../routes/quotesRoutes"));
 const remissionsRouter_1 = __importDefault(require("../routes/remissionsRouter"));
 const invoicesRouter_1 = __importDefault(require("../routes/invoicesRouter"));
+const bitacoraRouter_1 = __importDefault(require("../routes/bitacoraRouter"));
 const errorHandler_1 = require("../middleware/errorHandler");
 class Server {
     constructor() {
@@ -48,7 +49,8 @@ class Server {
             errors: "/api/errors",
             quotes: "/api/quotes",
             remissions: "/api/remissions",
-            invoices: "/api/invoices"
+            invoices: "/api/invoices",
+            meetings: "/api/meetings"
         };
         this.connectDB();
         this.configureRedis();
@@ -148,6 +150,7 @@ class Server {
         this.app.use(this.paths.quotes, quotesRoutes_1.default);
         this.app.use(this.paths.remissions, remissionsRouter_1.default);
         this.app.use(this.paths.invoices, invoicesRouter_1.default);
+        this.app.use(this.paths.meetings, bitacoraRouter_1.default);
     }
     async closeConnections() {
         if (this.redis) {

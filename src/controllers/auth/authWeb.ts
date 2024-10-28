@@ -1,12 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import { closeDbConnection, querys } from '../../database';
+import { closeDbConnection } from '../../database';
 import { generateWebJWT } from '../../helpers/generate-jwt';
-import moment from 'moment';
 import { UserWebSessionInterface } from '../../interface/user';
 import { handleGetWebSession } from '../../utils/Redis/getSession';
 import { handleDeleteRedisSession } from '../../utils/Redis/deleteRedis';
 import BadRequestError from '../../errors/BadRequestError';
-import { ConnectionPool } from 'mssql';
 import { loginWebService } from '../../services/authServices';
 
 const loginWeb = async (req: Request, res: Response, next: NextFunction) => {

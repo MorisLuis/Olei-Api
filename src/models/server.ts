@@ -22,6 +22,7 @@ import errorsRouter from "../routes/errorsRouter";
 import quotesRoutes from "../routes/quotesRoutes";
 import remissionsRouter from "../routes/remissionsRouter";
 import invoicesRouter from "../routes/invoicesRouter";
+import meetingsRouter from "../routes/bitacoraRouter";
 import { errorHandler } from "../middleware/errorHandler";
 
 class Server {
@@ -44,7 +45,8 @@ class Server {
         errors: string,
         quotes: string,
         remissions: string,
-        invoices: string
+        invoices: string,
+        meetings: string
     };
 
     constructor() {
@@ -66,7 +68,9 @@ class Server {
             errors: "/api/errors",
             quotes: "/api/quotes",
             remissions: "/api/remissions",
-            invoices: "/api/invoices"
+            invoices: "/api/invoices",
+            meetings: "/api/meetings"
+
         };
 
         this.connectDB();
@@ -181,6 +185,8 @@ class Server {
         this.app.use(this.paths.quotes, quotesRoutes);
         this.app.use(this.paths.remissions, remissionsRouter);
         this.app.use(this.paths.invoices, invoicesRouter);
+        this.app.use(this.paths.meetings, meetingsRouter);
+
     }
 
     async closeConnections() {
