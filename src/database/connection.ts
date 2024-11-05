@@ -21,8 +21,7 @@ export const dbConnection = async (server?: string, base?: string, user?: string
         try {
             pool = new sql.ConnectionPool(dbConfig);
             await pool.connect();
-        } catch (error: any) {
-            console.error('Error al conectar a Servidor 2:', error.message);
+        } catch (error) {
             throw error;
         }
     }
@@ -44,8 +43,7 @@ export const dbConnectionMain = async () => {
 
         try {
             mainPool = await sql.connect(dbConfig);
-        } catch (error: any) {
-            console.error('Error al conectar a Servidor 1:', error.message);
+        } catch (error) {
             throw error;
         }
     }

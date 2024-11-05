@@ -49,6 +49,7 @@ const loginDB = async (req, res, next) => {
             from: 'mobil'
         };
         req.session.user = datosDelUsuario;
+        console.log({ session: req.sessionID });
         return res.json({
             tokenDB,
             user

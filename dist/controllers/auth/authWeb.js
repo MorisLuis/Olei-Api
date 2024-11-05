@@ -6,45 +6,29 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.logout = exports.renewWeb = exports.loginWeb = void 0;
 const database_1 = require("../../database");
 const generate_jwt_1 = require("../../helpers/generate-jwt");
-const moment_1 = __importDefault(require("moment"));
 const getSession_1 = require("../../utils/Redis/getSession");
 const deleteRedis_1 = require("../../utils/Redis/deleteRedis");
 const BadRequestError_1 = __importDefault(require("../../errors/BadRequestError"));
+const authServices_1 = require("../../services/authServices");
 const loginWeb = async (req, res, next) => {
-    const { email, password } = req.body;
-    if (email === "" || password === "") {
-        throw new BadRequestError_1.default({ code: 401, message: "Necesario escribir correo y contraseña", logging: true });
-    }
     try {
-        const mainPool = await (0, database_1.dbConnectionMain)();
-        if (!mainPool) {
-            throw new BadRequestError_1.default({ code: 500, message: "Error connecting to the main database", logging: true });
-        }
-        const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await getUserByEmailWeb(mainPool, email);
-        if (!user) {
-            throw new BadRequestError_1.default({ code: 401, message: "Correo no encontrado", logging: true });
-        }
-        if (user.PasswordOOL.trim() !== password) {
-            throw new BadRequestError_1.default({ code: 401, message: "Contraseña incorrecta", logging: true });
-        }
-        const isExpired = await isSubscriptionExpired(Vigencia);
-        if (isExpired) {
-            throw new BadRequestError_1.default({ code: 401, message: "Cuenta de usuario vencida", logging: true });
-        }
+        const { email, password } = req.body;
+        const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await (0, authServices_1.loginWebService)(email, password);
+        const { Id_UsuarioOOL, Nombre, Id_Cliente, SwImagenes, SwSinStock, TipoUsuario, Id_Almacen } = user;
         const datosDelUsuario = {
-            Id: user.Id_UsuarioOOL.trim(),
-            Nombre: user.Nombre.trim(),
+            Id: Id_UsuarioOOL.trim(),
+            Nombre: Nombre.trim(),
             Serverweb: ServidorSQL.trim(),
             Baseweb: BaseSQL.trim(),
-            Id_Cliente: user.Id_Cliente || 0,
+            Id_Cliente: Id_Cliente || 0,
             Id_ListPre,
             Vigencia: Vigencia,
-            SwImagenes: user.SwImagenes,
-            SwSinStock: user.SwSinStock,
+            SwImagenes: SwImagenes,
+            SwSinStock: SwSinStock,
             SwsinPrecio,
             TipoDocOO,
-            TipoUsuario: user.TipoUsuario,
-            Id_Almacen: user.Id_Almacen,
+            TipoUsuario: TipoUsuario,
+            Id_Almacen: Id_Almacen,
             Id_Usuario: UsuarioSQL,
             PrecioIncIVA: 0,
             from: 'web'
@@ -53,10 +37,7 @@ const loginWeb = async (req, res, next) => {
         // Generar token JWT
         const token = await (0, generate_jwt_1.generateWebJWT)({ Id: user.Id_UsuarioOOL.trim(), sessionRedis: req.sessionID });
         return res.json({
-            user: {
-                ...datosDelUsuario,
-                Id_ListPre
-            },
+            user: datosDelUsuario,
             token
         });
     }
@@ -113,19 +94,4 @@ const logout = async (req, res, next) => {
     }
 };
 exports.logout = logout;
-//Utils
-const getUserByEmailWeb = async (mainPool, email) => {
-    const query_DB = database_1.querys.authWeb;
-    const result = await mainPool.request().input('email', email).query(query_DB);
-    const user = result?.recordset[0];
-    if (!user) {
-        throw new BadRequestError_1.default({ code: 401, message: "Usuario no encontrado", logging: true });
-    }
-    return user;
-};
-const isSubscriptionExpired = (dueDate) => {
-    const today = (0, moment_1.default)().startOf('day');
-    const isExpired = (0, moment_1.default)(dueDate).startOf('day').isBefore(today);
-    return isExpired;
-};
 //# sourceMappingURL=authWeb.js.map

@@ -27,10 +27,10 @@ const getProducts = async (req, res, next) => {
         const limitNumber = parseInt(limit, 10) || 10;
         let query = productsWeb_1.productsWebQuerys.getAllProducts;
         const result = await pool.request()
-            .input('nombre', mssql_1.default.VarChar, nombre || '')
-            .input('marca', mssql_1.default.VarChar, marca || '')
-            .input('familia', mssql_1.default.VarChar, familia || '')
-            .input('codigo', mssql_1.default.VarChar, folio || '')
+            .input('nombre', mssql_1.default.VarChar, nombre ?? '')
+            .input('marca', mssql_1.default.VarChar, marca ?? '')
+            .input('familia', mssql_1.default.VarChar, familia ?? '')
+            .input('codigo', mssql_1.default.VarChar, folio ?? '')
             .input('SwSinStock', mssql_1.default.Bit, SwSinStock === true ? 1 : 0)
             .input('SwsinPrecio', mssql_1.default.Bit, SwsinPrecio === true ? 1 : 0)
             .input('SwImagenes', mssql_1.default.Bit, SwImagenes === true ? 1 : 0)
@@ -38,9 +38,10 @@ const getProducts = async (req, res, next) => {
             .input('Id_Almacen', mssql_1.default.Int, Id_Almacen)
             .input('page', mssql_1.default.Int, pageNumber)
             .input('limit', mssql_1.default.Int, limitNumber)
-            .input('baseSQL', mssql_1.default.VarChar, Baseweb || '')
+            .input('baseSQL', mssql_1.default.VarChar, Baseweb ?? '')
             .query(query);
         const products = result.recordset;
+        console.log({ result });
         const productsWithImages = await (0, checkImageExists_1.getProductsWithImage)(products);
         res.json({
             total: productsWithImages.length,

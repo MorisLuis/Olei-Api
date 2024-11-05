@@ -4,7 +4,7 @@ import cors from 'cors';
 import Redis from 'ioredis';
 import RedisStore from 'connect-redis';
 import session, { Store } from 'express-session';
-import { dbConnection, dbConnectionMain } from "../database/connection";
+import { dbConnectionMain } from "../database/connection";
 
 // Rutas
 import userRouter from "../routes/userRouter";
@@ -19,6 +19,10 @@ import costosRouter from "../routes/costosRouter";
 import typeofmovementsRouter from "../routes/typeofmovementsRouter";
 import utilsRouter from "../routes/utilsRouter";
 import errorsRouter from "../routes/errorsRouter";
+import quotesRoutes from "../routes/quotesRoutes";
+import remissionsRouter from "../routes/remissionsRouter";
+import invoicesRouter from "../routes/invoicesRouter";
+import meetingsRouter from "../routes/bitacoraRouter";
 import { errorHandler } from "../middleware/errorHandler";
 
 class Server {
@@ -38,7 +42,11 @@ class Server {
         costos: string,
         typeofmovements: string,
         utils: string,
-        errors: string
+        errors: string,
+        quotes: string,
+        remissions: string,
+        invoices: string,
+        meetings: string
     };
 
     constructor() {
@@ -57,7 +65,12 @@ class Server {
             costos: "/api/costos",
             typeofmovements: "/api/typeofmovements",
             utils: "/api/utils",
-            errors: "/api/errors"
+            errors: "/api/errors",
+            quotes: "/api/quotes",
+            remissions: "/api/remissions",
+            invoices: "/api/invoices",
+            meetings: "/api/meetings"
+
         };
 
         this.connectDB();
@@ -91,17 +104,17 @@ class Server {
     configureSessions() {
         if (this.redis) {
             const isProduction = process.env.ENVIRONMENT === 'production';
-    
+
             // Define el TTL y maxAge para móvil y web
             const webMaxAgeInSeconds = 12 * 60 * 60; // 8 horas para la web
             const mobileMaxAgeInSeconds = 365 * 24 * 60 * 60; // 1 año en móvil
-    
+
             // Define el store de Redis, una sola vez
             const store = new RedisStore({
                 client: this.redis,
                 ttl: webMaxAgeInSeconds // Default ttl
             }) as Store;
-    
+
             // Configurar express-session una vez para toda la aplicación
             this.app.use(session({
                 secret: process.env.REDIS_SECRET as string,
@@ -116,16 +129,16 @@ class Server {
                     maxAge: webMaxAgeInSeconds * 1000 // Default maxAge
                 }
             }));
-    
+
             // Middleware personalizado para ajustar el maxAge según el User-Agent
             this.app.use((req, res, next) => {
                 const userAgent = req.headers['user-agent'];
-    
+
                 if (userAgent && (userAgent.includes('Mobile') || userAgent.includes('OleiApp'))) {
                     // Si es una app móvil, ajustamos maxAge
                     req.session.cookie.maxAge = mobileMaxAgeInSeconds * 1000;
                 }
-    
+
                 next();
             });
         } else {
@@ -169,6 +182,11 @@ class Server {
         this.app.use(this.paths.typeofmovements, typeofmovementsRouter);
         this.app.use(this.paths.errors, errorsRouter);
         this.app.use(this.paths.utils, utilsRouter);
+        this.app.use(this.paths.quotes, quotesRoutes);
+        this.app.use(this.paths.remissions, remissionsRouter);
+        this.app.use(this.paths.invoices, invoicesRouter);
+        this.app.use(this.paths.meetings, meetingsRouter);
+
     }
 
     async closeConnections() {
@@ -176,7 +194,7 @@ class Server {
             await this.redis.quit();
             console.log('Conexión a Redis cerrada');
         }
-        await dbConnectionMain().then(pool => pool.close()).catch(() => {});
+        await dbConnectionMain().then(pool => pool.close()).catch(() => { });
         console.log('Conexión a la base de datos cerrada');
     }
 
@@ -190,7 +208,7 @@ class Server {
         });
     }
 
-    
+
 }
 
 export default Server;
