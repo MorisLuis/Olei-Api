@@ -25,17 +25,17 @@ const getProducts = async (req: Request, res: Response, next: NextFunction) => {
         }
 
         const { nombre, marca, familia, folio, page = '1', limit = '10' } = req.query;
-
+        
         const pageNumber = parseInt(page as string, 10) || 1;
         const limitNumber = parseInt(limit as string, 10) || 10;
 
         let query = productsWebQuerys.getAllProducts;
 
         const result = await pool.request()
-            .input('nombre', sql.VarChar, nombre || '')
-            .input('marca', sql.VarChar, marca || '')
-            .input('familia', sql.VarChar, familia || '')
-            .input('codigo', sql.VarChar, folio || '')
+            .input('nombre', sql.VarChar, nombre ?? '')
+            .input('marca', sql.VarChar, marca ?? '')
+            .input('familia', sql.VarChar, familia ?? '')
+            .input('codigo', sql.VarChar, folio ?? '')
             .input('SwSinStock', sql.Bit, SwSinStock === true ? 1 : 0)
             .input('SwsinPrecio', sql.Bit, SwsinPrecio === true ? 1 : 0)
             .input('SwImagenes', sql.Bit, SwImagenes === true ? 1 : 0)
@@ -43,10 +43,11 @@ const getProducts = async (req: Request, res: Response, next: NextFunction) => {
             .input('Id_Almacen', sql.Int, Id_Almacen)
             .input('page', sql.Int, pageNumber)
             .input('limit', sql.Int, limitNumber)
-            .input('baseSQL', sql.VarChar, Baseweb || '')
+            .input('baseSQL', sql.VarChar, Baseweb ?? '')
             .query(query);
 
         const products = result.recordset;
+        console.log({result})
         const productsWithImages = await getProductsWithImage(products);
 
         res.json({

@@ -12,7 +12,7 @@ export default interface PorductInterface {
     Id_Marca: number;
     Id_ListaPrecios: number;
     Piezas: number;
-    Impto: number;
+    Impuesto: number;
     imagen: string;   
     imagenes: [{
         url: string;
