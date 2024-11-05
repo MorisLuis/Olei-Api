@@ -26,7 +26,6 @@ const getQuote = async (req: Request, res: Response, next: NextFunction) => {
         const { folio } = req.params;
 
         const sessionId = req.sessionID
-        console.log({sessionId})
         const quote = await getSellsDocService(
             sessionId,
             folio as string,

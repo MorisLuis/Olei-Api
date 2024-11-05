@@ -136,7 +136,6 @@ const deleteMeetingService = async (id: string, sessionId: string) => {
     await transaction.commit();
     //END TRANSACTION
 
-    console.log({ result })
     return id;
 }
 

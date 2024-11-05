@@ -58,8 +58,6 @@ const loginDB = async (req: Request, res: Response, next: NextFunction) => {
 
         (req.session as any).user = datosDelUsuario;
 
-        console.log({session: req.sessionID})
-
         return res.json({
             tokenDB,
             user

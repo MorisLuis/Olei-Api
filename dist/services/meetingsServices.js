@@ -124,7 +124,6 @@ const deleteMeetingService = async (id, sessionId) => {
         .query(query);
     await transaction.commit();
     //END TRANSACTION
-    console.log({ result });
     return id;
 };
 exports.deleteMeetingService = deleteMeetingService;

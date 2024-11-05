@@ -21,7 +21,6 @@ const getQuote = async (req, res, next) => {
         // Get session from REDIS.
         const { folio } = req.params;
         const sessionId = req.sessionID;
-        console.log({ sessionId });
         const quote = await (0, sellsDocsServices_1.getSellsDocService)(sessionId, folio, 4);
         res.json(quote);
     }

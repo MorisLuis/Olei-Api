@@ -47,7 +47,6 @@ const getProducts = async (req: Request, res: Response, next: NextFunction) => {
             .query(query);
 
         const products = result.recordset;
-        console.log({result})
         const productsWithImages = await getProductsWithImage(products);
 
         res.json({
