@@ -41,10 +41,10 @@ const getProducts = async (req, res, next) => {
             .input('baseSQL', mssql_1.default.VarChar, Baseweb ?? '')
             .query(query);
         const products = result.recordset;
-        const productsWithImages = await (0, checkImageExists_1.getProductsWithImage)(products);
+        //const productsWithImages = await getProductsWithImage(products);
         res.json({
-            total: productsWithImages.length,
-            products: productsWithImages
+            total: products.length,
+            products: products
         });
     }
     catch (error) {

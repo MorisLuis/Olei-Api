@@ -47,11 +47,11 @@ const getProducts = async (req: Request, res: Response, next: NextFunction) => {
             .query(query);
 
         const products = result.recordset;
-        const productsWithImages = await getProductsWithImage(products);
+        //const productsWithImages = await getProductsWithImage(products);
 
         res.json({
-            total: productsWithImages.length,
-            products: productsWithImages
+            total: products.length,
+            products: products
         });
 
     } catch (error) {
