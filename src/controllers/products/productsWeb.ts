@@ -3,7 +3,7 @@ import { dbConnection } from '../../database';
 import sql from 'mssql';
 import { handleGetWebSession } from '../../utils/Redis/getSession';
 import { productsWebQuerys } from '../../database/querys/productsWeb';
-import { getProductWithImages, getProductsWithImage } from '../../utils/checkImageExists';
+import { getProductWithImages } from '../../utils/checkImageExists';
 import BadRequestError from '../../errors/BadRequestError';
 
 const getProducts = async (req: Request, res: Response, next: NextFunction) => {
@@ -96,6 +96,8 @@ const getProducByIdWeb = async (req: Request, res: Response, next: NextFunction)
             Codigo: productBefore.Codigo,
             product: productBefore
         });
+
+        console.log({product: product.imagenes})
 
         return res.json(product);
     } catch (error) {

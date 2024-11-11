@@ -14,10 +14,7 @@ export default interface PorductInterface {
     Piezas: number;
     Impuesto: number;
     imagen: string;   
-    imagenes: [{
-        url: string;
-        id: number
-    }]
+    imagenes: Image[]
 }
 
 export interface ProductInterfaceBag {
@@ -29,4 +26,10 @@ export interface ProductInterfaceBag {
     Descripcion?: string;
     Marca?: string;
     key?: number
+}
+
+
+interface Image {
+    url: string;
+    id: number;
 }

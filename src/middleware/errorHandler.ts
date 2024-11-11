@@ -12,8 +12,6 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
         stack: err.stack,
       }, null, 2));
     }
-
-    console.log("errorHandler!!")
     return res.status(statusCode).send({ errors });
   }
 

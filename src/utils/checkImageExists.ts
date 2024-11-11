@@ -1,10 +1,5 @@
 import PorductInterface from "../interface/product";
 
-interface Image {
-    url: string;
-    id: number;
-}
-
 interface getImageInterface {
     baseSQL: string,
     Codigo: string,
@@ -24,7 +19,7 @@ export const getProductWithImages = async ({
         // Número máximo de intentos para encontrar la imagen
         const maxAttempts = 5;
         let attempt = 0;
-        let images: Image[] = [];
+        let images = [];
 
         while (attempt < maxAttempts) {
             let imageUrl;
@@ -48,7 +43,9 @@ export const getProductWithImages = async ({
 
         if (images.length > 0) {
             // Se encontraron imágenes existentes
-            product.imagenes = [images[0]];
+            console.log({images})
+            console.log({images2: [images[0]]})
+            product.imagenes = images;
         }
     }
 
@@ -70,6 +67,7 @@ export const getProductsWithImage = async (products: PorductInterface[]) => {
 export const checkImageExist = async (url: string): Promise<boolean> => {
     try {
         const response = await fetch(url, { method: 'HEAD' });
+        //console.log({response})
         return response.ok;
     } catch (error) {
         console.error('Error during image check:', error);
