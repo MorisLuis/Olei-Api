@@ -6,17 +6,17 @@ import BadRequestError from '../errors/BadRequestError';
 
 const getUsers = async (req: Request, res: Response, next: NextFunction) => {
 
-    // Get session from REDIS.
-    const sessionId = req.sessionRedis
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-
+    
     try {
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis
+        const { user: userFR } = await handleGetWebSession({ sessionId });
+    
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+    
+        const { Serverweb, Baseweb } = userFR;
         const pool = await dbConnection(Serverweb, Baseweb);
         const result = await pool?.request().query(querys.getAllUsers);
         const users = result?.recordset

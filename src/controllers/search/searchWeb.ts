@@ -7,17 +7,16 @@ import BadRequestError from '../../errors/BadRequestError';
 
 const searchProduct = async (req: Request, res: Response, next: NextFunction) => {
 
-    // Get session from REDIS.
-    const sessionId = req.sessionRedis
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, Id_Almacen } = userFR;
-
     try {
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis
+        const { user: userFR } = await handleGetWebSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+
+        const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, Id_Almacen } = userFR;
         const { nombre, familia, codigo, marca } = req.query;
         const pool = await dbConnection(Serverweb, Baseweb);
 
@@ -50,17 +49,17 @@ const searchProduct = async (req: Request, res: Response, next: NextFunction) =>
 
 const searchClient = async (req: Request, res: Response, next: NextFunction) => {
 
-    // Get session from REDIS.
-    const sessionId = req.sessionRedis
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true })
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-
     try {
+
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis
+        const { user: userFR } = await handleGetWebSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true })
+        }
+
+        const { Serverweb, Baseweb } = userFR;
         const pool = await dbConnection(Serverweb, Baseweb);
 
         if (!pool) {
@@ -83,7 +82,6 @@ const searchClient = async (req: Request, res: Response, next: NextFunction) => 
         next(error)
     }
 };
-
 
 export {
     searchProduct,

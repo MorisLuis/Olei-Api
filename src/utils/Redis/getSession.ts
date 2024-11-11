@@ -13,7 +13,6 @@ export const handleGetSession = async ({ sessionId }: handleGetSessionInterface)
         const user : UserSessionInterface = session.user;    
         return { user }
     } catch (error) {
-        console.log({errorGS: error})
         return { user : undefined }
     }
 

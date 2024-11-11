@@ -9,17 +9,17 @@ import BadRequestError from '../errors/BadRequestError';
 
 const postInventory = async (req: Request, res: Response, next: NextFunction) => {
 
-    const sessionId = req.sessionID;
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL} = userFR;
-    const Id_Usuario = req.id;
-
+    
     try {
+        const sessionId = req.sessionID;
+        const { user: userFR } = await handleGetSession({ sessionId });
+    
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+    
+        const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL} = userFR;
+        const Id_Usuario = req.id;
         const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
         const { inventoryDetails, typeOfMovement } = req.body;
         const Accion = typeOfMovement?.Accion;
@@ -72,9 +72,9 @@ const postInventory = async (req: Request, res: Response, next: NextFunction) =>
 
 const getInventory = async (req: Request, res: Response, next: NextFunction) => {
 
-    const { Folio } = req.query;
-
+    
     try {
+        const { Folio } = req.query;
         const pool = await dbConnection()
         if (!pool) {
             throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
@@ -96,9 +96,9 @@ const getInventory = async (req: Request, res: Response, next: NextFunction) => 
 
 const getInventoryDetails = async (req: Request, res: Response, next: NextFunction) => {
 
-    const { Folio } = req.query;
-
+    
     try {
+        const { Folio } = req.query;
         const pool = await dbConnection()
         if (!pool) {
             throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });

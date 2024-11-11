@@ -5,17 +5,17 @@ import BadRequestError from '../errors/BadRequestError';
 
 const getTables = async (req: Request, res: Response, next: NextFunction) => {
 
-    // Get session from REDIS.
-    const sessionId = req.sessionRedis
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-
+    
     try {
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis
+        const { user: userFR } = await handleGetWebSession({ sessionId });
+    
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+    
+        const { Serverweb, Baseweb } = userFR;
         const pool = await dbConnection(Serverweb, Baseweb);
         const FamiliasResult = await pool?.request().query(querys.getFamilias);
         const Familias = FamiliasResult?.recordset.map(familia => familia.Nombre);

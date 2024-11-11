@@ -9,21 +9,21 @@ import BadRequestError from '../../errors/BadRequestError';
 
 const getProducById = async (req: Request, res: Response, next: NextFunction) => {
 
-    const { id } = req.params;
-    const { Marca } = req.query;
-    const Id_Usuario = req.id;
-
-    const sessionId = req.sessionID;
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
 
     try {
+        const { id } = req.params;
+        const { Marca } = req.query;
+        const Id_Usuario = req.id;
+
+        const sessionId = req.sessionID;
+        const { user: userFR } = await handleGetSession({ sessionId });
+
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+
+        const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
         const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
@@ -52,17 +52,17 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
 
 const getProductsByStock = async (req: Request, res: Response, next: NextFunction) => {
 
-    const { PageNumber, PageSize } = req.query;
-    const sessionId = req.sessionID;
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
 
     try {
+        const { PageNumber, PageSize } = req.query;
+        const sessionId = req.sessionID;
+        const { user: userFR } = await handleGetSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+
+        const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
         const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
@@ -97,18 +97,17 @@ const getProductsByStock = async (req: Request, res: Response, next: NextFunctio
 
 const getTotalOfProductsByStock = async (req: Request, res: Response, next: NextFunction) => {
 
-    const Id_Usuario = req.id;
-
-    const sessionId = req.sessionID;
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
-
     try {
+        const Id_Usuario = req.id;
+
+        const sessionId = req.sessionID;
+        const { user: userFR } = await handleGetSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+
+        const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
         const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
@@ -137,17 +136,17 @@ const getTotalOfProductsByStock = async (req: Request, res: Response, next: Next
 
 const getProductByStockAndCodeBar = async (req: Request, res: Response, next: NextFunction) => {
 
-    const { CodBar, Codigo } = req.query;
-    const sessionId = req.sessionID;
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
 
     try {
+        const { CodBar, Codigo } = req.query;
+        const sessionId = req.sessionID;
+        const { user: userFR } = await handleGetSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+
+        const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
         const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;

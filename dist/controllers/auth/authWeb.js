@@ -47,14 +47,14 @@ const loginWeb = async (req, res, next) => {
 };
 exports.loginWeb = loginWeb;
 const renewWeb = async (req, res, next) => {
-    // Get session from REDIS.
-    const sessionId = req.sessionRedis;
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
-    const { Id, TipoUsuario, Serverweb, Baseweb } = userFR;
     try {
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis;
+        const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+        if (!userFR) {
+            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        }
+        const { Id, TipoUsuario, Serverweb, Baseweb } = userFR;
         if (!Id && !TipoUsuario) {
             return res.status(401).json({ message: 'Id and rol are neccessary' });
         }
@@ -80,11 +80,11 @@ const renewWeb = async (req, res, next) => {
 };
 exports.renewWeb = renewWeb;
 const logout = async (req, res, next) => {
-    const sessionId = req.sessionRedis;
-    if (!sessionId) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
     try {
+        const sessionId = req.sessionRedis;
+        if (!sessionId) {
+            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        }
         await (0, database_1.closeDbConnection)();
         await (0, deleteRedis_1.handleDeleteRedisSession)({ sessionId });
         res.json({ ok: true });

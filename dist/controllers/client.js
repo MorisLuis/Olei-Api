@@ -9,14 +9,14 @@ const getSession_1 = require("../utils/Redis/getSession");
 const deleteRedis_1 = require("../utils/Redis/deleteRedis");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const selectClient = async (req, res, next) => {
-    // Get session from REDIS.
-    const sessionId = req.sessionRedis;
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
-    const { Id } = userFR;
     try {
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis;
+        const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+        if (!userFR) {
+            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        }
+        const { Id } = userFR;
         const { Id_Cliente, Id_Almacen, Id_ListPre } = req.body;
         const client = {
             Id_Almacen: Id_Almacen,

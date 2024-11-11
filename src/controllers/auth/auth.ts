@@ -10,19 +10,20 @@ import BadRequestError from '../../errors/BadRequestError';
 
 const loginDB = async (req: Request, res: Response, next: NextFunction) => {
 
-    // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
-    const { IdUsuarioOLEI, PasswordOLEI } = req.body;
-
-    const mainPool = await dbConnectionMain();
-    if (!mainPool) {
-        throw new BadRequestError({ code: 400, message: "Error connecting to the main database!", logging: true });
-    }
-
-    if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
-        throw new BadRequestError({ code: 401, message: "Necesario enviar usuario y contraseña!", logging: true });
-    }
 
     try {
+        // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
+        const { IdUsuarioOLEI, PasswordOLEI } = req.body;
+
+        const mainPool = await dbConnectionMain();
+        if (!mainPool) {
+            throw new BadRequestError({ code: 400, message: "Error connecting to the main database!", logging: true });
+        }
+
+        if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
+            throw new BadRequestError({ code: 401, message: "Necesario enviar usuario y contraseña!", logging: true });
+        }
+
         const query_DB = querys.authDatabase;
         const result = await mainPool.request().input('IdUsuarioOLEI', IdUsuarioOLEI).query(query_DB);
         const cleanResult = result?.recordset[0];
@@ -70,23 +71,23 @@ const loginDB = async (req: Request, res: Response, next: NextFunction) => {
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
 
-    const sessionId = req.sessionID;
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
-
-    // STEP 1 - LOGIN
-    const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
-
-    if (!pool) {
-        throw new BadRequestError({ code: 500, message: "Error connecting to the main database", logging: true });
-    }
-
     try {
+        const sessionId = req.sessionID;
+        const { user: userFR } = await handleGetSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+
+        const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
+
+        // STEP 1 - LOGIN
+        const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+
+        if (!pool) {
+            throw new BadRequestError({ code: 500, message: "Error connecting to the main database", logging: true });
+        }
+
         // Search for the user in the database using their email.
         const { Id_Usuario, password } = req.body;
 
@@ -141,17 +142,17 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
 const renewDB = async (req: Request, res: Response, next: NextFunction) => {
 
-    // Get session from REDIS.
-    const sessionId = req.sessionID;
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { baseclientes, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
-
     try {
+        // Get session from REDIS.
+        const sessionId = req.sessionID;
+        const { user: userFR } = await handleGetSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+
+        const { baseclientes, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
+
         const token = await generateJWTDB({ IdUsuarioOLEI });
 
         if (!token) {
@@ -189,16 +190,16 @@ const renewDB = async (req: Request, res: Response, next: NextFunction) => {
 
 const renewLogin = async (req: Request, res: Response, next: NextFunction) => {
 
-    const sessionId = req.sessionID;
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { serverclientes, baseclientes, userId, userRol } = userFR;
 
     try {
+        const sessionId = req.sessionID;
+        const { user: userFR } = await handleGetSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+
+        const { serverclientes, baseclientes, userId, userRol } = userFR;
 
         if (!userId && !userRol) {
             throw new BadRequestError({ code: 401, message: "User not authenticated", logging: true });
@@ -229,15 +230,15 @@ const renewLogin = async (req: Request, res: Response, next: NextFunction) => {
 }
 
 const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
-    const sessionId = req.sessionID;
-
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
 
     try {
+        const sessionId = req.sessionID;
+
+        const { user: userFR } = await handleGetSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
 
         (req.session as any).user = {
             ...(req.session as any).user,
@@ -257,12 +258,11 @@ const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
 
 const logoutDB = async (req: Request, res: Response, next: NextFunction) => {
 
-    const sessionId = req.sessionID;
-    if (!sessionId) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
     try {
+        const sessionId = req.sessionID;
+        if (!sessionId) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
         await handleDeleteRedisSession({ sessionId });
         await closeDbConnection()
         res.json({ ok: true })

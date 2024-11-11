@@ -11,16 +11,16 @@ const getSession_1 = require("../../utils/Redis/getSession");
 const deleteRedis_1 = require("../../utils/Redis/deleteRedis");
 const BadRequestError_1 = __importDefault(require("../../errors/BadRequestError"));
 const loginDB = async (req, res, next) => {
-    // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
-    const { IdUsuarioOLEI, PasswordOLEI } = req.body;
-    const mainPool = await (0, database_1.dbConnectionMain)();
-    if (!mainPool) {
-        throw new BadRequestError_1.default({ code: 400, message: "Error connecting to the main database!", logging: true });
-    }
-    if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
-        throw new BadRequestError_1.default({ code: 401, message: "Necesario enviar usuario y contraseña!", logging: true });
-    }
     try {
+        // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
+        const { IdUsuarioOLEI, PasswordOLEI } = req.body;
+        const mainPool = await (0, database_1.dbConnectionMain)();
+        if (!mainPool) {
+            throw new BadRequestError_1.default({ code: 400, message: "Error connecting to the main database!", logging: true });
+        }
+        if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
+            throw new BadRequestError_1.default({ code: 401, message: "Necesario enviar usuario y contraseña!", logging: true });
+        }
         const query_DB = database_1.querys.authDatabase;
         const result = await mainPool.request().input('IdUsuarioOLEI', IdUsuarioOLEI).query(query_DB);
         const cleanResult = result?.recordset[0];
@@ -60,18 +60,18 @@ const loginDB = async (req, res, next) => {
 };
 exports.loginDB = loginDB;
 const login = async (req, res, next) => {
-    const sessionId = req.sessionID;
-    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
-    if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
-    // STEP 1 - LOGIN
-    const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
-    if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: "Error connecting to the main database", logging: true });
-    }
     try {
+        const sessionId = req.sessionID;
+        const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
+        if (!userFR) {
+            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        }
+        const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
+        // STEP 1 - LOGIN
+        const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+        if (!pool) {
+            throw new BadRequestError_1.default({ code: 500, message: "Error connecting to the main database", logging: true });
+        }
         // Search for the user in the database using their email.
         const { Id_Usuario, password } = req.body;
         if (Id_Usuario.trim() === "" || password.trim() === "") {
@@ -115,14 +115,14 @@ const login = async (req, res, next) => {
 };
 exports.login = login;
 const renewDB = async (req, res, next) => {
-    // Get session from REDIS.
-    const sessionId = req.sessionID;
-    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
-    if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
-    const { baseclientes, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
     try {
+        // Get session from REDIS.
+        const sessionId = req.sessionID;
+        const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
+        if (!userFR) {
+            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        }
+        const { baseclientes, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
         const token = await (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI });
         if (!token) {
             throw new BadRequestError_1.default({ code: 401, message: "Failed to generate token", logging: true });
@@ -155,13 +155,13 @@ const renewDB = async (req, res, next) => {
 };
 exports.renewDB = renewDB;
 const renewLogin = async (req, res, next) => {
-    const sessionId = req.sessionID;
-    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
-    if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
-    const { serverclientes, baseclientes, userId, userRol } = userFR;
     try {
+        const sessionId = req.sessionID;
+        const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
+        if (!userFR) {
+            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        }
+        const { serverclientes, baseclientes, userId, userRol } = userFR;
         if (!userId && !userRol) {
             throw new BadRequestError_1.default({ code: 401, message: "User not authenticated", logging: true });
         }
@@ -189,12 +189,12 @@ const renewLogin = async (req, res, next) => {
 };
 exports.renewLogin = renewLogin;
 const logoutUser = async (req, res, next) => {
-    const sessionId = req.sessionID;
-    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
-    if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
     try {
+        const sessionId = req.sessionID;
+        const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
+        if (!userFR) {
+            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        }
         req.session.user = {
             ...req.session.user,
             userId: undefined,
@@ -210,11 +210,11 @@ const logoutUser = async (req, res, next) => {
 };
 exports.logoutUser = logoutUser;
 const logoutDB = async (req, res, next) => {
-    const sessionId = req.sessionID;
-    if (!sessionId) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
     try {
+        const sessionId = req.sessionID;
+        if (!sessionId) {
+            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        }
         await (0, deleteRedis_1.handleDeleteRedisSession)({ sessionId });
         await (0, database_1.closeDbConnection)();
         res.json({ ok: true });

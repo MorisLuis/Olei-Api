@@ -10,7 +10,6 @@ const handleGetSession = async ({ sessionId }) => {
         return { user };
     }
     catch (error) {
-        console.log({ errorGS: error });
         return { user: undefined };
     }
 };

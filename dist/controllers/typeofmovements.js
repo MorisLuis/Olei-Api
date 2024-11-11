@@ -9,13 +9,13 @@ const mssql_1 = __importDefault(require("mssql"));
 const getSession_1 = require("../utils/Redis/getSession");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const getTypeofmovements = async (req, res, next) => {
-    const sessionId = req.sessionID;
-    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
-    if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL, userId } = userFR;
     try {
+        const sessionId = req.sessionID;
+        const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
+        if (!userFR) {
+            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        }
+        const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL, userId } = userFR;
         const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
         const request = pool.request();
         request.input('Id_Usuario', mssql_1.default.VarChar(50), userId);

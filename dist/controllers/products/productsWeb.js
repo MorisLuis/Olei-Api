@@ -11,13 +11,13 @@ const productsWeb_1 = require("../../database/querys/productsWeb");
 const checkImageExists_1 = require("../../utils/checkImageExists");
 const BadRequestError_1 = __importDefault(require("../../errors/BadRequestError"));
 const getProducts = async (req, res, next) => {
-    const sessionId = req.sessionRedis;
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
-    const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
     try {
+        const sessionId = req.sessionRedis;
+        const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+        if (!userFR) {
+            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        }
+        const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
         const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
             throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
@@ -53,14 +53,14 @@ const getProducts = async (req, res, next) => {
 };
 exports.getProducts = getProducts;
 const getProducByIdWeb = async (req, res, next) => {
-    // Get session from REDIS.
-    const sessionId = req.sessionRedis;
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
-    const { Serverweb, Baseweb, Id_ListPre, Id_Almacen } = userFR;
     try {
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis;
+        const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+        if (!userFR) {
+            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        }
+        const { Serverweb, Baseweb, Id_ListPre, Id_Almacen } = userFR;
         const { id } = req.params;
         const { Marca } = req.query;
         const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
@@ -88,14 +88,14 @@ const getProducByIdWeb = async (req, res, next) => {
 };
 exports.getProducByIdWeb = getProducByIdWeb;
 const getTotalProducts = async (req, res, next) => {
-    // Get session from REDIS.
-    const sessionId = req.sessionRedis;
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
-    const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
     try {
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis;
+        const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+        if (!userFR) {
+            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        }
+        const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
         const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
             throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });

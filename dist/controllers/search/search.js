@@ -9,15 +9,15 @@ const products_1 = require("../../database/querys/products");
 const getSession_1 = require("../../utils/Redis/getSession");
 const BadRequestError_1 = __importDefault(require("../../errors/BadRequestError"));
 const searchProductInventory = async (req, res, next) => {
-    const { searchTerm } = req.query;
-    const sessionId = req.sessionID;
-    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
-    if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
-    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
-    const Id_Usuario = req.id;
     try {
+        const { searchTerm } = req.query;
+        const sessionId = req.sessionID;
+        const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
+        if (!userFR) {
+            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        }
+        const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
+        const Id_Usuario = req.id;
         const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery);

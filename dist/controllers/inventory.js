@@ -12,14 +12,14 @@ const convertArrayToXml_1 = require("../utils/convertArrayToXml");
 const getSession_1 = require("../utils/Redis/getSession");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const postInventory = async (req, res, next) => {
-    const sessionId = req.sessionID;
-    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
-    if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
-    const Id_Usuario = req.id;
     try {
+        const sessionId = req.sessionID;
+        const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
+        if (!userFR) {
+            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        }
+        const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
+        const Id_Usuario = req.id;
         const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
         const { inventoryDetails, typeOfMovement } = req.body;
         const Accion = typeOfMovement?.Accion;
@@ -64,8 +64,8 @@ const postInventory = async (req, res, next) => {
 };
 exports.postInventory = postInventory;
 const getInventory = async (req, res, next) => {
-    const { Folio } = req.query;
     try {
+        const { Folio } = req.query;
         const pool = await (0, database_1.dbConnection)();
         if (!pool) {
             throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
@@ -83,8 +83,8 @@ const getInventory = async (req, res, next) => {
 };
 exports.getInventory = getInventory;
 const getInventoryDetails = async (req, res, next) => {
-    const { Folio } = req.query;
     try {
+        const { Folio } = req.query;
         const pool = await (0, database_1.dbConnection)();
         if (!pool) {
             throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });

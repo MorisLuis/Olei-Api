@@ -7,20 +7,19 @@ import BadRequestError from '../../errors/BadRequestError';
 
 const searchProductInventory = async (req: Request, res: Response, next: NextFunction) => {
 
-    const { searchTerm } = req.query;
-
-    const sessionId = req.sessionID;
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL} = userFR;
-
-    const Id_Usuario = req.id;
-
     try {
+        const { searchTerm } = req.query;
+
+        const sessionId = req.sessionID;
+        const { user: userFR } = await handleGetSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+
+        const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
+
+        const Id_Usuario = req.id;
         const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;

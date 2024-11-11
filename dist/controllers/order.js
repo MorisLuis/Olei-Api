@@ -12,14 +12,14 @@ const convertArrayToXml_1 = require("../utils/convertArrayToXml");
 const numeroALetra_1 = require("../utils/numeroALetra");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const postOrder = async (req, res, next) => {
-    // Get session from REDIS.
-    const sessionId = req.sessionRedis;
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
-    const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
     try {
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis;
+        const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+        if (!userFR) {
+            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        }
+        const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
         const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
         if (!pool) {
             throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });

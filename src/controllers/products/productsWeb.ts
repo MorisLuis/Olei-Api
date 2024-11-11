@@ -8,16 +8,16 @@ import BadRequestError from '../../errors/BadRequestError';
 
 const getProducts = async (req: Request, res: Response, next: NextFunction) => {
 
-    const sessionId = req.sessionRedis;
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
 
     try {
+        const sessionId = req.sessionRedis;
+        const { user: userFR } = await handleGetWebSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+
+        const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
         const pool = await dbConnection(Serverweb, Baseweb);
 
         if (!pool) {
@@ -25,7 +25,7 @@ const getProducts = async (req: Request, res: Response, next: NextFunction) => {
         }
 
         const { nombre, marca, familia, folio, page = '1', limit = '10' } = req.query;
-        
+
         const pageNumber = parseInt(page as string, 10) || 1;
         const limitNumber = parseInt(limit as string, 10) || 10;
 
@@ -61,17 +61,17 @@ const getProducts = async (req: Request, res: Response, next: NextFunction) => {
 
 const getProducByIdWeb = async (req: Request, res: Response, next: NextFunction) => {
 
-    // Get session from REDIS.
-    const sessionId = req.sessionRedis
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { Serverweb, Baseweb, Id_ListPre, Id_Almacen } = userFR;
 
     try {
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis
+        const { user: userFR } = await handleGetWebSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+
+        const { Serverweb, Baseweb, Id_ListPre, Id_Almacen } = userFR;
 
         const { id } = req.params;
         const { Marca } = req.query;
@@ -92,8 +92,8 @@ const getProducByIdWeb = async (req: Request, res: Response, next: NextFunction)
 
         const productBefore = result?.recordset[0];
         const product = await getProductWithImages({
-            baseSQL: Baseweb, 
-            Codigo: productBefore.Codigo,  
+            baseSQL: Baseweb,
+            Codigo: productBefore.Codigo,
             product: productBefore
         });
 
@@ -105,17 +105,16 @@ const getProducByIdWeb = async (req: Request, res: Response, next: NextFunction)
 
 const getTotalProducts = async (req: Request, res: Response, next: NextFunction) => {
 
-    // Get session from REDIS.
-    const sessionId = req.sessionRedis
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
-
     try {
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis
+        const { user: userFR } = await handleGetWebSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+
+        const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
 
         const pool = await dbConnection(Serverweb, Baseweb);
 
