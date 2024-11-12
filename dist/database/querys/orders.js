@@ -32,6 +32,15 @@ exports.orderQuerys = {
         INNER JOIN [dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
         WHERE V.Id_Cliente = @Id_Cliente AND TipoDoc = @TipoDocOO
         ORDER BY Fecha DESC
+        OFFSET (@PageNumber - 1) * @PageSize ROWS
+        FETCH NEXT @PageSize ROWS ONLY
+    `,
+    getTotalOrders: `
+        SELECT COUNT(*)
+        FROM [dbo].[VENTAS] AS V
+        INNER JOIN [dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
+        INNER JOIN [dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
+        WHERE V.Id_Cliente = @Id_Cliente AND TipoDoc = @TipoDocOO
     `,
     insertOrder: ` 
         INSERT INTO [dbo].[VENTAS]  (
@@ -63,7 +72,7 @@ exports.orderQuerys = {
         WHERE TRIM(P.Codigo) = @Codigo_Preview
     `,
     getOrderDetails: `
-        SELECT D.Precio, D.Cantidad as Piezas, D.Importe, D.Impuesto, D.Id_Marca, D.Id_Almacen, D.Id_ListaPrecios, D.Folio, TRIM(D.Descripcion) AS Descripcion, TRIM(D.Codigo) AS Codigo, E.Existencia, F.Nombre AS Marca
+        SELECT D.Precio, D.Cantidad, D.Importe, D.Impuesto, D.Id_Marca, D.Id_Almacen, D.Id_ListaPrecios, D.Folio, TRIM(D.Descripcion) AS Descripcion, TRIM(D.Codigo) AS Codigo, E.Existencia, F.Nombre AS Marca
         FROM [dbo].[DETALLEVENTAS] AS D
         INNER JOIN [dbo].[EXISTENCIAS] AS E ON D.Codigo = E.Codigo AND D.Id_Marca = E.Id_Marca AND D.Id_Almacen = E.Id_Almacen
         INNER JOIN [dbo].[MARCAS] AS F ON D.Id_Marca = F.Id_Marca

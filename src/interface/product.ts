@@ -11,7 +11,7 @@ export default interface PorductInterface {
     Marca: string;
     Id_Marca: number;
     Id_ListaPrecios: number;
-    Piezas: number;
+    Cantidad: number;
     Impuesto: number;
     imagen: string;   
     imagenes: Image[]

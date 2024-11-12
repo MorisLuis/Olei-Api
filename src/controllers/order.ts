@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import { dbConnection } from "../database";
 import sql from 'mssql';
-import OrderInterface from "../interface/order";
 import { orderQuerys } from "../database/querys/orders";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
@@ -12,16 +11,15 @@ import BadRequestError from '../errors/BadRequestError';
 
 const postOrder = async (req: Request, res: Response, next: NextFunction) => {
 
-    
     try {
         // Get session from REDIS.
         const sessionId = req.sessionRedis
         const { user: userFR } = await handleGetWebSession({ sessionId });
-    
+
         if (!userFR) {
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
         }
-    
+
         const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
         const pool = await dbConnection(Serverweb, Baseweb);
         if (!pool) {
@@ -54,8 +52,8 @@ const postOrder = async (req: Request, res: Response, next: NextFunction) => {
             .output('Folio', sql.Int)
             .execute('fn_ExecuteSales');
 
-        await transaction.commit();
 
+        await transaction.commit();
         const folio = result.recordset[0].Folio
 
         res.status(201).json({
@@ -70,17 +68,17 @@ const postOrder = async (req: Request, res: Response, next: NextFunction) => {
 
 const getOrder = async (req: Request, res: Response, next: NextFunction) => {
 
-    // Get session from REDIS.
-    const sessionId = req.sessionRedis
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
 
     try {
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis
+        const { user: userFR } = await handleGetWebSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+
+        const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
         const { folio } = req.params;
         const pool = await dbConnection(Serverweb, Baseweb);
 
@@ -107,17 +105,19 @@ const getOrder = async (req: Request, res: Response, next: NextFunction) => {
 
 const getAllOrders = async (req: Request, res: Response, next: NextFunction) => {
 
-    // Get session from REDIS.
-    const sessionId = req.sessionRedis
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
 
     try {
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis
+        const { user: userFR } = await handleGetWebSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+
+        const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
+        const { page, limit } = req.query;
+
         const pool = await dbConnection(Serverweb, Baseweb);
 
         if (!pool) {
@@ -129,10 +129,11 @@ const getAllOrders = async (req: Request, res: Response, next: NextFunction) => 
         const request = await pool.request()
             .input('TipoDocOO', TipoDocOO)
             .input('Id_Cliente', sql.Int, Id_Cliente)
+            .input('PageNumber', sql.Int, page)
+            .input('PageSize', sql.Int, limit)
             .query(query);
 
-
-        let allOrders: OrderInterface[] = request.recordset;
+        let allOrders = request.recordset;
 
         res.json(allOrders);
 
@@ -143,18 +144,17 @@ const getAllOrders = async (req: Request, res: Response, next: NextFunction) => 
 
 const getOrderDetails = async (req: Request, res: Response, next: NextFunction) => {
 
-    // Get session from REDIS.
-    const sessionId = req.sessionRedis
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    };
-    const { Serverweb, Baseweb } = userFR;
 
     try {
-        const { folio } = req.query;
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis
+        const { user: userFR } = await handleGetWebSession({ sessionId });
 
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        };
+        const { Serverweb, Baseweb } = userFR;
+        const { folio } = req.query;
         const pool = await dbConnection(Serverweb, Baseweb);
         if (!pool) {
             throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
@@ -173,9 +173,42 @@ const getOrderDetails = async (req: Request, res: Response, next: NextFunction) 
     }
 }
 
+const getTotalOrders = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis
+        const { user: userFR } = await handleGetWebSession({ sessionId });
+
+        if (!userFR) {
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        }
+
+        const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
+
+        const pool = await dbConnection(Serverweb, Baseweb);
+
+        if (!pool) {
+            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        }
+
+        const result = await pool?.request()
+            .input('TipoDocOO', TipoDocOO)
+            .input('Id_Cliente', sql.Int, Id_Cliente)
+            .query(orderQuerys.getTotalOrders);
+
+        res.json({ total: result?.recordset[0][""] });
+
+    } catch (error) {
+        next(error)
+    }
+};
+
+
 export {
     postOrder,
     getOrder,
     getAllOrders,
-    getOrderDetails
+    getOrderDetails,
+    getTotalOrders
 }
