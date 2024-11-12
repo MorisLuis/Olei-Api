@@ -43,8 +43,6 @@ export const getProductWithImages = async ({
 
         if (images.length > 0) {
             // Se encontraron imágenes existentes
-            console.log({images})
-            console.log({images2: [images[0]]})
             product.imagenes = images;
         }
     }
@@ -67,7 +65,6 @@ export const getProductsWithImage = async (products: PorductInterface[]) => {
 export const checkImageExist = async (url: string): Promise<boolean> => {
     try {
         const response = await fetch(url, { method: 'HEAD' });
-        //console.log({response})
         return response.ok;
     } catch (error) {
         console.error('Error during image check:', error);

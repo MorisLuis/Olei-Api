@@ -30,8 +30,6 @@ const getProductWithImages = async ({ baseSQL, Codigo, product }) => {
         ;
         if (images.length > 0) {
             // Se encontraron imágenes existentes
-            console.log({ images });
-            console.log({ images2: [images[0]] });
             product.imagenes = images;
         }
     }
@@ -52,7 +50,6 @@ exports.getProductsWithImage = getProductsWithImage;
 const checkImageExist = async (url) => {
     try {
         const response = await fetch(url, { method: 'HEAD' });
-        //console.log({response})
         return response.ok;
     }
     catch (error) {

@@ -12,7 +12,6 @@ const generateJWTDB = ({ IdUsuarioOLEI }) => {
             expiresIn: '31536000s' // 1 year
         }, (error, token) => {
             if (error) {
-                console.log(error);
                 reject('No se pudo generar el token');
             }
             resolve(token);
@@ -27,7 +26,6 @@ const generateJWT = ({ id }) => {
             expiresIn: process.env.JWT_EXPIRATION
         }, (error, token) => {
             if (error) {
-                console.log(error);
                 reject('No se pudo generar el token');
             }
             resolve(token);
@@ -42,7 +40,6 @@ const generateWebJWT = ({ Id, sessionRedis }) => {
             expiresIn: process.env.JWT_EXPIRATION
         }, (error, token) => {
             if (error) {
-                console.log(error);
                 reject('No se pudo generar el token');
             }
             resolve(token);

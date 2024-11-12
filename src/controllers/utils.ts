@@ -8,12 +8,6 @@ const getUtils = async (req: Request, res: Response) => {
 
     try {
 
-        console.log(numeroALetra(500));        // Quinientos
-        console.log(numeroALetra(1234));       // Mil doscientos treinta y cuatro
-        console.log(numeroALetra(1234567));    // Un millón doscientos treinta y cuatro mil quinientos sesenta y siete
-        console.log(numeroALetra(123456789));
-
-
         res.json({
             ok: true
         })

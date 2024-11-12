@@ -80,7 +80,6 @@ const getProducByIdWeb = async (req, res, next) => {
             Codigo: productBefore.Codigo,
             product: productBefore
         });
-        console.log({ product: product.imagenes });
         return res.json(product);
     }
     catch (error) {

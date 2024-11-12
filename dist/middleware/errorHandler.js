@@ -13,7 +13,6 @@ const errorHandler = (err, req, res, next) => {
                 stack: err.stack,
             }, null, 2));
         }
-        console.log("errorHandler!!");
         return res.status(statusCode).send({ errors });
     }
     // Unhandled errors

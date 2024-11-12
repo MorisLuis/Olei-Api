@@ -97,8 +97,6 @@ const getProducByIdWeb = async (req: Request, res: Response, next: NextFunction)
             product: productBefore
         });
 
-        console.log({product: product.imagenes})
-
         return res.json(product);
     } catch (error) {
         next(error)

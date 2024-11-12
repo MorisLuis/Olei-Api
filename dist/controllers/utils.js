@@ -3,10 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUtils = void 0;
 const getUtils = async (req, res) => {
     try {
-        console.log(numeroALetra(500)); // Quinientos
-        console.log(numeroALetra(1234)); // Mil doscientos treinta y cuatro
-        console.log(numeroALetra(1234567)); // Un millón doscientos treinta y cuatro mil quinientos sesenta y siete
-        console.log(numeroALetra(123456789));
         res.json({
             ok: true
         });
