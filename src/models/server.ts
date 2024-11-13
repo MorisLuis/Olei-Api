@@ -19,9 +19,7 @@ import costosRouter from "../routes/costosRouter";
 import typeofmovementsRouter from "../routes/typeofmovementsRouter";
 import utilsRouter from "../routes/utilsRouter";
 import errorsRouter from "../routes/errorsRouter";
-import quotesRoutes from "../routes/quotesRoutes";
-import remissionsRouter from "../routes/remissionsRouter";
-import invoicesRouter from "../routes/invoicesRouter";
+import sellsRouter from "../routes/sellsRouter";
 import meetingsRouter from "../routes/bitacoraRouter";
 import { errorHandler } from "../middleware/errorHandler";
 
@@ -43,9 +41,7 @@ class Server {
         typeofmovements: string,
         utils: string,
         errors: string,
-        quotes: string,
-        remissions: string,
-        invoices: string,
+        sells: string,
         meetings: string
     };
 
@@ -66,9 +62,7 @@ class Server {
             typeofmovements: "/api/typeofmovements",
             utils: "/api/utils",
             errors: "/api/errors",
-            quotes: "/api/quotes",
-            remissions: "/api/remissions",
-            invoices: "/api/invoices",
+            sells: "/api/sells",
             meetings: "/api/meetings"
 
         };
@@ -182,9 +176,7 @@ class Server {
         this.app.use(this.paths.typeofmovements, typeofmovementsRouter);
         this.app.use(this.paths.errors, errorsRouter);
         this.app.use(this.paths.utils, utilsRouter);
-        this.app.use(this.paths.quotes, quotesRoutes);
-        this.app.use(this.paths.remissions, remissionsRouter);
-        this.app.use(this.paths.invoices, invoicesRouter);
+        this.app.use(this.paths.sells, sellsRouter);
         this.app.use(this.paths.meetings, meetingsRouter);
 
     }

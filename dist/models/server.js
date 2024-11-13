@@ -24,9 +24,7 @@ const costosRouter_1 = __importDefault(require("../routes/costosRouter"));
 const typeofmovementsRouter_1 = __importDefault(require("../routes/typeofmovementsRouter"));
 const utilsRouter_1 = __importDefault(require("../routes/utilsRouter"));
 const errorsRouter_1 = __importDefault(require("../routes/errorsRouter"));
-const quotesRoutes_1 = __importDefault(require("../routes/quotesRoutes"));
-const remissionsRouter_1 = __importDefault(require("../routes/remissionsRouter"));
-const invoicesRouter_1 = __importDefault(require("../routes/invoicesRouter"));
+const sellsRouter_1 = __importDefault(require("../routes/sellsRouter"));
 const bitacoraRouter_1 = __importDefault(require("../routes/bitacoraRouter"));
 const errorHandler_1 = require("../middleware/errorHandler");
 class Server {
@@ -47,9 +45,7 @@ class Server {
             typeofmovements: "/api/typeofmovements",
             utils: "/api/utils",
             errors: "/api/errors",
-            quotes: "/api/quotes",
-            remissions: "/api/remissions",
-            invoices: "/api/invoices",
+            sells: "/api/sells",
             meetings: "/api/meetings"
         };
         this.connectDB();
@@ -147,9 +143,7 @@ class Server {
         this.app.use(this.paths.typeofmovements, typeofmovementsRouter_1.default);
         this.app.use(this.paths.errors, errorsRouter_1.default);
         this.app.use(this.paths.utils, utilsRouter_1.default);
-        this.app.use(this.paths.quotes, quotesRoutes_1.default);
-        this.app.use(this.paths.remissions, remissionsRouter_1.default);
-        this.app.use(this.paths.invoices, invoicesRouter_1.default);
+        this.app.use(this.paths.sells, sellsRouter_1.default);
         this.app.use(this.paths.meetings, bitacoraRouter_1.default);
     }
     async closeConnections() {
