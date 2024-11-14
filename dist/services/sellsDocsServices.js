@@ -10,8 +10,9 @@ const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const getSession_1 = require("../utils/Redis/getSession");
 const getSellsService = async (sessionId, PageNumber, SellsOrderCondition) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR)
-        throw new Error('Sesion terminada');
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
@@ -19,20 +20,20 @@ const getSellsService = async (sessionId, PageNumber, SellsOrderCondition) => {
     }
     ;
     let query = sells_1.sellsQuery.getSells;
-    console.log({ PageNumber });
     const request = await pool.request()
         .input('OrderCondition', SellsOrderCondition)
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
         .query(query);
-    const quotes = request.recordset;
-    return quotes;
+    const sells = request.recordset;
+    return sells;
 };
 exports.getSellsService = getSellsService;
 const getSellsByClientService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrderCondition, SellsFilterCondition, TipoDoc }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR)
-        throw new Error('Sesion terminada');
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
@@ -44,18 +45,19 @@ const getSellsByClientService = async ({ sessionId, PageNumber, Id_Cliente, Sell
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
         .input('Id_Cliente', Id_Cliente)
-        .input('OrderCondition', SellsOrderCondition ?? '')
-        .input('WhereCondition', SellsFilterCondition ?? '')
+        .input('OrderCondition', SellsOrderCondition)
+        .input('WhereCondition', SellsFilterCondition)
         .input('TipoDoc', TipoDoc)
         .query(query);
-    const quote = request.recordset;
-    return quote;
+    const sells = request.recordset;
+    return sells;
 };
 exports.getSellsByClientService = getSellsByClientService;
 const getSellByIdService = async (sessionId, folio, Serie, Id_Cliente, Id_Almacen, TipoDoc) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR)
-        throw new Error('Sesion terminada');
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
@@ -70,8 +72,8 @@ const getSellByIdService = async (sessionId, folio, Serie, Id_Cliente, Id_Almace
         .input('Folio', folio)
         .input('TipoDoc', TipoDoc)
         .query(query);
-    const quote = request.recordset;
-    return quote;
+    const sell = request.recordset;
+    return sell;
 };
 exports.getSellByIdService = getSellByIdService;
 //# sourceMappingURL=sellsDocsServices.js.map

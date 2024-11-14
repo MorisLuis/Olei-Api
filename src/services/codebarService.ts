@@ -15,9 +15,10 @@ type updateCodbar = {
 const updateCodebarService = async (sessionId: string, codigoParam: string, Id_Marca: string, body: updateCodbar) => {
 
     const { user: userFR } = await handleGetSession({ sessionId });
+
     if (!userFR) {
-        throw new Error('Sesion terminada');
-    };
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+    }
 
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);

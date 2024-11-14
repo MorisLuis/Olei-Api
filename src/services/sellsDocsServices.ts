@@ -1,18 +1,20 @@
 import { dbConnection } from "../database";
 import { sellsQuery } from "../database/querys/sells";
 import BadRequestError from "../errors/BadRequestError";
-import { SellsFilterCondition, SellsInterface, SellsOrderCondition } from "../interface/sells";
+import { SellsFilterConditionType, SellsInterface, SellsOrderConditionType } from "../interface/sells";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 
 
 const getSellsService = async (
     sessionId: string,
     PageNumber: number,
-    SellsOrderCondition?: SellsOrderCondition
+    SellsOrderCondition: SellsOrderConditionType | string
 ) => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
-    if (!userFR) throw new Error('Sesion terminada');
+    if (!userFR) {
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+    }
 
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
@@ -21,24 +23,23 @@ const getSellsService = async (
     };
 
     let query = sellsQuery.getSells;
-    console.log({PageNumber})
     const request = await pool.request()
         .input('OrderCondition', SellsOrderCondition)
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
         .query(query);
 
-    const quotes = request.recordset
+    const sells = request.recordset
 
-    return quotes
+    return sells
 };
 
 interface getSellsByClientServiceInterface {
     sessionId: string,
     PageNumber: number,
     Id_Cliente: number,
-    SellsOrderCondition?: SellsOrderCondition,
-    SellsFilterCondition?: SellsFilterCondition,
+    SellsOrderCondition: SellsOrderConditionType | string,
+    SellsFilterCondition: SellsFilterConditionType | string,
     TipoDoc?: SellsInterface['TipoDoc']
 }
 
@@ -52,8 +53,9 @@ const getSellsByClientService = async ({
 }: getSellsByClientServiceInterface) => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
-    if (!userFR) throw new Error('Sesion terminada');
-
+    if (!userFR) {
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+    }
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
     if (!pool) {
@@ -65,21 +67,21 @@ const getSellsByClientService = async ({
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
         .input('Id_Cliente', Id_Cliente)
-        .input('OrderCondition', SellsOrderCondition ?? '')
-        .input('WhereCondition', SellsFilterCondition ?? '') 
+        .input('OrderCondition', SellsOrderCondition)
+        .input('WhereCondition', SellsFilterCondition) 
         .input('TipoDoc', TipoDoc)
         .query(query);
 
-    const quote = request.recordset
-    return quote
+    const sells = request.recordset
+    return sells
 }
-
 
 const getSellByIdService = async (sessionId: string, folio: string, Serie: string, Id_Cliente: number, Id_Almacen: number, TipoDoc: SellsInterface['TipoDoc'] ) => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
-    if (!userFR) throw new Error('Sesion terminada');
-
+    if (!userFR) {
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+    }
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
     if (!pool) {
@@ -95,8 +97,8 @@ const getSellByIdService = async (sessionId: string, folio: string, Serie: strin
         .input('TipoDoc', TipoDoc)
         .query(query);
 
-    const quote = request.recordset
-    return quote
+    const sell = request.recordset
+    return sell
 }
 export {
     getSellsService,

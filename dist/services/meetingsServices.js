@@ -11,8 +11,9 @@ const getSession_1 = require("../utils/Redis/getSession");
 const mssql_1 = __importDefault(require("mssql"));
 const getMeetingsService = async (PageNumber, sessionId) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR)
-        throw new Error('Sesion terminada');
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
@@ -30,8 +31,10 @@ const getMeetingsService = async (PageNumber, sessionId) => {
 exports.getMeetingsService = getMeetingsService;
 const getMeetingByIdService = async (id, sessionId) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR)
-        throw new Error('Sesion terminada');
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
+    ;
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
@@ -48,10 +51,12 @@ const getMeetingByIdService = async (id, sessionId) => {
 exports.getMeetingByIdService = getMeetingByIdService;
 const updateMeetingService = async (id, sessionId, body) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR)
-        throw new Error('Sesion terminada');
-    if (!id)
-        throw new Error('No se adjunto un Id_Bitacora valido o existente');
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
+    if (!id) {
+        throw new BadRequestError_1.default({ code: 500, message: 'No se adjunto un Id_Bitacora valido o existente', logging: true });
+    }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
@@ -77,8 +82,9 @@ const updateMeetingService = async (id, sessionId, body) => {
 exports.updateMeetingService = updateMeetingService;
 const postMeetingService = async (sessionId, body) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR)
-        throw new Error('Sesion terminada');
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
@@ -106,8 +112,9 @@ const postMeetingService = async (sessionId, body) => {
 exports.postMeetingService = postMeetingService;
 const deleteMeetingService = async (id, sessionId) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR)
-        throw new Error('Sesion terminada');
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {

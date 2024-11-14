@@ -14,9 +14,8 @@ const mssql_1 = __importDefault(require("mssql"));
 const updateCodebarService = async (sessionId, codigoParam, Id_Marca, body) => {
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        throw new Error('Sesion terminada');
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
-    ;
     const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
     const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
     if (!pool) {

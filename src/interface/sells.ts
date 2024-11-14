@@ -16,6 +16,8 @@ export interface SellsInterface {
     Piezas?: number;
 }
 
-export type SellsOrderCondition = 'TipoDoc' | 'Folio' | 'Fecha' | 'FechaEntrega' | 'ExpiredDays';
+export type SellsOrderConditionType = 'TipoDoc' | 'Folio' | 'Fecha' | 'FechaEntrega' | 'ExpiredDays';
+export const SellsOrderCondition : SellsOrderConditionType[] = ['TipoDoc' , 'Folio' , 'Fecha' , 'FechaEntrega' , 'ExpiredDays']
 
-export type SellsFilterCondition = 'TipoDoc' | 'Expired' | "Not Expired"
+export type SellsFilterConditionType = 'TipoDoc' | 'Expired' | "Not Expired"
+export const SellsFilterCondition : SellsFilterConditionType[] = ['TipoDoc', 'Expired', "Not Expired"]
