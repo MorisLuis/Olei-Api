@@ -7,9 +7,10 @@ exports.deleteMeetingService = exports.postMeetingService = exports.updateMeetin
 const database_1 = require("../database");
 const bitacora_1 = require("../database/querys/bitacora");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
+const meeting_1 = require("../interface/meeting");
 const getSession_1 = require("../utils/Redis/getSession");
 const mssql_1 = __importDefault(require("mssql"));
-const getMeetingsService = async (PageNumber, sessionId) => {
+const getMeetingsService = async ({ sessionId, PageNumber, Id_Cliente, TipoContacto, MeetingOrderCondition, MeetingFilterCondition }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
@@ -24,6 +25,10 @@ const getMeetingsService = async (PageNumber, sessionId) => {
     const request = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
+        .input('Id_Cliente', Id_Cliente)
+        .input('TipoContacto', TipoContacto)
+        .input('OrderCondition', MeetingOrderCondition)
+        .input('WhereCondition', MeetingFilterCondition)
         .query(query);
     const quotes = request.recordset;
     return quotes;
@@ -67,6 +72,13 @@ const updateMeetingService = async (id, sessionId, body) => {
     const transaction = new mssql_1.default.Transaction(pool);
     await transaction.begin();
     let { Id_Cliente, Descripcion, TipoContacto, Fecha } = body;
+    if (!meeting_1.validTipoContacto.includes(TipoContacto)) {
+        throw new BadRequestError_1.default({ code: 500, message: `No es valido el tipo de contacto`, logging: true });
+    }
+    ;
+    if (!Id_Cliente) {
+        throw new BadRequestError_1.default({ code: 500, message: 'Es necesario el id de el cliente', logging: true });
+    }
     const request = new mssql_1.default.Request(transaction)
         .input('Id_Bitacora', id)
         .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
@@ -74,10 +86,10 @@ const updateMeetingService = async (id, sessionId, body) => {
         .input('TipoContacto', mssql_1.default.Int, TipoContacto)
         .input('Fecha', mssql_1.default.Date, Fecha);
     const query = bitacora_1.bitacoraQuerys.updateMeeting;
-    await request.query(query);
+    const result = await request.query(query);
     await transaction.commit();
     // END TRANSACTION
-    return { ok: true };
+    return { result: result.recordset[0] };
 };
 exports.updateMeetingService = updateMeetingService;
 const postMeetingService = async (sessionId, body) => {
@@ -96,8 +108,15 @@ const postMeetingService = async (sessionId, body) => {
     await transaction.begin();
     const request = new mssql_1.default.Request(transaction);
     const query = bitacora_1.bitacoraQuerys.insertMeeting;
-    const { Fecha, Descripcion, TipoContacto } = body;
-    const { Id_Almacen, Id_Cliente } = userFR;
+    const { Fecha, Descripcion, TipoContacto, Id_Cliente } = body;
+    const { Id_Almacen } = userFR;
+    if (!meeting_1.validTipoContacto.includes(TipoContacto)) {
+        throw new BadRequestError_1.default({ code: 500, message: `No es valido el tipo de contacto`, logging: true });
+    }
+    ;
+    if (!Id_Cliente) {
+        throw new BadRequestError_1.default({ code: 500, message: 'Es necesario el id de el cliente', logging: true });
+    }
     const result = await request
         .input('Id_Almacen', mssql_1.default.Int, Id_Almacen ?? 0)
         .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
@@ -107,7 +126,7 @@ const postMeetingService = async (sessionId, body) => {
         .query(query);
     await transaction.commit();
     //END TRANSACTION
-    return { ok: true };
+    return { result: result.recordset[0] };
 };
 exports.postMeetingService = postMeetingService;
 const deleteMeetingService = async (id, sessionId) => {
@@ -131,7 +150,7 @@ const deleteMeetingService = async (id, sessionId) => {
         .query(query);
     await transaction.commit();
     //END TRANSACTION
-    return id;
+    return { result: result.recordset[0] };
 };
 exports.deleteMeetingService = deleteMeetingService;
 //# sourceMappingURL=meetingsServices.js.map

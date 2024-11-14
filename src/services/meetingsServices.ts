@@ -1,11 +1,27 @@
 import { dbConnection } from "../database";
 import { bitacoraQuerys } from "../database/querys/bitacora";
 import BadRequestError from "../errors/BadRequestError";
-import MeetingInterface from "../interface/meeting";
+import MeetingInterface, { MeetingFilterConditionType, MeetingOrderConditionType, validTipoContacto } from "../interface/meeting";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 import sql from 'mssql';
 
-const getMeetingsService = async (PageNumber: string, sessionId: string) => {
+interface getMeetingsServiceInterface {
+    sessionId: string,
+    PageNumber: number, 
+    Id_Cliente: number,
+    TipoContacto: number,
+    MeetingOrderCondition: MeetingOrderConditionType | string,
+    MeetingFilterCondition: MeetingFilterConditionType | string
+}
+
+const getMeetingsService = async ({
+    sessionId,
+    PageNumber,
+    Id_Cliente,
+    TipoContacto,
+    MeetingOrderCondition,
+    MeetingFilterCondition
+}: getMeetingsServiceInterface ) => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -15,6 +31,7 @@ const getMeetingsService = async (PageNumber: string, sessionId: string) => {
 
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
+
     if (!pool) {
         throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
     };
@@ -23,6 +40,10 @@ const getMeetingsService = async (PageNumber: string, sessionId: string) => {
     const request = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
+        .input('Id_Cliente', Id_Cliente)
+        .input('TipoContacto', TipoContacto)
+        .input('OrderCondition', MeetingOrderCondition)
+        .input('WhereCondition', MeetingFilterCondition)
         .query(query);
 
     const quotes = request.recordset
@@ -77,6 +98,14 @@ const updateMeetingService = async (id: string, sessionId: string, body: Meeting
 
     let { Id_Cliente, Descripcion, TipoContacto, Fecha } = body;
 
+    if (!validTipoContacto.includes(TipoContacto)) {
+        throw new BadRequestError({ code: 500, message: `No es valido el tipo de contacto`, logging: true });
+    };
+
+    if (!Id_Cliente) {
+        throw new BadRequestError({ code: 500, message: 'Es necesario el id de el cliente', logging: true });
+    }
+
     const request = new sql.Request(transaction)
         .input('Id_Bitacora', id)
         .input('Id_Cliente', sql.Int, Id_Cliente)
@@ -85,11 +114,11 @@ const updateMeetingService = async (id: string, sessionId: string, body: Meeting
         .input('Fecha', sql.Date, Fecha);
 
     const query = bitacoraQuerys.updateMeeting;
-    await request.query(query);
+    const result = await request.query(query);
     await transaction.commit();
     // END TRANSACTION
 
-    return { ok: true }
+    return { result: result.recordset[0] }
 
 };
 
@@ -114,8 +143,16 @@ const postMeetingService = async (sessionId: string, body: MeetingInterface) => 
 
     const query = bitacoraQuerys.insertMeeting;
 
-    const { Fecha, Descripcion, TipoContacto } = body;
-    const { Id_Almacen, Id_Cliente } = userFR;
+    const { Fecha, Descripcion, TipoContacto, Id_Cliente } = body;
+    const { Id_Almacen } = userFR;
+
+    if (!validTipoContacto.includes(TipoContacto)) {
+        throw new BadRequestError({ code: 500, message: `No es valido el tipo de contacto`, logging: true });
+    };
+
+    if (!Id_Cliente) {
+        throw new BadRequestError({ code: 500, message: 'Es necesario el id de el cliente', logging: true });
+    }
 
     const result = await request
         .input('Id_Almacen', sql.Int, Id_Almacen ?? 0)
@@ -128,7 +165,7 @@ const postMeetingService = async (sessionId: string, body: MeetingInterface) => 
     await transaction.commit();
     //END TRANSACTION
 
-    return { ok: true }
+    return { result: result.recordset[0] }
 };
 
 const deleteMeetingService = async (id: string, sessionId: string) => {
@@ -157,8 +194,7 @@ const deleteMeetingService = async (id: string, sessionId: string) => {
 
     await transaction.commit();
     //END TRANSACTION
-
-    return id;
+    return { result: result.recordset[0] }
 }
 
 export {
