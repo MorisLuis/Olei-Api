@@ -3,11 +3,61 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.selectClient = void 0;
+exports.selectClient = exports.getClientId = exports.getClients = void 0;
 const generate_jwt_1 = require("../helpers/generate-jwt");
 const getSession_1 = require("../utils/Redis/getSession");
 const deleteRedis_1 = require("../utils/Redis/deleteRedis");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
+const clientsServices_1 = require("../services/clientsServices");
+const client_1 = require("../interface/client");
+const getClients = async (req, res, next) => {
+    try {
+        const { PageNumber, clientOrderCondition } = req.query;
+        const sessionId = req.sessionID;
+        let orderCondition;
+        if (typeof clientOrderCondition === 'string' && client_1.ClientOrderCondition.includes(clientOrderCondition)) {
+            orderCondition = clientOrderCondition;
+        }
+        else {
+            orderCondition = "";
+        }
+        const meeting = await (0, clientsServices_1.getClientsService)({
+            PageNumber: Number(PageNumber),
+            sessionId,
+            OrderCondition: orderCondition
+        });
+        res.json(meeting);
+    }
+    catch (error) {
+        next(error);
+    }
+    ;
+};
+exports.getClients = getClients;
+const getClientId = async (req, res, next) => {
+    try {
+        const { PageNumber, clientOrderCondition, Id_Almacen, Id_Cliente } = req.query;
+        const sessionId = req.sessionID;
+        let orderCondition;
+        if (typeof clientOrderCondition === 'string' && client_1.ClientOrderCondition.includes(clientOrderCondition)) {
+            orderCondition = clientOrderCondition;
+        }
+        else {
+            orderCondition = "";
+        }
+        const meeting = await (0, clientsServices_1.getClientIdService)({
+            sessionId,
+            Id_Cliente: Number(Id_Cliente),
+            Id_Almacen: Number(Id_Almacen)
+        });
+        res.json(meeting);
+    }
+    catch (error) {
+        next(error);
+    }
+    ;
+};
+exports.getClientId = getClientId;
 const selectClient = async (req, res, next) => {
     try {
         // Get session from REDIS.
