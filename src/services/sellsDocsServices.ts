@@ -39,8 +39,10 @@ interface getSellsByClientServiceInterface {
     PageNumber: number,
     Id_Cliente: number,
     SellsOrderCondition: SellsOrderConditionType | string,
-    SellsFilterCondition: SellsFilterConditionType | string,
     TipoDoc?: SellsInterface['TipoDoc']
+    FilterTipoDoc: 0 | 1,
+    FilterExpired: 0 | 1,
+    FilterNotExpired: 0 | 1
 }
 
 const getSellsByClientService = async ({
@@ -48,7 +50,9 @@ const getSellsByClientService = async ({
     PageNumber,
     Id_Cliente,
     SellsOrderCondition,
-    SellsFilterCondition,
+    FilterTipoDoc,
+    FilterExpired,
+    FilterNotExpired,
     TipoDoc
 }: getSellsByClientServiceInterface) => {
 
@@ -68,7 +72,9 @@ const getSellsByClientService = async ({
         .input('PageSize', 10)
         .input('Id_Cliente', Id_Cliente)
         .input('OrderCondition', SellsOrderCondition)
-        .input('WhereCondition', SellsFilterCondition) 
+        .input('FilterTipoDoc', FilterTipoDoc) 
+        .input('FilterExpired', FilterExpired) 
+        .input('FilterNotExpired', FilterNotExpired) 
         .input('TipoDoc', TipoDoc)
         .query(query);
 

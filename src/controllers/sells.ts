@@ -58,7 +58,7 @@ const getSellsByClient = async (req: Request, res: Response, next: NextFunction)
 
     try {
         // Get session from REDIS.
-        const { PageNumber, sellsOrderCondition, sellsFilterCondition, TipoDoc } = req.query;
+        const { PageNumber, sellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc } = req.query;
         const { client } = req.params;
 
         let orderCondition: SellsOrderConditionType | string;
@@ -68,12 +68,12 @@ const getSellsByClient = async (req: Request, res: Response, next: NextFunction)
             orderCondition = ""
         }
 
-        let filterCondtion: SellsFilterConditionType | string;
+       /*  let filterCondtion: SellsFilterConditionType | string;
         if (typeof sellsFilterCondition === 'string' && SellsFilterCondition.includes(sellsFilterCondition as SellsFilterConditionType)) {
             filterCondtion = sellsFilterCondition;
         } else {
             filterCondtion = ""
-        }
+        } */
 
         const sessionId = req.sessionID
         const sells = await getSellsByClientService({
@@ -81,8 +81,10 @@ const getSellsByClient = async (req: Request, res: Response, next: NextFunction)
             Id_Cliente: Number(client),
             PageNumber: Number(PageNumber),
             SellsOrderCondition: orderCondition,
-            SellsFilterCondition: filterCondtion,
-            TipoDoc: TipoDoc ? Number(TipoDoc) as SellsInterface['TipoDoc'] : 0
+            TipoDoc: TipoDoc ? Number(TipoDoc) as SellsInterface['TipoDoc'] : 0,
+            FilterNotExpired: 0,
+            FilterTipoDoc: 0,
+            FilterExpired: 0
         })
         res.json(sells);
     } catch (error) {

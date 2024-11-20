@@ -50,15 +50,15 @@ export const sellsQuery = {
         FROM [dbo].[VENTAS]
         WHERE Id_Cliente = @Id_Cliente
             AND (
-                @WhereCondition != 'TipoDoc' OR (TipoDoc = @TipoDoc AND @WhereCondition = 'TipoDoc')
+                @FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1)
             )
             AND (
-                @WhereCondition != 'Expired' OR 
-                (DATEDIFF(DAY, GETDATE(), FechaEntrega) < 0 AND DATEDIFF(DAY, GETDATE(), FechaEntrega) IS NOT NULL AND @WhereCondition = 'Expired')
+                @FilterExpired = 0 OR 
+                (DATEDIFF(DAY, GETDATE(), FechaEntrega) < 0 AND DATEDIFF(DAY, GETDATE(), FechaEntrega) IS NOT NULL AND @FilterExpired = 1)
             )
             AND (
-                @WhereCondition != 'Not Expired' OR 
-                (DATEDIFF(DAY, GETDATE(), FechaEntrega) > 0 AND DATEDIFF(DAY, GETDATE(), FechaEntrega) IS NOT NULL AND @WhereCondition = 'Not Expired')
+                @FilterNotExpired = 0 OR 
+                (DATEDIFF(DAY, GETDATE(), FechaEntrega) > 0 AND DATEDIFF(DAY, GETDATE(), FechaEntrega) IS NOT NULL AND @FilterNotExpired = 1)
             )
         ORDER BY 
             CASE WHEN @OrderCondition = 'TipoDoc' THEN TipoDoc END DESC,
