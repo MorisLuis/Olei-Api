@@ -50,15 +50,15 @@ exports.sellsQuery = {
         FROM [dbo].[VENTAS]
         WHERE Id_Cliente = @Id_Cliente
             AND (
-                @WhereCondition != 'TipoDoc' OR (TipoDoc = @TipoDoc AND @WhereCondition = 'TipoDoc')
+                @FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1)
             )
             AND (
-                @WhereCondition != 'Expired' OR 
-                (DATEDIFF(DAY, GETDATE(), FechaEntrega) < 0 AND DATEDIFF(DAY, GETDATE(), FechaEntrega) IS NOT NULL AND @WhereCondition = 'Expired')
+                @FilterExpired = 0 OR 
+                (DATEDIFF(DAY, GETDATE(), FechaEntrega) < 0 AND DATEDIFF(DAY, GETDATE(), FechaEntrega) IS NOT NULL AND @FilterExpired = 1)
             )
             AND (
-                @WhereCondition != 'Not Expired' OR 
-                (DATEDIFF(DAY, GETDATE(), FechaEntrega) > 0 AND DATEDIFF(DAY, GETDATE(), FechaEntrega) IS NOT NULL AND @WhereCondition = 'Not Expired')
+                @FilterNotExpired = 0 OR 
+                (DATEDIFF(DAY, GETDATE(), FechaEntrega) > 0 AND DATEDIFF(DAY, GETDATE(), FechaEntrega) IS NOT NULL AND @FilterNotExpired = 1)
             )
         ORDER BY 
             CASE WHEN @OrderCondition = 'TipoDoc' THEN TipoDoc END DESC,
@@ -74,6 +74,37 @@ exports.sellsQuery = {
         SELECT Id_Cliente, Id_Almacen, TipoDoc, Folio, Serie, Fecha, FechaEntrega, Saldo, Total, Subtotal, Impuesto, FechaLiq, Estado, Piezas
         FROM dbo.VENTAS
         WHERE Id_Almacen = @Id_Almacen AND TipoDoc = @TipoDoc AND Serie = @Serie AND Folio = @Folio
+    `,
+    getCobranza: `
+        SELECT
+            CONCAT(Id_Almacen, '-', TipoDoc, '-', TRIM(Serie), '-', Folio) AS UniqueKey,
+            Id_Cliente,
+            Id_Almacen,
+            TipoDoc,
+            Folio,
+            Serie,
+            Fecha,
+            FechaEntrega,
+            FechaLiq,
+            Saldo,
+            Total,
+            DATEDIFF(DAY, GETDATE(), FechaEntrega) AS ExpiredDays
+        FROM [dbo].[VENTAS]
+        WHERE Id_Cliente = @Id_Cliente 
+            AND Saldo > 0
+            AND FechaLiq >= CAST(GETDATE() AS DATE) -- Condición para FechaLiq
+            AND (
+                @FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1)
+            )
+        ORDER BY 
+            CASE WHEN @OrderCondition = 'TipoDoc' THEN TipoDoc END DESC,
+            CASE WHEN @OrderCondition = 'Folio' THEN Folio END DESC,
+            CASE WHEN @OrderCondition = 'Fecha' THEN Fecha END DESC,
+            CASE WHEN @OrderCondition = 'FechaEntrega' THEN FechaEntrega END DESC,
+            CASE WHEN @OrderCondition = 'ExpiredDays' THEN DATEDIFF(DAY, GETDATE(), FechaEntrega) END DESC,
+            TipoDoc
+        OFFSET (@PageNumber - 1) * @PageSize ROWS
+        FETCH NEXT @PageSize ROWS ONLY;
     `
 };
 //# sourceMappingURL=sells.js.map

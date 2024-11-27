@@ -1,7 +1,7 @@
 import { dbConnection } from "../database";
 import { sellsQuery } from "../database/querys/sells";
 import BadRequestError from "../errors/BadRequestError";
-import { SellsFilterConditionType, SellsInterface, SellsOrderConditionType } from "../interface/sells";
+import { SellsInterface, SellsOrderConditionType } from "../interface/sells";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 
 
@@ -43,7 +43,7 @@ interface getSellsByClientServiceInterface {
     FilterTipoDoc: 0 | 1,
     FilterExpired: 0 | 1,
     FilterNotExpired: 0 | 1
-}
+};
 
 const getSellsByClientService = async ({
     sessionId,
@@ -80,7 +80,7 @@ const getSellsByClientService = async ({
 
     const sells = request.recordset
     return sells
-}
+};
 
 const getSellByIdService = async (sessionId: string, folio: string, Serie: string, Id_Cliente: number, Id_Almacen: number, TipoDoc: SellsInterface['TipoDoc'] ) => {
 
@@ -105,9 +105,54 @@ const getSellByIdService = async (sessionId: string, folio: string, Serie: strin
 
     const sell = request.recordset
     return sell
-}
+};
+
+
+interface getCobranzaInterface {
+    sessionId: string,
+    PageNumber: number,
+    Id_Cliente: number,
+    SellsOrderCondition: SellsOrderConditionType | string,
+    TipoDoc?: SellsInterface['TipoDoc']
+    FilterTipoDoc: 0 | 1
+};
+
+const getCobranzaService = async ({
+    sessionId,
+    PageNumber,
+    Id_Cliente,
+    SellsOrderCondition,
+    FilterTipoDoc,
+    TipoDoc
+}: getCobranzaInterface) => {
+
+    const { user: userFR } = await handleGetWebSession({ sessionId });
+    if (!userFR) {
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+    }
+    const { Serverweb, Baseweb } = userFR;
+    const pool = await dbConnection(Serverweb, Baseweb);
+    if (!pool) {
+        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+    };
+
+    let query = sellsQuery.getCobranza;
+    const request = await pool.request()
+        .input('PageNumber', PageNumber)
+        .input('PageSize', 10)
+        .input('Id_Cliente', Id_Cliente)
+        .input('OrderCondition', SellsOrderCondition)
+        .input('FilterTipoDoc', FilterTipoDoc) 
+        .input('TipoDoc', TipoDoc)
+        .query(query);
+
+    const sells = request.recordset
+    return sells
+};
+
 export {
     getSellsService,
     getSellsByClientService,
-    getSellByIdService
+    getSellByIdService,
+    getCobranzaService
 }

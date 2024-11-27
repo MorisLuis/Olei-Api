@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSellById = exports.getSellsByClient = exports.getSells = void 0;
+exports.getCobranza = exports.getSellById = exports.getSellsByClient = exports.getSells = void 0;
 const sellsDocsServices_1 = require("../services/sellsDocsServices");
 const sells_1 = require("../interface/sells");
 const getSells = async (req, res, next) => {
@@ -42,7 +42,7 @@ exports.getSellById = getSellById;
 const getSellsByClient = async (req, res, next) => {
     try {
         // Get session from REDIS.
-        const { PageNumber, sellsOrderCondition, sellsFilterCondition, TipoDoc } = req.query;
+        const { PageNumber, sellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc } = req.query;
         const { client } = req.params;
         let orderCondition;
         if (typeof sellsOrderCondition === 'string' && sells_1.SellsOrderCondition.includes(sellsOrderCondition)) {
@@ -51,21 +51,16 @@ const getSellsByClient = async (req, res, next) => {
         else {
             orderCondition = "";
         }
-        let filterCondtion;
-        if (typeof sellsFilterCondition === 'string' && sells_1.SellsFilterCondition.includes(sellsFilterCondition)) {
-            filterCondtion = sellsFilterCondition;
-        }
-        else {
-            filterCondtion = "";
-        }
         const sessionId = req.sessionID;
         const sells = await (0, sellsDocsServices_1.getSellsByClientService)({
             sessionId,
             Id_Cliente: Number(client),
             PageNumber: Number(PageNumber),
             SellsOrderCondition: orderCondition,
-            SellsFilterCondition: filterCondtion,
-            TipoDoc: TipoDoc ? Number(TipoDoc) : 0
+            TipoDoc: TipoDoc ? Number(TipoDoc) : 0,
+            FilterNotExpired: 0,
+            FilterTipoDoc: 0,
+            FilterExpired: 0
         });
         res.json(sells);
     }
@@ -75,4 +70,33 @@ const getSellsByClient = async (req, res, next) => {
     ;
 };
 exports.getSellsByClient = getSellsByClient;
+const getCobranza = async (req, res, next) => {
+    try {
+        // Get session from REDIS.
+        const { PageNumber, sellsOrderCondition, TipoDoc } = req.query;
+        const { client } = req.params;
+        let orderCondition;
+        if (typeof sellsOrderCondition === 'string' && sells_1.SellsOrderCondition.includes(sellsOrderCondition)) {
+            orderCondition = sellsOrderCondition;
+        }
+        else {
+            orderCondition = "";
+        }
+        const sessionId = req.sessionID;
+        const sells = await (0, sellsDocsServices_1.getCobranzaService)({
+            sessionId,
+            Id_Cliente: Number(client),
+            PageNumber: Number(PageNumber),
+            SellsOrderCondition: orderCondition,
+            TipoDoc: TipoDoc ? Number(TipoDoc) : 0,
+            FilterTipoDoc: 0
+        });
+        res.json(sells);
+    }
+    catch (error) {
+        next(error);
+    }
+    ;
+};
+exports.getCobranza = getCobranza;
 //# sourceMappingURL=sells.js.map

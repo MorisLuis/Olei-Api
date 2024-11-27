@@ -18,7 +18,7 @@ exports.clientsQuerys = {
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY;
     `,
-    getClientId: `
+    getClientId: ` 
         SELECT 
             IdOLEI,
             Id_Almacen,

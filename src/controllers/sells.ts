@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express"
-import { getSellsService, getSellsByClientService, getSellByIdService } from "../services/sellsDocsServices";
-import { SellsFilterCondition, SellsFilterConditionType, SellsInterface, SellsOrderCondition, SellsOrderConditionType } from "../interface/sells";
+import { getSellsService, getSellsByClientService, getSellByIdService, getCobranzaService } from "../services/sellsDocsServices";
+import { SellsInterface, SellsOrderCondition, SellsOrderConditionType } from "../interface/sells";
 
 const getSells = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -68,13 +68,6 @@ const getSellsByClient = async (req: Request, res: Response, next: NextFunction)
             orderCondition = ""
         }
 
-       /*  let filterCondtion: SellsFilterConditionType | string;
-        if (typeof sellsFilterCondition === 'string' && SellsFilterCondition.includes(sellsFilterCondition as SellsFilterConditionType)) {
-            filterCondtion = sellsFilterCondition;
-        } else {
-            filterCondtion = ""
-        } */
-
         const sessionId = req.sessionID
         const sells = await getSellsByClientService({
             sessionId,
@@ -93,8 +86,39 @@ const getSellsByClient = async (req: Request, res: Response, next: NextFunction)
 
 };
 
+const getCobranza = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        // Get session from REDIS.
+        const { PageNumber, sellsOrderCondition, TipoDoc } = req.query;
+        const { client } = req.params;
+
+        let orderCondition: SellsOrderConditionType | string;
+        if (typeof sellsOrderCondition === 'string' && SellsOrderCondition.includes(sellsOrderCondition as SellsOrderConditionType)) {
+            orderCondition = sellsOrderCondition;
+        } else {
+            orderCondition = ""
+        }
+
+        const sessionId = req.sessionID
+        const sells = await getCobranzaService({
+            sessionId,
+            Id_Cliente: Number(client),
+            PageNumber: Number(PageNumber),
+            SellsOrderCondition: orderCondition,
+            TipoDoc: TipoDoc ? Number(TipoDoc) as SellsInterface['TipoDoc'] : 0,
+            FilterTipoDoc: 0
+        })
+        res.json(sells);
+    } catch (error) {
+        next(error)
+    };
+}
+
+
 export {
     getSells,
     getSellsByClient,
-    getSellById
+    getSellById,
+    getCobranza
 }

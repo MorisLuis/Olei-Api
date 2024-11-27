@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSellByIdService = exports.getSellsByClientService = exports.getSellsService = void 0;
+exports.getCobranzaService = exports.getSellByIdService = exports.getSellsByClientService = exports.getSellsService = void 0;
 const database_1 = require("../database");
 const sells_1 = require("../database/querys/sells");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
@@ -29,7 +29,8 @@ const getSellsService = async (sessionId, PageNumber, SellsOrderCondition) => {
     return sells;
 };
 exports.getSellsService = getSellsService;
-const getSellsByClientService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrderCondition, SellsFilterCondition, TipoDoc }) => {
+;
+const getSellsByClientService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
@@ -46,7 +47,9 @@ const getSellsByClientService = async ({ sessionId, PageNumber, Id_Cliente, Sell
         .input('PageSize', 10)
         .input('Id_Cliente', Id_Cliente)
         .input('OrderCondition', SellsOrderCondition)
-        .input('WhereCondition', SellsFilterCondition)
+        .input('FilterTipoDoc', FilterTipoDoc)
+        .input('FilterExpired', FilterExpired)
+        .input('FilterNotExpired', FilterNotExpired)
         .input('TipoDoc', TipoDoc)
         .query(query);
     const sells = request.recordset;
@@ -76,4 +79,29 @@ const getSellByIdService = async (sessionId, folio, Serie, Id_Cliente, Id_Almace
     return sell;
 };
 exports.getSellByIdService = getSellByIdService;
+;
+const getCobranzaService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrderCondition, FilterTipoDoc, TipoDoc }) => {
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
+    const { Serverweb, Baseweb } = userFR;
+    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    if (!pool) {
+        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+    }
+    ;
+    let query = sells_1.sellsQuery.getCobranza;
+    const request = await pool.request()
+        .input('PageNumber', PageNumber)
+        .input('PageSize', 10)
+        .input('Id_Cliente', Id_Cliente)
+        .input('OrderCondition', SellsOrderCondition)
+        .input('FilterTipoDoc', FilterTipoDoc)
+        .input('TipoDoc', TipoDoc)
+        .query(query);
+    const sells = request.recordset;
+    return sells;
+};
+exports.getCobranzaService = getCobranzaService;
 //# sourceMappingURL=sellsDocsServices.js.map

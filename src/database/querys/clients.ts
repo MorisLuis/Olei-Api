@@ -18,7 +18,7 @@ export const clientsQuerys = {
         FETCH NEXT @PageSize ROWS ONLY;
     `,
 
-    getClientId: `
+    getClientId: ` 
         SELECT 
             IdOLEI,
             Id_Almacen,
