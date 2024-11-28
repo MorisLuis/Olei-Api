@@ -71,20 +71,20 @@ const updateMeetingService = async (id, sessionId, body) => {
     //START TRANSACTION
     const transaction = new mssql_1.default.Transaction(pool);
     await transaction.begin();
-    let { Id_Cliente, Descripcion, TipoContacto, Fecha } = body;
-    if (!meeting_1.validTipoContacto.includes(TipoContacto)) {
+    const { Id_Cliente, Fecha, Hour, HourEnd, Titulo, Descripcion, TipoContacto, Comentarios } = body;
+    if (TipoContacto && !meeting_1.validTipoContacto.includes(TipoContacto)) {
         throw new BadRequestError_1.default({ code: 500, message: `No es valido el tipo de contacto`, logging: true });
     }
     ;
-    if (!Id_Cliente) {
-        throw new BadRequestError_1.default({ code: 500, message: 'Es necesario el id de el cliente', logging: true });
-    }
     const request = new mssql_1.default.Request(transaction)
-        .input('Id_Bitacora', id)
-        .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
+        .input('Id_Bitacora', mssql_1.default.Int, id)
+        .input('Fecha', mssql_1.default.Date, Fecha)
+        .input('Hour', mssql_1.default.VarChar, Hour)
+        .input('HourEnd', mssql_1.default.VarChar, HourEnd)
+        .input('Titulo', mssql_1.default.VarChar, Titulo)
         .input('Descripcion', mssql_1.default.VarChar, Descripcion)
         .input('TipoContacto', mssql_1.default.Int, TipoContacto)
-        .input('Fecha', mssql_1.default.Date, Fecha);
+        .input('Comentarios', mssql_1.default.VarChar, Comentarios);
     const query = bitacora_1.bitacoraQuerys.updateMeeting;
     const result = await request.query(query);
     await transaction.commit();
@@ -108,8 +108,7 @@ const postMeetingService = async (sessionId, body) => {
     await transaction.begin();
     const request = new mssql_1.default.Request(transaction);
     const query = bitacora_1.bitacoraQuerys.insertMeeting;
-    const { Fecha, Descripcion, TipoContacto, Id_Cliente } = body;
-    const { Id_Almacen } = userFR;
+    const { Id_Almacen, Id_Cliente, Fecha, Hour, HourEnd, Titulo, Descripcion, TipoContacto, Comentarios } = body;
     if (!meeting_1.validTipoContacto.includes(TipoContacto)) {
         throw new BadRequestError_1.default({ code: 500, message: `No es valido el tipo de contacto`, logging: true });
     }
@@ -121,8 +120,12 @@ const postMeetingService = async (sessionId, body) => {
         .input('Id_Almacen', mssql_1.default.Int, Id_Almacen ?? 0)
         .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
         .input('Fecha', mssql_1.default.Date, Fecha)
+        .input('Hour', mssql_1.default.VarChar, Hour)
+        .input('HourEnd', mssql_1.default.VarChar, HourEnd)
+        .input('Titulo', mssql_1.default.VarChar, Titulo)
         .input('Descripcion', mssql_1.default.VarChar, Descripcion)
         .input('TipoContacto', mssql_1.default.Int, TipoContacto)
+        .input('Comentarios', mssql_1.default.VarChar, Comentarios)
         .query(query);
     await transaction.commit();
     //END TRANSACTION
