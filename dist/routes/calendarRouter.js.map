@@ -1,0 +1,1 @@
+{"version":3,"file":"calendarRouter.js","sourceRoot":"","sources":["../../src/routes/calendarRouter.ts"],"names":[],"mappings":";;AAAA,qCAAiC;AACjC,0DAAyD;AACzD,sDAAuF;AAGvF,MAAM,MAAM,GAAG,IAAA,gBAAM,GAAE,CAAC;AAExB,MAAM,CAAC,GAAG,CAAC,QAAQ,EAAE,6BAAc,EAAE,iCAAsB,CAAC,CAAC;AAC7D,MAAM,CAAC,GAAG,CAAC,MAAM,EAAE,6BAAc,EAAE,+BAAoB,CAAC,CAAC;AAEzD,kBAAe,MAAM,CAAC"}

@@ -26,6 +26,7 @@ const utilsRouter_1 = __importDefault(require("../routes/utilsRouter"));
 const errorsRouter_1 = __importDefault(require("../routes/errorsRouter"));
 const sellsRouter_1 = __importDefault(require("../routes/sellsRouter"));
 const bitacoraRouter_1 = __importDefault(require("../routes/bitacoraRouter"));
+const calendarRouter_1 = __importDefault(require("../routes/calendarRouter"));
 const errorHandler_1 = require("../middleware/errorHandler");
 class Server {
     constructor() {
@@ -46,7 +47,8 @@ class Server {
             utils: "/api/utils",
             errors: "/api/errors",
             sells: "/api/sells",
-            meetings: "/api/meetings"
+            meetings: "/api/meetings",
+            calendar: "/api/calendar"
         };
         this.connectDB();
         this.configureRedis();
@@ -146,6 +148,7 @@ class Server {
         this.app.use(this.paths.utils, utilsRouter_1.default);
         this.app.use(this.paths.sells, sellsRouter_1.default);
         this.app.use(this.paths.meetings, bitacoraRouter_1.default);
+        this.app.use(this.paths.calendar, calendarRouter_1.default);
     }
     async closeConnections() {
         if (this.redis) {

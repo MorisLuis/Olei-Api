@@ -21,6 +21,8 @@ import utilsRouter from "../routes/utilsRouter";
 import errorsRouter from "../routes/errorsRouter";
 import sellsRouter from "../routes/sellsRouter";
 import meetingsRouter from "../routes/bitacoraRouter";
+import calendarRouter from "../routes/calendarRouter";
+
 import { errorHandler } from "../middleware/errorHandler";
 
 class Server {
@@ -42,7 +44,8 @@ class Server {
         utils: string,
         errors: string,
         sells: string,
-        meetings: string
+        meetings: string,
+        calendar: string
     };
 
     constructor() {
@@ -63,8 +66,8 @@ class Server {
             utils: "/api/utils",
             errors: "/api/errors",
             sells: "/api/sells",
-            meetings: "/api/meetings"
-
+            meetings: "/api/meetings",
+            calendar: "/api/calendar"
         };
 
         this.connectDB();
@@ -179,7 +182,7 @@ class Server {
         this.app.use(this.paths.utils, utilsRouter);
         this.app.use(this.paths.sells, sellsRouter);
         this.app.use(this.paths.meetings, meetingsRouter);
-
+        this.app.use(this.paths.calendar, calendarRouter);
     }
 
     async closeConnections() {
