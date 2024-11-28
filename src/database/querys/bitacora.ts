@@ -28,7 +28,7 @@ export const bitacoraQuerys = {
     `,
 
     insertMeeting: `
-        INSERT INTO [dbo].[BITACORACRM] (Id_Almacen, Id_Cliente, Fecha, Descripcion, TipoContacto)
+        INSERT INTO [dbo].[BITACORACRM] (Id_Almacen, Id_Cliente, Fecha, Descripcion, TipoContacto, Hour, HourEnd, Titulo, Comentarios)
         OUTPUT 
             INSERTED.Id_Bitacora, 
             INSERTED.Id_Almacen,
@@ -36,7 +36,7 @@ export const bitacoraQuerys = {
             INSERTED.Fecha,
             INSERTED.Descripcion,
             INSERTED.TipoContacto
-        VALUES (@Id_Almacen, @Id_Cliente, @Fecha, @Descripcion, @TipoContacto)
+        VALUES (@Id_Almacen, @Id_Cliente, @Fecha, @Descripcion, @TipoContacto, @Hour, @HourEnd, @Titulo, @Comentarios)
     `,
 
     updateMeeting: `
@@ -44,12 +44,19 @@ export const bitacoraQuerys = {
         SET 
             [Fecha] = COALESCE(@Fecha, [Fecha]),
             [Descripcion] = COALESCE(@Descripcion, [Descripcion]),
-            [TipoContacto] = COALESCE(@TipoContacto, [TipoContacto])
+            [TipoContacto] = COALESCE(@TipoContacto, [TipoContacto]),
+            [Hour] = COALESCE(@Hour, [Hour]),
+            [HourEnd] = COALESCE(@HourEnd, [HourEnd]),
+            [Titulo] = COALESCE(@Titulo, [Titulo]),
+            [Comentarios] = COALESCE(@Comentarios, [Comentarios])
         OUTPUT 
             INSERTED.Id_Bitacora,
             INSERTED.Fecha,
             INSERTED.Descripcion,
-            INSERTED.TipoContacto
+            INSERTED.TipoContacto,
+            INSERTED.Hour,
+            INSERTED.Titulo,
+            INSERTED.Comentarios
         WHERE Id_Bitacora = @Id_Bitacora    
     `,
 
