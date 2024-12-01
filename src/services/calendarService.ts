@@ -73,7 +73,48 @@ const getCalendarTaskByDayService = async ({
     return quotes
 };
 
+interface getCalendarByMonthAndClientServiceInterface {
+    sessionId: string;
+    Mes: string;
+    Anio: string;
+    Id_Cliente: number;
+}
+
+const getCalendarTaskByMonthAndClientService = async ({
+    sessionId,
+    Mes,
+    Anio,
+    Id_Cliente
+}: getCalendarByMonthAndClientServiceInterface ) => {
+
+    const { user: userFR } = await handleGetWebSession({ sessionId });
+
+    if (!userFR) {
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+    }
+
+    const { Serverweb, Baseweb } = userFR;
+    const pool = await dbConnection(Serverweb, Baseweb);
+
+    if (!pool) {
+        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+    };
+
+    let query = celendarQuerys.getCalendarTasksMonthByClient;
+    const request = await pool.request()
+        .input('Anio', Anio)
+        .input('Mes', Mes)
+        .input('Id_Cliente', Id_Cliente)
+        .query(query);
+
+    const quotes = request.recordset
+
+    return quotes
+};
+
+
 export {
     getCalendarTaskByMonthService,
-    getCalendarTaskByDayService
+    getCalendarTaskByDayService,
+    getCalendarTaskByMonthAndClientService
 }
