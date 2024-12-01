@@ -8,16 +8,18 @@ exports.bitacoraQuerys = {
             Id_Cliente,
             Fecha,
             Descripcion,
-            TipoContacto
+            TipoContacto,
+            Hour,
+            HourEnd
         FROM dbo.BITACORACRM
         WHERE
         (@WhereCondition != 'Cliente' OR (Id_Cliente = @Id_Cliente AND @WhereCondition = 'Cliente'))
         AND (@WhereCondition != 'TipoContacto' OR (TipoContacto = @TipoContacto AND @WhereCondition = 'TipoContacto'))
         ORDER BY 
-        CASE WHEN @OrderCondition = 'Cliente' THEN Id_Cliente END DESC,
-        CASE WHEN @OrderCondition = 'Fecha' THEN Fecha END DESC,
-        CASE WHEN @OrderCondition = 'TipoContacto' THEN TipoContacto END DESC,
-        Id_Bitacora
+            CASE WHEN @OrderCondition = 'Cliente' THEN Id_Cliente END DESC,
+            CASE WHEN @OrderCondition = 'Fecha' THEN Fecha END DESC,
+            CASE WHEN @OrderCondition = 'TipoContacto' THEN TipoContacto END DESC,
+            Id_Bitacora
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY;
     `,

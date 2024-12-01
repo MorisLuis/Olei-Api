@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCalendarTaskByDay = exports.getCalendarTaskByMonth = void 0;
+exports.getCalendarTaskByMonthAndClient = exports.getCalendarTaskByDay = exports.getCalendarTaskByMonth = void 0;
 const calendarService_1 = require("../services/calendarService");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const getCalendarTaskByMonth = async (req, res, next) => {
@@ -48,4 +48,31 @@ const getCalendarTaskByDay = async (req, res, next) => {
     ;
 };
 exports.getCalendarTaskByDay = getCalendarTaskByDay;
+const getCalendarTaskByMonthAndClient = async (req, res, next) => {
+    try {
+        const { Anio, Mes, Id_Cliente } = req.query;
+        const sessionId = req.sessionID;
+        if (typeof Anio !== 'string') {
+            throw new BadRequestError_1.default({ code: 500, message: `No se envio un Año correcto`, logging: true });
+        }
+        if (typeof Mes !== 'string') {
+            throw new BadRequestError_1.default({ code: 500, message: `No se envio un Mes correcto`, logging: true });
+        }
+        if (typeof Id_Cliente !== 'string') {
+            throw new BadRequestError_1.default({ code: 500, message: `No se envio un Id_Cliente correcto`, logging: true });
+        }
+        const tasks = await (0, calendarService_1.getCalendarTaskByMonthAndClientService)({
+            sessionId,
+            Anio,
+            Mes,
+            Id_Cliente: Number(Id_Cliente)
+        });
+        res.json(tasks);
+    }
+    catch (error) {
+        next(error);
+    }
+    ;
+};
+exports.getCalendarTaskByMonthAndClient = getCalendarTaskByMonthAndClient;
 //# sourceMappingURL=calendar.js.map
