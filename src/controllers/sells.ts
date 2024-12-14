@@ -1,31 +1,27 @@
 import { NextFunction, Request, Response } from "express"
-import { getSellsService, getSellsByClientService, getSellByIdService, getCobranzaService } from "../services/sellsDocsServices";
-import { SellsInterface, SellsOrderCondition, SellsOrderConditionType } from "../interface/sells";
+import { getSellsService, getSellsByClientService, getSellByIdService, getCobranzaService, getTotalSellsService, getTotalSellsByClientService, getTotalCobranzaService } from "../services/sellsDocsServices";
+import { getTotalSellsByClientQuerySchema, getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getSellByIdParamsSchema, getSellsByClientQuerySchema, getCobranzaQuerySchema } from '../validations/sellsValidations'
+import { z } from "zod";
 
 const getSells = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        // Get session from REDIS.
-        const { PageNumber, sellsOrderCondition } = req.query;
-        const sessionId = req.sessionID
-
-        let orderCondition: SellsOrderConditionType | string;
-
-        if (typeof sellsOrderCondition === 'string' && SellsOrderCondition.includes(sellsOrderCondition as SellsOrderConditionType)) {
-            orderCondition = sellsOrderCondition;
-        } else {
-            orderCondition = ""
-        }
+        const { PageNumber, sellsOrderCondition } = getSellsQuerySchema.parse(req.query)
+        const sessionId = req.sessionRedis
 
         const sells = await getSellsService(
             sessionId,
-            Number(PageNumber),
-            orderCondition
-        )
-        res.json(sells);
+            PageNumber,
+            sellsOrderCondition
+        );
 
+        res.json(sells);
     } catch (error) {
-        next(error)
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        } else {
+            next(error);
+        }
     };
 
 };
@@ -34,22 +30,26 @@ const getSellById = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
         // Get session from REDIS.
-        const sessionId = req.sessionID
-        const { Serie, Id_Almacen, Id_Cliente, TipoDoc } = req.query;
-        const { folio } = req.params;
+        const sessionId = req.sessionRedis;
+        const { Serie, Id_Almacen, Id_Cliente, TipoDoc } = getSellByIdQuerySchema.parse(req.query);
+        const { folio } = getSellByIdParamsSchema.parse(req.params);
 
         const sell = await getSellByIdService(
             sessionId,
             folio,
-            Serie as string,
-            Number(Id_Cliente),
-            Number(Id_Almacen),
-            TipoDoc ? Number(TipoDoc) as SellsInterface['TipoDoc'] : 0
+            Serie,
+            Id_Cliente,
+            Id_Almacen,
+            TipoDoc
         );
 
         res.json(sell);
     } catch (error) {
-        next(error)
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        } else {
+            next(error);
+        }
     };
 
 };
@@ -57,62 +57,119 @@ const getSellById = async (req: Request, res: Response, next: NextFunction) => {
 const getSellsByClient = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        // Get session from REDIS.
-        const { PageNumber, sellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc } = req.query;
-        const { client } = req.params;
+        const { PageNumber, sellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart } = getSellsByClientQuerySchema.parse(req.query);
+        const { client } = getClientParamsSchema.parse(req.params);
 
-        let orderCondition: SellsOrderConditionType | string;
-        if (typeof sellsOrderCondition === 'string' && SellsOrderCondition.includes(sellsOrderCondition as SellsOrderConditionType)) {
-            orderCondition = sellsOrderCondition;
-        } else {
-            orderCondition = ""
-        }
-
-        const sessionId = req.sessionID
+        const sessionId = req.sessionRedis;
         const sells = await getSellsByClientService({
             sessionId,
-            Id_Cliente: Number(client),
-            PageNumber: Number(PageNumber),
-            SellsOrderCondition: orderCondition,
-            TipoDoc: TipoDoc ? Number(TipoDoc) as SellsInterface['TipoDoc'] : 0,
-            FilterNotExpired: 0,
-            FilterTipoDoc: 0,
-            FilterExpired: 0
-        })
+            Id_Cliente: client,
+            PageNumber: PageNumber,
+            SellsOrderCondition: sellsOrderCondition,
+            TipoDoc: TipoDoc,
+            FilterTipoDoc,
+            FilterNotExpired,
+            FilterExpired,
+            DateEnd: DateEnd || null,
+            DateExactly: DateExactly || null,
+            DateStart: DateStart || null,
+        });
+
         res.json(sells);
     } catch (error) {
-        next(error)
-    };
-
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        } else {
+            next(error);
+        }
+    }
 };
 
 const getCobranza = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
         // Get session from REDIS.
-        const { PageNumber, sellsOrderCondition, TipoDoc } = req.query;
-        const { client } = req.params;
+        const { PageNumber, sellsOrderCondition, TipoDoc } = getCobranzaQuerySchema.parse(req.query);
+        const { client } = getClientParamsSchema.parse(req.params);
 
-        let orderCondition: SellsOrderConditionType | string;
-        if (typeof sellsOrderCondition === 'string' && SellsOrderCondition.includes(sellsOrderCondition as SellsOrderConditionType)) {
-            orderCondition = sellsOrderCondition;
-        } else {
-            orderCondition = ""
-        }
-
-        const sessionId = req.sessionID
+        const sessionId = req.sessionRedis;
         const sells = await getCobranzaService({
             sessionId,
-            Id_Cliente: Number(client),
-            PageNumber: Number(PageNumber),
-            SellsOrderCondition: orderCondition,
-            TipoDoc: TipoDoc ? Number(TipoDoc) as SellsInterface['TipoDoc'] : 0,
+            Id_Cliente: client,
+            PageNumber: PageNumber,
+            SellsOrderCondition: sellsOrderCondition,
+            TipoDoc,
             FilterTipoDoc: 0
-        })
+        });
+
         res.json(sells);
     } catch (error) {
         next(error)
     };
+};
+
+const getTotalSells = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const sessionId = req.sessionRedis
+        const total = await getTotalSellsService(sessionId)
+        res.json(total);
+    } catch (error) {
+        next(error);
+    }
+}
+
+const getTotalSellsByClient = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const params = getClientParamsSchema.parse(req.params);
+        const {
+            FilterTipoDoc,
+            FilterExpired,
+            FilterNotExpired,
+            TipoDoc,
+            DateEnd,
+            DateExactly,
+            DateStart,
+        } = getTotalSellsByClientQuerySchema.parse(req.query);
+
+        const total = await getTotalSellsByClientService({
+            sessionId: req.sessionRedis,
+            Id_Cliente: params.client,
+            TipoDoc,
+            FilterTipoDoc,
+            FilterNotExpired,
+            FilterExpired,
+            DateEnd: DateEnd || null,
+            DateExactly: DateExactly || null,
+            DateStart: DateStart || null,
+        });
+
+        res.json(total);
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        } else {
+            next(error);
+        }
+    }
+};
+
+
+const getTotalCobranza = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const { FilterTipoDoc, TipoDoc } = getTotalSellsByClientQuerySchema.parse(req.query);
+        const { client } = getClientParamsSchema.parse(req.params);
+
+        const sessionId = req.sessionRedis
+        const total = await getTotalCobranzaService({sessionId, FilterTipoDoc, TipoDoc, Id_Cliente: client})
+
+        res.json(total);
+
+    } catch (error) {
+        next(error);
+    }
 }
 
 
@@ -120,5 +177,8 @@ export {
     getSells,
     getSellsByClient,
     getSellById,
-    getCobranza
+    getCobranza,
+    getTotalSells,
+    getTotalSellsByClient,
+    getTotalCobranza
 }

@@ -2,7 +2,7 @@ export interface SellsInterface {
     UniqueKey?: string;
     Id_Cliente: number;
     Id_Almacen: number;
-    TipoDoc: 0 | 1 | 2 | 3 | 4;
+    TipoDoc: typeTipoDoc;
     Folio: number;
     Serie: string;
     Fecha: string;
@@ -17,8 +17,14 @@ export interface SellsInterface {
     Piezas?: number;
 }
 
-export type SellsOrderConditionType = 'TipoDoc' | 'Folio' | 'Fecha' | 'FechaEntrega' | 'ExpiredDays';
-export const SellsOrderCondition : SellsOrderConditionType[] = ['TipoDoc' , 'Folio' , 'Fecha' , 'FechaEntrega' , 'ExpiredDays']
+export type typeTipoDoc = 0 | 1 | 2 | 3 | 4;
+export const TipoDoc: typeTipoDoc[] = [0, 1, 2, 3, 4];
 
-export type SellsFilterConditionType = 'TipoDoc' | 'Expired' | "Not Expired"
-export const SellsFilterCondition : SellsFilterConditionType[] = ['TipoDoc', 'Expired', "Not Expired"]
+export type SellsOrderConditionType = 'Nombre' | 'Saldo' | 'Total';
+export const SellsOrderCondition: SellsOrderConditionType[] = ['Nombre', 'Saldo', 'Total']
+
+export type SellsOrderConditionByClientType = 'TipoDoc' | 'Folio' | 'Fecha' | 'FechaEntrega' | 'ExpiredDays';
+export const SellsOrderByClientCondition: SellsOrderConditionByClientType[] = ['TipoDoc', 'Folio', 'Fecha', 'FechaEntrega', 'ExpiredDays']
+
+export type SellsFilterConditionByClientType = 'TipoDoc' | 'Expired' | "Not Expired"
+export const SellsFilterCondition: SellsFilterConditionByClientType[] = ['TipoDoc', 'Expired', "Not Expired"]
