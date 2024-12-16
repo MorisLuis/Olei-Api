@@ -74,7 +74,6 @@ const postMeeting = async (req: Request, res: Response, next: NextFunction) => {
         const meeting = await postMeetingService(sessionId, body);
         res.json(meeting);
     } catch (error) {
-        console.log({error})
         next(error)
     };
 
