@@ -8,6 +8,7 @@ const getSells = async (req, res, next) => {
     try {
         const { PageNumber, sellsOrderCondition } = sellsValidations_1.getSellsQuerySchema.parse(req.query);
         const sessionId = req.sessionRedis;
+        console.log({ sessionId });
         const sells = await (0, sellsDocsServices_1.getSellsService)(sessionId, PageNumber, sellsOrderCondition);
         res.json(sells);
     }

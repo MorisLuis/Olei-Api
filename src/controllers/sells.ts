@@ -9,6 +9,8 @@ const getSells = async (req: Request, res: Response, next: NextFunction) => {
         const { PageNumber, sellsOrderCondition } = getSellsQuerySchema.parse(req.query)
         const sessionId = req.sessionRedis
 
+        console.log({sessionId})
+
         const sells = await getSellsService(
             sessionId,
             PageNumber,
