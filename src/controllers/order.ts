@@ -5,7 +5,6 @@ import { orderQuerys } from "../database/querys/orders";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
 import { numeroALetra } from "../utils/numeroALetra";
-import PorductInterface from "../interface/product";
 import BadRequestError from '../errors/BadRequestError';
 import { getOrderDetailsQuerrySchema, getTotalOrderDetailsQuerrySchema } from '../validations/orderValidations';
 import { getOrderDetailsSells, getTotalOrderDetailsSells } from "../services/orderServices";
