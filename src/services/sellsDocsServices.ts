@@ -62,7 +62,6 @@ const getSellsByClientService = async ({
     DateStart
 }: getSellsByClientServiceInterface) => {
 
-
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
         throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
