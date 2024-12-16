@@ -133,6 +133,16 @@ const getTotalSellsByClient = async (req: Request, res: Response, next: NextFunc
             DateStart,
         } = getTotalSellsByClientQuerySchema.parse(req.query);
 
+        console.log({
+            FilterTipoDoc,
+            FilterExpired,
+            FilterNotExpired,
+            TipoDoc,
+            DateEnd,
+            DateExactly,
+            DateStart,
+        })
+
         const total = await getTotalSellsByClientService({
             sessionId: req.sessionRedis,
             Id_Cliente: params.client,

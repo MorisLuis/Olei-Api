@@ -7,7 +7,8 @@ import { convertArrayToXml } from "../utils/convertArrayToXml";
 import { numeroALetra } from "../utils/numeroALetra";
 import PorductInterface from "../interface/product";
 import BadRequestError from '../errors/BadRequestError';
-
+import { getOrderDetailsQuerrySchema, getTotalOrderDetailsQuerrySchema } from '../validations/orderValidations';
+import { getOrderDetailsSells, getTotalOrderDetailsSells } from "../services/orderServices";
 
 const postOrder = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -146,26 +147,38 @@ const getOrderDetails = async (req: Request, res: Response, next: NextFunction) 
 
 
     try {
+        const { folio, PageNumber } = getOrderDetailsQuerrySchema.parse(req.query);
+
         // Get session from REDIS.
         const sessionId = req.sessionRedis
-        const { user: userFR } = await handleGetWebSession({ sessionId });
 
-        if (!userFR) {
-            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-        };
-        const { Serverweb, Baseweb } = userFR;
-        const { folio } = req.query;
-        const pool = await dbConnection(Serverweb, Baseweb);
-        if (!pool) {
-            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
-        };
+        const orderDetails = await getOrderDetailsSells({
+            folio,
+            PageNumber,
+            sessionId
+        })
 
-        const query = orderQuerys.getOrderDetails;
-        const request = await pool.request()
-            .input('folio', sql.Int, folio)
-            .query(query);
+        res.json(orderDetails)
 
-        let orderDetails: PorductInterface[] = request.recordset;
+    } catch (error) {
+        next(error)
+    }
+}
+
+const getTotalOrderDetails = async (req: Request, res: Response, next: NextFunction) => {
+
+
+    try {
+        const { folio } = getTotalOrderDetailsQuerrySchema.parse(req.query);
+
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis
+
+        const orderDetails = await getTotalOrderDetailsSells({
+            folio,
+            sessionId
+        })
+
         res.json(orderDetails)
 
     } catch (error) {
@@ -210,5 +223,6 @@ export {
     getOrder,
     getAllOrders,
     getOrderDetails,
-    getTotalOrders
+    getTotalOrders,
+    getTotalOrderDetails
 }

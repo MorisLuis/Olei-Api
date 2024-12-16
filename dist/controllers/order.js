@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTotalOrders = exports.getOrderDetails = exports.getAllOrders = exports.getOrder = exports.postOrder = void 0;
+exports.getTotalOrderDetails = exports.getTotalOrders = exports.getOrderDetails = exports.getAllOrders = exports.getOrder = exports.postOrder = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const orders_1 = require("../database/querys/orders");
@@ -11,6 +11,8 @@ const getSession_1 = require("../utils/Redis/getSession");
 const convertArrayToXml_1 = require("../utils/convertArrayToXml");
 const numeroALetra_1 = require("../utils/numeroALetra");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
+const orderValidations_1 = require("../validations/orderValidations");
+const orderServices_1 = require("../services/orderServices");
 const postOrder = async (req, res, next) => {
     try {
         // Get session from REDIS.
@@ -117,25 +119,14 @@ const getAllOrders = async (req, res, next) => {
 exports.getAllOrders = getAllOrders;
 const getOrderDetails = async (req, res, next) => {
     try {
+        const { folio, PageNumber } = orderValidations_1.getOrderDetailsQuerrySchema.parse(req.query);
         // Get session from REDIS.
         const sessionId = req.sessionRedis;
-        const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-        if (!userFR) {
-            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-        }
-        ;
-        const { Serverweb, Baseweb } = userFR;
-        const { folio } = req.query;
-        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
-        if (!pool) {
-            throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
-        }
-        ;
-        const query = orders_1.orderQuerys.getOrderDetails;
-        const request = await pool.request()
-            .input('folio', mssql_1.default.Int, folio)
-            .query(query);
-        let orderDetails = request.recordset;
+        const orderDetails = await (0, orderServices_1.getOrderDetailsSells)({
+            folio,
+            PageNumber,
+            sessionId
+        });
         res.json(orderDetails);
     }
     catch (error) {
@@ -143,6 +134,22 @@ const getOrderDetails = async (req, res, next) => {
     }
 };
 exports.getOrderDetails = getOrderDetails;
+const getTotalOrderDetails = async (req, res, next) => {
+    try {
+        const { folio } = orderValidations_1.getTotalOrderDetailsQuerrySchema.parse(req.query);
+        // Get session from REDIS.
+        const sessionId = req.sessionRedis;
+        const orderDetails = await (0, orderServices_1.getTotalOrderDetailsSells)({
+            folio,
+            sessionId
+        });
+        res.json(orderDetails);
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.getTotalOrderDetails = getTotalOrderDetails;
 const getTotalOrders = async (req, res, next) => {
     try {
         // Get session from REDIS.

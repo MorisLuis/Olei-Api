@@ -113,7 +113,8 @@ const getSellByIdService = async (sessionId: string, folio: string, Serie: strin
         .input('TipoDoc', TipoDoc)
         .query(query);
 
-    const sell = request.recordset
+    const sell = request.recordset[0];
+
     return sell
 };
 
