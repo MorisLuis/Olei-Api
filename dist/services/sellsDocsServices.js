@@ -78,7 +78,7 @@ const getSellByIdService = async (sessionId, folio, Serie, Id_Cliente, Id_Almace
         .input('Folio', folio)
         .input('TipoDoc', TipoDoc)
         .query(query);
-    const sell = request.recordset;
+    const sell = request.recordset[0];
     return sell;
 };
 exports.getSellByIdService = getSellByIdService;
