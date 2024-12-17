@@ -8,7 +8,6 @@ const getSells = async (req, res, next) => {
     try {
         const { PageNumber, sellsOrderCondition } = sellsValidations_1.getSellsQuerySchema.parse(req.query);
         const sessionId = req.sessionRedis;
-        console.log({ sessionId });
         const sells = await (0, sellsDocsServices_1.getSellsService)(sessionId, PageNumber, sellsOrderCondition);
         res.json(sells);
     }
@@ -110,15 +109,6 @@ const getTotalSellsByClient = async (req, res, next) => {
     try {
         const params = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const { FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, } = sellsValidations_1.getTotalSellsByClientQuerySchema.parse(req.query);
-        console.log({
-            FilterTipoDoc,
-            FilterExpired,
-            FilterNotExpired,
-            TipoDoc,
-            DateEnd,
-            DateExactly,
-            DateStart,
-        });
         const total = await (0, sellsDocsServices_1.getTotalSellsByClientService)({
             sessionId: req.sessionRedis,
             Id_Cliente: params.client,

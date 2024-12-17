@@ -4,61 +4,59 @@ import { handleGetWebSession } from '../utils/Redis/getSession';
 import { UserWebSessionInterface } from '../interface/user';
 import { handleDeleteRedisSession } from '../utils/Redis/deleteRedis';
 import BadRequestError from '../errors/BadRequestError';
-import { getClientIdService, getClientsService } from '../services/clientsServices';
-import { ClientOrderCondition, ClientOrderConditionType } from '../interface/client';
+import { getClientIdService, getClientsService, getTotalClientsService } from '../services/clientsServices';
+import { getClientIdQuerySchema, getClientsQuerySchema } from '../validations/clientValidations';
 
 const getClients = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        const { PageNumber, clientOrderCondition } = req.query;
-        const sessionId = req.sessionID;
+        const { PageNumber, clientOrderCondition } = getClientsQuerySchema.parse(req.query);
+        const sessionId = req.sessionRedis;
 
-        let orderCondition: ClientOrderConditionType | string;
-        if (typeof clientOrderCondition === 'string' && ClientOrderCondition.includes(clientOrderCondition as ClientOrderConditionType)) {
-            orderCondition = clientOrderCondition;
-        } else {
-            orderCondition = ""
-        }
-
-        const meeting = await getClientsService({
-            PageNumber: Number(PageNumber),
+        const clients = await getClientsService({
             sessionId,
-            OrderCondition: orderCondition
+            PageNumber: PageNumber,
+            OrderCondition: clientOrderCondition
         });
 
-        res.json(meeting);
+        res.json(clients);
     } catch (error) {
         next(error)
     };
+
+};
+
+const getTotalClients = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const sessionId = req.sessionRedis;
+        const total = await getTotalClientsService(sessionId);
+        res.json(total);
+    } catch (error) {
+        next(error)
+    };
+
 };
 
 const getClientId = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        const { PageNumber, clientOrderCondition, Id_Almacen, Id_Cliente } = req.query;
-        const sessionId = req.sessionID;
+        const { Id_Almacen, Id_Cliente } = getClientIdQuerySchema.parse(req.query);
+        const sessionId = req.sessionRedis;
 
-        let orderCondition: ClientOrderConditionType | string;
-        if (typeof clientOrderCondition === 'string' && ClientOrderCondition.includes(clientOrderCondition as ClientOrderConditionType)) {
-            orderCondition = clientOrderCondition;
-        } else {
-            orderCondition = ""
-        }
-
-        const meeting = await getClientIdService({
+        const clients = await getClientIdService({
             sessionId,
-            Id_Cliente: Number(Id_Cliente),
-            Id_Almacen: Number(Id_Almacen)
+            Id_Cliente: Id_Cliente,
+            Id_Almacen: Id_Almacen
         });
 
-        res.json(meeting);
+        res.json(clients);
     } catch (error) {
         next(error)
     };
 }
 
 const selectClient = async (req: Request, res: Response, next: NextFunction) => {
-
 
     try {
         // Get session from REDIS.
@@ -101,5 +99,6 @@ const selectClient = async (req: Request, res: Response, next: NextFunction) => 
 export {
     getClients,
     getClientId,
-    selectClient
+    selectClient,
+    getTotalClients
 }

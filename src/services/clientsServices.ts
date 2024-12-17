@@ -3,7 +3,7 @@ import { clientsQuerys } from "../database/querys/clients";
 import BadRequestError from "../errors/BadRequestError";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 
-interface  getClientsServiceInterface {
+interface getClientsServiceInterface {
     PageNumber: number,
     sessionId: string,
     OrderCondition: string
@@ -38,7 +38,7 @@ const getClientsService = async ({
     return quotes
 };
 
-interface  getClientIdInterface {
+interface getClientIdInterface {
     sessionId: string,
     Id_Cliente: number,
     Id_Almacen: number
@@ -75,12 +75,34 @@ const getClientIdService = async ({
         .input('Id_Almacen', Id_Almacen)
         .query(query);
 
-    const quotes = request.recordset
+    const quotes = request.recordset[0]
 
     return quotes
 };
 
+const getTotalClientsService = async (sessionId: string) => {
+
+    const { user: userFR } = await handleGetWebSession({ sessionId });
+    if (!userFR) {
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+    }
+
+    const { Serverweb, Baseweb } = userFR;
+    const pool = await dbConnection(Serverweb, Baseweb);
+    if (!pool) {
+        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+    };
+
+    let query = clientsQuerys.getTotalClients;
+    const request = await pool.request()
+        .query(query);
+
+    const total = request.recordset[0].TotalCount
+    return total
+};
+
 export {
     getClientsService,
-    getClientIdService
+    getClientIdService,
+    getTotalClientsService
 }

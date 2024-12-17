@@ -18,6 +18,11 @@ export const clientsQuerys = {
         FETCH NEXT @PageSize ROWS ONLY;
     `,
 
+    getTotalClients: `
+        SELECT COUNT(*) AS TotalCount
+        FROM [dbo].[CLIENTES]
+    `,
+
     getClientId: ` 
         SELECT 
             IdOLEI,
