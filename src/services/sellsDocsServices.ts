@@ -123,7 +123,12 @@ interface getCobranzaInterface {
     Id_Cliente: number,
     SellsOrderCondition: SellsOrderConditionType | string,
     TipoDoc?: SellsInterface['TipoDoc']
-    FilterTipoDoc: 0 | 1
+    FilterTipoDoc: 0 | 1,
+    FilterExpired: 0 | 1,
+    FilterNotExpired: 0 | 1,
+    DateEnd: string | null,
+    DateExactly: string | null,
+    DateStart: string | null,
 };
 
 const getCobranzaService = async ({
@@ -132,7 +137,12 @@ const getCobranzaService = async ({
     Id_Cliente,
     SellsOrderCondition,
     FilterTipoDoc,
-    TipoDoc
+    FilterExpired,
+    FilterNotExpired,
+    TipoDoc,
+    DateEnd,
+    DateExactly,
+    DateStart
 }: getCobranzaInterface) => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
@@ -152,6 +162,11 @@ const getCobranzaService = async ({
         .input('Id_Cliente', Id_Cliente)
         .input('OrderCondition', SellsOrderCondition)
         .input('FilterTipoDoc', FilterTipoDoc)
+        .input('FilterExpired', FilterExpired)
+        .input('FilterNotExpired', FilterNotExpired)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
         .input('TipoDoc', TipoDoc)
         .query(query);
 
@@ -244,6 +259,7 @@ const getTotalCobranzaService = async ({
 }: getTotalCobranzaServiceInterface ) => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
+
     if (!userFR) {
         throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }

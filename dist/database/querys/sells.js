@@ -112,36 +112,51 @@ exports.sellsQuery = {
         WHERE Id_Almacen = @Id_Almacen AND TipoDoc = @TipoDoc AND Serie = @Serie AND Folio = @Folio
     `,
     getCobranza: `
-        SELECT
-            CONCAT(Id_Almacen, '-', TipoDoc, '-', TRIM(Serie), '-', Folio) AS UniqueKey,
-            Id_Cliente,
-            Id_Almacen,
-            TipoDoc,
-            Folio,
-            Serie,
-            Fecha,
-            FechaEntrega,
-            FechaLiq,
-            Saldo,
-            Total,
-            DATEDIFF(DAY, GETDATE(), FechaEntrega) AS ExpiredDays
-        FROM [dbo].[VENTAS]
-        WHERE Id_Cliente = @Id_Cliente 
-            AND Saldo > 0
-            AND FechaLiq >= CAST(GETDATE() AS DATE) -- Condición para FechaLiq
-            AND (
-                @FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1)
+        WITH
+            VENTAS_CTE
+            AS
+            (
+                SELECT
+                    CONCAT(Id_Almacen, '-', TipoDoc, '-', TRIM(Serie), '-', Folio) AS UniqueKey,
+                    Id_Cliente,
+                    Id_Almacen,
+                    TipoDoc,
+                    Folio,
+                    Serie,
+                    Fecha,
+                    FechaEntrega,
+                    FechaLiq,
+                    Saldo,
+                    Total,
+                    DATEDIFF(DAY, GETDATE(), FechaEntrega) AS ExpiredDays
+                FROM [dbo].[VENTAS]
+                WHERE Id_Cliente = @Id_Cliente
+                    AND Saldo > 0
+                    AND FechaLiq >= CAST(GETDATE() AS DATE) -- Condición para FechaLiq
+                    AND ( @FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1) )
+                    AND (@FilterExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) < 0 AND @FilterExpired = 1))
+                    AND (@FilterNotExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) > 0 AND @FilterNotExpired = 1))
+                    AND (@DateExactly IS NULL OR CAST(Fecha AS DATE) = @DateExactly)
+                    AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)
+                    AND (@DateEnd IS NULL OR CAST(Fecha AS DATE) <= @DateEnd)
             )
+        SELECT *
+        FROM VENTAS_CTE
         ORDER BY 
-            CASE WHEN @OrderCondition = 'TipoDoc' THEN TipoDoc END DESC,
-            CASE WHEN @OrderCondition = 'Folio' THEN Folio END DESC,
-            CASE WHEN @OrderCondition = 'Fecha' THEN Fecha END DESC,
-            CASE WHEN @OrderCondition = 'FechaEntrega' THEN FechaEntrega END DESC,
-            CASE WHEN @OrderCondition = 'ExpiredDays' THEN DATEDIFF(DAY, GETDATE(), FechaEntrega) END DESC,
+            CASE 
+                WHEN @OrderCondition = 'TipoDoc' THEN TipoDoc 
+                WHEN @OrderCondition = 'Folio' THEN Folio 
+                WHEN @OrderCondition = 'Fecha' THEN Fecha 
+                WHEN @OrderCondition = 'ExpiredDays' THEN ExpiredDays 
+            END DESC,
+            CASE 
+                WHEN @OrderCondition = 'TipoDoc' THEN Fecha 
+                WHEN @OrderCondition = 'ExpiredDays' THEN Fecha
+            END DESC,
             Fecha,
             TipoDoc
         OFFSET (@PageNumber - 1) * @PageSize ROWS
-        FETCH NEXT @PageSize ROWS ONLY;
+        FETCH NEXT @PageSize ROWS ONLY
     `,
     getTotalCobranza: `
         SELECT COUNT(*) AS TotalCount

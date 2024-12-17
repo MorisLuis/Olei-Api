@@ -57,6 +57,7 @@ const getClientId = async (req, res, next) => {
 };
 exports.getClientId = getClientId;
 const selectClient = async (req, res, next) => {
+    console.log("selectClient");
     try {
         // Get session from REDIS.
         const sessionId = req.sessionRedis;

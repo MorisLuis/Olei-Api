@@ -9,6 +9,7 @@ import { loginWebService } from '../../services/authServices';
 
 const loginWeb = async (req: Request, res: Response, next: NextFunction) => {
 
+    console.log("loginWeb")
     try {
         const { email, password } = req.body;
         const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await loginWebService(email, password);
@@ -51,6 +52,7 @@ const loginWeb = async (req: Request, res: Response, next: NextFunction) => {
 const renewWeb = async (req: Request, res: Response, next: NextFunction) => {
 
 
+    console.log("renewWeb")
     try {
         // Get session from REDIS.
         const sessionId = req.sessionRedis;
@@ -71,7 +73,7 @@ const renewWeb = async (req: Request, res: Response, next: NextFunction) => {
         };
 
         let token
-        token = await generateWebJWT({ Id, sessionRedis: req.sessionID });
+        token = await generateWebJWT({ Id, sessionRedis: sessionId });
 
         if (!token) {
             return res.status(401).json({ message: 'Failed to generate token' });

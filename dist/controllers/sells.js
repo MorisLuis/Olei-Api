@@ -50,9 +50,9 @@ const getSellsByClient = async (req, res, next) => {
         const sells = await (0, sellsDocsServices_1.getSellsByClientService)({
             sessionId,
             Id_Cliente: client,
-            PageNumber: PageNumber,
+            PageNumber,
             SellsOrderCondition: sellsOrderCondition,
-            TipoDoc: TipoDoc,
+            TipoDoc,
             FilterTipoDoc,
             FilterNotExpired,
             FilterExpired,
@@ -75,16 +75,21 @@ exports.getSellsByClient = getSellsByClient;
 const getCobranza = async (req, res, next) => {
     try {
         // Get session from REDIS.
-        const { PageNumber, sellsOrderCondition, TipoDoc } = sellsValidations_1.getCobranzaQuerySchema.parse(req.query);
+        const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const sessionId = req.sessionRedis;
         const sells = await (0, sellsDocsServices_1.getCobranzaService)({
             sessionId,
             Id_Cliente: client,
-            PageNumber: PageNumber,
+            PageNumber,
             SellsOrderCondition: sellsOrderCondition,
             TipoDoc,
-            FilterTipoDoc: 0
+            FilterTipoDoc,
+            FilterNotExpired,
+            FilterExpired,
+            DateEnd: DateEnd || null,
+            DateExactly: DateExactly || null,
+            DateStart: DateStart || null
         });
         res.json(sells);
     }
@@ -134,14 +139,19 @@ const getTotalSellsByClient = async (req, res, next) => {
 exports.getTotalSellsByClient = getTotalSellsByClient;
 const getTotalCobranza = async (req, res, next) => {
     try {
-        const { FilterTipoDoc, TipoDoc } = sellsValidations_1.getTotalSellsByClientQuerySchema.parse(req.query);
+        const { FilterTipoDoc, TipoDoc } = sellsValidations_1.getTotalCobranzaQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const sessionId = req.sessionRedis;
         const total = await (0, sellsDocsServices_1.getTotalCobranzaService)({ sessionId, FilterTipoDoc, TipoDoc, Id_Cliente: client });
         res.json(total);
     }
     catch (error) {
-        next(error);
+        if (error instanceof zod_1.z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        }
+        else {
+            next(error);
+        }
     }
 };
 exports.getTotalCobranza = getTotalCobranza;

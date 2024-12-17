@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import { getSellsService, getSellsByClientService, getSellByIdService, getCobranzaService, getTotalSellsService, getTotalSellsByClientService, getTotalCobranzaService } from "../services/sellsDocsServices";
-import { getTotalSellsByClientQuerySchema, getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getSellByIdParamsSchema, getSellsByClientQuerySchema, getCobranzaQuerySchema } from '../validations/sellsValidations'
+import { getTotalSellsByClientQuerySchema, getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getSellByIdParamsSchema, getSellsByClientQuerySchema, getCobranzaQuerySchema, getTotalCobranzaQuerySchema } from '../validations/sellsValidations'
 import { z } from "zod";
 
 const getSells = async (req: Request, res: Response, next: NextFunction) => {
@@ -64,9 +64,9 @@ const getSellsByClient = async (req: Request, res: Response, next: NextFunction)
         const sells = await getSellsByClientService({
             sessionId,
             Id_Cliente: client,
-            PageNumber: PageNumber,
+            PageNumber,
             SellsOrderCondition: sellsOrderCondition,
-            TipoDoc: TipoDoc,
+            TipoDoc,
             FilterTipoDoc,
             FilterNotExpired,
             FilterExpired,
@@ -89,17 +89,22 @@ const getCobranza = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
         // Get session from REDIS.
-        const { PageNumber, sellsOrderCondition, TipoDoc } = getCobranzaQuerySchema.parse(req.query);
+        const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaQuerySchema.parse(req.query);
         const { client } = getClientParamsSchema.parse(req.params);
-
         const sessionId = req.sessionRedis;
+
         const sells = await getCobranzaService({
             sessionId,
             Id_Cliente: client,
-            PageNumber: PageNumber,
+            PageNumber,
             SellsOrderCondition: sellsOrderCondition,
             TipoDoc,
-            FilterTipoDoc: 0
+            FilterTipoDoc,
+            FilterNotExpired,
+            FilterExpired,
+            DateEnd: DateEnd || null,
+            DateExactly: DateExactly || null,
+            DateStart: DateStart || null
         });
 
         res.json(sells);
@@ -111,7 +116,7 @@ const getCobranza = async (req: Request, res: Response, next: NextFunction) => {
 const getTotalSells = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        const sessionId = req.sessionRedis
+        const sessionId = req.sessionRedis;
         const total = await getTotalSellsService(sessionId)
         res.json(total);
     } catch (error) {
@@ -159,16 +164,19 @@ const getTotalSellsByClient = async (req: Request, res: Response, next: NextFunc
 const getTotalCobranza = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        const { FilterTipoDoc, TipoDoc } = getTotalSellsByClientQuerySchema.parse(req.query);
+        const { FilterTipoDoc, TipoDoc } = getTotalCobranzaQuerySchema.parse(req.query);
         const { client } = getClientParamsSchema.parse(req.params);
+        const sessionId = req.sessionRedis;
 
-        const sessionId = req.sessionRedis
         const total = await getTotalCobranzaService({sessionId, FilterTipoDoc, TipoDoc, Id_Cliente: client})
-
         res.json(total);
 
     } catch (error) {
-        next(error);
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        } else {
+            next(error);
+        }
     }
 }
 

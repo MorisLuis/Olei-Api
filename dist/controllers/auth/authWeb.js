@@ -11,6 +11,7 @@ const deleteRedis_1 = require("../../utils/Redis/deleteRedis");
 const BadRequestError_1 = __importDefault(require("../../errors/BadRequestError"));
 const authServices_1 = require("../../services/authServices");
 const loginWeb = async (req, res, next) => {
+    console.log("loginWeb");
     try {
         const { email, password } = req.body;
         const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await (0, authServices_1.loginWebService)(email, password);
@@ -47,6 +48,7 @@ const loginWeb = async (req, res, next) => {
 };
 exports.loginWeb = loginWeb;
 const renewWeb = async (req, res, next) => {
+    console.log("renewWeb");
     try {
         // Get session from REDIS.
         const sessionId = req.sessionRedis;
@@ -64,7 +66,7 @@ const renewWeb = async (req, res, next) => {
         }
         ;
         let token;
-        token = await (0, generate_jwt_1.generateWebJWT)({ Id, sessionRedis: req.sessionID });
+        token = await (0, generate_jwt_1.generateWebJWT)({ Id, sessionRedis: sessionId });
         if (!token) {
             return res.status(401).json({ message: 'Failed to generate token' });
         }

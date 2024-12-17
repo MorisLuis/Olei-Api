@@ -83,7 +83,7 @@ const getSellByIdService = async (sessionId, folio, Serie, Id_Cliente, Id_Almace
 };
 exports.getSellByIdService = getSellByIdService;
 ;
-const getCobranzaService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrderCondition, FilterTipoDoc, TipoDoc }) => {
+const getCobranzaService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
@@ -101,6 +101,11 @@ const getCobranzaService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrde
         .input('Id_Cliente', Id_Cliente)
         .input('OrderCondition', SellsOrderCondition)
         .input('FilterTipoDoc', FilterTipoDoc)
+        .input('FilterExpired', FilterExpired)
+        .input('FilterNotExpired', FilterNotExpired)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
         .input('TipoDoc', TipoDoc)
         .query(query);
     const sells = request.recordset;
