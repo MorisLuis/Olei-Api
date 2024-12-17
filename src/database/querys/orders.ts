@@ -76,10 +76,24 @@ export const orderQuerys = {
     `,
 
     getOrderDetails: `
-        SELECT D.Precio, D.Cantidad, D.Importe, D.Impuesto, D.Id_Marca, D.Id_Almacen, D.Id_ListaPrecios, D.Folio, TRIM(D.Descripcion) AS Descripcion, TRIM(D.Codigo) AS Codigo, E.Existencia, F.Nombre AS Marca
+        SELECT 
+            D.Precio,
+            D.Cantidad,
+            D.Importe,
+            D.Impuesto,
+            D.Id_Marca,
+            D.Id_Almacen,
+            D.Id_ListaPrecios,
+            D.Folio,
+            TRIM(D.Descripcion) AS Descripcion,
+            TRIM(D.Codigo) AS Codigo,
+            E.Existencia,
+            F.Nombre AS Marca,
+            U.Nombre as Unidad
         FROM [dbo].[DETALLEVENTAS] AS D
         INNER JOIN [dbo].[EXISTENCIAS] AS E ON D.Codigo = E.Codigo AND D.Id_Marca = E.Id_Marca AND D.Id_Almacen = E.Id_Almacen
         INNER JOIN [dbo].[MARCAS] AS F ON D.Id_Marca = F.Id_Marca
+        INNER JOIN [dbo].[UNIDADES] AS U ON D.Id_Unidad = U.Id_Unidad
         WHERE Folio = @folio
         ORDER BY Folio DESC
         OFFSET (@PageNumber - 1) * @PageSize ROWS
