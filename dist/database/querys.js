@@ -106,7 +106,7 @@ exports.querys = {
     `,
     // Clients
     getClientBySearch: `
-        SELECT TOP(20) TRIM(C.Nombre) AS Nombre, C.Id_Cliente, C.Id_Almacen, C.Id_ListPre
+        SELECT TOP(10) TRIM(C.Nombre) AS Nombre, C.Id_Cliente, C.Id_Almacen, C.Id_ListPre, C.CorreoVtas, C.Telefono1
         FROM [dbo].[CLIENTES] C
         WHERE LOWER(C.Nombre) LIKE '%' + LOWER(@nombre) + '%'
     `,

@@ -22,6 +22,7 @@ import errorsRouter from "../routes/errorsRouter";
 import sellsRouter from "../routes/sellsRouter";
 import meetingsRouter from "../routes/bitacoraRouter";
 import calendarRouter from "../routes/calendarRouter";
+import emailRouter from "../routes/emailRouter";
 
 import { errorHandler } from "../middleware/errorHandler";
 
@@ -45,7 +46,8 @@ class Server {
         errors: string,
         sells: string,
         meetings: string,
-        calendar: string
+        calendar: string,
+        email: string
     };
 
     constructor() {
@@ -67,7 +69,8 @@ class Server {
             errors: "/api/errors",
             sells: "/api/sells",
             meetings: "/api/meetings",
-            calendar: "/api/calendar"
+            calendar: "/api/calendar",
+            email: "/api/email"
         };
 
         this.connectDB();
@@ -184,6 +187,8 @@ class Server {
         this.app.use(this.paths.sells, sellsRouter);
         this.app.use(this.paths.meetings, meetingsRouter);
         this.app.use(this.paths.calendar, calendarRouter);
+        this.app.use(this.paths.email, emailRouter);
+
     }
 
     async closeConnections() {
