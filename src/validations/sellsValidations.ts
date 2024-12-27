@@ -11,16 +11,16 @@ export const getSellsQuerySchema = z.object({
         .refine(
             (val): val is SellsOrderConditionType =>
                 val === undefined || SellsOrderCondition.includes(val as SellsOrderConditionType),
-            { message: "sellsOrderCondition debe ser 'Nombre', 'Saldo', 'Total'" }
+            { message: "sellsOrderCondition debe ser 'Cliente', 'Fecha', 'TipoContacto'" }
         )
 })
 
 // getSellById
 export const getSellByIdQuerySchema = z.object({
-    Serie: z.string().nonempty(),
+    Serie: z
+        .string()
+        .transform((val) => (val === undefined ? "" : val)), // Transforma undefined a cadena vacía
     Id_Almacen: z
-        .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
-    Id_Cliente: z
         .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
     TipoDoc: z
         .string()
@@ -31,6 +31,7 @@ export const getSellByIdQuerySchema = z.object({
             { message: "TipoDoc debe ser 0, 1 o 2" }
         ),
 });
+
 
 export const getSellByIdParamsSchema = z.object({
     folio: z.string().nonempty()

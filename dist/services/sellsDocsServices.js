@@ -59,7 +59,7 @@ const getSellsByClientService = async ({ sessionId, PageNumber, Id_Cliente, Sell
     return sells;
 };
 exports.getSellsByClientService = getSellsByClientService;
-const getSellByIdService = async (sessionId, folio, Serie, Id_Cliente, Id_Almacen, TipoDoc) => {
+const getSellByIdService = async (sessionId, folio, Serie, Id_Almacen, TipoDoc) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
@@ -72,7 +72,6 @@ const getSellByIdService = async (sessionId, folio, Serie, Id_Cliente, Id_Almace
     ;
     let query = sells_1.sellsQuery.getSellById;
     const request = await pool.request()
-        .input('Id_Cliente', Id_Cliente)
         .input('Id_Almacen', Id_Almacen)
         .input('Serie', Serie)
         .input('Folio', folio)

@@ -10,14 +10,14 @@ exports.getSellsQuerySchema = zod_1.z.object({
     sellsOrderCondition: zod_1.z
         .string()
         .optional()
-        .refine((val) => val === undefined || sells_1.SellsOrderCondition.includes(val), { message: "sellsOrderCondition debe ser 'Nombre', 'Saldo', 'Total'" })
+        .refine((val) => val === undefined || sells_1.SellsOrderCondition.includes(val), { message: "sellsOrderCondition debe ser 'Cliente', 'Fecha', 'TipoContacto'" })
 });
 // getSellById
 exports.getSellByIdQuerySchema = zod_1.z.object({
-    Serie: zod_1.z.string().nonempty(),
+    Serie: zod_1.z
+        .string()
+        .transform((val) => (val === undefined ? "" : val)), // Transforma undefined a cadena vacía
     Id_Almacen: zod_1.z
-        .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
-    Id_Cliente: zod_1.z
         .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
     TipoDoc: zod_1.z
         .string()

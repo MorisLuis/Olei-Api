@@ -2,25 +2,47 @@
 export const bitacoraQuerys = {
 
     getMeetings: `
-        SELECT Id_Bitacora,
-            Id_Almacen,
-            Id_Cliente,
+        WITH
+            MEETINGS_CTE
+            AS
+            (
+                SELECT Id_Bitacora,
+                    Id_Almacen,
+                    Id_Cliente,
+                    Fecha,
+                    Descripcion,
+                    TipoContacto,
+                    Hour,
+                    HourEnd
+                FROM dbo.BITACORACRM
+                WHERE
+            (@FilterCliente = 0 OR (Id_Cliente = @Id_Cliente AND @FilterCliente = 1))
+                    AND (@FilterTipoContacto = 0 OR (TipoContacto = @TipoContacto AND @FilterTipoContacto = 1))
+            )
+        SELECT *
+        FROM MEETINGS_CTE
+        ORDER BY 
+            CASE
+                WHEN @OrderCondition = 'Cliente' THEN Id_Cliente
+                WHEN @OrderCondition = 'Fecha' THEN Fecha
+                WHEN @OrderCondition = 'TipoContacto' THEN TipoContacto
+                END DESC,
+                CASE 
+                WHEN @OrderCondition = 'Cliente' THEN Fecha 
+                WHEN @OrderCondition = 'TipoContacto' THEN Fecha
+            END DESC,
             Fecha,
-            Descripcion,
-            TipoContacto,
-            Hour,
-            HourEnd
+            TipoContacto
+        OFFSET (@PageNumber - 1) * @PageSize ROWS
+        FETCH NEXT @PageSize ROWS ONLY
+    `,
+
+    getTotalMeetings: `
+        SELECT COUNT(*) AS TotalCount
         FROM dbo.BITACORACRM
         WHERE
-        (@WhereCondition != 'Cliente' OR (Id_Cliente = @Id_Cliente AND @WhereCondition = 'Cliente'))
-        AND (@WhereCondition != 'TipoContacto' OR (TipoContacto = @TipoContacto AND @WhereCondition = 'TipoContacto'))
-        ORDER BY 
-            CASE WHEN @OrderCondition = 'Cliente' THEN Id_Cliente END DESC,
-            CASE WHEN @OrderCondition = 'Fecha' THEN Fecha END DESC,
-            CASE WHEN @OrderCondition = 'TipoContacto' THEN TipoContacto END DESC,
-            Id_Bitacora
-        OFFSET (@PageNumber - 1) * @PageSize ROWS
-        FETCH NEXT @PageSize ROWS ONLY;
+        (@FilterCliente = 0 OR (Id_Cliente = @Id_Cliente AND @FilterCliente = 1))
+        AND (@FilterTipoContacto = 0 OR (TipoContacto = @TipoContacto AND @FilterTipoContacto = 1))
     `,
 
     getMeetingById: `

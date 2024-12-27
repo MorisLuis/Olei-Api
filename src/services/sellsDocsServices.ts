@@ -91,7 +91,7 @@ const getSellsByClientService = async ({
     return sells
 };
 
-const getSellByIdService = async (sessionId: string, folio: string, Serie: string, Id_Cliente: number, Id_Almacen: number, TipoDoc: SellsInterface['TipoDoc']) => {
+const getSellByIdService = async (sessionId: string, folio: string, Serie: string, Id_Almacen: number, TipoDoc: SellsInterface['TipoDoc']) => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
@@ -105,7 +105,6 @@ const getSellByIdService = async (sessionId: string, folio: string, Serie: strin
 
     let query = sellsQuery.getSellById;
     const request = await pool.request()
-        .input('Id_Cliente', Id_Cliente)
         .input('Id_Almacen', Id_Almacen)
         .input('Serie', Serie)
         .input('Folio', folio)

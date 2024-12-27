@@ -7,7 +7,7 @@ const getCalendarTaskByMonth = async (req: Request, res: Response, next: NextFun
 
     try {
         const { Anio, Mes } = req.query;
-        const sessionId = req.sessionID
+        const sessionId = req.sessionRedis
 
         if (typeof Anio !== 'string') {
             throw new BadRequestError({ code: 500, message: `No se envio un Año correcto`, logging: true });
@@ -32,8 +32,8 @@ const getCalendarTaskByMonth = async (req: Request, res: Response, next: NextFun
 const getCalendarTaskByDay = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        const { Day} = req.query;
-        const sessionId = req.sessionID
+        const { Day } = req.query;
+        const sessionId = req.sessionRedis
 
         if (typeof Day !== 'string') {
             throw new BadRequestError({ code: 500, message: `No se envio un Dia correcto`, logging: true });
@@ -55,7 +55,7 @@ const getCalendarTaskByMonthAndClient = async (req: Request, res: Response, next
 
     try {
         const { Anio, Mes, Id_Cliente } = req.query;
-        const sessionId = req.sessionID
+        const sessionId = req.sessionRedis
 
         if (typeof Anio !== 'string') {
             throw new BadRequestError({ code: 500, message: `No se envio un Año correcto`, logging: true });
@@ -84,7 +84,7 @@ const getCalendarTaskByMonthAndClient = async (req: Request, res: Response, next
 };
 
 
-export{
+export {
     getCalendarTaskByMonth,
     getCalendarTaskByDay,
     getCalendarTaskByMonthAndClient

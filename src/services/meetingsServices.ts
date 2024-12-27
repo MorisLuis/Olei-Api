@@ -11,7 +11,8 @@ interface getMeetingsServiceInterface {
     Id_Cliente: number,
     TipoContacto: number,
     MeetingOrderCondition: MeetingOrderConditionType | string,
-    MeetingFilterCondition: MeetingFilterConditionType | string
+    FilterCliente: 0 | 1,
+    FilterTipoContacto: 0 | 1,
 }
 
 const getMeetingsService = async ({
@@ -20,7 +21,8 @@ const getMeetingsService = async ({
     Id_Cliente,
     TipoContacto,
     MeetingOrderCondition,
-    MeetingFilterCondition
+    FilterCliente,
+    FilterTipoContacto
 }: getMeetingsServiceInterface) => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
@@ -36,6 +38,14 @@ const getMeetingsService = async ({
         throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
     };
 
+    if(FilterCliente === 1 && !Id_Cliente){
+        throw new BadRequestError({ code: 500, message: `Es necesario un Id_Cliente.`, logging: true });
+    };
+
+    if(FilterTipoContacto === 1 && !TipoContacto){
+        throw new BadRequestError({ code: 500, message: `Es necesario un TipoContacto.`, logging: true });
+    }
+
     let query = bitacoraQuerys.getMeetings;
     const request = await pool.request()
         .input('PageNumber', PageNumber)
@@ -43,13 +53,67 @@ const getMeetingsService = async ({
         .input('Id_Cliente', Id_Cliente)
         .input('TipoContacto', TipoContacto)
         .input('OrderCondition', MeetingOrderCondition)
-        .input('WhereCondition', MeetingFilterCondition)
+        .input('FilterTipoContacto', FilterTipoContacto)
+        .input('FilterCliente', FilterCliente)
         .query(query);
 
-    const quotes = request.recordset
+    const quotes = request.recordset;
+
 
     return quotes
 };
+
+
+interface getTotalMeetingsServiceInterface {
+    sessionId: string,
+    Id_Cliente: number,
+    TipoContacto: number,
+    FilterCliente: 0 | 1,
+    FilterTipoContacto: 0 | 1
+};
+
+const getTotalMeetingsService = async ({
+    sessionId,
+    Id_Cliente,
+    TipoContacto,
+    FilterCliente,
+    FilterTipoContacto
+}: getTotalMeetingsServiceInterface) => {
+
+    const { user: userFR } = await handleGetWebSession({ sessionId });
+
+    if (!userFR) {
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+    }
+
+    if(FilterCliente === 1 && !Id_Cliente){
+        throw new BadRequestError({ code: 500, message: `Es necesario un Id_Cliente.`, logging: true });
+    };
+
+    if(FilterTipoContacto === 1 && !TipoContacto){
+        throw new BadRequestError({ code: 500, message: `Es necesario un TipoContacto.`, logging: true });
+    };
+
+    const { Serverweb, Baseweb } = userFR;
+    const pool = await dbConnection(Serverweb, Baseweb);
+
+    if (!pool) {
+        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+    };
+
+    let query = bitacoraQuerys.getTotalMeetings;
+    const request = await pool.request()
+        .input('Id_Cliente', Id_Cliente)
+        .input('TipoContacto', TipoContacto)
+        .input('FilterCliente', FilterCliente)
+        .input('FilterTipoContacto', FilterTipoContacto)
+        .query(query);
+
+    const total = request.recordset[0].TotalCount
+
+    return total
+};
+
 
 const getMeetingByIdService = async (id: string, sessionId: string) => {
     const { user: userFR } = await handleGetWebSession({ sessionId });
@@ -68,6 +132,7 @@ const getMeetingByIdService = async (id: string, sessionId: string) => {
     const request = await pool.request()
         .input('Id_Bitacora', id)
         .query(query);
+
 
     const quotes = request.recordset[0]
 
@@ -220,6 +285,7 @@ const deleteMeetingService = async (id: string, sessionId: string) => {
 
 export {
     getMeetingsService,
+    getTotalMeetingsService,
     getMeetingByIdService,
     updateMeetingService,
     postMeetingService,

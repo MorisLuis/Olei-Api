@@ -3,14 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteMeetingService = exports.postMeetingService = exports.updateMeetingService = exports.getMeetingByIdService = exports.getMeetingsService = void 0;
+exports.deleteMeetingService = exports.postMeetingService = exports.updateMeetingService = exports.getMeetingByIdService = exports.getTotalMeetingsService = exports.getMeetingsService = void 0;
 const database_1 = require("../database");
 const bitacora_1 = require("../database/querys/bitacora");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const meeting_1 = require("../interface/meeting");
 const getSession_1 = require("../utils/Redis/getSession");
 const mssql_1 = __importDefault(require("mssql"));
-const getMeetingsService = async ({ sessionId, PageNumber, Id_Cliente, TipoContacto, MeetingOrderCondition, MeetingFilterCondition }) => {
+const getMeetingsService = async ({ sessionId, PageNumber, Id_Cliente, TipoContacto, MeetingOrderCondition, FilterCliente, FilterTipoContacto }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
@@ -21,6 +21,13 @@ const getMeetingsService = async ({ sessionId, PageNumber, Id_Cliente, TipoConta
         throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
     }
     ;
+    if (FilterCliente === 1 && !Id_Cliente) {
+        throw new BadRequestError_1.default({ code: 500, message: `Es necesario un Id_Cliente.`, logging: true });
+    }
+    ;
+    if (FilterTipoContacto === 1 && !TipoContacto) {
+        throw new BadRequestError_1.default({ code: 500, message: `Es necesario un TipoContacto.`, logging: true });
+    }
     let query = bitacora_1.bitacoraQuerys.getMeetings;
     const request = await pool.request()
         .input('PageNumber', PageNumber)
@@ -28,12 +35,44 @@ const getMeetingsService = async ({ sessionId, PageNumber, Id_Cliente, TipoConta
         .input('Id_Cliente', Id_Cliente)
         .input('TipoContacto', TipoContacto)
         .input('OrderCondition', MeetingOrderCondition)
-        .input('WhereCondition', MeetingFilterCondition)
+        .input('FilterTipoContacto', FilterTipoContacto)
+        .input('FilterCliente', FilterCliente)
         .query(query);
     const quotes = request.recordset;
     return quotes;
 };
 exports.getMeetingsService = getMeetingsService;
+;
+const getTotalMeetingsService = async ({ sessionId, Id_Cliente, TipoContacto, FilterCliente, FilterTipoContacto }) => {
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
+    if (FilterCliente === 1 && !Id_Cliente) {
+        throw new BadRequestError_1.default({ code: 500, message: `Es necesario un Id_Cliente.`, logging: true });
+    }
+    ;
+    if (FilterTipoContacto === 1 && !TipoContacto) {
+        throw new BadRequestError_1.default({ code: 500, message: `Es necesario un TipoContacto.`, logging: true });
+    }
+    ;
+    const { Serverweb, Baseweb } = userFR;
+    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    if (!pool) {
+        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+    }
+    ;
+    let query = bitacora_1.bitacoraQuerys.getTotalMeetings;
+    const request = await pool.request()
+        .input('Id_Cliente', Id_Cliente)
+        .input('TipoContacto', TipoContacto)
+        .input('FilterCliente', FilterCliente)
+        .input('FilterTipoContacto', FilterTipoContacto)
+        .query(query);
+    const total = request.recordset[0].TotalCount;
+    return total;
+};
+exports.getTotalMeetingsService = getTotalMeetingsService;
 const getMeetingByIdService = async (id, sessionId) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {

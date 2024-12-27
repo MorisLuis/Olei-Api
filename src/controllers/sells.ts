@@ -31,25 +31,27 @@ const getSellById = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // Get session from REDIS.
         const sessionId = req.sessionRedis;
-        const { Serie, Id_Almacen, Id_Cliente, TipoDoc } = getSellByIdQuerySchema.parse(req.query);
+
+        const { Serie, Id_Almacen, TipoDoc } = getSellByIdQuerySchema.parse(req.query);
         const { folio } = getSellByIdParamsSchema.parse(req.params);
 
         const sell = await getSellByIdService(
             sessionId,
             folio,
             Serie,
-            Id_Cliente,
             Id_Almacen,
             TipoDoc
         );
 
         res.json(sell);
     } catch (error) {
+        console.log({error})
         if (error instanceof z.ZodError) {
             res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
             next(error);
         }
+        
     };
 
 };

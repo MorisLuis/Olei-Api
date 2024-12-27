@@ -1,35 +1,22 @@
 import { NextFunction, Request, Response } from "express";
-import { deleteMeetingService, getMeetingByIdService, getMeetingsService, postMeetingService, updateMeetingService } from "../services/meetingsServices";
-import { MeetingFilterCondition, MeetingFilterConditionType, MeetingOrderCondition, MeetingOrderConditionType } from "../interface/meeting";
+import { deleteMeetingService, getMeetingByIdService, getMeetingsService, getTotalMeetingsService, postMeetingService, updateMeetingService } from "../services/meetingsServices";
+import MeetingInterface from "../interface/meeting";
+import { getMeetingsQuerySchema, getTotalMeetingsQuerySchema, postBitacoraBodySchema, updateBitacoraBodySchema } from "../validations/bitacoraValidations";
 
 const getMeetings = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        const { PageNumber, meetginOrderCondition, meetingFilterCondition, TipoContacto, Id_Cliente } = req.query;
-        const sessionId = req.sessionID;
+        const { PageNumber, meetginOrderCondition, FilterCliente, TipoContacto, Id_Cliente, FilterTipoContacto } = getMeetingsQuerySchema.parse(req.query);
+        const sessionId = req.sessionRedis;
 
-
-        let orderCondition: MeetingOrderConditionType | string;
-        if (typeof meetginOrderCondition === 'string' && MeetingOrderCondition.includes(meetginOrderCondition as MeetingOrderConditionType)) {
-            orderCondition = meetginOrderCondition;
-        } else {
-            orderCondition = ""
-        }
-
-        let filterCondtion: MeetingFilterConditionType | string;
-        if (typeof meetingFilterCondition === 'string' && MeetingFilterCondition.includes(meetingFilterCondition as MeetingFilterConditionType)) {
-            filterCondtion = meetingFilterCondition;
-        } else {
-            filterCondtion = ""
-        }
-    
         const meeting = await getMeetingsService({
-            PageNumber: Number(PageNumber),
+            PageNumber,
             sessionId,
-            MeetingOrderCondition: orderCondition,
-            MeetingFilterCondition: filterCondtion,
-            TipoContacto: TipoContacto ? Number(TipoContacto) : 0,
-            Id_Cliente: Number(Id_Cliente)
+            MeetingOrderCondition: meetginOrderCondition,
+            FilterTipoContacto: FilterTipoContacto,
+            TipoContacto: TipoContacto,
+            Id_Cliente: Id_Cliente ?? 0,
+            FilterCliente: FilterCliente
         });
 
         res.json(meeting);
@@ -39,11 +26,32 @@ const getMeetings = async (req: Request, res: Response, next: NextFunction) => {
 
 };
 
+const getTotalMeetings = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { TipoContacto, Id_Cliente, FilterCliente, FilterTipoContacto } = getTotalMeetingsQuerySchema.parse(req.query);
+        const sessionId = req.sessionRedis;
+
+        const total = await getTotalMeetingsService({
+            sessionId,
+            TipoContacto: TipoContacto,
+            Id_Cliente: Id_Cliente ?? 0,
+            FilterCliente,
+            FilterTipoContacto
+        });
+
+        res.json(total);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+
 const getMeetingById = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
         const { id } = req.params;
-        const sessionId = req.sessionID;
+        const sessionId = req.sessionRedis;
         const meeting = await getMeetingByIdService(id, sessionId);
         res.json(meeting);
     } catch (error) {
@@ -56,8 +64,8 @@ const updateMeeting = async (req: Request, res: Response, next: NextFunction) =>
 
     try {
         const { id } = req.params;
-        const body = req.body
-        const sessionId = req.sessionID
+        const body = updateBitacoraBodySchema.parse(req.body.body) as MeetingInterface;
+        const sessionId = req.sessionRedis
         const meeting = await updateMeetingService(id, sessionId, body)
         res.json(meeting);
     } catch (error) {
@@ -69,8 +77,9 @@ const updateMeeting = async (req: Request, res: Response, next: NextFunction) =>
 const postMeeting = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        const body = req.body
-        const sessionId = req.sessionID;
+        const body = postBitacoraBodySchema.parse(req.body.body) as MeetingInterface;
+
+        const sessionId = req.sessionRedis;
         const meeting = await postMeetingService(sessionId, body);
         res.json(meeting);
     } catch (error) {
@@ -83,7 +92,7 @@ const deleteMeeting = async (req: Request, res: Response, next: NextFunction) =>
 
     try {
         const { id } = req.params;
-        const sessionId = req.sessionID;
+        const sessionId = req.sessionRedis;
         const meeting = await deleteMeetingService(id, sessionId)
         res.json(meeting);
 
@@ -95,6 +104,7 @@ const deleteMeeting = async (req: Request, res: Response, next: NextFunction) =>
 
 export {
     getMeetings,
+    getTotalMeetings,
     getMeetingById,
     updateMeeting,
     postMeeting,

@@ -9,7 +9,7 @@ const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const getCalendarTaskByMonth = async (req, res, next) => {
     try {
         const { Anio, Mes } = req.query;
-        const sessionId = req.sessionID;
+        const sessionId = req.sessionRedis;
         if (typeof Anio !== 'string') {
             throw new BadRequestError_1.default({ code: 500, message: `No se envio un Año correcto`, logging: true });
         }
@@ -32,7 +32,7 @@ exports.getCalendarTaskByMonth = getCalendarTaskByMonth;
 const getCalendarTaskByDay = async (req, res, next) => {
     try {
         const { Day } = req.query;
-        const sessionId = req.sessionID;
+        const sessionId = req.sessionRedis;
         if (typeof Day !== 'string') {
             throw new BadRequestError_1.default({ code: 500, message: `No se envio un Dia correcto`, logging: true });
         }
@@ -51,7 +51,7 @@ exports.getCalendarTaskByDay = getCalendarTaskByDay;
 const getCalendarTaskByMonthAndClient = async (req, res, next) => {
     try {
         const { Anio, Mes, Id_Cliente } = req.query;
-        const sessionId = req.sessionID;
+        const sessionId = req.sessionRedis;
         if (typeof Anio !== 'string') {
             throw new BadRequestError_1.default({ code: 500, message: `No se envio un Año correcto`, logging: true });
         }
