@@ -4,13 +4,12 @@ import { getCobranza, getSellById, getSells, getSellsByClient, getTotalCobranza,
 
 
 const router = Router();
-
-router.get("/:folio", validateJWTWeb, getSellById); // Ruta general al final
+router.get("/", validateJWTWeb, getSells);
 router.get("/total", validateJWTWeb, getTotalSells);
+router.get("/:folio", validateJWTWeb, getSellById); // Ruta general al final
 router.get("/cobranza/total/:client", validateJWTWeb, getTotalCobranza);
 router.get("/cobranza/:client", validateJWTWeb, getCobranza);
 router.get("/client/total/:client", validateJWTWeb, getTotalSellsByClient);
 router.get("/client/:client", validateJWTWeb, getSellsByClient);
-router.get("/", validateJWTWeb, getSells);
 
 export default router;

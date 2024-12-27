@@ -18,6 +18,18 @@ exports.clientsQuerys = {
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY;
     `,
+    getClientsSelect: `
+        SELECT 
+            CONCAT(Id_Cliente, '-', Id_Almacen) AS Id_Unique,
+            Id_Cliente, 
+            Id_Almacen, 
+            Nombre 
+        FROM [dbo].[CLIENTES]
+        ORDER BY
+            Id_Cliente
+        OFFSET (@PageNumber - 1) * @PageSize ROWS
+        FETCH NEXT @PageSize ROWS ONLY;
+    `,
     getTotalClients: `
         SELECT COUNT(*) AS TotalCount
         FROM [dbo].[CLIENTES]

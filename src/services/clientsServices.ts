@@ -50,6 +50,7 @@ const getClientIdService = async ({
     Id_Almacen
 }: getClientIdInterface) => {
 
+
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
         throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
@@ -74,9 +75,7 @@ const getClientIdService = async ({
         .input('Id_Cliente', Id_Cliente)
         .input('Id_Almacen', Id_Almacen)
         .query(query);
-
     const quotes = request.recordset[0]
-
     return quotes
 };
 

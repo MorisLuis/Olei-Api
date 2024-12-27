@@ -10,6 +10,7 @@ const deleteRedis_1 = require("../utils/Redis/deleteRedis");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const clientsServices_1 = require("../services/clientsServices");
 const clientValidations_1 = require("../validations/clientValidations");
+const zod_1 = require("zod");
 const getClients = async (req, res, next) => {
     try {
         const { PageNumber, clientOrderCondition } = clientValidations_1.getClientsQuerySchema.parse(req.query);
@@ -41,19 +42,34 @@ const getTotalClients = async (req, res, next) => {
 exports.getTotalClients = getTotalClients;
 const getClientId = async (req, res, next) => {
     try {
+        // Validar los parámetros de consulta
         const { Id_Almacen, Id_Cliente } = clientValidations_1.getClientIdQuerySchema.parse(req.query);
+        // Validar la sesión
         const sessionId = req.sessionRedis;
+        if (!sessionId) {
+            return res.status(401).json({ error: "Session not found" });
+        }
+        // Obtener clientes
         const clients = await (0, clientsServices_1.getClientIdService)({
             sessionId,
-            Id_Cliente: Id_Cliente,
-            Id_Almacen: Id_Almacen
+            Id_Cliente,
+            Id_Almacen
         });
-        res.json(clients);
+        // Respuesta uniforme
+        res.status(200).json({
+            success: true,
+            data: clients ?? null
+        });
     }
     catch (error) {
-        next(error);
+        console.log({ error });
+        if (error instanceof zod_1.z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        }
+        else {
+            next(error);
+        }
     }
-    ;
 };
 exports.getClientId = getClientId;
 const selectClient = async (req, res, next) => {
