@@ -140,10 +140,20 @@ const getTotalSellsByClient = async (req, res, next) => {
 exports.getTotalSellsByClient = getTotalSellsByClient;
 const getTotalCobranza = async (req, res, next) => {
     try {
-        const { FilterTipoDoc, TipoDoc } = sellsValidations_1.getTotalCobranzaQuerySchema.parse(req.query);
+        const { FilterTipoDoc, TipoDoc, FilterNotExpired, FilterExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getTotalCobranzaQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const sessionId = req.sessionRedis;
-        const total = await (0, sellsDocsServices_1.getTotalCobranzaService)({ sessionId, FilterTipoDoc, TipoDoc, Id_Cliente: client });
+        const total = await (0, sellsDocsServices_1.getTotalCobranzaService)({
+            Id_Cliente: client,
+            sessionId,
+            TipoDoc,
+            FilterTipoDoc,
+            FilterNotExpired,
+            FilterExpired,
+            DateEnd: DateEnd || null,
+            DateExactly: DateExactly || null,
+            DateStart: DateStart || null,
+        });
         res.json(total);
     }
     catch (error) {

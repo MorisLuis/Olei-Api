@@ -166,11 +166,21 @@ const getTotalSellsByClient = async (req: Request, res: Response, next: NextFunc
 const getTotalCobranza = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        const { FilterTipoDoc, TipoDoc } = getTotalCobranzaQuerySchema.parse(req.query);
+        const { FilterTipoDoc, TipoDoc, FilterNotExpired, FilterExpired, DateEnd, DateExactly, DateStart } = getTotalCobranzaQuerySchema.parse(req.query);
         const { client } = getClientParamsSchema.parse(req.params);
         const sessionId = req.sessionRedis;
 
-        const total = await getTotalCobranzaService({sessionId, FilterTipoDoc, TipoDoc, Id_Cliente: client})
+        const total = await getTotalCobranzaService({
+            Id_Cliente: client,
+            sessionId,
+            TipoDoc,
+            FilterTipoDoc,
+            FilterNotExpired,
+            FilterExpired,
+            DateEnd: DateEnd || null,
+            DateExactly: DateExactly || null,
+            DateStart: DateStart || null,
+        })
         res.json(total);
 
     } catch (error) {

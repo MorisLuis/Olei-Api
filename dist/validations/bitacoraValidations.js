@@ -8,7 +8,6 @@ exports.getMeetingsQuerySchema = zod_1.z.object({
         preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
     meetginOrderCondition: zod_1.z
         .string()
-        .optional()
         .refine((val) => val === undefined || meeting_1.MeetingOrderCondition.includes(val), { message: "meetginOrderCondition debe ser 'Nombre', 'Saldo', 'Total'" }),
     TipoContacto: zod_1.z
         .preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional())

@@ -72,7 +72,6 @@ exports.updateMeeting = updateMeeting;
 const postMeeting = async (req, res, next) => {
     try {
         const body = bitacoraValidations_1.postBitacoraBodySchema.parse(req.body.body);
-        console.log({ body });
         const sessionId = req.sessionRedis;
         const meeting = await (0, meetingsServices_1.postMeetingService)(sessionId, body);
         res.json(meeting);

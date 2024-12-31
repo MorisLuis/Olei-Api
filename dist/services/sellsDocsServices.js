@@ -157,7 +157,7 @@ const getTotalSellsByClientService = async ({ sessionId, Id_Cliente, FilterTipoD
     return total;
 };
 exports.getTotalSellsByClientService = getTotalSellsByClientService;
-const getTotalCobranzaService = async ({ sessionId, Id_Cliente, FilterTipoDoc, TipoDoc }) => {
+const getTotalCobranzaService = async ({ sessionId, Id_Cliente, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
@@ -172,10 +172,15 @@ const getTotalCobranzaService = async ({ sessionId, Id_Cliente, FilterTipoDoc, T
     const request = await pool.request()
         .input('Id_Cliente', Id_Cliente)
         .input('FilterTipoDoc', FilterTipoDoc)
+        .input('FilterExpired', FilterExpired)
+        .input('FilterNotExpired', FilterNotExpired)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
         .input('TipoDoc', TipoDoc)
         .query(query);
-    const sells = request.recordset;
-    return sells;
+    const total = request.recordset[0].TotalCount;
+    return total;
 };
 exports.getTotalCobranzaService = getTotalCobranzaService;
 //# sourceMappingURL=sellsDocsServices.js.map

@@ -239,23 +239,33 @@ const getTotalSellsByClientService = async ({
         .input('TipoDoc', TipoDoc)
         .query(query);
 
-        const total = request.recordset[0].TotalCount
-        return total
+    const total = request.recordset[0].TotalCount
+    return total
 };
 
 interface getTotalCobranzaServiceInterface {
-    sessionId: string;
-    Id_Cliente: number;
-    FilterTipoDoc: 0 | 1;
-    TipoDoc: SellsInterface['TipoDoc']
+    sessionId: string,
+    Id_Cliente: number,
+    TipoDoc?: SellsInterface['TipoDoc']
+    FilterTipoDoc: 0 | 1,
+    FilterExpired: 0 | 1,
+    FilterNotExpired: 0 | 1,
+    DateEnd: string | null,
+    DateExactly: string | null,
+    DateStart: string | null,
 }
 
 const getTotalCobranzaService = async ({
     sessionId,
     Id_Cliente,
     FilterTipoDoc,
-    TipoDoc
-}: getTotalCobranzaServiceInterface ) => {
+    FilterExpired,
+    FilterNotExpired,
+    TipoDoc,
+    DateEnd,
+    DateExactly,
+    DateStart
+}: getTotalCobranzaServiceInterface) => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -272,11 +282,16 @@ const getTotalCobranzaService = async ({
     const request = await pool.request()
         .input('Id_Cliente', Id_Cliente)
         .input('FilterTipoDoc', FilterTipoDoc)
+        .input('FilterExpired', FilterExpired)
+        .input('FilterNotExpired', FilterNotExpired)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
         .input('TipoDoc', TipoDoc)
         .query(query);
 
-    const sells = request.recordset
-    return sells
+    const total = request.recordset[0].TotalCount
+    return total
 }
 
 export {

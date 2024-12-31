@@ -1,7 +1,7 @@
 import { dbConnection } from "../database";
 import { bitacoraQuerys } from "../database/querys/bitacora";
 import BadRequestError from "../errors/BadRequestError";
-import MeetingInterface, { MeetingFilterConditionType, MeetingOrderConditionType, validTipoContacto } from "../interface/meeting";
+import MeetingInterface, { MeetingOrderConditionType, validTipoContacto } from "../interface/meeting";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 import sql from 'mssql';
 
@@ -38,11 +38,11 @@ const getMeetingsService = async ({
         throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
     };
 
-    if(FilterCliente === 1 && !Id_Cliente){
+    if (FilterCliente === 1 && !Id_Cliente) {
         throw new BadRequestError({ code: 500, message: `Es necesario un Id_Cliente.`, logging: true });
     };
 
-    if(FilterTipoContacto === 1 && !TipoContacto){
+    if (FilterTipoContacto === 1 && !TipoContacto) {
         throw new BadRequestError({ code: 500, message: `Es necesario un TipoContacto.`, logging: true });
     }
 
@@ -86,11 +86,11 @@ const getTotalMeetingsService = async ({
         throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
-    if(FilterCliente === 1 && !Id_Cliente){
+    if (FilterCliente === 1 && !Id_Cliente) {
         throw new BadRequestError({ code: 500, message: `Es necesario un Id_Cliente.`, logging: true });
     };
 
-    if(FilterTipoContacto === 1 && !TipoContacto){
+    if (FilterTipoContacto === 1 && !TipoContacto) {
         throw new BadRequestError({ code: 500, message: `Es necesario un TipoContacto.`, logging: true });
     };
 
@@ -162,7 +162,6 @@ const updateMeetingService = async (id: string, sessionId: string, body: Meeting
     await transaction.begin();
 
     const {
-        Id_Cliente,
         Fecha,
         Hour,
         HourEnd,
@@ -174,7 +173,6 @@ const updateMeetingService = async (id: string, sessionId: string, body: Meeting
     if (TipoContacto && !validTipoContacto.includes(TipoContacto)) {
         throw new BadRequestError({ code: 500, message: `No es valido el tipo de contacto`, logging: true });
     };
-
 
     const request = new sql.Request(transaction)
         .input('Id_Bitacora', sql.Int, id)

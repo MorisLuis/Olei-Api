@@ -41,9 +41,12 @@ exports.sellsQuery = {
         ) AS Subquery
     `,
     getSellsByClient: `
-        WITH VENTAS_CTE AS (
+        WITH
+        VENTAS_CTE
+        AS
+        (
             SELECT
-                CONCAT(Id_Almacen, '_', TipoDoc, '_', TRIM(Serie), '_', Folio) AS UniqueKey,
+                CONCAT(Id_Almacen, '-', TipoDoc, '-', TRIM(Serie), '-', Folio) AS UniqueKey,
                 Id_Cliente,
                 Id_Almacen,
                 TipoDoc,
@@ -70,11 +73,13 @@ exports.sellsQuery = {
                 WHEN @OrderCondition = 'TipoDoc' THEN TipoDoc 
                 WHEN @OrderCondition = 'Folio' THEN Folio 
                 WHEN @OrderCondition = 'Fecha' THEN Fecha 
-                WHEN @OrderCondition = 'ExpiredDays' THEN ExpiredDays 
+                WHEN @OrderCondition = 'ExpiredDays' THEN ExpiredDays
+                WHEN @OrderCondition = 'FechaEntrega' THEN FechaEntrega
             END DESC,
             CASE 
                 WHEN @OrderCondition = 'TipoDoc' THEN Fecha 
                 WHEN @OrderCondition = 'ExpiredDays' THEN Fecha
+                WHEN @OrderCondition = 'FechaEntrega' THEN Fecha
             END DESC,
             Fecha,
             TipoDoc
@@ -112,7 +117,7 @@ exports.sellsQuery = {
         WHERE Id_Almacen = @Id_Almacen AND TipoDoc = @TipoDoc AND Serie = @Serie AND Folio = @Folio
     `,
     getCobranza: `
-        WITH
+            WITH
             VENTAS_CTE
             AS
             (
@@ -147,11 +152,13 @@ exports.sellsQuery = {
                 WHEN @OrderCondition = 'TipoDoc' THEN TipoDoc 
                 WHEN @OrderCondition = 'Folio' THEN Folio 
                 WHEN @OrderCondition = 'Fecha' THEN Fecha 
-                WHEN @OrderCondition = 'ExpiredDays' THEN ExpiredDays 
+                WHEN @OrderCondition = 'ExpiredDays' THEN ExpiredDays
+                WHEN @OrderCondition = 'FechaEntrega' THEN Fecha 
             END DESC,
             CASE 
                 WHEN @OrderCondition = 'TipoDoc' THEN Fecha 
                 WHEN @OrderCondition = 'ExpiredDays' THEN Fecha
+                WHEN @OrderCondition = 'FechaEntrega' THEN Fecha
             END DESC,
             Fecha,
             TipoDoc
@@ -161,12 +168,15 @@ exports.sellsQuery = {
     getTotalCobranza: `
         SELECT COUNT(*) AS TotalCount
         FROM [dbo].[VENTAS]
-        WHERE Id_Cliente = @Id_Cliente 
-            AND Saldo > 0
-            AND FechaLiq >= CAST(GETDATE() AS DATE) -- Condición para FechaLiq
-            AND (
-                @FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1)
-            );
+        WHERE Id_Cliente = @Id_Cliente
+        AND Saldo > 0
+        AND FechaLiq >= CAST(GETDATE() AS DATE) -- Condición para FechaLiq
+        AND ( @FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1) )
+        AND (@FilterExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) < 0 AND @FilterExpired = 1))
+        AND (@FilterNotExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) > 0 AND @FilterNotExpired = 1))
+        AND (@DateExactly IS NULL OR CAST(Fecha AS DATE) = @DateExactly)
+        AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)
+        AND (@DateEnd IS NULL OR CAST(Fecha AS DATE) <= @DateEnd)
     `
 };
 //# sourceMappingURL=sells.js.map

@@ -32,7 +32,7 @@ exports.bitacoraQuerys = {
                 WHEN @OrderCondition = 'Cliente' THEN Fecha 
                 WHEN @OrderCondition = 'TipoContacto' THEN Fecha
             END DESC,
-            Fecha,
+            Fecha DESC,
             TipoContacto
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY
@@ -45,7 +45,17 @@ exports.bitacoraQuerys = {
         AND (@FilterTipoContacto = 0 OR (TipoContacto = @TipoContacto AND @FilterTipoContacto = 1))
     `,
     getMeetingById: `
-        SELECT [Id_Bitacora], [Id_Almacen] ,[Id_Cliente] ,[Fecha] ,[Descripcion] ,[TipoContacto]
+        SELECT
+        [Id_Almacen]
+        ,[Id_Cliente]
+        ,[Fecha]
+        ,[Descripcion]
+        ,[TipoContacto]
+        ,[Id_Bitacora]
+        ,[Titulo]
+        ,[Hour]
+        ,[HourEnd]
+        ,[Comentarios]
         FROM [dbo].[BITACORACRM]
         WHERE Id_Bitacora = @Id_Bitacora
     `,

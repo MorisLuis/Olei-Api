@@ -110,7 +110,7 @@ const updateMeetingService = async (id, sessionId, body) => {
     //START TRANSACTION
     const transaction = new mssql_1.default.Transaction(pool);
     await transaction.begin();
-    const { Id_Cliente, Fecha, Hour, HourEnd, Titulo, Descripcion, TipoContacto, Comentarios } = body;
+    const { Fecha, Hour, HourEnd, Titulo, Descripcion, TipoContacto, Comentarios } = body;
     if (TipoContacto && !meeting_1.validTipoContacto.includes(TipoContacto)) {
         throw new BadRequestError_1.default({ code: 500, message: `No es valido el tipo de contacto`, logging: true });
     }

@@ -111,6 +111,9 @@ export const getCobranzaQuerySchema = z.object({
 })
 
 export const getTotalCobranzaQuerySchema = z.object({
+    FilterTipoDoc: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
+    FilterExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
+    FilterNotExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     TipoDoc: z
         .string()
         .optional()
@@ -119,7 +122,18 @@ export const getTotalCobranzaQuerySchema = z.object({
             (val): val is SellsInterface["TipoDoc"] => TipoDoc.includes(val as typeTipoDoc),
             { message: "TipoDoc debe ser 0, 1 o 2" }
         ),
-    FilterTipoDoc: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0))
+    DateEnd: z.preprocess(
+        (val) => (val === "undefined" ? undefined : val),
+        z.string().optional()
+    ),
+    DateExactly: z.preprocess(
+        (val) => (val === "undefined" ? undefined : val),
+        z.string().optional()
+    ),
+    DateStart: z.preprocess(
+        (val) => (val === "undefined" ? undefined : val),
+        z.string().optional()
+    )
 })
 
 // getTotalSellsByClient

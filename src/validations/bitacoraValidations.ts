@@ -1,5 +1,5 @@
 import { z } from "zod";
-import MeetingInterface, { MeetingFilterConditionType, MeetingOrderCondition, MeetingOrderConditionType, validTipoContacto } from "../interface/meeting";
+import MeetingInterface, { MeetingOrderCondition, MeetingOrderConditionType, validTipoContacto } from "../interface/meeting";
 
 
 export const getMeetingsQuerySchema = z.object({
@@ -7,7 +7,6 @@ export const getMeetingsQuerySchema = z.object({
         preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
     meetginOrderCondition: z
         .string()
-        .optional()
         .refine(
             (val): val is MeetingOrderConditionType =>
                 val === undefined || MeetingOrderCondition.includes(val as MeetingOrderConditionType),
