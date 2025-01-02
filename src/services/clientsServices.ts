@@ -7,7 +7,7 @@ interface getClientsServiceInterface {
     PageNumber: number,
     sessionId: string,
     OrderCondition: string
-}
+};
 
 const getClientsService = async ({
     PageNumber,
@@ -42,7 +42,7 @@ interface getClientIdInterface {
     sessionId: string,
     Id_Cliente: number,
     Id_Almacen: number
-}
+};
 
 const getClientIdService = async ({
     sessionId,
@@ -61,14 +61,6 @@ const getClientIdService = async ({
     if (!pool) {
         throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
     };
-
-    if (!Id_Cliente) {
-        throw new BadRequestError({ code: 500, message: 'Es necesario el id de el cliente', logging: true });
-    }
-
-    if (!Id_Almacen) {
-        throw new BadRequestError({ code: 500, message: 'Es necesario el id de el almacen', logging: true });
-    }
 
     let query = clientsQuerys.getClientId;
     const request = await pool.request()
@@ -99,6 +91,7 @@ const getTotalClientsService = async (sessionId: string) => {
     const total = request.recordset[0].TotalCount
     return total
 };
+
 
 export {
     getClientsService,

@@ -5,7 +5,7 @@ import { UserWebSessionInterface } from '../interface/user';
 import { handleDeleteRedisSession } from '../utils/Redis/deleteRedis';
 import BadRequestError from '../errors/BadRequestError';
 import { getClientIdService, getClientsService, getTotalClientsService } from '../services/clientsServices';
-import { getClientIdQuerySchema, getClientsQuerySchema } from '../validations/clientValidations';
+import { getClientIdQuerySchema, getClientsQuerySchema, selectClientBodySchema } from '../validations/clientValidations';
 import { z } from 'zod';
 
 const getClients = async (req: Request, res: Response, next: NextFunction) => {
@@ -41,29 +41,20 @@ const getTotalClients = async (req: Request, res: Response, next: NextFunction) 
 
 const getClientId = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // Validar los parámetros de consulta
         const { Id_Almacen, Id_Cliente } = getClientIdQuerySchema.parse(req.query);
-
-        // Validar la sesión
         const sessionId = req.sessionRedis;
-        if (!sessionId) {
-            return res.status(401).json({ error: "Session not found" });
-        }
 
-        // Obtener clientes
         const clients = await getClientIdService({
             sessionId,
             Id_Cliente,
             Id_Almacen
         });
 
-        // Respuesta uniforme
         res.status(200).json({
             success: true,
             data: clients ?? null
         });
     } catch (error) {
-        console.log({error})
         if (error instanceof z.ZodError) {
             res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
@@ -72,10 +63,7 @@ const getClientId = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-
 const selectClient = async (req: Request, res: Response, next: NextFunction) => {
-
-    console.log("selectClient")
 
     try {
         // Get session from REDIS.
@@ -84,9 +72,10 @@ const selectClient = async (req: Request, res: Response, next: NextFunction) => 
 
         if (!userFR) {
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-        }
+        };
+
         const { Id } = userFR;
-        const { Id_Cliente, Id_Almacen, Id_ListPre } = req.body;
+        const { Id_Cliente, Id_Almacen, Id_ListPre } = selectClientBodySchema.parse(req.body);
 
         const client = {
             Id_Almacen: Id_Almacen,

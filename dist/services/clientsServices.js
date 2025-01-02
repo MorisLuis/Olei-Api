@@ -8,6 +8,7 @@ const database_1 = require("../database");
 const clients_1 = require("../database/querys/clients");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const getSession_1 = require("../utils/Redis/getSession");
+;
 const getClientsService = async ({ PageNumber, sessionId, OrderCondition }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
@@ -29,6 +30,7 @@ const getClientsService = async ({ PageNumber, sessionId, OrderCondition }) => {
     return quotes;
 };
 exports.getClientsService = getClientsService;
+;
 const getClientIdService = async ({ sessionId, Id_Cliente, Id_Almacen }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
@@ -40,12 +42,6 @@ const getClientIdService = async ({ sessionId, Id_Cliente, Id_Almacen }) => {
         throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
     }
     ;
-    if (!Id_Cliente) {
-        throw new BadRequestError_1.default({ code: 500, message: 'Es necesario el id de el cliente', logging: true });
-    }
-    if (!Id_Almacen) {
-        throw new BadRequestError_1.default({ code: 500, message: 'Es necesario el id de el almacen', logging: true });
-    }
     let query = clients_1.clientsQuerys.getClientId;
     const request = await pool.request()
         .input('Id_Cliente', Id_Cliente)
