@@ -1,42 +1,38 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCalendarTaskByMonthAndClient = exports.getCalendarTaskByDay = exports.getCalendarTaskByMonth = void 0;
 const calendarService_1 = require("../services/calendarService");
-const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const calendarValidations_1 = require("../validations/calendarValidations");
+const zod_1 = require("zod");
 const getCalendarTaskByMonth = async (req, res, next) => {
     try {
-        const { Anio, Mes } = req.query;
+        const { Anio, Mes } = calendarValidations_1.getCalendarTaskByMonthQuerySchema.parse(req.query);
         const sessionId = req.sessionRedis;
-        if (typeof Anio !== 'string') {
-            throw new BadRequestError_1.default({ code: 500, message: `No se envio un Año correcto`, logging: true });
-        }
-        if (typeof Mes !== 'string') {
-            throw new BadRequestError_1.default({ code: 500, message: `No se envio un Mes correcto`, logging: true });
-        }
         const tasks = await (0, calendarService_1.getCalendarTaskByMonthService)({
             sessionId,
             Anio,
-            Mes
+            Mes,
         });
         res.json(tasks);
     }
     catch (error) {
-        next(error);
+        if (error instanceof zod_1.z.ZodError) {
+            // Manejo de errores de validación de Zod
+            res.status(400).json({
+                message: 'Validation error',
+                errors: error.errors,
+            });
+            return;
+        }
+        return next(error);
     }
-    ;
 };
 exports.getCalendarTaskByMonth = getCalendarTaskByMonth;
 const getCalendarTaskByDay = async (req, res, next) => {
+    /* Timeline */
     try {
-        const { Day } = req.query;
+        const { Day } = calendarValidations_1.getCalendarTaskByDayQuerySchema.parse(req.query);
         const sessionId = req.sessionRedis;
-        if (typeof Day !== 'string') {
-            throw new BadRequestError_1.default({ code: 500, message: `No se envio un Dia correcto`, logging: true });
-        }
         const tasks = await (0, calendarService_1.getCalendarTaskByDayService)({
             sessionId,
             Day
@@ -44,7 +40,15 @@ const getCalendarTaskByDay = async (req, res, next) => {
         res.json(tasks);
     }
     catch (error) {
-        next(error);
+        if (error instanceof zod_1.z.ZodError) {
+            // Manejo de errores de validación de Zod
+            res.status(400).json({
+                message: 'Validation error',
+                errors: error.errors,
+            });
+            return;
+        }
+        return next(error);
     }
     ;
 };
@@ -62,7 +66,15 @@ const getCalendarTaskByMonthAndClient = async (req, res, next) => {
         res.json(tasks);
     }
     catch (error) {
-        next(error);
+        if (error instanceof zod_1.z.ZodError) {
+            // Manejo de errores de validación de Zod
+            res.status(400).json({
+                message: 'Validation error',
+                errors: error.errors,
+            });
+            return;
+        }
+        return next(error);
     }
     ;
 };

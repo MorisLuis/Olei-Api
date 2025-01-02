@@ -75,8 +75,8 @@ const getCalendarTaskByDayService = async ({
 
 interface getCalendarByMonthAndClientServiceInterface {
     sessionId: string;
-    Mes: number;
-    Anio: number;
+    Mes: number | string;
+    Anio: number | string;
     Id_Cliente: number;
 }
 
