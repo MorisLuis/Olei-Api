@@ -115,7 +115,7 @@ const getTotalMeetingsService = async ({
 };
 
 
-const getMeetingByIdService = async (id: string, sessionId: string) => {
+const getMeetingByIdService = async (id: number, sessionId: string) => {
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
@@ -139,7 +139,7 @@ const getMeetingByIdService = async (id: string, sessionId: string) => {
     return quotes
 }
 
-const updateMeetingService = async (id: string, sessionId: string, body: MeetingInterface) => {
+const updateMeetingService = async (id: number, sessionId: string, body: MeetingInterface) => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -252,7 +252,7 @@ const postMeetingService = async (sessionId: string, body: MeetingInterface) => 
     return { result: result.recordset[0] }
 };
 
-const deleteMeetingService = async (id: string, sessionId: string) => {
+const deleteMeetingService = async (id: number, sessionId: string) => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 

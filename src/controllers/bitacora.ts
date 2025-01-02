@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { deleteMeetingService, getMeetingByIdService, getMeetingsService, getTotalMeetingsService, postMeetingService, updateMeetingService } from "../services/meetingsServices";
 import MeetingInterface from "../interface/meeting";
-import { getMeetingsQuerySchema, getTotalMeetingsQuerySchema, postBitacoraBodySchema, updateBitacoraBodySchema } from "../validations/bitacoraValidations";
+import { getMeetingByIdParmsSchema, getMeetingsQuerySchema, getTotalMeetingsQuerySchema, postBitacoraBodySchema, updateBitacoraBodySchema } from "../validations/bitacoraValidations";
 
 const getMeetings = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -49,7 +49,7 @@ const getTotalMeetings = async (req: Request, res: Response, next: NextFunction)
 const getMeetingById = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        const { id } = req.params;
+        const { id } = getMeetingByIdParmsSchema.parse(req.params);
         const sessionId = req.sessionRedis;
         const meeting = await getMeetingByIdService(id, sessionId);
         res.json(meeting);
@@ -62,7 +62,7 @@ const getMeetingById = async (req: Request, res: Response, next: NextFunction) =
 const updateMeeting = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        const { id } = req.params;
+        const { id } = getMeetingByIdParmsSchema.parse(req.params);
         const body = updateBitacoraBodySchema.parse(req.body.body) as MeetingInterface;
         const sessionId = req.sessionRedis
         const meeting = await updateMeetingService(id, sessionId, body)
@@ -90,7 +90,7 @@ const postMeeting = async (req: Request, res: Response, next: NextFunction) => {
 const deleteMeeting = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        const { id } = req.params;
+        const { id } = getMeetingByIdParmsSchema.parse(req.params);
         const sessionId = req.sessionRedis;
         const meeting = await deleteMeetingService(id, sessionId)
         res.json(meeting);

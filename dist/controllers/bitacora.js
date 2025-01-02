@@ -44,7 +44,7 @@ const getTotalMeetings = async (req, res, next) => {
 exports.getTotalMeetings = getTotalMeetings;
 const getMeetingById = async (req, res, next) => {
     try {
-        const { id } = req.params;
+        const { id } = bitacoraValidations_1.getMeetingByIdParmsSchema.parse(req.params);
         const sessionId = req.sessionRedis;
         const meeting = await (0, meetingsServices_1.getMeetingByIdService)(id, sessionId);
         res.json(meeting);
@@ -57,7 +57,7 @@ const getMeetingById = async (req, res, next) => {
 exports.getMeetingById = getMeetingById;
 const updateMeeting = async (req, res, next) => {
     try {
-        const { id } = req.params;
+        const { id } = bitacoraValidations_1.getMeetingByIdParmsSchema.parse(req.params);
         const body = bitacoraValidations_1.updateBitacoraBodySchema.parse(req.body.body);
         const sessionId = req.sessionRedis;
         const meeting = await (0, meetingsServices_1.updateMeetingService)(id, sessionId, body);
@@ -84,7 +84,7 @@ const postMeeting = async (req, res, next) => {
 exports.postMeeting = postMeeting;
 const deleteMeeting = async (req, res, next) => {
     try {
-        const { id } = req.params;
+        const { id } = bitacoraValidations_1.getMeetingByIdParmsSchema.parse(req.params);
         const sessionId = req.sessionRedis;
         const meeting = await (0, meetingsServices_1.deleteMeetingService)(id, sessionId);
         res.json(meeting);
