@@ -9,8 +9,7 @@ import sql from 'mssql';
 type updateCodbar = {
     CodBar: string;
     codeRandom: string
-}
-
+};
 
 const updateCodebarService = async (sessionId: string, codigoParam: string, Id_Marca: string, body: updateCodbar) => {
 

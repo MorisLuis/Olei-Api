@@ -6,73 +6,33 @@ import { currentTime } from "../utils/currentTime";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
 import { handleGetSession } from "../utils/Redis/getSession";
 import BadRequestError from '../errors/BadRequestError';
+import { postInventoryService } from "../services/inventoryServices";
+import { postInventoryBodySchema } from "../validations/inventoryValidations";
 
 const postInventory = async (req: Request, res: Response, next: NextFunction) => {
 
-    
     try {
         const sessionId = req.sessionID;
-        const { user: userFR } = await handleGetSession({ sessionId });
-    
-        if (!userFR) {
-            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-        }
-    
-        const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL} = userFR;
         const Id_Usuario = req.id;
-        const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
-        const { inventoryDetails, typeOfMovement } = req.body;
-        const Accion = typeOfMovement?.Accion;
-        const Id_TipoMovInv = typeOfMovement?.Id_TipoMovInv;
-        const ExpectedRows = inventoryDetails.length;
-        const ExpectedTotalQuantity = inventoryDetails.reduce((sum: any, item: any) => sum + item.Cantidad, 0);
+        const { inventoryDetails, typeOfMovement } = postInventoryBodySchema.parse(req.body);
 
-        const transaction = new sql.Transaction(pool);
-        await transaction.begin();
-        const request = new sql.Request(transaction);
+        const { Folio } = await postInventoryService({
+            sessionId,
+            inventoryDetails,
+            typeOfMovement,
+            Id_Usuario
+        })
 
-        // Get the inventory data.
-        const inventoryData = {
-            Estado: 1, // If it were 0 it would mean a inventory was cancelled
-            Fecha: currentTime(),
-            Id_TipoMovInv: typeOfMovement?.Id_TipoMovInv,
-            Id_AlmacenDest: 0,
-            SwPendiente: 0,
-            Descripcion: '',
-            SwTr: 0,
-            FolioReq: null,
-            AlmReq: 0,
-        }
-
-        const xmlDataInventory = await convertArrayToXml(inventoryData);
-        const xmlDataInventoryDetails = await convertArrayToXml(inventoryDetails);
-
-        const result = await request
-            .input('xmlDataInventory', sql.Xml, xmlDataInventory)
-            .input('xmlDataInventoryDetails', sql.Xml, xmlDataInventoryDetails)
-            .input('Accion', sql.Int, Accion)
-            .input('Id_TipoMovInv', sql.Int, Id_TipoMovInv)
-            .input('user', sql.NVarChar(50), Id_Usuario)
-            .input('ExpectedRows', sql.Int, ExpectedRows)
-            .input('ExpectedTotalQuantity', sql.Decimal(18, 0), ExpectedTotalQuantity)
-            .output('Folio', sql.Int)
-            .execute('fn_ExecuteInventory'); 
-
-        const Folio = result.output.Folio;
-
-        await transaction.commit();
-        const inventory = result.recordset[0];
-
-        res.json({ Folio, inventory })
+        res.json({ Folio });
 
     } catch (error) {
         next(error)
     }
-}
+};
 
 const getInventory = async (req: Request, res: Response, next: NextFunction) => {
 
-    
+
     try {
         const { Folio } = req.query;
         const pool = await dbConnection()
@@ -92,11 +52,11 @@ const getInventory = async (req: Request, res: Response, next: NextFunction) => 
     } catch (error) {
         next(error)
     }
-}
+};
 
 const getInventoryDetails = async (req: Request, res: Response, next: NextFunction) => {
 
-    
+
     try {
         const { Folio } = req.query;
         const pool = await dbConnection()
@@ -115,7 +75,7 @@ const getInventoryDetails = async (req: Request, res: Response, next: NextFuncti
     } catch (error) {
         next(error)
     }
-}
+};
 
 
 export {
