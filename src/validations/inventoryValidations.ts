@@ -30,7 +30,7 @@ const inventoryDetailsItemSchema = z.object({
     Cantidad: z
         .number()
         .positive()
-        
+
     //.max(20, { message: "SKU no puede exceder los 20 caracteres" }),
 });
 
@@ -39,12 +39,12 @@ export const postInventoryBodySchema = z.object({
     inventoryDetails: z.array(inventoryDetailsItemSchema),
     typeOfMovement: z.object({
         Accion: z
-        .union([z.string(), z.number()])
-        .transform((val) => (typeof val === "number" ? val.toString() : val)) // Convierte el número a string
-        .refine(
-            (val) => ["1", "2", "3"].includes(val), // Validación: debe ser "1", "2" o "3"
-            { message: "Accion debe ser '1', '2' o '3'" }
-        ),
+            .union([z.string(), z.number()])
+            .transform((val) => (typeof val === "number" ? val.toString() : val)) // Convierte el número a string
+            .refine(
+                (val) => ["1", "2", "3"].includes(val), // Validación: debe ser "1", "2" o "3"
+                { message: "Accion debe ser '1', '2' o '3'" }
+            ),
         Id_TipoMovInv: z.number().int().positive().nonnegative()
     })
 });
@@ -53,3 +53,9 @@ export const getIdClienteQuerySchema = z.object({
     Id_Usuario: z
         .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number())
 });
+
+export const getInventoryQuerySchema = z.object({
+    Folio: z
+        .number()
+        .int()
+})

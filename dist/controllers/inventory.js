@@ -29,7 +29,7 @@ const postInventory = async (req, res, next) => {
 exports.postInventory = postInventory;
 const getInventory = async (req, res, next) => {
     try {
-        const { Folio } = req.query;
+        const { Folio } = inventoryValidations_1.getInventoryQuerySchema.parse(req.query);
         const pool = await (0, database_1.dbConnection)();
         if (!pool) {
             throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
@@ -48,7 +48,7 @@ const getInventory = async (req, res, next) => {
 exports.getInventory = getInventory;
 const getInventoryDetails = async (req, res, next) => {
     try {
-        const { Folio } = req.query;
+        const { Folio } = inventoryValidations_1.getInventoryQuerySchema.parse(req.query);
         const pool = await (0, database_1.dbConnection)();
         if (!pool) {
             throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });

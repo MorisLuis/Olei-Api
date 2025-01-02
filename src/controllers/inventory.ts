@@ -7,7 +7,7 @@ import { convertArrayToXml } from "../utils/convertArrayToXml";
 import { handleGetSession } from "../utils/Redis/getSession";
 import BadRequestError from '../errors/BadRequestError';
 import { postInventoryService } from "../services/inventoryServices";
-import { postInventoryBodySchema } from "../validations/inventoryValidations";
+import { getInventoryQuerySchema, postInventoryBodySchema } from "../validations/inventoryValidations";
 
 const postInventory = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -21,7 +21,7 @@ const postInventory = async (req: Request, res: Response, next: NextFunction) =>
             inventoryDetails,
             typeOfMovement,
             Id_Usuario
-        })
+        });
 
         res.json({ Folio });
 
@@ -32,10 +32,10 @@ const postInventory = async (req: Request, res: Response, next: NextFunction) =>
 
 const getInventory = async (req: Request, res: Response, next: NextFunction) => {
 
-
     try {
-        const { Folio } = req.query;
-        const pool = await dbConnection()
+        const { Folio } = getInventoryQuerySchema.parse(req.query);
+        const pool = await dbConnection();
+
         if (!pool) {
             throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
@@ -58,7 +58,8 @@ const getInventoryDetails = async (req: Request, res: Response, next: NextFuncti
 
 
     try {
-        const { Folio } = req.query;
+        const { Folio } = getInventoryQuerySchema.parse(req.query);
+
         const pool = await dbConnection()
         if (!pool) {
             throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
@@ -76,7 +77,6 @@ const getInventoryDetails = async (req: Request, res: Response, next: NextFuncti
         next(error)
     }
 };
-
 
 export {
     postInventory,
