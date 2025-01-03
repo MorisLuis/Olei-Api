@@ -8,8 +8,6 @@ const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const orders_1 = require("../database/querys/orders");
 const getSession_1 = require("../utils/Redis/getSession");
-const convertArrayToXml_1 = require("../utils/convertArrayToXml");
-const numeroALetra_1 = require("../utils/numeroALetra");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const orderValidations_1 = require("../validations/orderValidations");
 const orderServices_1 = require("../services/orderServices");
@@ -17,39 +15,15 @@ const postOrder = async (req, res, next) => {
     try {
         // Get session from REDIS.
         const sessionId = req.sessionRedis;
-        const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-        if (!userFR) {
-            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-        }
-        const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
-        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
-        if (!pool) {
-            throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
-        }
-        ;
-        const { sellsDetails, sellsData } = req.body;
+        const { sellsDetails, sellsData } = orderValidations_1.postOrderBodySchema.parse(req.body);
         const { Subtotal, Total } = sellsData ?? {};
-        const transaction = new mssql_1.default.Transaction(pool);
-        await transaction.begin();
-        const request = new mssql_1.default.Request(transaction);
-        const TotalImpuesto = Total - Subtotal;
-        const CantLetra = (0, numeroALetra_1.numeroALetra)(Total);
-        const xmlDataSales = await (0, convertArrayToXml_1.convertArrayToXml)(sellsData);
-        const xmlDataSalesDetails = await (0, convertArrayToXml_1.convertArrayToXml)(sellsDetails);
-        const result = await request
-            .input('xmlDataSales', mssql_1.default.Xml, xmlDataSales)
-            .input('xmlDataSalesDetails', mssql_1.default.Xml, xmlDataSalesDetails)
-            .input('Id_Usuario', mssql_1.default.Int, 1)
-            .input('Id_Almacen', mssql_1.default.Int, Id_Almacen)
-            .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
-            .input('Id_ListPre', mssql_1.default.Int, Id_ListPre)
-            .input('TipoDoc', mssql_1.default.Int, TipoDocOO)
-            .input('CantLetra', mssql_1.default.VarChar, CantLetra)
-            .input('TotalImpuesto', mssql_1.default.Decimal, TotalImpuesto)
-            .output('Folio', mssql_1.default.Int)
-            .execute('fn_ExecuteSales');
-        await transaction.commit();
-        const folio = result.recordset[0].Folio;
+        const { folio } = await (0, orderServices_1.postOrderService)({
+            sellsData,
+            sellsDetails,
+            sessionId,
+            Subtotal,
+            Total
+        });
         res.status(201).json({
             ok: true,
             folio

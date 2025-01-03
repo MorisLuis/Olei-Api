@@ -56,7 +56,6 @@ const getInventory = async (req: Request, res: Response, next: NextFunction) => 
 
 const getInventoryDetails = async (req: Request, res: Response, next: NextFunction) => {
 
-
     try {
         const { Folio } = getInventoryQuerySchema.parse(req.query);
 

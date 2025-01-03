@@ -3,12 +3,60 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOrderDetailsSells = exports.getTotalOrderDetailsSells = void 0;
+exports.getOrderDetailsSells = exports.getTotalOrderDetailsSells = exports.postOrderService = void 0;
 const database_1 = require("../database");
 const orders_1 = require("../database/querys/orders");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const getSession_1 = require("../utils/Redis/getSession");
 const mssql_1 = __importDefault(require("mssql"));
+const numeroALetra_1 = require("../utils/numeroALetra");
+const convertArrayToXml_1 = require("../utils/convertArrayToXml");
+;
+const postOrderService = async ({ sessionId, Total, Subtotal, sellsDetails, sellsData }) => {
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+    console.log({ userFR });
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
+    ;
+    const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
+    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    if (!pool) {
+        throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+    }
+    ;
+    const transaction = new mssql_1.default.Transaction(pool);
+    await transaction.begin();
+    const request = new mssql_1.default.Request(transaction);
+    const TotalImpuesto = Total - Subtotal;
+    const CantLetra = (0, numeroALetra_1.numeroALetra)(Total);
+    const xmlDataSales = await (0, convertArrayToXml_1.convertArrayToXml)(sellsData);
+    const xmlDataSalesDetails = await (0, convertArrayToXml_1.convertArrayToXml)(sellsDetails);
+    console.log({
+        sellsDetails
+    });
+    console.log({
+        sellsData
+    });
+    const result = await request
+        .input('xmlDataSales', mssql_1.default.Xml, xmlDataSales)
+        .input('xmlDataSalesDetails', mssql_1.default.Xml, xmlDataSalesDetails)
+        .input('Id_Usuario', mssql_1.default.Int, 1)
+        .input('Id_Almacen', mssql_1.default.Int, Id_Almacen)
+        .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
+        .input('Id_ListPre', mssql_1.default.Int, Id_ListPre)
+        .input('TipoDoc', mssql_1.default.Int, TipoDocOO)
+        .input('CantLetra', mssql_1.default.VarChar, CantLetra)
+        .input('TotalImpuesto', mssql_1.default.Decimal, TotalImpuesto)
+        .output('Folio', mssql_1.default.Int)
+        .execute('fn_ExecuteSales');
+    await transaction.commit();
+    const folio = result.recordset[0].Folio;
+    return {
+        folio
+    };
+};
+exports.postOrderService = postOrderService;
 const getOrderDetailsSells = async ({ PageNumber, folio, sessionId }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
