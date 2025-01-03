@@ -4,8 +4,8 @@ import { handleGetWebSession } from '../utils/Redis/getSession';
 import { UserWebSessionInterface } from '../interface/user';
 import { handleDeleteRedisSession } from '../utils/Redis/deleteRedis';
 import BadRequestError from '../errors/BadRequestError';
-import { getClientIdService, getClientsService, getTotalClientsService } from '../services/clientsServices';
-import { getClientIdQuerySchema, getClientsQuerySchema, selectClientBodySchema } from '../validations/clientValidations';
+import { getClientIdService, getClientsService, getTotalClientsService, searchClientService } from '../services/clientsServices';
+import { getClientIdQuerySchema, getClientsQuerySchema, searchClientQuerySchema, selectClientBodySchema } from '../validations/clientValidations';
 import { z } from 'zod';
 
 const getClients = async (req: Request, res: Response, next: NextFunction) => {
@@ -118,11 +118,28 @@ const selectClient = async (req: Request, res: Response, next: NextFunction) => 
             next(error);
         }
     }
-}
+};
+
+const searchClient = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const sessionId = req.sessionRedis
+        const { term } = searchClientQuerySchema.parse(req.query)
+        const { Clients } = await searchClientService({ sessionId, term })
+
+        res.json({
+            Clients
+        })
+
+    } catch (error) {
+        next(error)
+    }
+};
 
 export {
     getClients,
     getClientId,
     selectClient,
+    searchClient,
     getTotalClients
 }

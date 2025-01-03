@@ -20,7 +20,8 @@ const getUsers = async (req: Request, res: Response, next: NextFunction) => {
         const pool = await dbConnection(Serverweb, Baseweb);
         const result = await pool?.request().query(querys.getAllUsers);
         const users = result?.recordset
-        const total = result?.rowsAffected[0]
+        const total = result?.rowsAffected[0];
+
         res.json({
             total,
             users

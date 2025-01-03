@@ -11,7 +11,7 @@ import {
     
 } from "../controllers/products/products";
 import { validateJWT, validateJWTWeb } from "../helpers/validate-jwt";
-import { getProducByIdWeb, getProducts, getTotalProducts } from "../controllers/products/productsWeb";
+import { getProducByIdWeb, getProducts, getTotalProducts, searchProduct } from "../controllers/products/productsWeb";
 
 
 const router = Router()
@@ -20,6 +20,7 @@ const router = Router()
 router.get("/", validateJWTWeb, getProducts)
 router.get("/web/:id", validateJWTWeb, getProducByIdWeb)
 router.get("/count", validateJWTWeb, getTotalProducts)
+router.get("/search", validateJWTWeb, searchProduct)
 
 // App endpoints
 router.get("/byStock", validateJWT, getProductsByStock);

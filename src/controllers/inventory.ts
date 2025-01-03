@@ -1,13 +1,9 @@
 import { Response, Request, NextFunction } from "express";
 import { dbConnection } from "../database";
-import sql from 'mssql';
 import { inventoryQuerys } from "../database/querys/inventory";
-import { currentTime } from "../utils/currentTime";
-import { convertArrayToXml } from "../utils/convertArrayToXml";
-import { handleGetSession } from "../utils/Redis/getSession";
 import BadRequestError from '../errors/BadRequestError';
-import { postInventoryService } from "../services/inventoryServices";
-import { getInventoryQuerySchema, postInventoryBodySchema } from "../validations/inventoryValidations";
+import { postInventoryService, searchProductInventoryService } from "../services/inventoryServices";
+import { getInventoryQuerySchema, postInventoryBodySchema, searchProductInventoryQuerySchema } from "../validations/inventoryValidations";
 import { z } from "zod";
 
 const postInventory = async (req: Request, res: Response, next: NextFunction) => {
@@ -90,8 +86,31 @@ const getInventoryDetails = async (req: Request, res: Response, next: NextFuncti
     }
 };
 
+const searchProductInventory = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const { searchTerm } = searchProductInventoryQuerySchema.parse(req.query);
+
+        const sessionId = req.sessionID;
+        const { products } = await searchProductInventoryService({ 
+            sessionId, 
+            searchTerm: searchTerm, 
+        })
+
+        res.json(products);
+
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        } else {
+            next(error);
+        }
+    }
+};
+
 export {
     postInventory,
     getInventory,
-    getInventoryDetails
+    getInventoryDetails,
+    searchProductInventory
 }

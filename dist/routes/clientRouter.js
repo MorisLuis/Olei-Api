@@ -8,5 +8,6 @@ router.get('/', validate_jwt_1.validateJWTWeb, client_1.getClients);
 router.get('/total', validate_jwt_1.validateJWTWeb, client_1.getTotalClients);
 router.get('/clientId', validate_jwt_1.validateJWTWeb, client_1.getClientId);
 router.post('/', validate_jwt_1.validateJWTWeb, client_1.selectClient);
+router.get("/search", validate_jwt_1.validateJWTWeb, client_1.searchClient);
 exports.default = router;
 //# sourceMappingURL=clientRouter.js.map

@@ -1,7 +1,8 @@
-import { dbConnection } from "../database";
+import { dbConnection, querys } from "../database";
 import { clientsQuerys } from "../database/querys/clients";
 import BadRequestError from "../errors/BadRequestError";
 import { handleGetWebSession } from "../utils/Redis/getSession";
+import sql from 'mssql';
 
 interface getClientsServiceInterface {
     PageNumber: number,
@@ -92,9 +93,44 @@ const getTotalClientsService = async (sessionId: string) => {
     return total
 };
 
+interface searchClientServiceInterface {
+    sessionId: string;
+    term: string
+};
+
+const searchClientService = async ({
+    sessionId,
+    term
+} : searchClientServiceInterface ) => {
+
+    const { user: userFR } = await handleGetWebSession({ sessionId });
+
+    if (!userFR) {
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true })
+    }
+
+    const { Serverweb, Baseweb } = userFR;
+    const pool = await dbConnection(Serverweb, Baseweb);
+
+    if (!pool) {
+        throw new BadRequestError({ code: 500, message: "Unable to establish a connection to the database", logging: true })
+    };
+
+    let query = clientsQuerys.getClientBySearch;
+    const result = await pool.request()
+        .input('nombre', sql.VarChar, term)
+        .query(query);
+
+    const Clients = result.recordset;
+
+    return {
+        Clients
+    }
+}
 
 export {
     getClientsService,
     getClientIdService,
-    getTotalClientsService
+    getTotalClientsService,
+    searchClientService
 }

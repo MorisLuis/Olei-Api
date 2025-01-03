@@ -105,17 +105,6 @@ exports.querys = {
         WHERE Id_TipoMovInv = @Id_TipoMovInv
     `,
     // Clients
-    getClientBySearch: `
-        SELECT TOP(10) 
-            TRIM(C.Nombre) AS Nombre, 
-            C.Id_Cliente,
-            C.Id_Almacen, 
-            C.Id_ListPre, 
-            C.CorreoVtas, 
-            C.Telefono1
-        FROM [dbo].[CLIENTES] C
-        WHERE LOWER(C.Nombre) LIKE '%' + LOWER(@nombre) + '%'
-    `,
     postError: `
         INSERT INTO [dbo].[ERRORES]
         ( [From], [Message], Id_Usuario, Fecha, Metodo, code )

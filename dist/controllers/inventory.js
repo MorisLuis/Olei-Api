@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getInventoryDetails = exports.getInventory = exports.postInventory = void 0;
+exports.searchProductInventory = exports.getInventoryDetails = exports.getInventory = exports.postInventory = void 0;
 const database_1 = require("../database");
 const inventory_1 = require("../database/querys/inventory");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
@@ -81,4 +81,24 @@ const getInventoryDetails = async (req, res, next) => {
     }
 };
 exports.getInventoryDetails = getInventoryDetails;
+const searchProductInventory = async (req, res, next) => {
+    try {
+        const { searchTerm } = inventoryValidations_1.searchProductInventoryQuerySchema.parse(req.query);
+        const sessionId = req.sessionID;
+        const { products } = await (0, inventoryServices_1.searchProductInventoryService)({
+            sessionId,
+            searchTerm: searchTerm,
+        });
+        res.json(products);
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        }
+        else {
+            next(error);
+        }
+    }
+};
+exports.searchProductInventory = searchProductInventory;
 //# sourceMappingURL=inventory.js.map

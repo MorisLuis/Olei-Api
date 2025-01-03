@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.selectClientBodySchema = exports.getClientIdQuerySchema = exports.getClientsQuerySchema = void 0;
+exports.searchClientQuerySchema = exports.selectClientBodySchema = exports.getClientIdQuerySchema = exports.getClientsQuerySchema = void 0;
 const zod_1 = require("zod");
 const client_1 = require("../interface/client");
 exports.getClientsQuerySchema = zod_1.z.object({
@@ -25,5 +25,8 @@ exports.selectClientBodySchema = zod_1.z.object({
         .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
     Id_ListPre: zod_1.z
         .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
+});
+exports.searchClientQuerySchema = zod_1.z.object({
+    term: zod_1.z.string()
 });
 //# sourceMappingURL=clientValidations.js.map

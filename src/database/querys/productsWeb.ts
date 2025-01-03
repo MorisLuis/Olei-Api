@@ -38,8 +38,8 @@ export const productsWebQuerys = {
         WHERE RowNum BETWEEN (@page - 1) * @limit + 1 AND @page * @limit;
     `,
 
-        // Get product by id.
-        getProducById: `
+    // Get product by id.
+    getProducById: `
         SELECT
             TRIM(P.Descripcion) AS Descripcion,
             TRIM(P.Codigo) AS Codigo,
@@ -84,5 +84,28 @@ export const productsWebQuerys = {
         AND LOWER(P.Codigo) LIKE '%' + LOWER(@codigo) + '%'
         AND (@SwSinStock = 0 OR E.Existencia > 0)
         AND (@SwsinPrecio = 0 OR PR.Precio > 0)
-    `
+    `,
+
+    getProductsBySearch: `
+        SELECT TOP(10)
+            TRIM(P.Descripcion) AS Descripcion
+        FROM [dbo].[PRODUCTOS] P
+            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+            JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
+            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+        WHERE LOWER(P.Descripcion) LIKE '%' + LOWER(@Descripcion) + '%'
+            AND PR.Id_ListaPrecios = @Id_ListaPrecios AND E.Id_Almacen = @Id_Almacen
+            AND LOWER(P.Codigo) LIKE '%' + LOWER(@Codigo) + '%'
+            AND LOWER(F.Nombre) LIKE '%' + LOWER(@familia) + '%'
+            AND LOWER(M.Nombre) LIKE '%' + LOWER(@marca) + '%'
+            AND (@SwSinStock = 0 OR E.Existencia > 0)
+            AND (@SwsinPrecio = 0 OR PR.Precio > 0)
+        ORDER BY
+        CASE 
+            WHEN LOWER(P.Descripcion) LIKE LOWER(@Descripcion) + '%' THEN 0 -- Prioridad para coincidencia inicial
+            ELSE 1
+        END,
+        P.Descripcion; -- Luego orden alfabético
+    `,
 }

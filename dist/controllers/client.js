@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTotalClients = exports.selectClient = exports.getClientId = exports.getClients = void 0;
+exports.getTotalClients = exports.searchClient = exports.selectClient = exports.getClientId = exports.getClients = void 0;
 const generate_jwt_1 = require("../helpers/generate-jwt");
 const getSession_1 = require("../utils/Redis/getSession");
 const deleteRedis_1 = require("../utils/Redis/deleteRedis");
@@ -119,4 +119,18 @@ const selectClient = async (req, res, next) => {
     }
 };
 exports.selectClient = selectClient;
+const searchClient = async (req, res, next) => {
+    try {
+        const sessionId = req.sessionRedis;
+        const { term } = clientValidations_1.searchClientQuerySchema.parse(req.query);
+        const { Clients } = await (0, clientsServices_1.searchClientService)({ sessionId, term });
+        res.json({
+            Clients
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.searchClient = searchClient;
 //# sourceMappingURL=client.js.map

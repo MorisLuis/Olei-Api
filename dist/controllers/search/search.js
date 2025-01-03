@@ -8,6 +8,7 @@ const database_1 = require("../../database");
 const products_1 = require("../../database/querys/products");
 const getSession_1 = require("../../utils/Redis/getSession");
 const BadRequestError_1 = __importDefault(require("../../errors/BadRequestError"));
+/* CHANGED TO inventory.ts */
 const searchProductInventory = async (req, res, next) => {
     try {
         const { searchTerm } = req.query;

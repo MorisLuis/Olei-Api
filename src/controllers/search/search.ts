@@ -5,6 +5,7 @@ import { handleGetSession } from '../../utils/Redis/getSession';
 import BadRequestError from '../../errors/BadRequestError';
 
 
+/* CHANGED TO inventory.ts */
 const searchProductInventory = async (req: Request, res: Response, next: NextFunction) => {
 
     try {

@@ -34,3 +34,7 @@ export const selectClientBodySchema = z.object({
     Id_ListPre: z
         .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
 })
+
+export const searchClientQuerySchema = z.object({
+    term: z.string()
+})

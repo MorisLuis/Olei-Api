@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getInventoryQuerySchema = exports.getIdClienteQuerySchema = exports.postInventoryBodySchema = void 0;
+exports.searchProductInventoryQuerySchema = exports.getInventoryQuerySchema = exports.getIdClienteQuerySchema = exports.postInventoryBodySchema = void 0;
 const zod_1 = require("zod");
 const inventoryDetailsItemSchema = zod_1.z.object({
     Codigo: zod_1.z
@@ -52,5 +52,8 @@ exports.getInventoryQuerySchema = zod_1.z.object({
     Folio: zod_1.z
         .number()
         .int()
+});
+exports.searchProductInventoryQuerySchema = zod_1.z.object({
+    searchTerm: zod_1.z.string()
 });
 //# sourceMappingURL=inventoryValidations.js.map

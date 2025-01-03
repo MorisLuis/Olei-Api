@@ -42,5 +42,23 @@ export const clientsQuerys = {
             CorreoVtas
             FROM dbo.CLIENTES
         WHERE Id_Cliente = @Id_Cliente AND Id_Almacen = @Id_Almacen
-    `
+    `,
+
+    getClientBySearch: `
+        SELECT TOP(10) 
+            TRIM(C.Nombre) AS Nombre, 
+            C.Id_Cliente,
+            C.Id_Almacen, 
+            C.Id_ListPre, 
+            C.CorreoVtas, 
+            C.Telefono1
+        FROM [dbo].[CLIENTES] C
+        WHERE LOWER(C.Nombre) LIKE '%' + LOWER(@nombre) + '%'
+        ORDER BY 
+        CASE 
+            WHEN LOWER(Nombre) LIKE LOWER(@nombre) + '%' THEN 0 -- Prioridad para coincidencia inicial
+            ELSE 1
+        END,
+        Nombre; -- Luego orden alfabético
+    `,
 }

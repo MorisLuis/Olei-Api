@@ -1,6 +1,6 @@
-import { dbConnection } from "../database";
+import { dbConnection, querys } from "../database";
+import { productsQuerys } from "../database/querys/products";
 import BadRequestError from "../errors/BadRequestError";
-import InventoryInterface from "../interface/inventory";
 import InventoryDetailsInterface from "../interface/inventoryDetails";
 import { handleGetSession } from "../utils/Redis/getSession";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
@@ -78,4 +78,48 @@ export const postInventoryService = async ({
         Folio
     }
 
+};
+
+interface searchProductInventoryServiceInterface {
+    sessionId: string;
+    searchTerm: string;
 }
+
+export const searchProductInventoryService = async ({
+    sessionId,
+    searchTerm,
+} : searchProductInventoryServiceInterface ) => {
+
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+    console.log({userFR});
+
+    if (!userFR) {
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+    }
+
+    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
+
+    const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+
+    const userquery = querys.getAuthLimitData;
+    const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery)
+    const user = requestUser.recordset[0]
+
+    if (!pool) {
+        throw new BadRequestError({ code: 500, message: "Unable to establish a connection to the database", logging: true });
+    }
+
+    const query = productsQuerys.getProductsBySearchInventory;
+    const result = await pool.request()
+        .input("searchTerm", searchTerm)
+        .input('Id_ListaPrecios', user.Id_ListPre)
+        .query(query);
+
+    const products = result.recordset
+
+
+    return {
+        products
+    }
+};

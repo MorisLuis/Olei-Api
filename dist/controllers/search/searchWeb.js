@@ -9,14 +9,17 @@ const mssql_1 = __importDefault(require("mssql"));
 const products_1 = require("../../database/querys/products");
 const getSession_1 = require("../../utils/Redis/getSession");
 const BadRequestError_1 = __importDefault(require("../../errors/BadRequestError"));
+/* change to  */
 const searchProduct = async (req, res, next) => {
     try {
         // Get session from REDIS.
         const sessionId = req.sessionRedis;
         const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+        console.log({ userFR });
         if (!userFR) {
             throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
         }
+        ;
         const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, Id_Almacen } = userFR;
         const { nombre, familia, codigo, marca } = req.query;
         const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
@@ -45,33 +48,40 @@ const searchProduct = async (req, res, next) => {
     }
 };
 exports.searchProduct = searchProduct;
+/* CHANGED TO client.ts */
 const searchClient = async (req, res, next) => {
-    try {
+    /* try {
+
         // Get session from REDIS.
-        const sessionId = req.sessionRedis;
-        const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+        const sessionId = req.sessionRedis
+        const { user: userFR } = await handleGetWebSession({ sessionId });
+
         if (!userFR) {
-            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true })
         }
+
         const { Serverweb, Baseweb } = userFR;
-        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+        const pool = await dbConnection(Serverweb, Baseweb);
+
         if (!pool) {
-            throw new BadRequestError_1.default({ code: 500, message: "Unable to establish a connection to the database", logging: true });
-        }
-        ;
-        const { term } = req.query;
-        let query = database_1.querys.getClientBySearch;
+            throw new BadRequestError({ code: 500, message: "Unable to establish a connection to the database", logging: true })
+        };
+
+        const { term } = req.query
+        let query = querys.getClientBySearch;
         const result = await pool.request()
-            .input('nombre', mssql_1.default.VarChar, term)
+            .input('nombre', sql.VarChar, term)
             .query(query);
-        const Clients = result.recordset;
+
+        const Clients = result.recordset
+
         res.json({
             Clients
-        });
-    }
-    catch (error) {
-        next(error);
-    }
+        })
+
+    } catch (error) {
+        next(error)
+    } */
 };
 exports.searchClient = searchClient;
 //# sourceMappingURL=searchWeb.js.map

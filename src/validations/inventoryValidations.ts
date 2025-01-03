@@ -59,3 +59,7 @@ export const getInventoryQuerySchema = z.object({
         .number()
         .int()
 })
+
+export const searchProductInventoryQuerySchema = z.object({
+    searchTerm: z.string()
+})
