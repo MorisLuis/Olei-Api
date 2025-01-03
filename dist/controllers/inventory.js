@@ -9,6 +9,7 @@ const inventory_1 = require("../database/querys/inventory");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const inventoryServices_1 = require("../services/inventoryServices");
 const inventoryValidations_1 = require("../validations/inventoryValidations");
+const zod_1 = require("zod");
 const postInventory = async (req, res, next) => {
     try {
         const sessionId = req.sessionID;
@@ -23,7 +24,12 @@ const postInventory = async (req, res, next) => {
         res.json({ Folio });
     }
     catch (error) {
-        next(error);
+        if (error instanceof zod_1.z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        }
+        else {
+            next(error);
+        }
     }
 };
 exports.postInventory = postInventory;
@@ -42,7 +48,12 @@ const getInventory = async (req, res, next) => {
         res.json(inventory);
     }
     catch (error) {
-        next(error);
+        if (error instanceof zod_1.z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        }
+        else {
+            next(error);
+        }
     }
 };
 exports.getInventory = getInventory;
@@ -61,7 +72,12 @@ const getInventoryDetails = async (req, res, next) => {
         res.json(inventoryDetails);
     }
     catch (error) {
-        next(error);
+        if (error instanceof zod_1.z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        }
+        else {
+            next(error);
+        }
     }
 };
 exports.getInventoryDetails = getInventoryDetails;

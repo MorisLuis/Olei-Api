@@ -22,7 +22,11 @@ const getClients = async (req: Request, res: Response, next: NextFunction) => {
 
         res.json(clients);
     } catch (error) {
-        next(error)
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        } else {
+            next(error);
+        }
     };
 
 };
@@ -34,7 +38,11 @@ const getTotalClients = async (req: Request, res: Response, next: NextFunction) 
         const total = await getTotalClientsService(sessionId);
         res.json(total);
     } catch (error) {
-        next(error)
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        } else {
+            next(error);
+        }
     };
 
 };
@@ -58,7 +66,11 @@ const getClientId = async (req: Request, res: Response, next: NextFunction) => {
         if (error instanceof z.ZodError) {
             res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
-            next(error);
+            if (error instanceof z.ZodError) {
+                res.status(400).json({ message: "Validation error", errors: error.errors });
+            } else {
+                next(error);
+            };
         }
     }
 };
@@ -100,7 +112,11 @@ const selectClient = async (req: Request, res: Response, next: NextFunction) => 
         })
 
     } catch (error) {
-        next(error)
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        } else {
+            next(error);
+        }
     }
 }
 

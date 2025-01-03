@@ -32,7 +32,6 @@ const getSellById = async (req, res, next) => {
         res.json(sell);
     }
     catch (error) {
-        console.log({ error });
         if (error instanceof zod_1.z.ZodError) {
             res.status(400).json({ message: "Validation error", errors: error.errors });
         }

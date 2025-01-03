@@ -8,6 +8,7 @@ import { handleGetSession } from "../utils/Redis/getSession";
 import BadRequestError from '../errors/BadRequestError';
 import { postInventoryService } from "../services/inventoryServices";
 import { getInventoryQuerySchema, postInventoryBodySchema } from "../validations/inventoryValidations";
+import { z } from "zod";
 
 const postInventory = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -26,7 +27,11 @@ const postInventory = async (req: Request, res: Response, next: NextFunction) =>
         res.json({ Folio });
 
     } catch (error) {
-        next(error)
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        } else {
+            next(error);
+        }
     }
 };
 
@@ -50,7 +55,11 @@ const getInventory = async (req: Request, res: Response, next: NextFunction) => 
         res.json(inventory)
 
     } catch (error) {
-        next(error)
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        } else {
+            next(error);
+        }
     }
 };
 
@@ -73,7 +82,11 @@ const getInventoryDetails = async (req: Request, res: Response, next: NextFuncti
         res.json(inventoryDetails)
 
     } catch (error) {
-        next(error)
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        } else {
+            next(error);
+        }
     }
 };
 

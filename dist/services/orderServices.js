@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOrderDetailsSells = exports.getTotalOrderDetailsSells = exports.postOrderService = void 0;
+exports.getOrderDetailsSells = exports.getTotalAllOrdersService = exports.getTotalOrderDetailsService = exports.getAllOrdersService = exports.getOrderService = exports.postOrderService = void 0;
 const database_1 = require("../database");
 const orders_1 = require("../database/querys/orders");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
@@ -14,7 +14,6 @@ const convertArrayToXml_1 = require("../utils/convertArrayToXml");
 ;
 const postOrderService = async ({ sessionId, Total, Subtotal, sellsDetails, sellsData }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    console.log({ userFR });
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
@@ -32,12 +31,6 @@ const postOrderService = async ({ sessionId, Total, Subtotal, sellsDetails, sell
     const CantLetra = (0, numeroALetra_1.numeroALetra)(Total);
     const xmlDataSales = await (0, convertArrayToXml_1.convertArrayToXml)(sellsData);
     const xmlDataSalesDetails = await (0, convertArrayToXml_1.convertArrayToXml)(sellsDetails);
-    console.log({
-        sellsDetails
-    });
-    console.log({
-        sellsData
-    });
     const result = await request
         .input('xmlDataSales', mssql_1.default.Xml, xmlDataSales)
         .input('xmlDataSalesDetails', mssql_1.default.Xml, xmlDataSalesDetails)
@@ -57,6 +50,53 @@ const postOrderService = async ({ sessionId, Total, Subtotal, sellsDetails, sell
     };
 };
 exports.postOrderService = postOrderService;
+const getOrderService = async ({ sessionId, folio }) => {
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
+    ;
+    const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
+    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    if (!pool) {
+        throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+    }
+    ;
+    const getOrderQuery = orders_1.orderQuerys.getOrder;
+    const request = await pool.request()
+        .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
+        .input('folio', mssql_1.default.Int, folio)
+        .input('TipoDocOO', TipoDocOO)
+        .query(getOrderQuery);
+    const order = request.recordset[0];
+    return {
+        order
+    };
+};
+exports.getOrderService = getOrderService;
+const getAllOrdersService = async ({ sessionId, page, limit }) => {
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
+    const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
+    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    if (!pool) {
+        throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+    }
+    const query = orders_1.orderQuerys.getAllOrders;
+    const request = await pool.request()
+        .input('TipoDocOO', TipoDocOO)
+        .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
+        .input('PageNumber', mssql_1.default.Int, page)
+        .input('PageSize', mssql_1.default.Int, limit)
+        .query(query);
+    let allOrders = request.recordset;
+    return {
+        allOrders
+    };
+};
+exports.getAllOrdersService = getAllOrdersService;
 const getOrderDetailsSells = async ({ PageNumber, folio, sessionId }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
@@ -79,7 +119,28 @@ const getOrderDetailsSells = async ({ PageNumber, folio, sessionId }) => {
     return orderDetails;
 };
 exports.getOrderDetailsSells = getOrderDetailsSells;
-const getTotalOrderDetailsSells = async ({ folio, sessionId }) => {
+const getTotalAllOrdersService = async (sessionId) => {
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
+    const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
+    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    if (!pool) {
+        throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+    }
+    const result = await pool?.request()
+        .input('TipoDocOO', TipoDocOO)
+        .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
+        .query(orders_1.orderQuerys.getTotalAllOrders);
+    const total = result?.recordset[0].TotalCount;
+    return {
+        total
+    };
+};
+exports.getTotalAllOrdersService = getTotalAllOrdersService;
+;
+const getTotalOrderDetailsService = async ({ folio, sessionId }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
@@ -98,5 +159,5 @@ const getTotalOrderDetailsSells = async ({ folio, sessionId }) => {
     const total = request.recordset[0].TotalCount;
     return total;
 };
-exports.getTotalOrderDetailsSells = getTotalOrderDetailsSells;
+exports.getTotalOrderDetailsService = getTotalOrderDetailsService;
 //# sourceMappingURL=orderServices.js.map

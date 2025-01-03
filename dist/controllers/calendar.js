@@ -17,14 +17,11 @@ const getCalendarTaskByMonth = async (req, res, next) => {
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            // Manejo de errores de validación de Zod
-            res.status(400).json({
-                message: 'Validation error',
-                errors: error.errors,
-            });
-            return;
+            res.status(400).json({ message: "Validation error", errors: error.errors });
         }
-        return next(error);
+        else {
+            next(error);
+        }
     }
 };
 exports.getCalendarTaskByMonth = getCalendarTaskByMonth;
@@ -41,14 +38,11 @@ const getCalendarTaskByDay = async (req, res, next) => {
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            // Manejo de errores de validación de Zod
-            res.status(400).json({
-                message: 'Validation error',
-                errors: error.errors,
-            });
-            return;
+            res.status(400).json({ message: "Validation error", errors: error.errors });
         }
-        return next(error);
+        else {
+            next(error);
+        }
     }
     ;
 };
@@ -67,14 +61,11 @@ const getCalendarTaskByMonthAndClient = async (req, res, next) => {
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            // Manejo de errores de validación de Zod
-            res.status(400).json({
-                message: 'Validation error',
-                errors: error.errors,
-            });
-            return;
+            res.status(400).json({ message: "Validation error", errors: error.errors });
         }
-        return next(error);
+        else {
+            next(error);
+        }
     }
     ;
 };

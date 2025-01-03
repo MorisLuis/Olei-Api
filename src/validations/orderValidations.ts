@@ -17,10 +17,27 @@ export const SellsDetailsSchema = z.object({
     Descripcion: z.string().nullable().optional()
 });
 
-// Validación para el cuerpo del request
+// postOrder
 export const postOrderBodySchema = z.object({
     sellsData: SellsSchema,
     sellsDetails: z.array(SellsDetailsSchema)
+});
+
+// getOrder
+export const getOrderParamsSchema = z.object({
+    folio: z.string()
+});
+
+// getAllOrders
+export const getAllOrdersParamsSchema = z.object({
+    page: z
+        .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number())
+        .refine((val) => val > 0, { message: "Page debe ser un número positivo mayor que 0" }),
+
+    limit: z
+        .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number())
+        .refine((val) => val > 0 && val < 100, { message: "limit debe ser un número positivo mayor que 0 y menor que 100" }),
+
 });
 
 // getSells
