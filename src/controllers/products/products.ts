@@ -9,7 +9,6 @@ import BadRequestError from '../../errors/BadRequestError';
 
 const getProducById = async (req: Request, res: Response, next: NextFunction) => {
 
-
     try {
         const { id } = req.params;
         const { Marca } = req.query;
@@ -237,7 +236,6 @@ export const checkImageExists = async (url: string): Promise<boolean> => {
         return false;
     }
 };
-
 
 export {
     getProducById,

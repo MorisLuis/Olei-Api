@@ -35,7 +35,13 @@ export const productsWebQuerys = {
         )
         SELECT *
         FROM PagedProducts
-        WHERE RowNum BETWEEN (@page - 1) * @limit + 1 AND @page * @limit;
+        WHERE RowNum BETWEEN (@page - 1) * @limit + 1 AND @page * @limit
+        ORDER BY 
+        CASE 
+            WHEN LOWER(Descripcion) LIKE LOWER(@nombre) + '%' THEN 0 -- Prioridad para coincidencia inicial
+            ELSE 1
+        END,
+        Descripcion -- Luego orden alfabético
     `,
 
     // Get product by id.
@@ -70,7 +76,7 @@ export const productsWebQuerys = {
     `,
 
     getTotalProducts: `
-        SELECT COUNT(*)
+        SELECT COUNT(*) AS TotalCount
         FROM [dbo].[PRODUCTOS] P
         JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
         JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
