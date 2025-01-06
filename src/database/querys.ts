@@ -1,17 +1,6 @@
 export const querys = {
 
     //Auth
-    auth: ` 
-        SELECT
-        [Nombre],
-        [EMail],
-        [Id_Usuario],
-        [Password],
-        [Id_Almacen]
-        FROM [dbo].[USUARIOS]
-        WHERE Id_Usuario = @Id_Usuario
-    `,
-
     getAuthLimitData: `
         SELECT 
             Id_Almacen,
@@ -46,13 +35,6 @@ export const querys = {
         WHERE U.Id_UsuarioOOL = @email
     `,
 
-    authCompany: ` 
-        SELECT C.Id_ListPre, C.Nombre, CS.PrecioIncIVA
-        FROM [dbo].[CLIENTES] C
-        JOIN [dbo].[CONFIGSIST] CS ON C.IdOLEI = @IdOLEI
-        WHERE Id_Cliente = @Id_Cliente
-    ` ,
-
     authDatabase: `
         SELECT [IdOLEI]
             ,[Id_Almacen]
@@ -74,18 +56,6 @@ export const querys = {
         FROM [dbo].[CLIENTES]
         WHERE IdUsuarioOLEI = @IdUsuarioOLEI
     `,
-
-    getTypeOfMovementInitial: `
-        SELECT TOP (1) 
-            [Id_TipoMovInv],
-            [Descripcion],
-            [Accion],
-            [Id_AlmDest]
-        FROM [dbo].[TIPOMOVSINV]
-    `,
-
-    // Users
-    getAllUsers: "SELECT TOP(500) * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS]",
 
     // Tables
     getFamilias: `SELECT TRIM(F.Nombre) AS Nombre FROM [dbo].[FAMILIAS] F`,
@@ -111,9 +81,6 @@ export const querys = {
         FROM [dbo].[TIPOMOVSINV]
         WHERE Id_TipoMovInv = @Id_TipoMovInv
     `,
-
-    // Clients
-   
 
     postError: `
         INSERT INTO [dbo].[ERRORES]

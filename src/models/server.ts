@@ -7,7 +7,6 @@ import session, { Store } from 'express-session';
 import { dbConnectionMain } from "../database/connection";
 
 // Rutas
-import userRouter from "../routes/userRouter";
 import productRouter from "../routes/productRouter";
 import authRouter from "../routes/authRouter";
 import searchRouter from "../routes/searchRouter";
@@ -33,7 +32,6 @@ class Server {
 
     private paths: {
         product: string,
-        user: string,
         auth: string,
         search: string,
         tables: string,
@@ -56,7 +54,6 @@ class Server {
         this.redis = null;
         this.paths = {
             product: "/api/product",
-            user: "/api/user",
             auth: "/api/auth",
             search: "/api/search",
             tables: "/api/tables",
@@ -173,7 +170,6 @@ class Server {
 
     routes() {
         this.app.use(this.paths.product, productRouter);
-        this.app.use(this.paths.user, userRouter);
         this.app.use(this.paths.auth, authRouter);
         this.app.use(this.paths.search, searchRouter);
         this.app.use(this.paths.tables, tablesRouter);

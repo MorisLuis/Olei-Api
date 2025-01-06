@@ -9,5 +9,4 @@ export * from './sellsRouter';
 export * from './searchRouter';
 export * from './tablesRouter';
 export * from './typeofmovementsRouter';
-export * from './userRouter';
 export * from './utilsRouter';

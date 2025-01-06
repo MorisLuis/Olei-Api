@@ -12,7 +12,6 @@ const connect_redis_1 = __importDefault(require("connect-redis"));
 const express_session_1 = __importDefault(require("express-session"));
 const connection_1 = require("../database/connection");
 // Rutas
-const userRouter_1 = __importDefault(require("../routes/userRouter"));
 const productRouter_1 = __importDefault(require("../routes/productRouter"));
 const authRouter_1 = __importDefault(require("../routes/authRouter"));
 const searchRouter_1 = __importDefault(require("../routes/searchRouter"));
@@ -36,7 +35,6 @@ class Server {
         this.redis = null;
         this.paths = {
             product: "/api/product",
-            user: "/api/user",
             auth: "/api/auth",
             search: "/api/search",
             tables: "/api/tables",
@@ -138,7 +136,6 @@ class Server {
     }
     routes() {
         this.app.use(this.paths.product, productRouter_1.default);
-        this.app.use(this.paths.user, userRouter_1.default);
         this.app.use(this.paths.auth, authRouter_1.default);
         this.app.use(this.paths.search, searchRouter_1.default);
         this.app.use(this.paths.tables, tablesRouter_1.default);
