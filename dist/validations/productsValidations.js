@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.serachProductQuerySchema = exports.getTotalProductsQuerySchema = exports.getProducByIdWebQuerySchema = exports.getProductsQuerySchema = void 0;
+exports.getProductsByStockQuerySchema = exports.serachProductQuerySchema = exports.getTotalProductsQuerySchema = exports.getProducByIdWebQuerySchema = exports.getProductsQuerySchema = void 0;
 const zod_1 = require("zod");
 exports.getProductsQuerySchema = zod_1.z.object({
     page: zod_1.z.
@@ -60,5 +60,12 @@ exports.serachProductQuerySchema = zod_1.z.object({
         .string()
         .optional()
         .transform((val) => (val === undefined ? "" : val))
+});
+// App
+exports.getProductsByStockQuerySchema = zod_1.z.object({
+    PageNumber: zod_1.z.
+        preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
+    PageSize: zod_1.z.
+        preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
 });
 //# sourceMappingURL=productsValidations.js.map

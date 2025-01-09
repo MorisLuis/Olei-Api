@@ -1,9 +1,4 @@
 import { NextFunction, Request, Response } from 'express'
-import { dbConnection } from '../../database';
-import sql from 'mssql';
-import { handleGetWebSession } from '../../utils/Redis/getSession';
-import { productsWebQuerys } from '../../database/querys/productsWeb';
-import BadRequestError from '../../errors/BadRequestError';
 import { getProducByIdWebService, getProductsService, getTotalProductsService, searchProductService } from '../../services/productsServices';
 import { getProducByIdWebQuerySchema, getProductsQuerySchema, getTotalProductsQuerySchema, serachProductQuerySchema } from '../../validations/productsValidations';
 
