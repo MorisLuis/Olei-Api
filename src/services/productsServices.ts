@@ -27,7 +27,8 @@ const getProductsByStockService = async ({
 
     const userquery = querys.getAuthLimitData;
     const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery)
-    const user = requestUser.recordset[0]
+    const user = requestUser.recordset[0];
+    console.log({user})
 
     if (!pool) {
         throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
