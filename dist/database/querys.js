@@ -3,16 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.querys = void 0;
 exports.querys = {
     //Auth
-    auth: ` 
-        SELECT
-        [Nombre],
-        [EMail],
-        [Id_Usuario],
-        [Password],
-        [Id_Almacen]
-        FROM [dbo].[USUARIOS]
-        WHERE Id_Usuario = @Id_Usuario
-    `,
     getAuthLimitData: `
         SELECT 
             Id_Almacen,
@@ -45,12 +35,6 @@ exports.querys = {
         JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] UC on U.Id_ClienteDBCLIENTES = UC.Id_Cliente
         WHERE U.Id_UsuarioOOL = @email
     `,
-    authCompany: ` 
-        SELECT C.Id_ListPre, C.Nombre, CS.PrecioIncIVA
-        FROM [dbo].[CLIENTES] C
-        JOIN [dbo].[CONFIGSIST] CS ON C.IdOLEI = @IdOLEI
-        WHERE Id_Cliente = @Id_Cliente
-    `,
     authDatabase: `
         SELECT [IdOLEI]
             ,[Id_Almacen]
@@ -72,20 +56,43 @@ exports.querys = {
         FROM [dbo].[CLIENTES]
         WHERE IdUsuarioOLEI = @IdUsuarioOLEI
     `,
-    getTypeOfMovementInitial: `
-        SELECT TOP (1) 
-            [Id_TipoMovInv],
-            [Descripcion],
-            [Accion],
-            [Id_AlmDest]
-        FROM [dbo].[TIPOMOVSINV]
-    `,
-    // Users
-    getAllUsers: "SELECT TOP(500) * FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOS]",
     // Tables
-    getFamilias: `SELECT TRIM(F.Nombre) AS Nombre FROM [dbo].[FAMILIAS] F`,
-    getMarcas: `SELECT TRIM(M.Nombre) AS Nombre FROM [dbo].[MARCAS] M`,
-    getFolios: `SELECT TRIM(P.Codigo) AS Codigo FROM [dbo].[PRODUCTOS] P`,
+    getFamilias: `
+        SELECT TOP(10)
+        TRIM(Nombre) AS Nombre  
+        FROM [dbo].[FAMILIAS]
+        WHERE LOWER(Nombre) LIKE '%' + LOWER(@Nombre) + '%'
+        ORDER BY 
+        CASE 
+            WHEN LOWER(Nombre) LIKE LOWER(@Nombre) + '%' THEN 0 -- Prioridad para coincidencia inicial
+            ELSE 1
+        END,
+        Nombre; -- Luego orden alfabético
+    `,
+    getMarcas: `
+        SELECT TOP(10)
+        TRIM(Nombre) AS Nombre  
+        FROM [dbo].[MARCAS]
+        WHERE LOWER(Nombre) LIKE '%' + LOWER(@Nombre) + '%'
+        ORDER BY 
+        CASE 
+            WHEN LOWER(Nombre) LIKE LOWER(@Nombre) + '%' THEN 0 -- Prioridad para coincidencia inicial
+            ELSE 1
+        END,
+        Nombre; -- Luego orden alfabético
+    `,
+    getFolios: `
+        SELECT TOP(10)
+        TRIM(Codigo) AS Codigo
+        FROM [dbo].[PRODUCTOS]
+        WHERE LOWER(Codigo) LIKE '%' + LOWER(@Codigo) + '%'
+        ORDER BY 
+        CASE 
+            WHEN LOWER(Codigo) LIKE LOWER(@Codigo) + '%' THEN 0 -- Prioridad para coincidencia inicial
+            ELSE 1
+        END,
+        Codigo; -- Luego orden alfabético
+    `,
     // TypeOfMovements
     getTiposMovimiento: `
         SELECT TOP (1000) 
@@ -103,18 +110,6 @@ exports.querys = {
             [Id_AlmDest]
         FROM [dbo].[TIPOMOVSINV]
         WHERE Id_TipoMovInv = @Id_TipoMovInv
-    `,
-    // Clients
-    getClientBySearch: `
-        SELECT TOP(10) 
-            TRIM(C.Nombre) AS Nombre, 
-            C.Id_Cliente,
-            C.Id_Almacen, 
-            C.Id_ListPre, 
-            C.CorreoVtas, 
-            C.Telefono1
-        FROM [dbo].[CLIENTES] C
-        WHERE LOWER(C.Nombre) LIKE '%' + LOWER(@nombre) + '%'
     `,
     postError: `
         INSERT INTO [dbo].[ERRORES]

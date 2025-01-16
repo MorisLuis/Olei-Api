@@ -11,7 +11,6 @@ import { getProductsByStockService } from '../../services/productsServices';
 
 const getProducById = async (req: Request, res: Response, next: NextFunction) => {
 
-
     try {
         const { id } = req.params;
         const { Marca } = req.query;
@@ -19,8 +18,6 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
 
         const sessionId = req.sessionID;
         const { user: userFR } = await handleGetSession({ sessionId });
-
-        console.log({userFR})
 
         if (!userFR) {
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
@@ -176,51 +173,6 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
 };
 
 
-// Utils
-interface getImageInterface {
-    base?: string,
-    products: any
-}
-
-const getImagesFromProducts = async ({
-    base,
-    products
-}: getImageInterface) => {
-
-    // Ahora, para cada producto, agrega la propiedad "imagen"
-    for (const product of products) {
-        // Supongamos que la URL de la imagen se basa en la propiedad "Codigo" del producto
-        const baseSQL = base?.trim().toLowerCase().split(',');
-
-        if (baseSQL && baseSQL.length > 0) {
-            const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
-            const imageDB = formatImageDB[formatImageDB.length - 1];
-            const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
-
-            // Verifica si la imagen existe antes de agregarla al producto
-            const imageExists = await checkImageExists(imageUrl);
-
-            if (imageExists) {
-                product.imagen = [{
-                    url: imageUrl,
-                    id: 1
-                }];
-            }
-        }
-    }
-
-    return { products }
-}
-
-export const checkImageExists = async (url: string): Promise<boolean> => {
-    try {
-        const response = await fetch(url, { method: 'HEAD' });
-        return response.ok;
-    } catch (error) {
-        console.error('Error during image check:', error);
-        return false;
-    }
-};
 
 
 export {

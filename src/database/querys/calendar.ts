@@ -34,7 +34,6 @@ export const celendarQuerys = {
             AND MONTH(Fecha) = @Mes;
     `,
 
-
     getCalendarTasksDay: `
         SELECT
             Id_Bitacora,
@@ -103,4 +102,5 @@ export const celendarQuerys = {
             AND MONTH(Fecha) = @Mes
             AND Id_Cliente = @Id_Cliente
     `
+
 }

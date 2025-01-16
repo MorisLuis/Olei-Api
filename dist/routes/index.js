@@ -25,6 +25,5 @@ __exportStar(require("./sellsRouter"), exports);
 __exportStar(require("./searchRouter"), exports);
 __exportStar(require("./tablesRouter"), exports);
 __exportStar(require("./typeofmovementsRouter"), exports);
-__exportStar(require("./userRouter"), exports);
 __exportStar(require("./utilsRouter"), exports);
 //# sourceMappingURL=index.js.map

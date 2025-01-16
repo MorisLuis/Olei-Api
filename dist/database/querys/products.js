@@ -78,20 +78,25 @@ exports.productsQuerys = {
     // Search products. ***
     getProductsBySearch: `
         SELECT TOP(10)
-        TRIM(P.Descripcion) AS Descripcion
+            TRIM(P.Descripcion) AS Descripcion
         FROM [dbo].[PRODUCTOS] P
             JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
             JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
             JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
             JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
         WHERE LOWER(P.Descripcion) LIKE '%' + LOWER(@Descripcion) + '%'
-        AND PR.Id_ListaPrecios = @Id_ListaPrecios AND E.Id_Almacen = @Id_Almacen
-        AND LOWER(P.Codigo) LIKE '%' + LOWER(@Codigo) + '%'
-        AND LOWER(F.Nombre) LIKE '%' + LOWER(@familia) + '%'
-        AND LOWER(M.Nombre) LIKE '%' + LOWER(@marca) + '%'
-        AND (@SwSinStock = 0 OR E.Existencia > 0)
-        AND (@SwsinPrecio = 0 OR PR.Precio > 0)
-        ORDER BY P.Codigo
+            AND PR.Id_ListaPrecios = @Id_ListaPrecios AND E.Id_Almacen = @Id_Almacen
+            AND LOWER(P.Codigo) LIKE '%' + LOWER(@Codigo) + '%'
+            AND LOWER(F.Nombre) LIKE '%' + LOWER(@familia) + '%'
+            AND LOWER(M.Nombre) LIKE '%' + LOWER(@marca) + '%'
+            AND (@SwSinStock = 0 OR E.Existencia > 0)
+            AND (@SwsinPrecio = 0 OR PR.Precio > 0)
+        ORDER BY
+        CASE 
+            WHEN LOWER(P.Descripcion) LIKE LOWER(@Descripcion) + '%' THEN 0 -- Prioridad para coincidencia inicial
+            ELSE 1
+        END,
+        P.Descripcion; -- Luego orden alfabético
     `,
     // Search products in inventory.
     getProductsBySearchInventory: `
@@ -103,12 +108,17 @@ exports.productsQuerys = {
             TRIM(CT.CodBar) AS CodBar,
             TRIM(M.Nombre) AS Marca
         FROM [dbo].[PRODUCTOS] P
-        JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-        JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-        JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-        JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
-        WHERE LOWER(P.Descripcion) LIKE '%' + LOWER(@searchTerm) + '%' AND  PR.Id_ListaPrecios = @Id_ListaPrecios
-        ORDER BY P.Codigo
+            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+            JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
+        WHERE LOWER(P.Descripcion) LIKE '%' + LOWER(@searchTerm) + '%' AND PR.Id_ListaPrecios = @Id_ListaPrecios
+        ORDER BY 
+            CASE 
+                WHEN LOWER(P.Descripcion) LIKE LOWER(@searchTerm) + '%' THEN 0 -- Prioridad para coincidencia inicial
+                ELSE 1
+            END,
+            P.Descripcion; -- Luego orden alfabético
     `,
 };
 //# sourceMappingURL=products.js.map

@@ -1,50 +1,56 @@
 import { NextFunction, Request, Response } from 'express'
-import { dbConnection, querys } from '../../database';
-import { productsQuerys } from '../../database/querys/products';
-import { handleGetSession } from '../../utils/Redis/getSession';
-import BadRequestError from '../../errors/BadRequestError';
+import { searcCodigoService, searchFamiliaService, searchMarcaService } from '../../services/searchServices';
+import { simpleSearchQuerySchema } from '../../validations/searchValidations';
 
 
-const searchProductInventory = async (req: Request, res: Response, next: NextFunction) => {
+const getFamilias = async (req: Request, res: Response, next: NextFunction) => {
 
-    try {
-        const { searchTerm } = req.query;
+    const { searchTerm } = simpleSearchQuerySchema.parse(req.query);
+    const sessionId = req.sessionRedis
 
-        const sessionId = req.sessionID;
-        const { user: userFR } = await handleGetSession({ sessionId });
+    const { familias } = await searchFamiliaService({
+        sessionId,
+        searchTerm
+    });
 
-        if (!userFR) {
-            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-        }
+    res.json({
+        familias
+    });
+};
 
-        const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
+const getMarcas = async (req: Request, res: Response, next: NextFunction) => {
 
-        const Id_Usuario = req.id;
-        const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+    const { searchTerm } = simpleSearchQuerySchema.parse(req.query);
+    const sessionId = req.sessionRedis
 
-        const userquery = querys.getAuthLimitData;
-        const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
-        const user = requestUser.recordset[0]
+    const { marcas } = await searchMarcaService({
+        sessionId,
+        searchTerm
+    });
 
-        if (!pool) {
-            throw new BadRequestError({ code: 500, message: "Unable to establish a connection to the database", logging: true });
-        }
+    res.json({
+        marcas
+    });
+};
 
-        const query = productsQuerys.getProductsBySearchInventory;
-        const result = await pool.request()
-            .input("searchTerm", searchTerm)
-            .input('Id_ListaPrecios', user.Id_ListPre)
-            .query(query);
+const getCodigos = async (req: Request, res: Response, next: NextFunction) => {
 
-        const products = result.recordset
+    const { searchTerm } = simpleSearchQuerySchema.parse(req.query);
+    const sessionId = req.sessionRedis
 
-        res.json(products)
+    const { codigos } = await searcCodigoService({
+        sessionId,
+        searchTerm
+    });
 
-    } catch (error) {
-        next(error)
-    }
-}
+    res.json({
+        codigos
+    });
+};
+
 
 export {
-    searchProductInventory
+    getFamilias,
+    getMarcas,
+    getCodigos
 }

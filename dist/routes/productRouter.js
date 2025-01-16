@@ -14,6 +14,7 @@ const router = (0, express_1.default)();
 router.get("/", validate_jwt_1.validateJWTWeb, productsWeb_1.getProducts);
 router.get("/web/:id", validate_jwt_1.validateJWTWeb, productsWeb_1.getProducByIdWeb);
 router.get("/count", validate_jwt_1.validateJWTWeb, productsWeb_1.getTotalProducts);
+router.get("/search", validate_jwt_1.validateJWTWeb, productsWeb_1.searchProduct);
 // App endpoints
 router.get("/byStock", validate_jwt_1.validateJWT, products_1.getProductsByStock);
 router.get("/byStockCount", validate_jwt_1.validateJWT, products_1.getTotalOfProductsByStock);

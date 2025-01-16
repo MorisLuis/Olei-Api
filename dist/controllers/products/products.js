@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProductByStockAndCodeBar = exports.getTotalOfProductsByStock = exports.getProductsByStock = exports.getProducById = exports.checkImageExists = void 0;
+exports.getProductByStockAndCodeBar = exports.getTotalOfProductsByStock = exports.getProductsByStock = exports.getProducById = void 0;
 const database_1 = require("../../database");
 const products_1 = require("../../database/querys/products");
 const identifyBarcodeType_1 = require("../../utils/identifyBarcodeType");
@@ -30,13 +30,19 @@ const getProducById = async (req, res, next) => {
         if (!pool) {
             throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
+        let query = productsWeb_1.productsWebQuerys.getProducById;
+        if (userFR.baseclientes === 'OLEIDB1_ROSCO') {
+            // We have to modify query to ROSCO
+            query = productsWeb_1.productsWebQuerys.getProducByIdROSCO;
+        }
+        ;
         const result = await pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)
             .input("ListaPrecios", user.Id_ListPre)
             .input("Almacen", user.Id_Almacen)
             .input("baseSQL", baseclientes)
-            .query(productsWeb_1.productsWebQuerys.getProducById);
+            .query(query);
         const product = result?.recordset[0];
         return res.json(product);
     }
@@ -136,36 +142,4 @@ const getProductByStockAndCodeBar = async (req, res, next) => {
     }
 };
 exports.getProductByStockAndCodeBar = getProductByStockAndCodeBar;
-const getImagesFromProducts = async ({ base, products }) => {
-    // Ahora, para cada producto, agrega la propiedad "imagen"
-    for (const product of products) {
-        // Supongamos que la URL de la imagen se basa en la propiedad "Codigo" del producto
-        const baseSQL = base?.trim().toLowerCase().split(',');
-        if (baseSQL && baseSQL.length > 0) {
-            const formatImageDB = baseSQL[baseSQL.length - 1].split('_');
-            const imageDB = formatImageDB[formatImageDB.length - 1];
-            const imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${product.Codigo.trim()}.jpg`;
-            // Verifica si la imagen existe antes de agregarla al producto
-            const imageExists = await (0, exports.checkImageExists)(imageUrl);
-            if (imageExists) {
-                product.imagen = [{
-                        url: imageUrl,
-                        id: 1
-                    }];
-            }
-        }
-    }
-    return { products };
-};
-const checkImageExists = async (url) => {
-    try {
-        const response = await fetch(url, { method: 'HEAD' });
-        return response.ok;
-    }
-    catch (error) {
-        console.error('Error during image check:', error);
-        return false;
-    }
-};
-exports.checkImageExists = checkImageExists;
 //# sourceMappingURL=products.js.map

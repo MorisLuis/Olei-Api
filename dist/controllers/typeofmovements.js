@@ -15,6 +15,7 @@ const getTypeofmovements = async (req, res, next) => {
         if (!userFR) {
             throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
         }
+        ;
         const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL, userId } = userFR;
         const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
         const request = pool.request();

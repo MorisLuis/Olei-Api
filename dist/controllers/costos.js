@@ -15,6 +15,7 @@ const updateCostos = async (req, res, next) => {
     catch (error) {
         next(error);
     }
+    ;
 };
 exports.updateCostos = updateCostos;
 //# sourceMappingURL=costos.js.map

@@ -5,7 +5,6 @@ import BadRequestError from '../errors/BadRequestError';
 
 const getTables = async (req: Request, res: Response, next: NextFunction) => {
 
-    
     try {
         // Get session from REDIS.
         const sessionId = req.sessionRedis
@@ -17,6 +16,7 @@ const getTables = async (req: Request, res: Response, next: NextFunction) => {
     
         const { Serverweb, Baseweb } = userFR;
         const pool = await dbConnection(Serverweb, Baseweb);
+
         const FamiliasResult = await pool?.request().query(querys.getFamilias);
         const Familias = FamiliasResult?.recordset.map(familia => familia.Nombre);
 
@@ -35,7 +35,7 @@ const getTables = async (req: Request, res: Response, next: NextFunction) => {
     } catch (error) {
         next(error)
     }
-}
+};
 
 export {
     getTables
