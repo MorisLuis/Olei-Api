@@ -109,11 +109,15 @@ const getOrderDetailsSells = async ({ PageNumber, folio, sessionId }) => {
         throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
     }
     ;
+    // Whe made a little variotion when the PageNumber is 999.
+    // This variation is used in the function 'handleGetOrderDetails' in olei web
+    const pageNumberModified = PageNumber === 999 ? 1 : PageNumber;
+    const pageSizeModified = PageNumber === 999 ? 100 : 10;
     const query = orders_1.orderQuerys.getOrderDetails;
     const request = await pool.request()
         .input('folio', mssql_1.default.Int, folio)
-        .input('PageNumber', mssql_1.default.Int, PageNumber)
-        .input('PageSize', mssql_1.default.Int, 10)
+        .input('PageNumber', mssql_1.default.Int, pageNumberModified)
+        .input('PageSize', mssql_1.default.Int, pageSizeModified)
         .query(query);
     const orderDetails = request.recordset;
     return orderDetails;
