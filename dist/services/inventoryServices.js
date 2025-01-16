@@ -62,7 +62,6 @@ const postInventoryService = async ({ sessionId, inventoryDetails, typeOfMovemen
 exports.postInventoryService = postInventoryService;
 const searchProductInventoryService = async ({ sessionId, searchTerm, }) => {
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
-    console.log({ userFR });
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }

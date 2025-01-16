@@ -56,7 +56,7 @@ const getOrderService = async ({ sessionId, folio }) => {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
     ;
-    const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
+    const { Serverweb, Baseweb, Id_Cliente, TipoDocOO } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
         throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });

@@ -30,13 +30,19 @@ const getProducById = async (req, res, next) => {
         if (!pool) {
             throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
+        let query = productsWeb_1.productsWebQuerys.getProducById;
+        if (userFR.baseclientes === 'OLEIDB1_ROSCO') {
+            // We have to modify query to ROSCO
+            query = productsWeb_1.productsWebQuerys.getProducByIdROSCO;
+        }
+        ;
         const result = await pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)
             .input("ListaPrecios", user.Id_ListPre)
             .input("Almacen", user.Id_Almacen)
             .input("baseSQL", baseclientes)
-            .query(productsWeb_1.productsWebQuerys.getProducById);
+            .query(query);
         const product = result?.recordset[0];
         return res.json(product);
     }

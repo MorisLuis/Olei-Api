@@ -92,8 +92,6 @@ export const searchProductInventoryService = async ({
 
     const { user: userFR } = await handleGetSession({ sessionId });
 
-    console.log({userFR});
-
     if (!userFR) {
         throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }

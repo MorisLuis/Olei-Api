@@ -5,7 +5,6 @@ const searchServices_1 = require("../../services/searchServices");
 const searchValidations_1 = require("../../validations/searchValidations");
 const getFamilias = async (req, res, next) => {
     const { searchTerm } = searchValidations_1.simpleSearchQuerySchema.parse(req.query);
-    console.log({ searchTerm });
     const sessionId = req.sessionRedis;
     const { familias } = await (0, searchServices_1.searchFamiliaService)({
         sessionId,

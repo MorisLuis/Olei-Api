@@ -19,8 +19,6 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
         const sessionId = req.sessionID;
         const { user: userFR } = await handleGetSession({ sessionId });
 
-        console.log({userFR})
-
         if (!userFR) {
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
         }

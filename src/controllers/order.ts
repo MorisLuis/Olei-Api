@@ -44,6 +44,7 @@ const getOrder = async (req: Request, res: Response, next: NextFunction) => {
             folio
         })
 
+
         res.json(order)
 
     } catch (error) {
@@ -78,7 +79,6 @@ const getAllOrders = async (req: Request, res: Response, next: NextFunction) => 
 };
 
 const getOrderDetails = async (req: Request, res: Response, next: NextFunction) => {
-
 
     try {
         const sessionId = req.sessionRedis

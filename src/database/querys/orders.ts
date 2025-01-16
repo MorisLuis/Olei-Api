@@ -5,9 +5,9 @@ export const orderQuerys = {
     getOrder: ` 
         SELECT V.Folio, V.Piezas, V.Subtotal, V.Impuesto, V.Total, V.Fecha, C.Nombre as Cliente, VE.Nombre as Vendedor
         FROM [dbo].[VENTAS] AS V
-        INNER JOIN [dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
-        INNER JOIN [dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
-        WHERE V.Id_Cliente = @Id_Cliente AND V.TipoDoc = @TipoDocOO AND V.Folio = @folio
+        LEFT JOIN [dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
+        LEFT JOIN [dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor
+        WHERE  V.Folio = @folio
     `,
 
     getAllOrders: `

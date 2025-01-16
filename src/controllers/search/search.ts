@@ -6,7 +6,6 @@ import { simpleSearchQuerySchema } from '../../validations/searchValidations';
 const getFamilias = async (req: Request, res: Response, next: NextFunction) => {
 
     const { searchTerm } = simpleSearchQuerySchema.parse(req.query);
-    console.log({searchTerm})
     const sessionId = req.sessionRedis
 
     const { familias } = await searchFamiliaService({
@@ -47,7 +46,7 @@ const getCodigos = async (req: Request, res: Response, next: NextFunction) => {
     res.json({
         codigos
     });
-}
+};
 
 
 export {
