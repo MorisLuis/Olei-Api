@@ -101,12 +101,10 @@ exports.productsQuerys = {
     // Search products in inventory.
     getProductsBySearchInventory: `
         SELECT TOP(20)
-            TRIM(P.Descripcion) AS Descripcion,
-            TRIM(P.Codigo) AS Codigo,
-            E.Id_Almacen,
-            M.Id_Marca,
-            TRIM(CT.CodBar) AS CodBar,
-            TRIM(M.Nombre) AS Marca
+            P.Descripcion AS Descripcion,
+            P.Codigo AS Codigo,
+            M.Nombre AS Marca,
+            CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', E.Id_Almacen, '-', PR.Id_ListaPrecios) AS UniqueKey
         FROM [dbo].[PRODUCTOS] P
             JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
             JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
@@ -115,10 +113,10 @@ exports.productsQuerys = {
         WHERE LOWER(P.Descripcion) LIKE '%' + LOWER(@searchTerm) + '%' AND PR.Id_ListaPrecios = @Id_ListaPrecios
         ORDER BY 
             CASE 
-                WHEN LOWER(P.Descripcion) LIKE LOWER(@searchTerm) + '%' THEN 0 -- Prioridad para coincidencia inicial
+                WHEN CHARINDEX(@searchTerm, P.Descripcion) = 1 THEN 0
                 ELSE 1
             END,
-            P.Descripcion; -- Luego orden alfabético
+            P.Descripcion
     `,
 };
 //# sourceMappingURL=products.js.map
