@@ -19,6 +19,7 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
         const sessionId = req.sessionID;
         const { user: userFR } = await handleGetSession({ sessionId });
 
+        console.log({userFR})
 
         if (!userFR) {
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
@@ -35,13 +36,20 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
             throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
 
+        let query = productsWebQuerys.getProducById
+
+        if(userFR.baseclientes === 'OLEIDB1_ROSCO') {
+            // We have to modify query to ROSCO
+            query = productsWebQuerys.getProducByIdROSCO
+        };
+
         const result = await pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)
             .input("ListaPrecios", user.Id_ListPre)
             .input("Almacen", user.Id_Almacen)
             .input("baseSQL", baseclientes)
-            .query(productsWebQuerys.getProducById);
+            .query(query);
 
         const product = result?.recordset[0];
 
