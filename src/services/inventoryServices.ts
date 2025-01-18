@@ -100,10 +100,6 @@ export const searchProductInventoryService = async ({
 
     const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
 
-    const userquery = querys.getAuthLimitData;
-    const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery)
-    const user = requestUser.recordset[0]
-
     if (!pool) {
         throw new BadRequestError({ code: 500, message: "Unable to establish a connection to the database", logging: true });
     }
@@ -111,7 +107,7 @@ export const searchProductInventoryService = async ({
     const query = productsQuerys.getProductsBySearchInventory;
     const result = await pool.request()
         .input("searchTerm", searchTerm)
-        .input('Id_ListaPrecios', user.Id_ListPre)
+        .input('Id_Usuario', userId)
         .query(query);
 
     const products = result.recordset

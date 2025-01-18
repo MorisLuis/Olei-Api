@@ -107,22 +107,23 @@ export const productsQuerys = {
 
     // Search products in inventory.
     getProductsBySearchInventory: `
-        SELECT TOP(20)
+        SELECT TOP(10)
             P.Descripcion AS Descripcion,
             P.Codigo AS Codigo,
             M.Nombre AS Marca,
             CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', E.Id_Almacen, '-', PR.Id_ListaPrecios) AS UniqueKey
         FROM [dbo].[PRODUCTOS] P
-            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-            JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
-        WHERE LOWER(P.Descripcion) LIKE '%' + LOWER(@searchTerm) + '%' AND PR.Id_ListaPrecios = @Id_ListaPrecios
+        JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+        JOIN [dbo].[USUARIOS] U ON Id_Usuario = @Id_Usuario
+        JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+        JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+        JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
+        WHERE LOWER(P.Descripcion) LIKE '%' + LOWER(@searchTerm) + '%' AND PR.Id_ListaPrecios = U.ActualizarListas
         ORDER BY 
-            CASE 
-                WHEN CHARINDEX(@searchTerm, P.Descripcion) = 1 THEN 0
-                ELSE 1
-            END,
-            P.Descripcion
+        CASE 
+            WHEN CHARINDEX(@searchTerm, P.Descripcion) = 1 THEN 0
+            ELSE 1
+        END,
+        P.Descripcion
     `,
 }
