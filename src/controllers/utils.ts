@@ -1,10 +1,30 @@
 import { Request, Response } from 'express';
 import { closeDbConnection, dbConnection } from '../database';
+import { handleGetWebSession } from '../utils/Redis/getSession';
+import BadRequestError from '../errors/BadRequestError';
 
+
+const getBanner = async (req: Request, res: Response) => {
+
+    const sessionId = req.sessionRedis;
+    const { user: userFR } = await handleGetWebSession({ sessionId });
+
+    if (!userFR) {
+        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+    };
+
+    const database = userFR?.Baseweb
+    const databaseSplit = database?.split('_')
+    const newPath = databaseSplit?.[1]?.toLowerCase().trim();
+    const banner = newPath ? `https://oleistorage.blob.core.windows.net/${newPath}/BANNER.png` : '/Banner_olei.png';
+
+    res.json({
+        banner
+    });
+}
 
 
 const getUtils = async (req: Request, res: Response) => {
-
 
     try {
 
@@ -18,6 +38,7 @@ const getUtils = async (req: Request, res: Response) => {
 };
 
 export {
+    getBanner,
     getUtils
 };
 

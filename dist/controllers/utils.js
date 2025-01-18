@@ -1,6 +1,27 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUtils = void 0;
+exports.getUtils = exports.getBanner = void 0;
+const getSession_1 = require("../utils/Redis/getSession");
+const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
+const getBanner = async (req, res) => {
+    const sessionId = req.sessionRedis;
+    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
+    ;
+    const database = userFR?.Baseweb;
+    const databaseSplit = database?.split('_');
+    const newPath = databaseSplit?.[1]?.toLowerCase().trim();
+    const banner = newPath ? `https://oleistorage.blob.core.windows.net/${newPath}/BANNER.png` : '/Banner_olei.png';
+    res.json({
+        banner
+    });
+};
+exports.getBanner = getBanner;
 const getUtils = async (req, res) => {
     try {
         res.json({
