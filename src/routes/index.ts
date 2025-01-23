@@ -10,3 +10,4 @@ export * from './searchRouter';
 export * from './tablesRouter';
 export * from './typeofmovementsRouter';
 export * from './utilsRouter';
+export * from './reportsRouter';
