@@ -2,7 +2,9 @@ import { Request, Response } from 'express';
 import { closeDbConnection, dbConnection } from '../database';
 import { handleGetWebSession } from '../utils/Redis/getSession';
 import BadRequestError from '../errors/BadRequestError';
-
+import { sellsQuery } from '../database/querys/sells';
+import { ConnectionPool } from 'mssql';
+import ExcelJS from 'exceljs'
 
 const getBanner = async (req: Request, res: Response) => {
 
@@ -143,6 +145,7 @@ const generateExcelStream = async (res: any, data: any[]) => {
 
 
 export {
+    getBanner,
     getUtils,
     getExcellTest
 };
