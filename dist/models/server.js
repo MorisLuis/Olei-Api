@@ -117,7 +117,9 @@ class Server {
             'https://www.oleionline.com',
             'http://localhost:3000',
             'http://localhost:3001',
-            "https://olei-crm.vercel.app"
+            "https://olei-crm.vercel.app",
+            //Demos
+            "https://oleiweb-git-demo2-morisluis-projects.vercel.app"
         ];
         const corsOptions = {
             origin: (origin, callback) => {
