@@ -31,8 +31,10 @@ const getProducById = async (req, res, next) => {
             throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
         }
         let query = productsWeb_1.productsWebQuerys.getProducById;
-        if (userFR.baseclientes === 'OLEIDB1_ROSCO') {
+        if (userFR.baseclientes === 'OLEIDB1_ROSCO' ||
+            userFR.baseclientes === 'OLEIDB1_ROSCO_TEST') {
             // We have to modify query to ROSCO
+            console.log("rosco");
             query = productsWeb_1.productsWebQuerys.getProducByIdROSCO;
         }
         ;

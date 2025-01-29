@@ -36,8 +36,12 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
 
         let query = productsWebQuerys.getProducById
 
-        if(userFR.baseclientes === 'OLEIDB1_ROSCO') {
+        if(
+            userFR.baseclientes === 'OLEIDB1_ROSCO' ||
+            userFR.baseclientes === 'OLEIDB1_ROSCO_TEST'
+            ) {
             // We have to modify query to ROSCO
+            console.log("rosco")
             query = productsWebQuerys.getProducByIdROSCO
         };
 

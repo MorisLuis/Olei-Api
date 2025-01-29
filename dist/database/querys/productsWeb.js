@@ -93,7 +93,7 @@ exports.productsWebQuerys = {
             CT.Impto AS Impuesto,
             P.Observaciones,
             TRIM(CT.CodBar) AS CodBar,
-            'https://rosco1.blob.core.windows.net/imagenes/' +  LOWER(SUBSTRING(@baseSQL, CHARINDEX('_', @baseSQL) + 1, LEN(@baseSQL))) + '/' + TRIM(P.Codigo) + '.jpg' AS imagen
+            'https://rosco1.blob.core.windows.net/imagenes/' + TRIM(P.SKU) + '.jpg' AS imagen
             FROM [dbo].[PRODUCTOS] P
         JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
         JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
