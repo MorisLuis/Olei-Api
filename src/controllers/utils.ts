@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { closeDbConnection, dbConnection } from '../database';
+import { dbConnection } from '../database';
 import { handleGetWebSession } from '../utils/Redis/getSession';
 import BadRequestError from '../errors/BadRequestError';
 import { sellsQuery } from '../database/querys/sells';
@@ -24,7 +24,6 @@ const getBanner = async (req: Request, res: Response) => {
         banner
     });
 }
-
 
 const getUtils = async (req: Request, res: Response) => {
 

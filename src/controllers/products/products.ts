@@ -23,8 +23,8 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
         }
 
-        const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
-        const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+        const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
         const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
@@ -37,8 +37,8 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
         let query = productsWebQuerys.getProducById
 
         if(
-            userFR.baseclientes === 'OLEIDB1_ROSCO' ||
-            userFR.baseclientes === 'OLEIDB1_ROSCO_TEST'
+            userFR.BaseSQL === 'OLEIDB1_ROSCO' ||
+            userFR.BaseSQL === 'OLEIDB1_ROSCO_TEST'
             ) {
             // We have to modify query to ROSCO
             console.log("rosco")
@@ -50,7 +50,7 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
             .input("Marca", Marca)
             .input("ListaPrecios", user.Id_ListPre)
             .input("Almacen", user.Id_Almacen)
-            .input("baseSQL", baseclientes)
+            .input("baseSQL", BaseSQL)
             .query(query);
 
         const product = result?.recordset[0];
@@ -92,8 +92,8 @@ const getTotalOfProductsByStock = async (req: Request, res: Response, next: Next
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
         }
 
-        const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
-        const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+        const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
         const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
@@ -131,8 +131,8 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
         }
 
-        const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
-        const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+        const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL } = userFR;
+        const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
         const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery)

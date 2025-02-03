@@ -1,63 +1,50 @@
 import { NextFunction, Request, Response } from 'express';
-import sql from "mssql";
-import { closeDbConnection, dbConnection, dbConnectionMain, querys } from '../../database';
+import { closeDbConnection } from '../../database';
 import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
-import { MovementDetail, UserSessionInterface, ValidationResult } from '../../interface/user';
+import { UserSessionInterface } from '../../interface/user';
 import { handleGetSession } from '../../utils/Redis/getSession';
 import { handleDeleteRedisSession } from '../../utils/Redis/deleteRedis';
-
 import BadRequestError from '../../errors/BadRequestError';
+import { loginAppService, loginDBAppService } from '../../services/authAppServices';
 
 const loginDB = async (req: Request, res: Response, next: NextFunction) => {
 
-
     try {
-        // STEP 1 - CONNECT TO OLIEDB1_CLIENTES
         const { IdUsuarioOLEI, PasswordOLEI } = req.body;
 
-        const mainPool = await dbConnectionMain();
-        if (!mainPool) {
-            throw new BadRequestError({ code: 400, message: "Error connecting to the main database!", logging: true });
-        }
+        const { result } = await loginDBAppService({
+            IdUsuarioOLEI,
+            PasswordOLEI
+        })
 
-        if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
-            throw new BadRequestError({ code: 401, message: "Necesario enviar usuario y contraseña!", logging: true });
-        }
+        const tokenDB = await generateJWTDB({
+            IdUsuarioOLEI: result.IdUsuarioOLEI.trim()
+        });
 
-        const query_DB = querys.authDatabase;
-        const result = await mainPool.request().input('IdUsuarioOLEI', IdUsuarioOLEI).query(query_DB);
-        const cleanResult = result?.recordset[0];
-
-        if (!cleanResult) {
-            throw new BadRequestError({ code: 401, message: `No se encontro el usuario: ${IdUsuarioOLEI}`, logging: true });
-        }
-
-        if (cleanResult.PasswordOLEI.trim() !== PasswordOLEI) {
-            throw new BadRequestError({ code: 401, message: `Contraseña incorrecta`, logging: true });
-        }
-
-        const user = {
-            BaseSQL: cleanResult.BaseSQL,
-            RazonSocial: cleanResult.RazonSocial
-        };
-
-        const tokenDB = await generateJWTDB({ IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim() });
-
+        // Session redis
         const datosDelUsuario: UserSessionInterface = {
-            serverclientes: cleanResult.ServidorSQL.trim(),
-            baseclientes: cleanResult.BaseSQL.trim(),
-            PasswordSQL: cleanResult.PasswordSQL.trim(),
-            UsuarioSQL: cleanResult.UsuarioSQL.trim(),
-            IdUsuarioOLEI: cleanResult.IdUsuarioOLEI.trim(),
-            RazonSocial: cleanResult.RazonSocial.trim(),
-            SwImagenes: cleanResult.SwImagenes,
-            Vigencia: cleanResult.Vigencia,
+            ServidorSQL: result.ServidorSQL.trim(),
+            BaseSQL: result.BaseSQL.trim(),
+            PasswordSQL: result.PasswordSQL.trim(),
+            UsuarioSQL: result.UsuarioSQL.trim(),
+
+            IdUsuarioOLEI: result.IdUsuarioOLEI.trim(),
+
+            RazonSocial: result.RazonSocial.trim(),
+            SwImagenes: result.SwImagenes,
+            Vigencia: result.Vigencia,
             userId: undefined,
             userRol: undefined,
             from: 'mobil'
         };
 
         (req.session as any).user = datosDelUsuario;
+
+        // User to Frontend.
+        const user = {
+            BaseSQL: result.BaseSQL,
+            RazonSocial: result.RazonSocial
+        };
 
         return res.json({
             tokenDB,
@@ -72,63 +59,37 @@ const loginDB = async (req: Request, res: Response, next: NextFunction) => {
 const login = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        const sessionId = req.sessionID;
-        const { user: userFR } = await handleGetSession({ sessionId });
-
-        if (!userFR) {
-            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-        }
-
-        const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
-
-        // STEP 1 - LOGIN
-        const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
-
-        if (!pool) {
-            throw new BadRequestError({ code: 500, message: "Error connecting to the main database", logging: true });
-        }
-
-        // Search for the user in the database using their email.
         const { Id_Usuario, password } = req.body;
+        const sessionId = req.sessionID;
 
-        if (Id_Usuario.trim() === "" || password.trim() === "") {
-            throw new BadRequestError({ code: 404, message: "Necesario escribir correo y contraseña", logging: true });
-        }
-
-        const request = pool.request();
-        request.input('Id_Usuario', sql.VarChar(50), Id_Usuario);
-        request.input('Password', sql.VarChar(50), password);
-
-        const resultData = await request.execute('sp_AuthenticateAndGetMovement');
-        const Validations = (resultData.recordsets as any)[0] as ValidationResult[];
-
-        if (Validations[0].Tipo === "usuario" && Validations[0].Resultado !== 1) {
-            throw new BadRequestError({ code: 404, message: "Correo no encontrada", logging: true });
-        }
-
-        if (Validations[1].Tipo === "contrasena" && Validations[1].Resultado !== 1) {
-            throw new BadRequestError({ code: 404, message: "Contraseña incorrecta", logging: true });
-        }
-
-        const User = (resultData.recordsets as any)[1][0] as MovementDetail;
+        const { userData } = await loginAppService({
+            Id_Usuario,
+            password,
+            sessionId
+        })
 
         const token = await generateJWT({ id: Id_Usuario.trim() });
 
-        (req.session as any).user = {
+        const datosDelUsuario: UserSessionInterface = {
             ...(req.session as any).user,
             userId: Id_Usuario.trim(),
-            userRol: User.Id_Perfil
-        }
+            userRol: userData.Id_Perfil,
+            TodosAlmacenes: userData.TodosAlmacenes
+        };
+
+        // Session redis
+        (req.session as any).user = datosDelUsuario;
 
         const userStorage = {
             Id_Usuario,
+            TodosAlmacenes: userData.TodosAlmacenes,
             Id_TipoMovInv: {
-                Id_TipoMovInv: User.Id_TipoMovInv,
-                Accion: User.Accion,
-                Descripcion: User.Descripcion,
-                Id_AlmDest: User.Id_AlmDest
+                Id_TipoMovInv: userData.Id_TipoMovInv,
+                Accion: userData.Accion,
+                Descripcion: userData.Descripcion,
+                Id_AlmDest: userData.Id_AlmDest
             }
-        }
+        };
 
         return res.json({
             userStorage,
@@ -151,7 +112,7 @@ const renewDB = async (req: Request, res: Response, next: NextFunction) => {
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
         }
 
-        const { baseclientes, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
+        const { BaseSQL, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
 
         const token = await generateJWTDB({ IdUsuarioOLEI });
 
@@ -168,7 +129,7 @@ const renewDB = async (req: Request, res: Response, next: NextFunction) => {
 
         // User to Frontend.
         const user = {
-            BaseSQL: baseclientes,
+            BaseSQL: BaseSQL,
             RazonSocial: RazonSocial
         };
 
@@ -190,7 +151,6 @@ const renewDB = async (req: Request, res: Response, next: NextFunction) => {
 
 const renewLogin = async (req: Request, res: Response, next: NextFunction) => {
 
-
     try {
         const sessionId = req.sessionID;
         const { user: userFR } = await handleGetSession({ sessionId });
@@ -199,13 +159,13 @@ const renewLogin = async (req: Request, res: Response, next: NextFunction) => {
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
         }
 
-        const { serverclientes, baseclientes, userId, userRol } = userFR;
+        const { ServidorSQL, BaseSQL, userId, userRol, TodosAlmacenes } = userFR;
 
         if (!userId && !userRol) {
             throw new BadRequestError({ code: 401, message: "User not authenticated", logging: true });
         };
 
-        if (!serverclientes && !baseclientes) {
+        if (!ServidorSQL && !BaseSQL) {
             throw new BadRequestError({ code: 401, message: "Server and base data is neccessary", logging: true });
         };
 
@@ -216,7 +176,8 @@ const renewLogin = async (req: Request, res: Response, next: NextFunction) => {
         };
 
         const user = {
-            Id_Usuario: userId
+            Id_Usuario: userId,
+            TodosAlmacenes
         };
 
         res.json({

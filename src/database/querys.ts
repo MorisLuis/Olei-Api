@@ -37,22 +37,15 @@ export const querys = {
 
     authDatabase: `
         SELECT [IdOLEI]
-            ,[Id_Almacen]
-            ,[Id_Cliente]
-            ,[Nombre]
-            ,[Id_ListPre]
-            ,[IdUsuarioOLEI]
-            ,[PasswordOLEI]
-            ,[ServidorSQL]
-            ,[BaseSQL]
-            ,[UsuarioSQL]
-            ,[PasswordSQL]
-            ,[Vigencia]
-            ,[RazonSocial]
-            ,[SwImagenes]
-            ,[SwSinStock]
-            ,[SwSinPrecio]
-            ,[TipoDocOO]
+            PasswordOLEI,
+            IdUsuarioOLEI,
+            ServidorSQL,
+            BaseSQL,
+            UsuarioSQL,
+            PasswordSQL,
+            RazonSocial,
+            SwImagenes,
+            Vigencia
         FROM [dbo].[CLIENTES]
         WHERE IdUsuarioOLEI = @IdUsuarioOLEI
     `,
@@ -95,6 +88,21 @@ export const querys = {
             ELSE 1
         END,
         Codigo; -- Luego orden alfabético
+    `,
+
+    getAlmacenes: `
+        SELECT TOP(20)
+            [Id_Almacen],
+            [IdOLEI],
+            [Nombre]
+        FROM [dbo].[ALMACENES]
+        WHERE LOWER(Nombre) LIKE '%' + LOWER(@Nombre) + '%'
+        ORDER BY 
+        CASE 
+            WHEN LOWER(Nombre) LIKE LOWER(@Nombre) + '%' THEN 0 -- Prioridad para coincidencia inicial
+            ELSE 1
+        END,
+        Id_Almacen; -- Luego orden alfabético
     `,
 
 

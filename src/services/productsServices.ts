@@ -228,8 +228,8 @@ const getProductsByStockService = async ({
         throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
-    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
-    const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL } = userFR;
+    const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
     const userquery = querys.getAuthLimitData;
     const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery)

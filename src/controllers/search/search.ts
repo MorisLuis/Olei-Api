@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { searcCodigoService, searchFamiliaService, searchMarcaService } from '../../services/searchServices';
+import { searcCodigoService, searchAlmacenesService, searchFamiliaService, searchMarcaService } from '../../services/searchServices';
 import { simpleSearchQuerySchema } from '../../validations/searchValidations';
 
 
@@ -48,9 +48,24 @@ const getCodigos = async (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
+const getAlmacenes = async (req: Request, res: Response, next: NextFunction) => {
+
+    const { searchTerm } = simpleSearchQuerySchema.parse(req.query);
+    const sessionId = req.sessionID;
+
+    const { almacenes } = await searchAlmacenesService({
+        sessionId,
+        nombre: searchTerm
+    });
+
+    res.json({
+        almacenes
+    });
+}
 
 export {
     getFamilias,
     getMarcas,
-    getCodigos
+    getCodigos,
+    getAlmacenes
 }

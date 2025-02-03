@@ -10,6 +10,7 @@ const router = (0, express_1.Router)();
 router.get("/familias", validate_jwt_1.validateJWTWeb, search_1.getFamilias);
 router.get("/marcas", validate_jwt_1.validateJWTWeb, search_1.getMarcas);
 router.get("/codigos", validate_jwt_1.validateJWTWeb, search_1.getCodigos);
+router.get("/almacenes", validate_jwt_1.validateJWT, search_1.getAlmacenes);
 //router.get("/", validateJWTWeb, searchProduct)
 //router.get("/client", validateJWTWeb, searchClient)
 exports.default = router;
