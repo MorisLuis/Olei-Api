@@ -31,7 +31,7 @@ const loginDBAppService = async ({
         .input('IdUsuarioOLEI', IdUsuarioOLEI)
         .query(query_DB);
 
-    const result : UserSessionInterface = resp?.recordset[0];
+    const result: UserSessionInterface = resp?.recordset[0];
 
     if (!result) {
         throw new BadRequestError({ code: 401, message: `No se encontro el usuario: ${IdUsuarioOLEI}`, logging: true });
@@ -57,7 +57,7 @@ const loginAppService = async ({
     sessionId,
     Id_Usuario,
     password
-} :  loginAppServiceInterface ) => {
+}: loginAppServiceInterface) => {
 
     const { user: userFR } = await handleGetSession({ sessionId });
 
@@ -65,7 +65,7 @@ const loginAppService = async ({
         throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
 
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
@@ -84,6 +84,7 @@ const loginAppService = async ({
     const result = await request.execute('sp_AuthenticateAndGetMovement');
     const userData = (result.recordsets as any)[1][0]
     const validations = (result.recordsets as any)[0] as ValidationResult[];
+
     if (validations[0].Tipo === "usuario" && validations[0].Resultado !== 1) {
         throw new BadRequestError({ code: 404, message: "Correo no encontrada", logging: true });
     };
@@ -93,13 +94,13 @@ const loginAppService = async ({
     };
 
     return {
-        userData
+        userData: {
+            ...userData,
+            Id_Almacen
+        }
     }
 };
 
-const renewDBService = async () => {
-
-};
 
 export {
     loginDBAppService,

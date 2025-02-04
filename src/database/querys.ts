@@ -45,7 +45,8 @@ export const querys = {
             PasswordSQL,
             RazonSocial,
             SwImagenes,
-            Vigencia
+            Vigencia,
+            Id_Almacen
         FROM [dbo].[CLIENTES]
         WHERE IdUsuarioOLEI = @IdUsuarioOLEI
     `,
@@ -89,22 +90,6 @@ export const querys = {
         END,
         Codigo; -- Luego orden alfabético
     `,
-
-    getAlmacenes: `
-        SELECT TOP(20)
-            [Id_Almacen],
-            [IdOLEI],
-            [Nombre]
-        FROM [dbo].[ALMACENES]
-        WHERE LOWER(Nombre) LIKE '%' + LOWER(@Nombre) + '%'
-        ORDER BY 
-        CASE 
-            WHEN LOWER(Nombre) LIKE LOWER(@Nombre) + '%' THEN 0 -- Prioridad para coincidencia inicial
-            ELSE 1
-        END,
-        Id_Almacen; -- Luego orden alfabético
-    `,
-
 
     // TypeOfMovements
     getTiposMovimiento: `

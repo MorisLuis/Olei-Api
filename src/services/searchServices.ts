@@ -86,39 +86,9 @@ const searcCodigoService = async ({
 
 };
 
-interface searchAlmacenesServiceInterface {
-    sessionId: string;
-    nombre: string
-}
-
-const searchAlmacenesService = async ({
-    sessionId,
-    nombre
-} :  searchAlmacenesServiceInterface ) => {
-
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { ServidorSQL, BaseSQL } = userFR;
-    const pool = await dbConnection(ServidorSQL, BaseSQL);
-
-    const result = await pool.request()
-        .input('Nombre', nombre)
-        .query(querys.getAlmacenes);
-
-    const almacenes = result?.recordset;
-
-    return {
-        almacenes
-    }
-}
 
 export {
     searchFamiliaService,
     searchMarcaService,
-    searcCodigoService,
-    searchAlmacenesService
+    searcCodigoService
 }

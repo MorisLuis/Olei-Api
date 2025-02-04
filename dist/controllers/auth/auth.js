@@ -27,6 +27,7 @@ const loginDB = async (req, res, next) => {
             PasswordSQL: result.PasswordSQL.trim(),
             UsuarioSQL: result.UsuarioSQL.trim(),
             IdUsuarioOLEI: result.IdUsuarioOLEI.trim(),
+            Id_Almacen: result.Id_Almacen,
             RazonSocial: result.RazonSocial.trim(),
             SwImagenes: result.SwImagenes,
             Vigencia: result.Vigencia,
@@ -71,6 +72,7 @@ const login = async (req, res, next) => {
         const userStorage = {
             Id_Usuario,
             TodosAlmacenes: userData.TodosAlmacenes,
+            Id_Almacen: userData.Id_Almacen,
             Id_TipoMovInv: {
                 Id_TipoMovInv: userData.Id_TipoMovInv,
                 Accion: userData.Accion,

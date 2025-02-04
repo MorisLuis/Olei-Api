@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchAlmacenesService = exports.searcCodigoService = exports.searchMarcaService = exports.searchFamiliaService = void 0;
+exports.searcCodigoService = exports.searchMarcaService = exports.searchFamiliaService = void 0;
 const database_1 = require("../database");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const getSession_1 = require("../utils/Redis/getSession");
@@ -55,20 +55,4 @@ const searcCodigoService = async ({ sessionId, searchTerm }) => {
     };
 };
 exports.searcCodigoService = searcCodigoService;
-const searchAlmacenesService = async ({ sessionId, nombre }) => {
-    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
-    if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-    }
-    const { ServidorSQL, BaseSQL } = userFR;
-    const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL);
-    const result = await pool.request()
-        .input('Nombre', nombre)
-        .query(database_1.querys.getAlmacenes);
-    const almacenes = result?.recordset;
-    return {
-        almacenes
-    };
-};
-exports.searchAlmacenesService = searchAlmacenesService;
 //# sourceMappingURL=searchServices.js.map

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAlmacenes = exports.getCodigos = exports.getMarcas = exports.getFamilias = void 0;
+exports.getCodigos = exports.getMarcas = exports.getFamilias = void 0;
 const searchServices_1 = require("../../services/searchServices");
 const searchValidations_1 = require("../../validations/searchValidations");
 const getFamilias = async (req, res, next) => {
@@ -39,16 +39,4 @@ const getCodigos = async (req, res, next) => {
     });
 };
 exports.getCodigos = getCodigos;
-const getAlmacenes = async (req, res, next) => {
-    const { searchTerm } = searchValidations_1.simpleSearchQuerySchema.parse(req.query);
-    const sessionId = req.sessionID;
-    const { almacenes } = await (0, searchServices_1.searchAlmacenesService)({
-        sessionId,
-        nombre: searchTerm
-    });
-    res.json({
-        almacenes
-    });
-};
-exports.getAlmacenes = getAlmacenes;
 //# sourceMappingURL=search.js.map

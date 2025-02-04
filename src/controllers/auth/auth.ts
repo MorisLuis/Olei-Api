@@ -29,6 +29,7 @@ const loginDB = async (req: Request, res: Response, next: NextFunction) => {
             UsuarioSQL: result.UsuarioSQL.trim(),
 
             IdUsuarioOLEI: result.IdUsuarioOLEI.trim(),
+            Id_Almacen: result.Id_Almacen,
 
             RazonSocial: result.RazonSocial.trim(),
             SwImagenes: result.SwImagenes,
@@ -43,7 +44,8 @@ const loginDB = async (req: Request, res: Response, next: NextFunction) => {
         // User to Frontend.
         const user = {
             BaseSQL: result.BaseSQL,
-            RazonSocial: result.RazonSocial
+            RazonSocial: result.RazonSocial,
+            Id_Almacen: result.Id_Almacen
         };
 
         return res.json({
@@ -83,6 +85,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         const userStorage = {
             Id_Usuario,
             TodosAlmacenes: userData.TodosAlmacenes,
+            Id_Almacen: userData.Id_Almacen,
             Id_TipoMovInv: {
                 Id_TipoMovInv: userData.Id_TipoMovInv,
                 Accion: userData.Accion,
@@ -112,7 +115,7 @@ const renewDB = async (req: Request, res: Response, next: NextFunction) => {
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
         }
 
-        const { BaseSQL, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
+        const { BaseSQL, IdUsuarioOLEI, RazonSocial, userId, userRol, Id_Almacen } = userFR;
 
         const token = await generateJWTDB({ IdUsuarioOLEI });
 
@@ -130,7 +133,8 @@ const renewDB = async (req: Request, res: Response, next: NextFunction) => {
         // User to Frontend.
         const user = {
             BaseSQL: BaseSQL,
-            RazonSocial: RazonSocial
+            RazonSocial: RazonSocial,
+            Id_Almacen
         };
 
         if (!userFR) {
