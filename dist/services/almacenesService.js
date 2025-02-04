@@ -33,7 +33,6 @@ const getAlmacenByIdService = async ({ sessionId, Id_Almacen }) => {
         .input('Id_Almacen', Id_Almacen)
         .query(almacen_1.AlamacenQuery.getAlmacenById);
     const almacen = result?.recordset[0];
-    console.log({ almacen });
     return {
         almacen
     };

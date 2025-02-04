@@ -39,7 +39,8 @@ const loginDB = async (req, res, next) => {
         // User to Frontend.
         const user = {
             BaseSQL: result.BaseSQL,
-            RazonSocial: result.RazonSocial
+            RazonSocial: result.RazonSocial,
+            Id_Almacen: result.Id_Almacen
         };
         return res.json({
             tokenDB,
@@ -98,7 +99,7 @@ const renewDB = async (req, res, next) => {
         if (!userFR) {
             throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
         }
-        const { BaseSQL, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
+        const { BaseSQL, IdUsuarioOLEI, RazonSocial, userId, userRol, Id_Almacen } = userFR;
         const token = await (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI });
         if (!token) {
             throw new BadRequestError_1.default({ code: 401, message: "Failed to generate token", logging: true });
@@ -113,7 +114,8 @@ const renewDB = async (req, res, next) => {
         // User to Frontend.
         const user = {
             BaseSQL: BaseSQL,
-            RazonSocial: RazonSocial
+            RazonSocial: RazonSocial,
+            Id_Almacen
         };
         if (!userFR) {
             throw new BadRequestError_1.default({ code: 401, message: "User data is neccesary", logging: true });

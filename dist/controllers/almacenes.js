@@ -22,11 +22,20 @@ const updateAlmacenInRedis = async (req, res, next) => {
     try {
         const { Id_Almacen } = almacenValidations_1.getAlmacenByIdQuerySchema.parse(req.query);
         const sessionId = req.sessionID;
-        console.log({ sessionId });
         const { almacen } = await (0, almacenesService_1.getAlmacenByIdService)({
             sessionId,
             Id_Almacen
         });
+        if (!almacen) {
+            return res.status(404).json({ message: 'Almacen no encontrado' });
+        }
+        if (almacen.Id_Almacen) {
+            const datosDelUsuario = {
+                ...req.session.user,
+                Id_Almacen: almacen.Id_Almacen
+            };
+            req.session.user = datosDelUsuario;
+        }
         res.json(almacen);
     }
     catch (error) {
