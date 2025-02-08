@@ -81,6 +81,7 @@ class Server {
         this.configureSessions();
         this.middlewares();
         this.routes();
+
         this.errorHandler();
     }
 
@@ -195,7 +196,6 @@ class Server {
         this.app.use(this.paths.email, emailRouter);
         this.app.use(this.paths.reports, reportsRouter);
         this.app.use(this.paths.almacenes, almacenesRouter);
-
     }
 
     async closeConnections() {
@@ -206,6 +206,7 @@ class Server {
         await dbConnectionMain().then(pool => pool.close()).catch(() => { });
         console.log('Conexión a la base de datos cerrada');
     }
+
 
     errorHandler() {
         this.app.use(errorHandler);

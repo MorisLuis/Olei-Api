@@ -49,7 +49,6 @@ const updateAlmacenInRedis = async (req: Request, res: Response, next: NextFunct
 
 
     } catch (error) {
-        console.log({ error })
         next(error)
     };
 

@@ -25,10 +25,10 @@ const loginDBAppService = async ({ IdUsuarioOLEI, PasswordOLEI }) => {
         .query(query_DB);
     const result = resp?.recordset[0];
     if (!result) {
-        throw new BadRequestError_1.default({ code: 401, message: `No se encontro el usuario: ${IdUsuarioOLEI}`, logging: true });
+        throw new BadRequestError_1.default({ code: 404, message: `No se encontro el usuario: ${IdUsuarioOLEI}`, logging: true });
     }
     if (result?.PasswordOLEI && result?.PasswordOLEI.trim() !== PasswordOLEI) {
-        throw new BadRequestError_1.default({ code: 401, message: `Contraseña incorrecta`, logging: true });
+        throw new BadRequestError_1.default({ code: 404, message: `Contraseña incorrecta`, logging: true });
     }
     return {
         result
@@ -52,16 +52,16 @@ const loginAppService = async ({ sessionId, Id_Usuario, password }) => {
     request.input('Id_Usuario', mssql_1.default.VarChar(50), Id_Usuario);
     request.input('Password', mssql_1.default.VarChar(50), password);
     const result = await request.execute('sp_AuthenticateAndGetMovement');
-    const userData = result.recordsets[1][0];
     const validations = result.recordsets[0];
     if (validations[0].Tipo === "usuario" && validations[0].Resultado !== 1) {
-        throw new BadRequestError_1.default({ code: 404, message: "Correo no encontrada", logging: true });
+        throw new BadRequestError_1.default({ code: 404, message: "Correo no encontrado", logging: true });
     }
     ;
     if (validations[1].Tipo === "contrasena" && validations[1].Resultado !== 1) {
         throw new BadRequestError_1.default({ code: 404, message: "Contraseña incorrecta", logging: true });
     }
     ;
+    const userData = result.recordsets[1][0];
     return {
         userData: {
             ...userData,

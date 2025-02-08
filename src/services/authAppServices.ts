@@ -1,6 +1,6 @@
 import { dbConnection, dbConnectionMain, querys } from "../database";
 import BadRequestError from "../errors/BadRequestError";
-import { UserSessionInterface, ValidationResult } from "../interface/user";
+import { ValidationResult } from "../interface/user";
 import { handleGetSession } from "../utils/Redis/getSession";
 import sql from "mssql";
 
@@ -31,14 +31,14 @@ const loginDBAppService = async ({
         .input('IdUsuarioOLEI', IdUsuarioOLEI)
         .query(query_DB);
 
-    const result: UserSessionInterface = resp?.recordset[0];
+    const result = resp?.recordset[0];
 
     if (!result) {
-        throw new BadRequestError({ code: 401, message: `No se encontro el usuario: ${IdUsuarioOLEI}`, logging: true });
+        throw new BadRequestError({ code: 404, message: `No se encontro el usuario: ${IdUsuarioOLEI}`, logging: true });
     }
 
     if (result?.PasswordOLEI && result?.PasswordOLEI.trim() !== PasswordOLEI) {
-        throw new BadRequestError({ code: 401, message: `Contraseña incorrecta`, logging: true });
+        throw new BadRequestError({ code: 404, message: `Contraseña incorrecta`, logging: true });
     }
 
     return {
@@ -82,16 +82,18 @@ const loginAppService = async ({
     request.input('Password', sql.VarChar(50), password);
 
     const result = await request.execute('sp_AuthenticateAndGetMovement');
-    const userData = (result.recordsets as any)[1][0]
     const validations = (result.recordsets as any)[0] as ValidationResult[];
 
+
     if (validations[0].Tipo === "usuario" && validations[0].Resultado !== 1) {
-        throw new BadRequestError({ code: 404, message: "Correo no encontrada", logging: true });
+        throw new BadRequestError({ code: 404, message: "Correo no encontrado", logging: true });
     };
 
     if (validations[1].Tipo === "contrasena" && validations[1].Resultado !== 1) {
         throw new BadRequestError({ code: 404, message: "Contraseña incorrecta", logging: true });
     };
+
+    const userData = (result.recordsets as any)[1][0]
 
     return {
         userData: {

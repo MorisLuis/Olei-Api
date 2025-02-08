@@ -39,7 +39,6 @@ const updateAlmacenInRedis = async (req, res, next) => {
         res.json(almacen);
     }
     catch (error) {
-        console.log({ error });
         next(error);
     }
     ;

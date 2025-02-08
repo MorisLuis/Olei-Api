@@ -34,7 +34,6 @@ const getProducById = async (req, res, next) => {
         if (userFR.BaseSQL === 'OLEIDB1_ROSCO' ||
             userFR.BaseSQL === 'OLEIDB1_ROSCO_TEST') {
             // We have to modify query to ROSCO
-            console.log("rosco");
             query = productsWeb_1.productsWebQuerys.getProducByIdROSCO;
         }
         ;

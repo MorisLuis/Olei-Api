@@ -17,16 +17,16 @@ const loginWebService = async (email: string, password: string) => {
     const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await getUserByEmailWeb(mainPool, email);
 
     if (!user) {
-        throw new BadRequestError({ code: 401, message: "Correo no encontrado", logging: true });
+        throw new BadRequestError({ code: 404, message: "Correo no encontrado", logging: true });
     }
 
     if (user.PasswordOOL.trim() !== password) {
-        throw new BadRequestError({ code: 401, message: "Contraseña incorrecta", logging: true });
+        throw new BadRequestError({ code: 404, message: "Contraseña incorrecta", logging: true });
     }
 
     const isExpired = await isSubscriptionExpired(Vigencia);
     if (isExpired) {
-        throw new BadRequestError({ code: 401, message: "Cuenta de usuario vencida", logging: true });
+        throw new BadRequestError({ code: 404, message: "Cuenta de usuario vencida", logging: true });
     }
 
     return {
@@ -48,7 +48,7 @@ const getUserByEmailWeb = async (mainPool: ConnectionPool, email: string) => {
     const user = result?.recordset[0]
 
     if (!user) {
-        throw new BadRequestError({ code: 401, message: "Usuario no encontrado", logging: true });
+        throw new BadRequestError({ code: 404, message: "Usuario no encontrado", logging: true });
     }
 
     return user

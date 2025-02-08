@@ -41,7 +41,7 @@ const updateCodebarService = async (sessionId: string, codigoParam: string, Id_M
 
     if (!codigoParam || !Id_Marca) {
         await transaction.rollback();
-        throw new BadRequestError({ code: 400, message: `Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.`, logging: true });
+        throw new BadRequestError({ code: 404, message: `Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.`, logging: true });
     };
 
     const request = new sql.Request(transaction);

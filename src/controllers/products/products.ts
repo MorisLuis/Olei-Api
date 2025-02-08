@@ -41,7 +41,6 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
             userFR.BaseSQL === 'OLEIDB1_ROSCO_TEST'
             ) {
             // We have to modify query to ROSCO
-            console.log("rosco")
             query = productsWebQuerys.getProducByIdROSCO
         };
 
