@@ -23,6 +23,8 @@ import meetingsRouter from "../routes/bitacoraRouter";
 import calendarRouter from "../routes/calendarRouter";
 import emailRouter from "../routes/emailRouter";
 import reportsRouter from "../routes/reportsRouter";
+import almacenesRouter from "../routes/almacenesRouter";
+
 import { errorHandler } from "../middleware/errorHandler";
 
 class Server {
@@ -47,6 +49,7 @@ class Server {
         calendar: string,
         email: string,
         reports: string
+        almacenes: string
     };
 
     constructor() {
@@ -69,7 +72,8 @@ class Server {
             meetings: "/api/meetings",
             calendar: "/api/calendar",
             email: "/api/email",
-            reports: "/api/reports"
+            reports: "/api/reports",
+            almacenes: "/api/almacenes"
         };
 
         this.connectDB();
@@ -77,6 +81,7 @@ class Server {
         this.configureSessions();
         this.middlewares();
         this.routes();
+
         this.errorHandler();
     }
 
@@ -190,6 +195,7 @@ class Server {
         this.app.use(this.paths.calendar, calendarRouter);
         this.app.use(this.paths.email, emailRouter);
         this.app.use(this.paths.reports, reportsRouter);
+        this.app.use(this.paths.almacenes, almacenesRouter);
     }
 
     async closeConnections() {
@@ -201,6 +207,7 @@ class Server {
         console.log('Conexión a la base de datos cerrada');
     }
 
+
     errorHandler() {
         this.app.use(errorHandler);
     }
@@ -210,7 +217,6 @@ class Server {
             console.log("Servidor corriendo en puerto " + this.port);
         });
     }
-
 
 }
 

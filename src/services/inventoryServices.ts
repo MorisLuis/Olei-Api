@@ -27,8 +27,8 @@ export const postInventoryService = async ({
         throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
-    const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+    const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
     if (!pool) {
         throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
@@ -58,6 +58,7 @@ export const postInventoryService = async ({
 
     const xmlDataInventory = await convertArrayToXml(inventoryData);
     const xmlDataInventoryDetails = await convertArrayToXml(inventoryDetails);
+
 
     const result = await request
         .input('xmlDataInventory', sql.Xml, xmlDataInventory)
@@ -96,9 +97,9 @@ export const searchProductInventoryService = async ({
         throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
-    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
+    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL } = userFR;
 
-    const pool = await dbConnection(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+    const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
     if (!pool) {
         throw new BadRequestError({ code: 500, message: "Unable to establish a connection to the database", logging: true });

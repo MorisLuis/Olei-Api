@@ -6,5 +6,6 @@ const validate_jwt_1 = require("../helpers/validate-jwt");
 const router = (0, express_1.Router)();
 router.get('/banner', validate_jwt_1.validateJWTWeb, utils_1.getBanner);
 router.get("/", utils_1.getUtils);
+router.get("/excell", validate_jwt_1.validateJWTWeb, utils_1.getExcellTest);
 exports.default = router;
 //# sourceMappingURL=utilsRouter.js.map

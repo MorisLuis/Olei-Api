@@ -26,4 +26,6 @@ __exportStar(require("./searchRouter"), exports);
 __exportStar(require("./tablesRouter"), exports);
 __exportStar(require("./typeofmovementsRouter"), exports);
 __exportStar(require("./utilsRouter"), exports);
+__exportStar(require("./reportsRouter"), exports);
+__exportStar(require("./almacenesRouter"), exports);
 //# sourceMappingURL=index.js.map

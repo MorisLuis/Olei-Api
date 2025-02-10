@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { closeDbConnection, dbConnection } from '../database';
+import { dbConnection } from '../database';
 import { handleGetWebSession } from '../utils/Redis/getSession';
 import BadRequestError from '../errors/BadRequestError';
 import { sellsQuery } from '../database/querys/sells';
@@ -24,7 +24,6 @@ const getBanner = async (req: Request, res: Response) => {
         banner
     });
 }
-
 
 const getUtils = async (req: Request, res: Response) => {
 
@@ -70,7 +69,6 @@ const fetchDataInBatches = async (pool: ConnectionPool): Promise<any[]> => {
     let moreData = true;
 
     while (moreData) {
-        console.log({ offset })
 
         const Id_Cliente = 1;
         const SellsOrderCondition = 'Fecha';
@@ -102,7 +100,6 @@ const fetchDataInBatches = async (pool: ConnectionPool): Promise<any[]> => {
 
             results.push(...res.recordset);  // Añadimos los datos del lote a los resultados finales
 
-            console.log({ res: res.recordset.length })
             // Si el lote trae menos registros de los solicitados, significa que no hay más datos
             if (res.recordset.length < batchSize) {
                 moreData = false;

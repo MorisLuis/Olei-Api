@@ -9,7 +9,6 @@ import { loginWebService } from '../../services/authServices';
 
 const loginWeb = async (req: Request, res: Response, next: NextFunction) => {
 
-    console.log("loginWeb")
     try {
         const { email, password } = req.body;
         const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await loginWebService(email, password);
@@ -51,8 +50,6 @@ const loginWeb = async (req: Request, res: Response, next: NextFunction) => {
 
 const renewWeb = async (req: Request, res: Response, next: NextFunction) => {
 
-
-    console.log("renewWeb")
     try {
         // Get session from REDIS.
         const sessionId = req.sessionRedis;

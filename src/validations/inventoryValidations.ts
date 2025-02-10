@@ -8,21 +8,9 @@ const inventoryDetailsItemSchema = z.object({
         .number()
         .int()
         .positive({ message: "Id_Marca debe ser un número entero positivo" }),
-    Id_Ubicacion: z
-        .number()
-        .int()
-        .positive({ message: "Id_Ubicacion debe ser un número entero positivo" }),
     Diferencia: z
         .number()
         .min(0, { message: "Diferencia debe ser un número mayor o igual a 0" }),
-    SwNS: z
-        .number()
-        .int()
-        .min(0, { message: "SwNS debe ser 0 o 1" })
-        .max(1, { message: "SwNS debe ser 0 o 1" }),
-    NumsDeSerie: z
-        .string()
-        .regex(/^[A-Za-z0-9-]+$/, { message: "NumsDeSerie debe contener solo letras, números o guiones" }),
     SKU: z
         .string()
         .optional(),
@@ -30,8 +18,6 @@ const inventoryDetailsItemSchema = z.object({
     Cantidad: z
         .number()
         .positive()
-
-    //.max(20, { message: "SKU no puede exceder los 20 caracteres" }),
 });
 
 

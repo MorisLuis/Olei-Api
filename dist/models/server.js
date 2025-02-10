@@ -27,6 +27,8 @@ const sellsRouter_1 = __importDefault(require("../routes/sellsRouter"));
 const bitacoraRouter_1 = __importDefault(require("../routes/bitacoraRouter"));
 const calendarRouter_1 = __importDefault(require("../routes/calendarRouter"));
 const emailRouter_1 = __importDefault(require("../routes/emailRouter"));
+const reportsRouter_1 = __importDefault(require("../routes/reportsRouter"));
+const almacenesRouter_1 = __importDefault(require("../routes/almacenesRouter"));
 const errorHandler_1 = require("../middleware/errorHandler");
 class Server {
     constructor() {
@@ -48,7 +50,9 @@ class Server {
             sells: "/api/sells",
             meetings: "/api/meetings",
             calendar: "/api/calendar",
-            email: "/api/email"
+            email: "/api/email",
+            reports: "/api/reports",
+            almacenes: "/api/almacenes"
         };
         this.connectDB();
         this.configureRedis();
@@ -152,6 +156,8 @@ class Server {
         this.app.use(this.paths.meetings, bitacoraRouter_1.default);
         this.app.use(this.paths.calendar, calendarRouter_1.default);
         this.app.use(this.paths.email, emailRouter_1.default);
+        this.app.use(this.paths.reports, reportsRouter_1.default);
+        this.app.use(this.paths.almacenes, almacenesRouter_1.default);
     }
     async closeConnections() {
         if (this.redis) {

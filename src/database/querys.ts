@@ -37,22 +37,16 @@ export const querys = {
 
     authDatabase: `
         SELECT [IdOLEI]
-            ,[Id_Almacen]
-            ,[Id_Cliente]
-            ,[Nombre]
-            ,[Id_ListPre]
-            ,[IdUsuarioOLEI]
-            ,[PasswordOLEI]
-            ,[ServidorSQL]
-            ,[BaseSQL]
-            ,[UsuarioSQL]
-            ,[PasswordSQL]
-            ,[Vigencia]
-            ,[RazonSocial]
-            ,[SwImagenes]
-            ,[SwSinStock]
-            ,[SwSinPrecio]
-            ,[TipoDocOO]
+            PasswordOLEI,
+            IdUsuarioOLEI,
+            ServidorSQL,
+            BaseSQL,
+            UsuarioSQL,
+            PasswordSQL,
+            RazonSocial,
+            SwImagenes,
+            Vigencia,
+            Id_Almacen
         FROM [dbo].[CLIENTES]
         WHERE IdUsuarioOLEI = @IdUsuarioOLEI
     `,
@@ -96,7 +90,6 @@ export const querys = {
         END,
         Codigo; -- Luego orden alfabético
     `,
-
 
     // TypeOfMovements
     getTiposMovimiento: `

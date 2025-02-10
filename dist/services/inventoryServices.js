@@ -16,8 +16,8 @@ const postInventoryService = async ({ sessionId, inventoryDetails, typeOfMovemen
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
-    const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+    const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
         throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
     }
@@ -65,8 +65,8 @@ const searchProductInventoryService = async ({ sessionId, searchTerm, }) => {
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
-    const { serverclientes, baseclientes, userId, PasswordSQL, UsuarioSQL } = userFR;
-    const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL } = userFR;
+    const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
         throw new BadRequestError_1.default({ code: 500, message: "Unable to establish a connection to the database", logging: true });
     }

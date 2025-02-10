@@ -1,6 +1,6 @@
 import { dbConnection, querys } from "../database";
 import BadRequestError from "../errors/BadRequestError";
-import { handleGetWebSession } from "../utils/Redis/getSession";
+import { handleGetSession, handleGetWebSession } from "../utils/Redis/getSession";
 
 
 interface searchServiceInterface {
@@ -85,6 +85,7 @@ const searcCodigoService = async ({
     }
 
 };
+
 
 export {
     searchFamiliaService,

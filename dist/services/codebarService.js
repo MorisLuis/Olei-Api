@@ -16,8 +16,8 @@ const updateCodebarService = async (sessionId, codigoParam, Id_Marca, body) => {
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
-    const { serverclientes, baseclientes, PasswordSQL, UsuarioSQL } = userFR;
-    const pool = await (0, database_1.dbConnection)(serverclientes, baseclientes, UsuarioSQL, PasswordSQL);
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+    const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
         throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
     }
@@ -36,7 +36,7 @@ const updateCodebarService = async (sessionId, codigoParam, Id_Marca, body) => {
     ;
     if (!codigoParam || !Id_Marca) {
         await transaction.rollback();
-        throw new BadRequestError_1.default({ code: 400, message: `Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.`, logging: true });
+        throw new BadRequestError_1.default({ code: 404, message: `Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.`, logging: true });
     }
     ;
     const request = new mssql_1.default.Request(transaction);

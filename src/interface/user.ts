@@ -1,17 +1,21 @@
 
 export interface UserSessionInterface {
-    serverclientes: string;
-    baseclientes: string;
-    PasswordSQL: string;
+    ServidorSQL: string;
+    BaseSQL: string;
     UsuarioSQL: string;
+    PasswordSQL: string;
+
     IdUsuarioOLEI: string;
+    PasswordOLEI?: string;
+
     RazonSocial: string;
     SwImagenes: string;
     Vigencia: string;
-
     userId?: string;
     userRol?: string;
     from: 'web' | 'mobil' | 'crm',
+    TodosAlmacenes?: number;
+    Id_Almacen: number;
 }
 
 export interface UserWebSessionInterface {

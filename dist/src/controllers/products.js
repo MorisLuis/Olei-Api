@@ -137,6 +137,7 @@ const getProducById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             .input("Almacen", userAlmacen)
             .query(database_1.querys.getProducById);
         const product = result === null || result === void 0 ? void 0 : result.recordset[0];
+
         /* if (user?.SwImagenes) {
             const baseSQL = user?.BaseSQL.trim().toLowerCase().split(',');
 
