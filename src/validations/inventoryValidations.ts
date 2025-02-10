@@ -31,7 +31,8 @@ export const postInventoryBodySchema = z.object({
                 (val) => ["1", "2", "3"].includes(val), // Validación: debe ser "1", "2" o "3"
                 { message: "Accion debe ser '1', '2' o '3'" }
             ),
-        Id_TipoMovInv: z.number().int().positive().nonnegative()
+        Id_TipoMovInv: z.number().int().positive().nonnegative(),
+        Id_AlmDest: z.number().int().positive().nonnegative()
     })
 });
 

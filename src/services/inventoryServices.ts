@@ -10,7 +10,7 @@ import sql from 'mssql';
 interface postInventoryServiceInterface {
     sessionId: string;
     inventoryDetails: Partial<InventoryDetailsInterface>[];
-    typeOfMovement: { Accion: string, Id_TipoMovInv: Number };
+    typeOfMovement: { Accion: string, Id_TipoMovInv: Number, Id_AlmDest: Number };
     Id_Usuario: string;
 }
 
@@ -48,7 +48,7 @@ export const postInventoryService = async ({
         Estado: 1, // If it were 0 it would mean a inventory was cancelled
         Fecha: currentTime(),
         Id_TipoMovInv: typeOfMovement?.Id_TipoMovInv,
-        Id_AlmacenDest: 0,
+        Id_AlmacenDest: typeOfMovement?.Id_AlmDest,
         SwPendiente: 0,
         Descripcion: '',
         SwTr: 0,

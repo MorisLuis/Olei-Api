@@ -34,7 +34,7 @@ const postInventoryService = async ({ sessionId, inventoryDetails, typeOfMovemen
         Estado: 1, // If it were 0 it would mean a inventory was cancelled
         Fecha: (0, currentTime_1.currentTime)(),
         Id_TipoMovInv: typeOfMovement?.Id_TipoMovInv,
-        Id_AlmacenDest: 0,
+        Id_AlmacenDest: typeOfMovement?.Id_AlmDest,
         SwPendiente: 0,
         Descripcion: '',
         SwTr: 0,

@@ -15,6 +15,7 @@ export interface UserSessionInterface {
     userRol?: string;
     from: 'web' | 'mobil' | 'crm',
     TodosAlmacenes?: number;
+    
     Id_Almacen: number;
 }
 
