@@ -16,7 +16,7 @@ const postInventoryService = async ({ sessionId, inventoryDetails, typeOfMovemen
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
         throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
@@ -34,7 +34,7 @@ const postInventoryService = async ({ sessionId, inventoryDetails, typeOfMovemen
         Estado: 1, // If it were 0 it would mean a inventory was cancelled
         Fecha: (0, currentTime_1.currentTime)(),
         Id_TipoMovInv: typeOfMovement?.Id_TipoMovInv,
-        Id_AlmacenDest: typeOfMovement?.Id_AlmDest,
+        Id_AlmacenDest: typeOfMovement?.Id_AlmDest ?? 0,
         SwPendiente: 0,
         Descripcion: '',
         SwTr: 0,
@@ -48,6 +48,7 @@ const postInventoryService = async ({ sessionId, inventoryDetails, typeOfMovemen
         .input('xmlDataInventoryDetails', mssql_1.default.Xml, xmlDataInventoryDetails)
         .input('Accion', mssql_1.default.Int, Accion)
         .input('Id_TipoMovInv', mssql_1.default.Int, Id_TipoMovInv)
+        .input('Id_Almacen', mssql_1.default.Int, Id_Almacen)
         .input('user', mssql_1.default.NVarChar(50), Id_Usuario)
         .input('ExpectedRows', mssql_1.default.Int, ExpectedRows)
         .input('ExpectedTotalQuantity', mssql_1.default.Decimal(18, 0), ExpectedTotalQuantity)

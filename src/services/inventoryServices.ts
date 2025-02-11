@@ -27,7 +27,7 @@ export const postInventoryService = async ({
         throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
     if (!pool) {
@@ -48,7 +48,7 @@ export const postInventoryService = async ({
         Estado: 1, // If it were 0 it would mean a inventory was cancelled
         Fecha: currentTime(),
         Id_TipoMovInv: typeOfMovement?.Id_TipoMovInv,
-        Id_AlmacenDest: typeOfMovement?.Id_AlmDest,
+        Id_AlmacenDest: typeOfMovement?.Id_AlmDest ?? 0,
         SwPendiente: 0,
         Descripcion: '',
         SwTr: 0,
@@ -65,6 +65,7 @@ export const postInventoryService = async ({
         .input('xmlDataInventoryDetails', sql.Xml, xmlDataInventoryDetails)
         .input('Accion', sql.Int, Accion)
         .input('Id_TipoMovInv', sql.Int, Id_TipoMovInv)
+        .input('Id_Almacen', sql.Int, Id_Almacen)
         .input('user', sql.NVarChar(50), Id_Usuario)
         .input('ExpectedRows', sql.Int, ExpectedRows)
         .input('ExpectedTotalQuantity', sql.Decimal(18, 0), ExpectedTotalQuantity)

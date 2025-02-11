@@ -32,7 +32,7 @@ export const postInventoryBodySchema = z.object({
                 { message: "Accion debe ser '1', '2' o '3'" }
             ),
         Id_TipoMovInv: z.number().int().positive().nonnegative(),
-        Id_AlmDest: z.number().int().positive().nonnegative()
+        Id_AlmDest: z.number().int().nonnegative()
     })
 });
 
