@@ -40,10 +40,12 @@ const updateAlmacenInRedis = async (req: Request, res: Response, next: NextFunct
         if (almacen.Id_Almacen) {
             const datosDelUsuario: UserSessionInterface = {
                 ...(req.session as any).user,
-                Id_Almacen: almacen.Id_Almacen
+                Id_Almacen: almacen.Id_Almacen,
+                AlmacenNombre: almacen.Nombre ?? ''
             };
             (req.session as any).user = datosDelUsuario;
         }
+
 
         res.json(almacen);
 

@@ -9,6 +9,7 @@ import { z } from "zod";
 const postInventory = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
+
         const sessionId = req.sessionID;
         const Id_Usuario = req.id;
         const { inventoryDetails, typeOfMovement } = postInventoryBodySchema.parse(req.body);
@@ -23,6 +24,7 @@ const postInventory = async (req: Request, res: Response, next: NextFunction) =>
         res.json({ Folio });
 
     } catch (error) {
+        console.log({error})
         if (error instanceof z.ZodError) {
             res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
