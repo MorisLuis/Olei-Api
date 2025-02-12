@@ -36,7 +36,8 @@ export const querys = {
     `,
 
     authDatabase: `
-        SELECT [IdOLEI]
+        SELECT 
+            IdOLEI,
             PasswordOLEI,
             IdUsuarioOLEI,
             ServidorSQL,
