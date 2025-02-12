@@ -17,6 +17,7 @@ export interface UserSessionInterface {
     TodosAlmacenes?: number;
     
     Id_Almacen: number;
+    AlmacenNombre?: string;
 }
 
 export interface UserWebSessionInterface {

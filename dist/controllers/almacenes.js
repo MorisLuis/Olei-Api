@@ -32,7 +32,8 @@ const updateAlmacenInRedis = async (req, res, next) => {
         if (almacen.Id_Almacen) {
             const datosDelUsuario = {
                 ...req.session.user,
-                Id_Almacen: almacen.Id_Almacen
+                Id_Almacen: almacen.Id_Almacen,
+                AlmacenNombre: almacen.Nombre ?? ''
             };
             req.session.user = datosDelUsuario;
         }
