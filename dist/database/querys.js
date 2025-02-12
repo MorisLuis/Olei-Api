@@ -36,7 +36,8 @@ exports.querys = {
         WHERE U.Id_UsuarioOOL = @email
     `,
     authDatabase: `
-        SELECT [IdOLEI]
+        SELECT 
+            IdOLEI,
             PasswordOLEI,
             IdUsuarioOLEI,
             ServidorSQL,
