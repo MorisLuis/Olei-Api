@@ -4,35 +4,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendEmail = void 0;
-const mail_1 = __importDefault(require("@sendgrid/mail"));
-// Configura la clave API de SendGrid
-mail_1.default.setApiKey('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'); // Reemplaza con tu clave API de Twilio SendGrid
+const nodemailer_1 = __importDefault(require("nodemailer"));
 const sendEmail = async (req, res, next) => {
-    const { sender, senderName, recipient, recipientName, subject, htmlContent, params } = req.body;
-    if (!sender || !recipient || !subject || !htmlContent) {
-        return res.status(400).json({ error: 'Faltan parámetros obligatorios' });
-    }
+    const { destinatario, remitente, subject, text } = req.body;
+    // Configurar el transporte SMTP
+    const transporter = nodemailer_1.default.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+            user: 'moradoluisenrique@gmail.com', // Tu usuario SMTP
+            pass: 'todv peof eahm kygy', // Tu contraseña SMTP
+        },
+    });
+    // Opciones del correo
+    const mailOptions = {
+        from: '"Olei Software" <moradoluisenrique@gmail.com>',
+        to: destinatario,
+        subject: subject,
+        text: text,
+        replyTo: remitente
+    };
     try {
-        // Crear el mensaje a enviar
-        const msg = {
-            to: recipient, // Dirección del destinatario
-            from: 'moradoluisenrique@gmail.com', // Tu correo verificado en SendGrid
-            subject: subject, // Asunto del correo
-            html: htmlContent, // Contenido en HTML del correo
-            // En este caso no usamos params directamente, pero puedes agregar dinámicamente en el HTML
-            // params, // Si quieres incluir parámetros adicionales en el correo, por ejemplo, en el cuerpo del mensaje
-        };
-        // Enviar el correo utilizando la API de SendGrid
-        await mail_1.default.send(msg);
-        // Responder con éxito
-        res.status(200).json({ message: 'Correo enviado exitosamente' });
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Correo enviado: %s', info.messageId);
+        res.json({
+            ok: true
+        });
     }
     catch (error) {
         console.error('Error al enviar el correo:', error);
-        res.status(500).json({
-            error: 'Error al enviar el correo',
-            details: error.response?.body || error.message,
-        });
     }
 };
 exports.sendEmail = sendEmail;
