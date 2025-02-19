@@ -22,7 +22,7 @@ const getProducById = async (req, res, next) => {
         if (!userFR) {
             throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
         }
-        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
         const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
@@ -41,7 +41,7 @@ const getProducById = async (req, res, next) => {
             .input("Codigo", id)
             .input("Marca", Marca)
             .input("ListaPrecios", user.Id_ListPre)
-            .input("Almacen", user.Id_Almacen)
+            .input("Almacen", Id_Almacen)
             .input("baseSQL", BaseSQL)
             .query(query);
         const product = result?.recordset[0];
@@ -76,7 +76,7 @@ const getTotalOfProductsByStock = async (req, res, next) => {
         if (!userFR) {
             throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
         }
-        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
         const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
@@ -87,7 +87,7 @@ const getTotalOfProductsByStock = async (req, res, next) => {
         let query = products_1.productsQuerys.getTotalOfAllProductsByStock;
         const request = await pool.request()
             .input('Id_ListaPrecios', user.Id_ListPre)
-            .input('Almacen', user.Id_Almacen)
+            .input('Almacen', Id_Almacen)
             .query(query);
         const TotalProductos = request.recordset;
         res.json(TotalProductos);
@@ -105,7 +105,7 @@ const getProductByStockAndCodeBar = async (req, res, next) => {
         if (!userFR) {
             throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
         }
-        const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL } = userFR;
+        const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
         const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery);
@@ -123,7 +123,7 @@ const getProductByStockAndCodeBar = async (req, res, next) => {
             request = await pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)
                 .input('Id_ListaPrecios', user.Id_ListPre)
-                .input('Id_Almacen', user.Id_Almacen)
+                .input('Id_Almacen', Id_Almacen)
                 .query(query);
         }
         else {
@@ -132,7 +132,7 @@ const getProductByStockAndCodeBar = async (req, res, next) => {
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)
                 .input("Codigo", Codigo === 'undefined' ? null : Codigo)
                 .input('Id_ListaPrecios', user.Id_ListPre)
-                .input('Id_Almacen', user.Id_Almacen)
+                .input('Id_Almacen', Id_Almacen)
                 .query(query);
         }
         const productByStockAndCodeBar = request.recordset;
