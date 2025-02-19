@@ -5,16 +5,13 @@ const CustomError_1 = require("../errors/CustomError");
 const errorHandler = (err, req, res, next) => {
     // Errores controlados (personalizados)
     if (err instanceof CustomError_1.CustomError) {
-        const { statusCode, errors, logging } = err;
-        if (logging) {
-            console.error("Error: ========================================");
-            console.error(JSON.stringify({
-                code: statusCode,
-                errors,
-                stack: err.stack,
-            }, null, 2));
-            console.error("Fin Error: =====================================");
-        }
+        const { statusCode, errors } = err;
+        console.error("Error: ========================================");
+        console.error(JSON.stringify({
+            code: statusCode,
+            errors,
+            stack: err.stack,
+        }, null, 2));
         res.status(statusCode).json({
             errors,
             message: err.message,

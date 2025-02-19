@@ -9,23 +9,20 @@ export const errorHandler = (
 ): void => {
   // Errores controlados (personalizados)
   if (err instanceof CustomError) {
-    const { statusCode, errors, logging } = err;
+    const { statusCode, errors } = err;
 
-    if (logging) {
-      console.error("Error: ========================================");
-      console.error(
-        JSON.stringify(
-          {
-            code: statusCode,
-            errors,
-            stack: err.stack,
-          },
-          null,
-          2
-        )
-      );
-      console.error("Fin Error: =====================================");
-    }
+    console.error("Error: ========================================");
+    console.error(
+      JSON.stringify(
+        {
+          code: statusCode,
+          errors,
+          stack: err.stack,
+        },
+        null,
+        2
+      )
+    );
 
     res.status(statusCode).json({
       errors,
