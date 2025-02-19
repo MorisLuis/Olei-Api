@@ -39,9 +39,6 @@ const updateCodebarService = async (sessionId, codigoParam, Id_Marca, body) => {
         throw new BadRequestError_1.default({ code: 404, message: `Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.`, logging: true });
     }
     ;
-    const request = new mssql_1.default.Request(transaction);
-    request.input('codigo', mssql_1.default.NVarChar, codigoParam);
-    request.input('Id_Marca', mssql_1.default.Int, Id_Marca);
     const keys = Object.keys(body);
     const query = costos_1.costosQuerys.updateCostos;
     // Codebar random
@@ -50,12 +47,11 @@ const updateCodebarService = async (sessionId, codigoParam, Id_Marca, body) => {
         const codeBarRandom = uniqueId.replace(/-/g, '').substring(0, 10);
         CodBar = codeBarRandom;
     }
-    // Make forEach to create de SET of the query.
-    keys.forEach((key) => {
-        if (key === 'codeRandom') {
-            request.input('CodBar', mssql_1.default.NVarChar, body['CodBar']);
-        }
-    });
+    console.log({ CodBar });
+    const request = new mssql_1.default.Request(transaction);
+    request.input('codigo', mssql_1.default.NVarChar, codigoParam);
+    request.input('Id_Marca', mssql_1.default.Int, Id_Marca);
+    request.input('CodBar', mssql_1.default.NVarChar, CodBar);
     await request.query(query);
     await transaction.commit();
     return { ok: true };

@@ -11,7 +11,12 @@ type updateCodbar = {
     codeRandom: string
 };
 
-const updateCodebarService = async (sessionId: string, codigoParam: string, Id_Marca: string, body: updateCodbar) => {
+const updateCodebarService = async (
+    sessionId: string,
+    codigoParam: string,
+    Id_Marca: number,
+    body: updateCodbar
+) => {
 
     const { user: userFR } = await handleGetSession({ sessionId });
 
@@ -44,9 +49,7 @@ const updateCodebarService = async (sessionId: string, codigoParam: string, Id_M
         throw new BadRequestError({ code: 404, message: `Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.`, logging: true });
     };
 
-    const request = new sql.Request(transaction);
-    request.input('codigo', sql.NVarChar, codigoParam);
-    request.input('Id_Marca', sql.Int, Id_Marca);
+
 
     const keys = Object.keys(body);
     const query = costosQuerys.updateCostos;
@@ -58,12 +61,12 @@ const updateCodebarService = async (sessionId: string, codigoParam: string, Id_M
         CodBar = codeBarRandom
     }
 
-    // Make forEach to create de SET of the query.
-    keys.forEach((key) => {
-        if (key === 'codeRandom') {
-            request.input('CodBar', sql.NVarChar, body['CodBar']);
-        }
-    });
+    console.log({CodBar});
+
+    const request = new sql.Request(transaction);
+    request.input('codigo', sql.NVarChar, codigoParam);
+    request.input('Id_Marca', sql.Int, Id_Marca);
+    request.input('CodBar', sql.NVarChar, CodBar);
 
     await request.query(query);
     await transaction.commit();
