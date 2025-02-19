@@ -3,20 +3,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendEmail = void 0;
+exports.sendEmailWithPDF = exports.sendEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
+const generatePDF_1 = require("../utils/generatePDF");
+const emailValidations_1 = require("../validations/emailValidations");
+// Configurar el transporte SMTP
+const transporter = nodemailer_1.default.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+        user: 'moradoluisenrique@gmail.com', // Tu usuario SMTP
+        pass: process.env.KEY_EMAIL, // Tu contraseña SMTP
+    },
+});
 const sendEmail = async (req, res, next) => {
-    const { destinatario, remitente, subject, text } = req.body;
-    // Configurar el transporte SMTP
-    const transporter = nodemailer_1.default.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-            user: 'moradoluisenrique@gmail.com', // Tu usuario SMTP
-            pass: 'todv peof eahm kygy', // Tu contraseña SMTP
-        },
-    });
+    const { destinatario, remitente, subject, text } = emailValidations_1.emailBodySchema.parse(req.body);
     // Opciones del correo
     const mailOptions = {
         from: '"Olei Software" <moradoluisenrique@gmail.com>',
@@ -24,6 +26,35 @@ const sendEmail = async (req, res, next) => {
         subject: subject,
         text: text,
         replyTo: remitente
+    };
+    try {
+        await transporter.sendMail(mailOptions);
+        res.json({
+            ok: true
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.sendEmail = sendEmail;
+const sendEmailWithPDF = async (req, res, next) => {
+    const { destinatario, remitente, subject, text, nombreRemitente } = emailValidations_1.emailCobranzaBodySchema.parse(req.body);
+    const pdfBuffer = await (0, generatePDF_1.generatePDF)({ name: 'prueba', message: "Primera prueba de pdf enviada por correo" });
+    // Opciones del correo
+    const mailOptions = {
+        from: '"Olei Software" <moradoluisenrique@gmail.com>',
+        to: destinatario,
+        subject: subject,
+        text: text,
+        replyTo: remitente,
+        attachments: [
+            {
+                filename: `Cobranza-${nombreRemitente}.pdf`,
+                content: Buffer.from(pdfBuffer),
+                contentType: 'application/pdf',
+            },
+        ],
     };
     try {
         const info = await transporter.sendMail(mailOptions);
@@ -36,5 +67,5 @@ const sendEmail = async (req, res, next) => {
         console.error('Error al enviar el correo:', error);
     }
 };
-exports.sendEmail = sendEmail;
+exports.sendEmailWithPDF = sendEmailWithPDF;
 //# sourceMappingURL=email.js.map
