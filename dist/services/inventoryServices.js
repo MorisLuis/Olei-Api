@@ -41,8 +41,11 @@ const postInventoryService = async ({ sessionId, inventoryDetails, typeOfMovemen
         FolioReq: null,
         AlmReq: 0,
     };
+    console.log({ typeOfMovement });
+    console.log({ inventoryData });
     const xmlDataInventory = await (0, convertArrayToXml_1.convertArrayToXml)(inventoryData);
     const xmlDataInventoryDetails = await (0, convertArrayToXml_1.convertArrayToXml)(inventoryDetails);
+    console.log({ inventoryDetails });
     const result = await request
         .input('xmlDataInventory', mssql_1.default.Xml, xmlDataInventory)
         .input('xmlDataInventoryDetails', mssql_1.default.Xml, xmlDataInventoryDetails)

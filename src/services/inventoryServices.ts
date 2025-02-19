@@ -54,11 +54,15 @@ export const postInventoryService = async ({
         SwTr: 0,
         FolioReq: null,
         AlmReq: 0,
-    }
+    };
+
+    console.log({typeOfMovement})
+    console.log({inventoryData})
 
     const xmlDataInventory = await convertArrayToXml(inventoryData);
     const xmlDataInventoryDetails = await convertArrayToXml(inventoryDetails);
 
+    console.log({inventoryDetails}) 
 
     const result = await request
         .input('xmlDataInventory', sql.Xml, xmlDataInventory)

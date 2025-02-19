@@ -28,7 +28,7 @@ exports.postInventoryBodySchema = zod_1.z.object({
             .transform((val) => (typeof val === "number" ? val.toString() : val)) // Convierte el número a string
             .refine((val) => ["1", "2", "3"].includes(val), // Validación: debe ser "1", "2" o "3"
         { message: "Accion debe ser '1', '2' o '3'" }),
-        Id_TipoMovInv: zod_1.z.number().int().positive().nonnegative(),
+        Id_TipoMovInv: zod_1.z.number().int().nonnegative(),
         Id_AlmDest: zod_1.z.number().int().nonnegative()
     })
 });
