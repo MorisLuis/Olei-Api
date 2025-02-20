@@ -14,7 +14,7 @@ const postInventory = async (req: Request, res: Response, next: NextFunction) =>
         const Id_Usuario = req.id;
         const { inventoryDetails, typeOfMovement } = postInventoryBodySchema.parse(req.body);
 
-        const { Folio } = await postInventoryService({
+        const { Folio } = await postInventoryService({ 
             sessionId,
             inventoryDetails,
             typeOfMovement,

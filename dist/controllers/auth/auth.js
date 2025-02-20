@@ -65,7 +65,9 @@ const login = async (req, res, next) => {
             ...req.session.user,
             userId: Id_Usuario.trim(),
             userRol: userData.Id_Perfil,
-            TodosAlmacenes: userData.TodosAlmacenes
+            TodosAlmacenes: userData.TodosAlmacenes,
+            Id_Almacen: userData.Id_Almacen,
+            AlmacenNombre: userData.AlmacenNombre
         };
         // Session redis
         req.session.user = datosDelUsuario;
@@ -73,6 +75,7 @@ const login = async (req, res, next) => {
             Id_Usuario,
             TodosAlmacenes: userData.TodosAlmacenes,
             Id_Almacen: userData.Id_Almacen,
+            AlmacenNombre: userData.AlmacenNombre,
             Id_TipoMovInv: {
                 Id_TipoMovInv: userData.Id_TipoMovInv,
                 Accion: userData.Accion,
@@ -98,7 +101,7 @@ const renewDB = async (req, res, next) => {
         if (!userFR) {
             throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
         }
-        const { BaseSQL, IdUsuarioOLEI, RazonSocial, userId, userRol, Id_Almacen } = userFR;
+        const { BaseSQL, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
         const token = await (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI });
         if (!token) {
             throw new BadRequestError_1.default({ code: 401, message: "Failed to generate token", logging: true });
@@ -113,8 +116,7 @@ const renewDB = async (req, res, next) => {
         // User to Frontend.
         const user = {
             BaseSQL: BaseSQL,
-            RazonSocial: RazonSocial,
-            Id_Almacen
+            RazonSocial: RazonSocial
         };
         if (!userFR) {
             throw new BadRequestError_1.default({ code: 401, message: "User data is neccesary", logging: true });
@@ -154,7 +156,9 @@ const renewLogin = async (req, res, next) => {
         ;
         const user = {
             Id_Usuario: userId,
-            TodosAlmacenes
+            TodosAlmacenes,
+            Id_Almacen: userFR.Id_Almacen,
+            AlmacenNombre: userFR.AlmacenNombre
         };
         res.json({
             user,

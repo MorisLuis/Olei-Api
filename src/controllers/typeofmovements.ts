@@ -21,7 +21,7 @@ const getTypeofmovements = async (req: Request, res: Response, next: NextFunctio
         const request = pool.request();
         request.input('Id_Usuario', sql.VarChar(50), userId);
         const resultData = await request.execute('fn_GetTypeOfMovement');
-        const TiposMovimiento = resultData?.recordset
+        const TiposMovimiento = resultData?.recordset;
         res.json(TiposMovimiento);
 
     } catch (error) {

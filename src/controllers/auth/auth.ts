@@ -55,7 +55,7 @@ const loginDB = async (req: Request, res: Response, next: NextFunction) => {
         console.log({error})
         next(error);
     }
-}
+};
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -75,7 +75,9 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             ...(req.session as any).user,
             userId: Id_Usuario.trim(),
             userRol: userData.Id_Perfil,
-            TodosAlmacenes: userData.TodosAlmacenes
+            TodosAlmacenes: userData.TodosAlmacenes,
+            Id_Almacen: userData.Id_Almacen,
+            AlmacenNombre: userData.AlmacenNombre
         };
 
         // Session redis
@@ -85,6 +87,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             Id_Usuario,
             TodosAlmacenes: userData.TodosAlmacenes,
             Id_Almacen: userData.Id_Almacen,
+            AlmacenNombre: userData.AlmacenNombre,
             Id_TipoMovInv: {
                 Id_TipoMovInv: userData.Id_TipoMovInv,
                 Accion: userData.Accion,
@@ -114,7 +117,7 @@ const renewDB = async (req: Request, res: Response, next: NextFunction) => {
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
         }
 
-        const { BaseSQL, IdUsuarioOLEI, RazonSocial, userId, userRol, Id_Almacen } = userFR;
+        const { BaseSQL, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
 
         const token = await generateJWTDB({ IdUsuarioOLEI });
 
@@ -132,8 +135,7 @@ const renewDB = async (req: Request, res: Response, next: NextFunction) => {
         // User to Frontend.
         const user = {
             BaseSQL: BaseSQL,
-            RazonSocial: RazonSocial,
-            Id_Almacen
+            RazonSocial: RazonSocial
         };
 
         if (!userFR) {
@@ -180,7 +182,9 @@ const renewLogin = async (req: Request, res: Response, next: NextFunction) => {
 
         const user = {
             Id_Usuario: userId,
-            TodosAlmacenes
+            TodosAlmacenes,
+            Id_Almacen: userFR.Id_Almacen,
+            AlmacenNombre: userFR.AlmacenNombre
         };
 
         res.json({

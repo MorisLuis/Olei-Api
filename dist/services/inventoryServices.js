@@ -16,7 +16,7 @@ const postInventoryService = async ({ sessionId, inventoryDetails, typeOfMovemen
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, TodosAlmacenes } = userFR;
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
         throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
@@ -29,12 +29,14 @@ const postInventoryService = async ({ sessionId, inventoryDetails, typeOfMovemen
     const transaction = new mssql_1.default.Transaction(pool);
     await transaction.begin();
     const request = new mssql_1.default.Request(transaction);
+    // Si Accion es igual a 3, es traspaso. Si no es entrada o salida.
+    const AlmacenDestino = typeOfMovement.Accion === '3' ? typeOfMovement?.Id_AlmDest : Id_Almacen;
     // Get the inventory data.
     const inventoryData = {
         Estado: 1, // If it were 0 it would mean a inventory was cancelled
         Fecha: (0, currentTime_1.currentTime)(),
         Id_TipoMovInv: typeOfMovement?.Id_TipoMovInv,
-        Id_AlmacenDest: typeOfMovement?.Id_AlmDest ?? 0,
+        Id_AlmacenDest: AlmacenDestino,
         SwPendiente: 0,
         Descripcion: '',
         SwTr: 0,
