@@ -8,8 +8,6 @@ const updateCostos = async (req: Request, res: Response, next: NextFunction) => 
     const { codigo: codigoParam, Id_Marca } = updateCodbarQuerySchema.parse(req.query);
     const body = req.body;
 
-    console.log({body})
-
     try {
         const resp = await updateCodebarService(
             sessionId,

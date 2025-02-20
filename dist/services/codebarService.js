@@ -47,7 +47,6 @@ const updateCodebarService = async (sessionId, codigoParam, Id_Marca, body) => {
         const codeBarRandom = uniqueId.replace(/-/g, '').substring(0, 10);
         CodBar = codeBarRandom;
     }
-    console.log({ CodBar });
     const request = new mssql_1.default.Request(transaction);
     request.input('codigo', mssql_1.default.NVarChar, codigoParam);
     request.input('Id_Marca', mssql_1.default.Int, Id_Marca);

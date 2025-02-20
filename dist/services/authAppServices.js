@@ -40,7 +40,7 @@ const loginAppService = async ({ sessionId, Id_Usuario, password }) => {
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
         throw new BadRequestError_1.default({ code: 500, message: "Error connecting to the main database", logging: true });
@@ -64,8 +64,7 @@ const loginAppService = async ({ sessionId, Id_Usuario, password }) => {
     const userData = result.recordsets[1][0];
     return {
         userData: {
-            ...userData,
-            Id_Almacen
+            ...userData
         }
     };
 };

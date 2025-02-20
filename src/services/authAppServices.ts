@@ -65,7 +65,7 @@ const loginAppService = async ({
         throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
     }
 
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
 
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
@@ -93,12 +93,11 @@ const loginAppService = async ({
         throw new BadRequestError({ code: 404, message: "Contraseña incorrecta", logging: true });
     };
 
-    const userData = (result.recordsets as any)[1][0]
+    const userData = (result.recordsets as any)[1][0];
 
     return {
         userData: {
-            ...userData,
-            Id_Almacen
+            ...userData
         }
     }
 };

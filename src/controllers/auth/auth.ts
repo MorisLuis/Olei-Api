@@ -29,7 +29,6 @@ const loginDB = async (req: Request, res: Response, next: NextFunction) => {
             UsuarioSQL: result.UsuarioSQL.trim(),
 
             IdUsuarioOLEI: result.IdUsuarioOLEI.trim(),
-            Id_Almacen: result.Id_Almacen,
 
             RazonSocial: result.RazonSocial.trim(),
             SwImagenes: result.SwImagenes,
@@ -44,8 +43,7 @@ const loginDB = async (req: Request, res: Response, next: NextFunction) => {
         // User to Frontend.
         const user = {
             BaseSQL: result.BaseSQL,
-            RazonSocial: result.RazonSocial,
-            Id_Almacen: result.Id_Almacen
+            RazonSocial: result.RazonSocial
         };
 
         return res.json({
@@ -54,6 +52,7 @@ const loginDB = async (req: Request, res: Response, next: NextFunction) => {
         });
 
     } catch (error) {
+        console.log({error})
         next(error);
     }
 }

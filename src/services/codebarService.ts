@@ -61,8 +61,6 @@ const updateCodebarService = async (
         CodBar = codeBarRandom
     }
 
-    console.log({CodBar});
-
     const request = new sql.Request(transaction);
     request.input('codigo', sql.NVarChar, codigoParam);
     request.input('Id_Marca', sql.Int, Id_Marca);

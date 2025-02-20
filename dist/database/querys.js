@@ -20,7 +20,6 @@ exports.querys = {
             U.Id_UsuarioOLEI,
             U.PasswordOLEI,
             U.Id_ClienteDBCLIENTES,
-            U.Id_Almacen,
             U.Id_Cliente,
             UC.SwImagenes, 
             UC.SwSinStock, 
