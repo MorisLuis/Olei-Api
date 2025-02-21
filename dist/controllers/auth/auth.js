@@ -67,7 +67,8 @@ const login = async (req, res, next) => {
             userRol: userData.Id_Perfil,
             TodosAlmacenes: userData.TodosAlmacenes,
             Id_Almacen: userData.Id_Almacen,
-            AlmacenNombre: userData.AlmacenNombre
+            AlmacenNombre: userData.AlmacenNombre,
+            SalidaSinExistencias: userData.SalidaSinExistencias
         };
         // Session redis
         req.session.user = datosDelUsuario;
@@ -76,6 +77,7 @@ const login = async (req, res, next) => {
             TodosAlmacenes: userData.TodosAlmacenes,
             Id_Almacen: userData.Id_Almacen,
             AlmacenNombre: userData.AlmacenNombre,
+            SalidaSinExistencias: userData.SalidaSinExistencias,
             Id_TipoMovInv: {
                 Id_TipoMovInv: userData.Id_TipoMovInv,
                 Accion: userData.Accion,
@@ -158,7 +160,8 @@ const renewLogin = async (req, res, next) => {
             Id_Usuario: userId,
             TodosAlmacenes,
             Id_Almacen: userFR.Id_Almacen,
-            AlmacenNombre: userFR.AlmacenNombre
+            AlmacenNombre: userFR.AlmacenNombre,
+            SalidaSinExistencias: userFR.SalidaSinExistencias,
         };
         res.json({
             user,

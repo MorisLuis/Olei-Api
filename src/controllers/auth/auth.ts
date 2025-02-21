@@ -67,7 +67,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             Id_Usuario,
             password,
             sessionId
-        })
+        });
 
         const token = await generateJWT({ id: Id_Usuario.trim() });
 
@@ -77,7 +77,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             userRol: userData.Id_Perfil,
             TodosAlmacenes: userData.TodosAlmacenes,
             Id_Almacen: userData.Id_Almacen,
-            AlmacenNombre: userData.AlmacenNombre
+            AlmacenNombre: userData.AlmacenNombre,
+            SalidaSinExistencias: userData.SalidaSinExistencias
         };
 
         // Session redis
@@ -88,6 +89,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             TodosAlmacenes: userData.TodosAlmacenes,
             Id_Almacen: userData.Id_Almacen,
             AlmacenNombre: userData.AlmacenNombre,
+            SalidaSinExistencias: userData.SalidaSinExistencias,
             Id_TipoMovInv: {
                 Id_TipoMovInv: userData.Id_TipoMovInv,
                 Accion: userData.Accion,
@@ -184,7 +186,9 @@ const renewLogin = async (req: Request, res: Response, next: NextFunction) => {
             Id_Usuario: userId,
             TodosAlmacenes,
             Id_Almacen: userFR.Id_Almacen,
-            AlmacenNombre: userFR.AlmacenNombre
+            AlmacenNombre: userFR.AlmacenNombre,
+            SalidaSinExistencias: userFR.SalidaSinExistencias,
+
         };
 
         res.json({
