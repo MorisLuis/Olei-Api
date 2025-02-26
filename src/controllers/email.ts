@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import nodemailer from 'nodemailer';
 import { generatePDF } from '../utils/generatePDF';
 import { emailBodySchema, emailCobranzaBodySchema } from '../validations/emailValidations';
+import { getCobranzaService } from '../services/sellsDocsServices';
+import { getClientParamsSchema, getCobranzaQuerySchema } from '../validations/sellsValidations';
 
 // Configurar el transporte SMTP
 const transporter = nodemailer.createTransport({
@@ -43,8 +45,28 @@ const sendEmail = async (req: Request, res: Response, next: NextFunction) => {
 const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction) => {
 
     const { destinatario, remitente, subject, text, nombreRemitente } = emailCobranzaBodySchema.parse(req.body)
+    const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaQuerySchema.parse(req.query);
+    const { client } = getClientParamsSchema.parse(req.params);
+    const sessionId = req.sessionRedis;
+
+    // Download data
+    const sells = await getCobranzaService({
+        sessionId,
+        Id_Cliente: client,
+        PageNumber,
+        SellsOrderCondition: sellsOrderCondition,
+        TipoDoc,
+        FilterTipoDoc,
+        FilterNotExpired,
+        FilterExpired,
+        DateEnd: DateEnd || null,
+        DateExactly: DateExactly || null,
+        DateStart: DateStart || null
+    });
+
+    // Generate PDF
     const pdfBuffer = await generatePDF({ name: 'prueba', message: "Primera prueba de pdf enviada por correo" });
-    
+
     // Opciones del correo
     const mailOptions = {
         from: '"Olei Software" <moradoluisenrique@gmail.com>',

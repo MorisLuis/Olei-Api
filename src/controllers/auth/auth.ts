@@ -119,19 +119,12 @@ const renewDB = async (req: Request, res: Response, next: NextFunction) => {
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
         }
 
-        const { BaseSQL, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
+        const { BaseSQL, IdUsuarioOLEI, RazonSocial } = userFR;
 
         const token = await generateJWTDB({ IdUsuarioOLEI });
 
         if (!token) {
             throw new BadRequestError({ code: 401, message: "Failed to generate token", logging: true });
-        };
-
-        // User to Redis.
-        const userRedis: UserSessionInterface = {
-            ...userFR,
-            userId: userId ? userId : undefined,
-            userRol: userRol ? userRol : undefined
         };
 
         // User to Frontend.
@@ -143,8 +136,6 @@ const renewDB = async (req: Request, res: Response, next: NextFunction) => {
         if (!userFR) {
             throw new BadRequestError({ code: 401, message: "User data is neccesary", logging: true });
         };
-
-        (req.session as any).user = userRedis
 
         res.json({
             token,
@@ -188,7 +179,6 @@ const renewLogin = async (req: Request, res: Response, next: NextFunction) => {
             Id_Almacen: userFR.Id_Almacen,
             AlmacenNombre: userFR.AlmacenNombre,
             SalidaSinExistencias: userFR.SalidaSinExistencias,
-
         };
 
         res.json({
@@ -212,11 +202,18 @@ const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
         }
 
-        (req.session as any).user = {
+        const datosDelUsuario: UserSessionInterface = {
             ...(req.session as any).user,
             userId: undefined,
-            userRol: undefined
+            userRol: undefined,
+            TodosAlmacenes: undefined,
+            Id_Almacen: undefined,
+            AlmacenNombre: undefined,
+            SalidaSinExistencias: undefined
         };
+
+        // Session redis
+        (req.session as any).user = datosDelUsuario;
 
 
         res.json({

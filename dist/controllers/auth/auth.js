@@ -103,18 +103,12 @@ const renewDB = async (req, res, next) => {
         if (!userFR) {
             throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
         }
-        const { BaseSQL, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
+        const { BaseSQL, IdUsuarioOLEI, RazonSocial } = userFR;
         const token = await (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI });
         if (!token) {
             throw new BadRequestError_1.default({ code: 401, message: "Failed to generate token", logging: true });
         }
         ;
-        // User to Redis.
-        const userRedis = {
-            ...userFR,
-            userId: userId ? userId : undefined,
-            userRol: userRol ? userRol : undefined
-        };
         // User to Frontend.
         const user = {
             BaseSQL: BaseSQL,
@@ -124,7 +118,6 @@ const renewDB = async (req, res, next) => {
             throw new BadRequestError_1.default({ code: 401, message: "User data is neccesary", logging: true });
         }
         ;
-        req.session.user = userRedis;
         res.json({
             token,
             user
@@ -180,11 +173,17 @@ const logoutUser = async (req, res, next) => {
         if (!userFR) {
             throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
         }
-        req.session.user = {
+        const datosDelUsuario = {
             ...req.session.user,
             userId: undefined,
-            userRol: undefined
+            userRol: undefined,
+            TodosAlmacenes: undefined,
+            Id_Almacen: undefined,
+            AlmacenNombre: undefined,
+            SalidaSinExistencias: undefined
         };
+        // Session redis
+        req.session.user = datosDelUsuario;
         res.json({
             user: userFR
         });
