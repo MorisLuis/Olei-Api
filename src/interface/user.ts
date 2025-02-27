@@ -18,7 +18,8 @@ export interface UserSessionInterface {
     TodosAlmacenes?: number;
     Id_Almacen?: number;
     AlmacenNombre?: string;
-    
+    Id_ListPre?: number;
+
     SalidaSinExistencias?: Number
 }
 

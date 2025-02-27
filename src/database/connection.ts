@@ -6,7 +6,9 @@ let pool: sql.ConnectionPool | null = null;
 
 
 export const dbConnection = async (server?: string, base?: string, user?: string, pass?: string) => {
+    
     if (!pool) {
+
         const dbConfig = {
             user: user || config.dbUser,
             password: pass || config.dbPassword,

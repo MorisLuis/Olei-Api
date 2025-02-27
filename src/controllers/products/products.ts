@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { dbConnection, querys } from '../../database';
+import { dbConnection } from '../../database';
 import { productsQuerys } from '../../database/querys/products';
 import { guessBarcodeType } from '../../utils/identifyBarcodeType';
 import { handleGetSession } from '../../utils/Redis/getSession';
@@ -14,7 +14,6 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
     try {
         const { id } = req.params;
         const { Marca } = req.query;
-        const Id_Usuario = req.id;
 
         const sessionId = req.sessionID;
         const { user: userFR } = await handleGetSession({ sessionId });
@@ -23,12 +22,8 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
         }
 
-        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
+        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
         const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
-
-        const userquery = querys.getAuthLimitData;
-        const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
-        const user = requestUser.recordset[0]
 
         if (!pool) {
             throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
@@ -47,7 +42,7 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
         const result = await pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)
-            .input("ListaPrecios", user.Id_ListPre)
+            .input("ListaPrecios", Id_ListPre)
             .input("Almacen", Id_Almacen)
             .input("baseSQL", BaseSQL)
             .query(query);
@@ -91,12 +86,8 @@ const getTotalOfProductsByStock = async (req: Request, res: Response, next: Next
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
         }
 
-        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
+        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
         const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
-
-        const userquery = querys.getAuthLimitData;
-        const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
-        const user = requestUser.recordset[0]
 
         if (!pool) {
             throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
@@ -105,7 +96,7 @@ const getTotalOfProductsByStock = async (req: Request, res: Response, next: Next
         let query = productsQuerys.getTotalOfAllProductsByStock;
 
         const request = await pool.request()
-            .input('Id_ListaPrecios', user.Id_ListPre)
+            .input('Id_ListaPrecios', Id_ListPre)
             .input('Almacen', Id_Almacen)
             .query(query);
 
@@ -130,12 +121,8 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
             throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
         }
 
-        const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
+        const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
         const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
-
-        const userquery = querys.getAuthLimitData;
-        const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery)
-        const user = requestUser.recordset[0]
 
         if (!pool) {
             throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
@@ -153,7 +140,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
             let query = productsQuerys.getProductByStockAndCodeBarDV;
             request = await pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)
-                .input('Id_ListaPrecios', user.Id_ListPre)
+                .input('Id_ListaPrecios', Id_ListPre)
                 .input('Id_Almacen', Id_Almacen)
                 .query(query);
 
@@ -162,7 +149,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
             request = await pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)
                 .input("Codigo", Codigo === 'undefined' ? null : Codigo)
-                .input('Id_ListaPrecios', user.Id_ListPre)
+                .input('Id_ListaPrecios', Id_ListPre)
                 .input('Id_Almacen', Id_Almacen)
                 .query(query);
 

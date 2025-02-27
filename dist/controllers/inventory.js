@@ -1,15 +1,43 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchProductInventory = exports.getInventoryDetails = exports.getInventory = exports.postInventory = void 0;
-const database_1 = require("../database");
-const inventory_1 = require("../database/querys/inventory");
-const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const inventoryServices_1 = require("../services/inventoryServices");
 const inventoryValidations_1 = require("../validations/inventoryValidations");
 const zod_1 = require("zod");
+const getInventory = async (req, res, next) => {
+    try {
+        const { Folio } = inventoryValidations_1.getInventoryQuerySchema.parse(req.query);
+        const sessionId = req.sessionID;
+        const { inventory } = await (0, inventoryServices_1.getInventoryService)({ Folio, sessionId });
+        res.json(inventory);
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        }
+        else {
+            next(error);
+        }
+    }
+};
+exports.getInventory = getInventory;
+const getInventoryDetails = async (req, res, next) => {
+    try {
+        const { Folio } = inventoryValidations_1.getInventoryQuerySchema.parse(req.query);
+        const sessionId = req.sessionID;
+        const { inventoryDetails } = await (0, inventoryServices_1.getInventoryDetailsService)({ Folio, sessionId });
+        res.json(inventoryDetails);
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        }
+        else {
+            next(error);
+        }
+    }
+};
+exports.getInventoryDetails = getInventoryDetails;
 const postInventory = async (req, res, next) => {
     try {
         const sessionId = req.sessionID;
@@ -34,54 +62,6 @@ const postInventory = async (req, res, next) => {
     }
 };
 exports.postInventory = postInventory;
-const getInventory = async (req, res, next) => {
-    try {
-        const { Folio } = inventoryValidations_1.getInventoryQuerySchema.parse(req.query);
-        const pool = await (0, database_1.dbConnection)();
-        if (!pool) {
-            throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
-        }
-        const getInventoryQuery = inventory_1.inventoryQuerys.getInventory;
-        const request = await pool.request()
-            .input("Folio", Folio)
-            .query(getInventoryQuery);
-        let inventory = request.recordset[0];
-        res.json(inventory);
-    }
-    catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
-        }
-        else {
-            next(error);
-        }
-    }
-};
-exports.getInventory = getInventory;
-const getInventoryDetails = async (req, res, next) => {
-    try {
-        const { Folio } = inventoryValidations_1.getInventoryQuerySchema.parse(req.query);
-        const pool = await (0, database_1.dbConnection)();
-        if (!pool) {
-            throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
-        }
-        const getInventoryQuery = inventory_1.inventoryQuerys.getInventoryDetails;
-        const request = await pool.request()
-            .input("Folio", Folio)
-            .query(getInventoryQuery);
-        const inventoryDetails = request.recordset;
-        res.json(inventoryDetails);
-    }
-    catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
-        }
-        else {
-            next(error);
-        }
-    }
-};
-exports.getInventoryDetails = getInventoryDetails;
 const searchProductInventory = async (req, res, next) => {
     try {
         const { searchTerm } = inventoryValidations_1.searchProductInventoryQuerySchema.parse(req.query);

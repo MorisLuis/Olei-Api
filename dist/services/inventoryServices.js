@@ -3,8 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchProductInventoryService = exports.postInventoryService = void 0;
+exports.getInventoryDetailsService = exports.getInventoryService = exports.searchProductInventoryService = exports.postInventoryService = void 0;
 const database_1 = require("../database");
+const inventory_1 = require("../database/querys/inventory");
 const products_1 = require("../database/querys/products");
 const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const getSession_1 = require("../utils/Redis/getSession");
@@ -84,4 +85,44 @@ const searchProductInventoryService = async ({ sessionId, searchTerm, }) => {
     };
 };
 exports.searchProductInventoryService = searchProductInventoryService;
+const getInventoryService = async ({ sessionId, Folio }) => {
+    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+    const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
+    if (!pool) {
+        throw new BadRequestError_1.default({ code: 500, message: "Unable to establish a connection to the database", logging: true });
+    }
+    ;
+    const getInventoryQuery = inventory_1.inventoryQuerys.getInventory;
+    const request = await pool.request()
+        .input("Folio", Folio)
+        .query(getInventoryQuery);
+    let inventory = request.recordset[0];
+    return { inventory };
+};
+exports.getInventoryService = getInventoryService;
+const getInventoryDetailsService = async ({ sessionId, Folio }) => {
+    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
+    if (!userFR) {
+        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+    }
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+    const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
+    if (!pool) {
+        throw new BadRequestError_1.default({ code: 500, message: "Unable to establish a connection to the database", logging: true });
+    }
+    ;
+    const getInventoryQuery = inventory_1.inventoryQuerys.getInventoryDetails;
+    const request = await pool.request()
+        .input("Folio", Folio)
+        .query(getInventoryQuery);
+    const inventoryDetails = request.recordset;
+    return {
+        inventoryDetails
+    };
+};
+exports.getInventoryDetailsService = getInventoryDetailsService;
 //# sourceMappingURL=inventoryServices.js.map

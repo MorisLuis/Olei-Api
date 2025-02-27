@@ -126,16 +126,14 @@ const searchProductService = async ({ sessionId, nombre, marca, familia, codigo 
     };
 };
 exports.searchProductService = searchProductService;
+;
 const getProductsByStockService = async ({ sessionId, PageSize, PageNumber }) => {
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
         throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
     }
-    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
+    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
-    const userquery = database_1.querys.getAuthLimitData;
-    const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery);
-    const user = requestUser.recordset[0];
     if (!pool) {
         throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
     }
@@ -143,7 +141,7 @@ const getProductsByStockService = async ({ sessionId, PageSize, PageNumber }) =>
     const request = await pool.request()
         .input('PageSize', PageSize)
         .input('PageNumber', PageNumber)
-        .input('Id_ListaPrecios', user.Id_ListPre)
+        .input('Id_ListaPrecios', Id_ListPre)
         .input('Almacen', Id_Almacen)
         .query(query);
     const productsByStock = request.recordset;
