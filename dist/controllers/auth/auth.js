@@ -35,6 +35,7 @@ const loginDB = async (req, res, next) => {
             from: 'mobil'
         };
         req.session.user = datosDelUsuario;
+        console.log("Session in loginDB", req.session);
         // User to Frontend.
         const user = {
             BaseSQL: result.BaseSQL,
@@ -55,6 +56,7 @@ const login = async (req, res, next) => {
     try {
         const { Id_Usuario, password } = req.body;
         const sessionId = req.sessionID;
+        console.log("sessionId in login", sessionId);
         const { userData } = await (0, authAppServices_1.loginAppService)({
             Id_Usuario,
             password,

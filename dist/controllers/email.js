@@ -59,8 +59,9 @@ const sendEmailWithPDF = async (req, res, next) => {
         DateExactly: DateExactly || null,
         DateStart: DateStart || null
     });
+    console.log(sells);
     // Generate PDF
-    const pdfBuffer = await (0, generatePDF_1.generatePDF)({ name: 'prueba', message: "Primera prueba de pdf enviada por correo" });
+    const pdfBuffer = await (0, generatePDF_1.generatePDF)(sells);
     // Opciones del correo
     const mailOptions = {
         from: '"Olei Software" <moradoluisenrique@gmail.com>',

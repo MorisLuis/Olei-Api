@@ -16,7 +16,6 @@ const getProducById = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { Marca } = req.query;
-        const Id_Usuario = req.id;
         const sessionId = req.sessionID;
         const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
         if (!userFR) {

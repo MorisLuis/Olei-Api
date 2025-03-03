@@ -40,6 +40,8 @@ const loginDB = async (req: Request, res: Response, next: NextFunction) => {
 
         (req.session as any).user = datosDelUsuario;
 
+        console.log("Session in loginDB", req.session)
+
         // User to Frontend.
         const user = {
             BaseSQL: result.BaseSQL,
@@ -62,6 +64,9 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { Id_Usuario, password } = req.body;
         const sessionId = req.sessionID;
+
+        console.log("sessionId in login", sessionId)
+
 
         const { userData } = await loginAppService({
             Id_Usuario,

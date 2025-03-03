@@ -78,6 +78,10 @@ const getCobranza = async (req, res, next) => {
         const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const sessionId = req.sessionRedis;
+        console.log({
+            PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart
+        });
+        console.log({ client });
         const sells = await (0, sellsDocsServices_1.getCobranzaService)({
             sessionId,
             Id_Cliente: client,

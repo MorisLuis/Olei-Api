@@ -64,8 +64,9 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
         DateStart: DateStart || null
     });
 
+    console.log((sells as any))
     // Generate PDF
-    const pdfBuffer = await generatePDF({ name: 'prueba', message: "Primera prueba de pdf enviada por correo" });
+    const pdfBuffer = await generatePDF((sells as any));
 
     // Opciones del correo
     const mailOptions = {
