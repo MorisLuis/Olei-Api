@@ -67,7 +67,6 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
         console.log("sessionId in login", sessionId)
 
-
         const { userData } = await loginAppService({
             Id_Usuario,
             password,
