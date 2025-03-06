@@ -5,27 +5,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateJWTWeb = exports.validateJWT = exports.validateJWTDB = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const CustomError_1 = require("../errors/CustomError");
 // Middleware to validate JWT from first login. (App)
 const validateJWTDB = async (req, res, next) => {
     const token = req.headers['authorization']?.split(' ')[1];
     if (!token) {
-        return res.status(401).json({
-            ok: false,
-            message: 'Access denied. Token missing or invalid.',
-        });
+        throw new CustomError_1.UnauthorizedError('Acceso denegado. Falto token o es invalido');
     }
     try {
         jsonwebtoken_1.default.verify(token, process.env.SECRETORPRIVATEKEY || '', (err, decoded) => {
             if (err) {
-                return res.status(500).json({ success: false, message: 'Failed to authenticate token' });
+                throw new CustomError_1.UnauthorizedError('Fallo la autenticación del token');
             }
+            ;
             const { IdUsuarioOLEI } = decoded;
             req.IdUsuarioOLEI = IdUsuarioOLEI;
             next();
         });
     }
     catch (error) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        next(error);
     }
 };
 exports.validateJWTDB = validateJWTDB;
@@ -33,15 +32,12 @@ exports.validateJWTDB = validateJWTDB;
 const validateJWT = async (req, res, next) => {
     const token = req.headers['authorization']?.split(' ')[1];
     if (!token) {
-        return res.status(401).json({
-            ok: false,
-            message: 'Access denied. Token missing or invalid.',
-        });
+        throw new CustomError_1.UnauthorizedError('Acceso denegado. Falto token o es invalido');
     }
     try {
         jsonwebtoken_1.default.verify(token, process.env.SECRETORPRIVATEKEY || '', (err, decoded) => {
             if (err) {
-                return res.status(500).json({ success: false, message: 'Failed to authenticate token' });
+                throw new CustomError_1.UnauthorizedError('Fallo la autenticación del token');
             }
             const { id } = decoded;
             req.id = id;
@@ -49,7 +45,7 @@ const validateJWT = async (req, res, next) => {
         });
     }
     catch (error) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        next(error);
     }
 };
 exports.validateJWT = validateJWT;

@@ -1,29 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.errorHandler = void 0;
-const CustomError_1 = require("../errors/CustomError");
 const errorHandler = (err, req, res, next) => {
-    // Errores controlados (personalizados)
-    if (err instanceof CustomError_1.CustomError) {
-        const { statusCode, errors } = err;
-        console.error("Error: ========================================");
-        console.error(JSON.stringify({
-            code: statusCode,
-            errors,
-            stack: err.stack,
-        }, null, 2));
-        res.status(statusCode).json({
-            errors,
-            message: err.message,
-        });
-        return; // Finaliza la función sin devolver nada
-    }
-    // Errores no controlados
-    console.error("Unhandled error:", JSON.stringify(err, null, 2));
-    res.status(500).json({
-        errors: [{ message: "Something went wrong" }],
-        message: "Something went wrong",
-    });
+    const statusCode = err.statusCode || 500;
+    const message = err.message || 'Internal Server Error';
+    console.error(`[ERROR] ${req.method} ${req.path} - ${message}`);
+    res.status(statusCode).json({ error: message });
 };
 exports.errorHandler = errorHandler;
 //# sourceMappingURL=errorHandler.js.map

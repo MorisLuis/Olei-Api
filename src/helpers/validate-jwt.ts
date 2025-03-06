@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken';
+import { UnauthorizedError } from '../errors/CustomError';
 
 
 // Middleware to validate JWT from first login. (App)
@@ -7,17 +8,14 @@ const validateJWTDB = async (req: Request, res: Response, next: NextFunction) =>
     const token = req.headers['authorization']?.split(' ')[1];
 
     if (!token) {
-        return res.status(401).json({
-            ok: false,
-            message: 'Access denied. Token missing or invalid.',
-        });
+        throw new UnauthorizedError('Acceso denegado. Falto token o es invalido')
     }
 
     try {
         jwt.verify(token, process.env.SECRETORPRIVATEKEY || '', (err, decoded) => {
             if (err) {
-                return res.status(500).json({ success: false, message: 'Failed to authenticate token' });
-            }
+                throw new UnauthorizedError('Fallo la autenticación del token')
+            };
 
             const { IdUsuarioOLEI } = decoded as { IdUsuarioOLEI: string };
 
@@ -25,7 +23,7 @@ const validateJWTDB = async (req: Request, res: Response, next: NextFunction) =>
             next();
         });
     } catch (error) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        next(error)
     }
 };
 
@@ -36,16 +34,13 @@ const validateJWT = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers['authorization']?.split(' ')[1];
 
     if (!token) {
-        return res.status(401).json({
-            ok: false,
-            message: 'Access denied. Token missing or invalid.',
-        });
+        throw new UnauthorizedError('Acceso denegado. Falto token o es invalido')
     }
 
     try {
         jwt.verify(token, process.env.SECRETORPRIVATEKEY || '', (err, decoded) => {
             if (err) {
-                return res.status(500).json({ success: false, message: 'Failed to authenticate token' });
+                throw new UnauthorizedError('Fallo la autenticación del token')
             }
 
             const { id } = decoded as { id: string };
@@ -54,7 +49,7 @@ const validateJWT = async (req: Request, res: Response, next: NextFunction) => {
             next();
         });
     } catch (error) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        next(error)
     }
 };
 

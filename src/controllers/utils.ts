@@ -26,16 +26,9 @@ const getBanner = async (req: Request, res: Response) => {
 }
 
 const getUtils = async (req: Request, res: Response) => {
-
-    try {
-
-        res.json({
-            ok: true
-        })
-
-    } catch (error) {
-        res.status(500).send(error);
-    }
+    return new Promise((resolve, reject) => {
+        reject('Error en la promesa!');
+    });
 };
 
 const getExcellTest = async (req: Request, res: Response) => {

@@ -1,15 +1,13 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logoutDB = exports.logoutUser = exports.renewLogin = exports.renewDB = exports.login = exports.loginDB = void 0;
 const database_1 = require("../../database");
 const generate_jwt_1 = require("../../helpers/generate-jwt");
 const getSession_1 = require("../../utils/Redis/getSession");
 const deleteRedis_1 = require("../../utils/Redis/deleteRedis");
-const BadRequestError_1 = __importDefault(require("../../errors/BadRequestError"));
 const authAppServices_1 = require("../../services/authAppServices");
+const CustomError_1 = require("../../errors/CustomError");
+// login global server
 const loginDB = async (req, res, next) => {
     try {
         const { IdUsuarioOLEI, PasswordOLEI } = req.body;
@@ -46,11 +44,66 @@ const loginDB = async (req, res, next) => {
         });
     }
     catch (error) {
-        console.log({ error });
         next(error);
     }
 };
 exports.loginDB = loginDB;
+const renewDB = async (req, res, next) => {
+    try {
+        // Get session from REDIS.
+        const sessionId = req.sessionID;
+        const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
+        if (!userFR) {
+            throw new CustomError_1.UnauthorizedError('Sesion terminada');
+        }
+        const { BaseSQL, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
+        const token = await (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI });
+        if (!token) {
+            throw new CustomError_1.UnauthorizedError('Error al generar token');
+        }
+        ;
+        // User to Redis.
+        const userRedis = {
+            ...userFR,
+            userId: userId ? userId : undefined,
+            userRol: userRol ? userRol : undefined
+        };
+        // User to Frontend.
+        const user = {
+            BaseSQL: BaseSQL,
+            RazonSocial: RazonSocial
+        };
+        if (!userFR) {
+            throw new CustomError_1.ValidationError('Información del usuario es necesaria');
+        }
+        ;
+        req.session.user = userRedis;
+        res.json({
+            token,
+            user
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.renewDB = renewDB;
+const logoutDB = async (req, res, next) => {
+    try {
+        const sessionId = req.sessionID;
+        if (!sessionId) {
+            throw new CustomError_1.UnauthorizedError('Sesion terminada');
+        }
+        await (0, deleteRedis_1.handleDeleteRedisSession)({ sessionId });
+        await (0, database_1.closeDbConnection)();
+        res.json({ ok: true });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.logoutDB = logoutDB;
+// login
 const login = async (req, res, next) => {
     try {
         const { Id_Usuario, password } = req.body;
@@ -93,65 +146,26 @@ const login = async (req, res, next) => {
     }
 };
 exports.login = login;
-const renewDB = async (req, res, next) => {
-    try {
-        // Get session from REDIS.
-        const sessionId = req.sessionID;
-        const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
-        if (!userFR) {
-            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-        }
-        const { BaseSQL, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
-        const token = await (0, generate_jwt_1.generateJWTDB)({ IdUsuarioOLEI });
-        if (!token) {
-            throw new BadRequestError_1.default({ code: 401, message: "Failed to generate token", logging: true });
-        }
-        ;
-        // User to Redis.
-        const userRedis = {
-            ...userFR,
-            userId: userId ? userId : undefined,
-            userRol: userRol ? userRol : undefined
-        };
-        // User to Frontend.
-        const user = {
-            BaseSQL: BaseSQL,
-            RazonSocial: RazonSocial
-        };
-        if (!userFR) {
-            throw new BadRequestError_1.default({ code: 401, message: "User data is neccesary", logging: true });
-        }
-        ;
-        req.session.user = userRedis;
-        res.json({
-            token,
-            user
-        });
-    }
-    catch (error) {
-        next(error);
-    }
-};
-exports.renewDB = renewDB;
 const renewLogin = async (req, res, next) => {
     try {
         const sessionId = req.sessionID;
         const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
+        console.log({ sessionId });
         if (!userFR) {
-            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+            throw new CustomError_1.UnauthorizedError('Sesion terminada');
         }
         const { ServidorSQL, BaseSQL, userId, userRol, TodosAlmacenes } = userFR;
         if (!userId && !userRol) {
-            throw new BadRequestError_1.default({ code: 401, message: "User not authenticated", logging: true });
+            throw new CustomError_1.ValidationError('userId y userRol son necesarios');
         }
         ;
         if (!ServidorSQL && !BaseSQL) {
-            throw new BadRequestError_1.default({ code: 401, message: "Server and base data is neccessary", logging: true });
+            throw new CustomError_1.ValidationError('ServidorSQL y BaseSQL son necesarios');
         }
         ;
         const token = await (0, generate_jwt_1.generateJWT)({ id: userId });
         if (!token) {
-            throw new BadRequestError_1.default({ code: 401, message: "Failed to generate token", logging: true });
+            throw new CustomError_1.UnauthorizedError('Error al generar token');
         }
         ;
         const user = {
@@ -175,15 +189,19 @@ const logoutUser = async (req, res, next) => {
         const sessionId = req.sessionID;
         const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
         if (!userFR) {
-            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+            throw new CustomError_1.UnauthorizedError('Sesion terminada');
         }
-        req.session.user = {
+        const datosDelUsuario = {
             ...req.session.user,
             userId: undefined,
-            userRol: undefined
+            userRol: undefined,
+            TodosAlmacenes: undefined,
+            Id_Almacen: undefined,
+            AlmacenNombre: undefined
         };
+        req.session.user = datosDelUsuario;
         res.json({
-            user: userFR
+            user: datosDelUsuario
         });
     }
     catch (error) {
@@ -191,19 +209,4 @@ const logoutUser = async (req, res, next) => {
     }
 };
 exports.logoutUser = logoutUser;
-const logoutDB = async (req, res, next) => {
-    try {
-        const sessionId = req.sessionID;
-        if (!sessionId) {
-            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
-        }
-        await (0, deleteRedis_1.handleDeleteRedisSession)({ sessionId });
-        await (0, database_1.closeDbConnection)();
-        res.json({ ok: true });
-    }
-    catch (error) {
-        next(error);
-    }
-};
-exports.logoutDB = logoutDB;
 //# sourceMappingURL=auth.js.map
