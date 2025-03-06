@@ -42,10 +42,8 @@ const validateJWT = async (req: Request, res: Response, next: NextFunction) => {
             if (err) {
                 throw new UnauthorizedError('Fallo la autenticación del token')
             }
-
             const { id } = decoded as { id: string };
-
-            req.id = id;
+            req.Id_mobile = id;
             next();
         });
     } catch (error) {
@@ -72,7 +70,7 @@ const validateJWTWeb = async (req: Request, res: Response, next: NextFunction) =
             }
 
             const {  Id, sessionRedis  } = decoded as {  Id: string, sessionRedis: string };
-            req.Id = Id;
+            req.Id_web = Id;
             req.sessionRedis = sessionRedis;
             next();
         });

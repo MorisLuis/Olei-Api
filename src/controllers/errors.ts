@@ -14,7 +14,7 @@ const handleErrors = async (req: Request, res: Response) => {
 
         let query = querys.postError;
 
-        const result = await request
+        await request
             .input('From', sql.VarChar, From || '')
             .input('Message', sql.VarChar, Message || '')
             .input('Id_Usuario', sql.VarChar, Id_Usuario || '')
@@ -32,8 +32,51 @@ const handleErrors = async (req: Request, res: Response) => {
         return res.status(500).send(error);
     }
 
+};
+
+interface handleErrorsEndpointInterface {
+    From: string,
+    Message: string,
+    Id_Usuario: string,
+    Metodo: string,
+    code: string
+};
+
+const handleErrorsEndpoint = async ({
+    From,
+    Message,
+    Id_Usuario,
+    Metodo,
+    code
+}: handleErrorsEndpointInterface) => {
+
+
+    try {
+        const pool = await dbConnectionMain();
+
+        const transaction = new sql.Transaction(pool);
+        await transaction.begin();
+        const request = new sql.Request(transaction);
+
+        let query = querys.postError;
+
+        await request
+            .input('From', sql.VarChar, From || '')
+            .input('Message', sql.VarChar, Message || '')
+            .input('Id_Usuario', sql.VarChar, Id_Usuario || '')
+            .input('Metodo', sql.VarChar, Metodo || '')
+            .input('code', sql.VarChar, code || '')
+            .query(query);
+
+        await transaction.commit();
+
+    } catch (error) {
+        console.log({error})
+    }
+
 }
 
 export {
-    handleErrors
+    handleErrors,
+    handleErrorsEndpoint
 }

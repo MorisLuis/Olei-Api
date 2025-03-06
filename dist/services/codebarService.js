@@ -39,7 +39,6 @@ const updateCodebarService = async (sessionId, codigoParam, Id_Marca, body) => {
         throw new CustomError_1.ValidationError('Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.');
     }
     ;
-    const keys = Object.keys(body);
     const query = costos_1.costosQuerys.updateCostos;
     // Codebar random
     if (codeRandom === "true") {

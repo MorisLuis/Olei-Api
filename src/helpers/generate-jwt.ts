@@ -22,12 +22,12 @@ const generateJWTDB = ({ IdUsuarioOLEI }: generateJWTDBProps) => {
 
 
 interface generateJWTProps {
-    id: string
+    Id_Usuario: string
 }
 
-const generateJWT = ({ id }: generateJWTProps) => {
+const generateJWT = ({ Id_Usuario }: generateJWTProps) => {
     return new Promise((resolve, reject) => {
-        const payload = { id }
+        const payload = { Id_Usuario }
         jwt.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
             expiresIn: process.env.JWT_EXPIRATION
         }, (error, token) => {

@@ -11,7 +11,7 @@ const postInventory = async (req: Request, res: Response, next: NextFunction) =>
     try {
 
         const sessionId = req.sessionID;
-        const Id_Usuario = req.id;
+        const Id_Usuario = req.Id_mobile;
         const { inventoryDetails, typeOfMovement } = postInventoryBodySchema.parse(req.body);
 
         const { Folio } = await postInventoryService({ 
@@ -68,7 +68,7 @@ const getInventoryDetails = async (req: Request, res: Response, next: NextFuncti
 
         const pool = await dbConnection()
         if (!pool) {
-            throw new ValidationError('Error al conectarse a base de datos principal');
+        throw new ValidationError('Error al conectarse a base de datos principal');
         }
 
         const getInventoryQuery = inventoryQuerys.getInventoryDetails;

@@ -14,7 +14,7 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
     try {
         const { id } = req.params;
         const { Marca } = req.query;
-        const Id_Usuario = req.id;
+        const Id_Usuario = req.Id_mobile;
 
         const sessionId = req.sessionID;
         const { user: userFR } = await handleGetSession({ sessionId });
@@ -36,10 +36,10 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
 
         let query = productsWebQuerys.getProducById
 
-        if(
+        if (
             userFR.BaseSQL === 'OLEIDB1_ROSCO' ||
             userFR.BaseSQL === 'OLEIDB1_ROSCO_TEST'
-            ) {
+        ) {
             // We have to modify query to ROSCO
             query = productsWebQuerys.getProducByIdROSCO
         };
@@ -80,41 +80,37 @@ const getProductsByStock = async (req: Request, res: Response, next: NextFunctio
 };
 
 const getTotalOfProductsByStock = async (req: Request, res: Response, next: NextFunction) => {
-
     try {
-        const Id_Usuario = req.id;
-
+        const Id_Usuario = req.Id_mobile;
         const sessionId = req.sessionID;
         const { user: userFR } = await handleGetSession({ sessionId });
 
         if (!userFR) {
-            throw new UnauthorizedError('Sesion terminada')
+            throw new UnauthorizedError('Sesión terminada');
         }
 
         const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
         const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
         const userquery = querys.getAuthLimitData;
-        const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery)
-        const user = requestUser.recordset[0]
+        const requestUser = await pool.request().input('Id_Usuario', Id_Usuario).query(userquery);
+        const user = requestUser.recordset[0];
 
         if (!pool) {
             throw new ValidationError('Error al conectarse a base de datos principal');
         }
 
         let query = productsQuerys.getTotalOfAllProductsByStock;
-
         const request = await pool.request()
             .input('Id_ListaPrecios', user.Id_ListPre)
             .input('Almacen', Id_Almacen)
             .query(query);
 
         const TotalProductos = request.recordset;
-
         res.json(TotalProductos);
 
     } catch (error) {
-        next(error)
+        next(error);
     }
 };
 
@@ -136,11 +132,6 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
         const userquery = querys.getAuthLimitData;
         const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery)
         const user = requestUser.recordset[0]
-
-        if (!pool) {
-            throw new ValidationError('Error al conectarse a base de datos principal');
-        }
-
 
         let isEAN13orUPC14 = false;
         if (CodBar) {

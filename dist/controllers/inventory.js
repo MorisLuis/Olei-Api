@@ -10,7 +10,7 @@ const CustomError_1 = require("../errors/CustomError");
 const postInventory = async (req, res, next) => {
     try {
         const sessionId = req.sessionID;
-        const Id_Usuario = req.id;
+        const Id_Usuario = req.Id_mobile;
         const { inventoryDetails, typeOfMovement } = inventoryValidations_1.postInventoryBodySchema.parse(req.body);
         const { Folio } = await (0, inventoryServices_1.postInventoryService)({
             sessionId,

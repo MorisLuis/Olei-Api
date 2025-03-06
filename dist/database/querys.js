@@ -4,7 +4,7 @@ exports.querys = void 0;
 exports.querys = {
     //Auth
     getAuthLimitData: `
-        SELECT 
+        SELECT
             Id_Almacen,
             ActualizarListas AS Id_ListPre
         FROM [dbo].[USUARIOS]

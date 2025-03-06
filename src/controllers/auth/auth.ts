@@ -133,7 +133,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             sessionId
         })
 
-        const token = await generateJWT({ id: Id_Usuario.trim() });
+        const token = await generateJWT({ Id_Usuario: Id_Usuario.trim() });
 
         const datosDelUsuario: UserSessionInterface = {
             ...(req.session as any).user,
@@ -176,22 +176,21 @@ const renewLogin = async (req: Request, res: Response, next: NextFunction) => {
         const sessionId = req.sessionID;
         const { user: userFR } = await handleGetSession({ sessionId });
 
-        console.log({sessionId})
         if (!userFR) {
             throw new UnauthorizedError('Sesion terminada')
         }
 
         const { ServidorSQL, BaseSQL, userId, userRol, TodosAlmacenes } = userFR;
 
-        if (!userId && !userRol) {
+        if (!userId || !userRol) {
             throw new ValidationError('userId y userRol son necesarios')
         };
 
-        if (!ServidorSQL && !BaseSQL) {
+        if (!ServidorSQL || !BaseSQL) {
             throw new ValidationError('ServidorSQL y BaseSQL son necesarios')
         };
 
-        const token = await generateJWT({ id: userId as string });
+        const token = await generateJWT({ Id_Usuario: userId });
 
         if (!token) {
             throw new UnauthorizedError('Error al generar token')

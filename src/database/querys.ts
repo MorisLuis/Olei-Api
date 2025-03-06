@@ -2,7 +2,7 @@ export const querys = {
 
     //Auth
     getAuthLimitData: `
-        SELECT 
+        SELECT
             Id_Almacen,
             ActualizarListas AS Id_ListPre
         FROM [dbo].[USUARIOS]

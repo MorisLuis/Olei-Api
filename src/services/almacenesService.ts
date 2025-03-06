@@ -20,9 +20,7 @@ const getAlmacenesService = async ({
 
     const { ServidorSQL, BaseSQL } = userFR;
     const pool = await dbConnection(ServidorSQL, BaseSQL);
-
     const result = await pool.request().query(AlamacenQuery.getAlmacenes);
-
     const almacenes = result?.recordset;
 
     return {

@@ -13,7 +13,7 @@ const getProducById = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { Marca } = req.query;
-        const Id_Usuario = req.id;
+        const Id_Usuario = req.Id_mobile;
         const sessionId = req.sessionID;
         const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
         if (!userFR) {
@@ -67,11 +67,11 @@ const getProductsByStock = async (req, res, next) => {
 exports.getProductsByStock = getProductsByStock;
 const getTotalOfProductsByStock = async (req, res, next) => {
     try {
-        const Id_Usuario = req.id;
+        const Id_Usuario = req.Id_mobile;
         const sessionId = req.sessionID;
         const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
         if (!userFR) {
-            throw new CustomError_1.UnauthorizedError('Sesion terminada');
+            throw new CustomError_1.UnauthorizedError('Sesión terminada');
         }
         const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
         const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
@@ -107,9 +107,6 @@ const getProductByStockAndCodeBar = async (req, res, next) => {
         const userquery = database_1.querys.getAuthLimitData;
         const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery);
         const user = requestUser.recordset[0];
-        if (!pool) {
-            throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
-        }
         let isEAN13orUPC14 = false;
         if (CodBar) {
             isEAN13orUPC14 = (0, identifyBarcodeType_1.guessBarcodeType)(CodBar);

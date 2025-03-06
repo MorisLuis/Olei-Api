@@ -40,7 +40,7 @@ const validateJWT = async (req, res, next) => {
                 throw new CustomError_1.UnauthorizedError('Fallo la autenticación del token');
             }
             const { id } = decoded;
-            req.id = id;
+            req.Id_mobile = id;
             next();
         });
     }
@@ -65,7 +65,7 @@ const validateJWTWeb = async (req, res, next) => {
                 return res.status(500).json({ success: false, message: 'Failed to authenticate token' });
             }
             const { Id, sessionRedis } = decoded;
-            req.Id = Id;
+            req.Id_web = Id;
             req.sessionRedis = sessionRedis;
             next();
         });
