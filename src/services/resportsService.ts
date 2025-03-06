@@ -1,9 +1,6 @@
 import { ConnectionPool } from "mssql";
-import { dbConnection } from "../database";
 import { sellsQuery } from "../database/querys/sells";
-import BadRequestError from "../errors/BadRequestError";
 import { SellsInterface, SellsOrderConditionType } from "../interface/sells";
-import { handleGetWebSession } from "../utils/Redis/getSession";
 import ExcelJS from 'exceljs';
 import { Response } from "express";
 import { validateSession } from "../helpers/validateSession";

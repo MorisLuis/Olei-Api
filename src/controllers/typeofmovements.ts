@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import { dbConnection } from '../database';
 import sql from "mssql";
 import { handleGetSession } from '../utils/Redis/getSession';
-import BadRequestError from '../errors/BadRequestError';
+import { UnauthorizedError } from '../errors/CustomError';
 
 
 const getTypeofmovements = async (req: Request, res: Response, next: NextFunction) => {
@@ -12,7 +12,7 @@ const getTypeofmovements = async (req: Request, res: Response, next: NextFunctio
         const { user: userFR } = await handleGetSession({ sessionId });
     
         if (!userFR) {
-            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+            throw new UnauthorizedError('Sesion terminada')
         };
 
         const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, userId } = userFR;

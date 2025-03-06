@@ -20,6 +20,6 @@ router.get("/byStock", validate_jwt_1.validateJWT, products_1.getProductsByStock
 router.get("/byStockCount", validate_jwt_1.validateJWT, products_1.getTotalOfProductsByStock);
 router.get("/byStockAndCodeBar", validate_jwt_1.validateJWT, products_1.getProductByStockAndCodeBar);
 // This enndpoint is used in WEB and APP to get product details.
-router.get("/:id", validate_jwt_1.validateJWT, products_1.getProducById);
+router.get("/:id", validate_jwt_1.validateJWT, products_1.getProducById); // Verify > if a i used this endpoint.
 exports.default = router;
 //# sourceMappingURL=productRouter.js.map

@@ -1,6 +1,6 @@
-import { dbConnection, querys } from "../database";
+import { dbConnection } from "../database";
 import { productsQuerys } from "../database/querys/products";
-import BadRequestError from "../errors/BadRequestError";
+import { UnauthorizedError, ValidationError } from "../errors/CustomError";
 import InventoryDetailsInterface from "../interface/inventoryDetails";
 import { handleGetSession } from "../utils/Redis/getSession";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
@@ -24,14 +24,14 @@ export const postInventoryService = async ({
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, TodosAlmacenes } = userFR;
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     const Accion = typeOfMovement.Accion;
@@ -97,7 +97,7 @@ export const searchProductInventoryService = async ({
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL } = userFR;
@@ -105,7 +105,7 @@ export const searchProductInventoryService = async ({
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: "Unable to establish a connection to the database", logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     }
 
     const query = productsQuerys.getProductsBySearchInventory;

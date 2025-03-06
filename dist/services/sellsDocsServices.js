@@ -1,22 +1,19 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTotalCobranzaService = exports.getTotalSellsByClientService = exports.getTotalSellsService = exports.getCobranzaService = exports.getSellByIdService = exports.getSellsByClientService = exports.getSellsService = void 0;
 const database_1 = require("../database");
 const sells_1 = require("../database/querys/sells");
-const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
+const CustomError_1 = require("../errors/CustomError");
 const getSession_1 = require("../utils/Redis/getSession");
 const getSellsService = async (sessionId, PageNumber, SellsOrderCondition) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     let query = sells_1.sellsQuery.getSells;
@@ -33,12 +30,12 @@ exports.getSellsService = getSellsService;
 const getSellsByClientService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     let query = sells_1.sellsQuery.getSellsByClient;
@@ -62,12 +59,12 @@ exports.getSellsByClientService = getSellsByClientService;
 const getSellByIdService = async (sessionId, folio, Serie, Id_Almacen, TipoDoc) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     let query = sells_1.sellsQuery.getSellById;
@@ -85,12 +82,12 @@ exports.getSellByIdService = getSellByIdService;
 const getCobranzaService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     let query = sells_1.sellsQuery.getCobranza;
@@ -114,13 +111,13 @@ exports.getCobranzaService = getCobranzaService;
 const getTotalSellsService = async (sessionId) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     ;
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     let query = sells_1.sellsQuery.getTotalSells;
@@ -134,12 +131,12 @@ exports.getTotalSellsService = getTotalSellsService;
 const getTotalSellsByClientService = async ({ sessionId, Id_Cliente, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     let query = sells_1.sellsQuery.getTotalSellsByClient;
@@ -160,12 +157,12 @@ exports.getTotalSellsByClientService = getTotalSellsByClientService;
 const getTotalCobranzaService = async ({ sessionId, Id_Cliente, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     let query = sells_1.sellsQuery.getTotalCobranza;

@@ -1,16 +1,13 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTotalClients = exports.searchClient = exports.selectClient = exports.getClientId = exports.getClients = void 0;
 const generate_jwt_1 = require("../helpers/generate-jwt");
 const getSession_1 = require("../utils/Redis/getSession");
 const deleteRedis_1 = require("../utils/Redis/deleteRedis");
-const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const clientsServices_1 = require("../services/clientsServices");
 const clientValidations_1 = require("../validations/clientValidations");
 const zod_1 = require("zod");
+const CustomError_1 = require("../errors/CustomError");
 const getClients = async (req, res, next) => {
     try {
         const { PageNumber, clientOrderCondition } = clientValidations_1.getClientsQuerySchema.parse(req.query);
@@ -86,7 +83,7 @@ const selectClient = async (req, res, next) => {
         const sessionId = req.sessionRedis;
         const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
         if (!userFR) {
-            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+            throw new CustomError_1.UnauthorizedError('Sesion terminada');
         }
         ;
         const { Id } = userFR;

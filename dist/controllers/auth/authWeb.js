@@ -1,15 +1,12 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logout = exports.renewWeb = exports.loginWeb = void 0;
 const database_1 = require("../../database");
 const generate_jwt_1 = require("../../helpers/generate-jwt");
 const getSession_1 = require("../../utils/Redis/getSession");
 const deleteRedis_1 = require("../../utils/Redis/deleteRedis");
-const BadRequestError_1 = __importDefault(require("../../errors/BadRequestError"));
 const authServices_1 = require("../../services/authServices");
+const CustomError_1 = require("../../errors/CustomError");
 const loginWeb = async (req, res, next) => {
     try {
         const { email, password } = req.body;
@@ -52,7 +49,7 @@ const renewWeb = async (req, res, next) => {
         const sessionId = req.sessionRedis;
         const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
         if (!userFR) {
-            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+            throw new CustomError_1.UnauthorizedError('Sesion terminada');
         }
         const { Id, TipoUsuario, Serverweb, Baseweb } = userFR;
         if (!Id && !TipoUsuario) {
@@ -83,7 +80,7 @@ const logout = async (req, res, next) => {
     try {
         const sessionId = req.sessionRedis;
         if (!sessionId) {
-            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+            throw new CustomError_1.UnauthorizedError('Sesion terminada');
         }
         await (0, database_1.closeDbConnection)();
         await (0, deleteRedis_1.handleDeleteRedisSession)({ sessionId });

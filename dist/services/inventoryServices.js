@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchProductInventoryService = exports.postInventoryService = void 0;
 const database_1 = require("../database");
 const products_1 = require("../database/querys/products");
-const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
+const CustomError_1 = require("../errors/CustomError");
 const getSession_1 = require("../utils/Redis/getSession");
 const convertArrayToXml_1 = require("../utils/convertArrayToXml");
 const currentTime_1 = require("../utils/currentTime");
@@ -14,12 +14,12 @@ const mssql_1 = __importDefault(require("mssql"));
 const postInventoryService = async ({ sessionId, inventoryDetails, typeOfMovement, Id_Usuario }) => {
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, TodosAlmacenes } = userFR;
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     const Accion = typeOfMovement.Accion;
@@ -66,12 +66,12 @@ exports.postInventoryService = postInventoryService;
 const searchProductInventoryService = async ({ sessionId, searchTerm, }) => {
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL } = userFR;
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: "Unable to establish a connection to the database", logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     const query = products_1.productsQuerys.getProductsBySearchInventory;
     const result = await pool.request()

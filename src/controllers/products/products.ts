@@ -4,9 +4,9 @@ import { productsQuerys } from '../../database/querys/products';
 import { guessBarcodeType } from '../../utils/identifyBarcodeType';
 import { handleGetSession } from '../../utils/Redis/getSession';
 import { productsWebQuerys } from '../../database/querys/productsWeb';
-import BadRequestError from '../../errors/BadRequestError';
 import { getProductsByStockQuerySchema } from '../../validations/productsValidations';
 import { getProductsByStockService } from '../../services/productsServices';
+import { UnauthorizedError, ValidationError } from '../../errors/CustomError';
 
 
 const getProducById = async (req: Request, res: Response, next: NextFunction) => {
@@ -20,7 +20,7 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
         const { user: userFR } = await handleGetSession({ sessionId });
 
         if (!userFR) {
-            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+            throw new UnauthorizedError('Sesion terminada')
         }
 
         const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
@@ -31,7 +31,7 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
         const user = requestUser.recordset[0]
 
         if (!pool) {
-            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+            throw new ValidationError('Error al conectarse a base de datos principal');
         }
 
         let query = productsWebQuerys.getProducById
@@ -88,7 +88,7 @@ const getTotalOfProductsByStock = async (req: Request, res: Response, next: Next
         const { user: userFR } = await handleGetSession({ sessionId });
 
         if (!userFR) {
-            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+            throw new UnauthorizedError('Sesion terminada')
         }
 
         const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
@@ -99,7 +99,7 @@ const getTotalOfProductsByStock = async (req: Request, res: Response, next: Next
         const user = requestUser.recordset[0]
 
         if (!pool) {
-            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+            throw new ValidationError('Error al conectarse a base de datos principal');
         }
 
         let query = productsQuerys.getTotalOfAllProductsByStock;
@@ -127,7 +127,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
         const { user: userFR } = await handleGetSession({ sessionId });
 
         if (!userFR) {
-            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+            throw new UnauthorizedError('Sesion terminada')
         }
 
         const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
@@ -138,7 +138,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
         const user = requestUser.recordset[0]
 
         if (!pool) {
-            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+            throw new ValidationError('Error al conectarse a base de datos principal');
         }
 
 

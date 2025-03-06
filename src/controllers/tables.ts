@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { dbConnection, querys } from '../database';
 import { handleGetWebSession } from '../utils/Redis/getSession';
-import BadRequestError from '../errors/BadRequestError';
+import { UnauthorizedError } from '../errors/CustomError';
 
 const getTables = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -11,7 +11,7 @@ const getTables = async (req: Request, res: Response, next: NextFunction) => {
         const { user: userFR } = await handleGetWebSession({ sessionId });
     
         if (!userFR) {
-            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+            throw new UnauthorizedError('Sesion terminada')
         }
     
         const { Serverweb, Baseweb } = userFR;

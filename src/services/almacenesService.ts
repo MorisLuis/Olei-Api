@@ -1,6 +1,6 @@
 import { dbConnection } from "../database";
 import { AlamacenQuery } from "../database/querys/almacen";
-import BadRequestError from "../errors/BadRequestError";
+import { UnauthorizedError } from "../errors/CustomError";
 import { handleGetSession } from "../utils/Redis/getSession";
 
 
@@ -15,7 +15,7 @@ const getAlmacenesService = async ({
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { ServidorSQL, BaseSQL } = userFR;
@@ -43,7 +43,7 @@ const getAlmacenByIdService = async ({
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { ServidorSQL, BaseSQL } = userFR;

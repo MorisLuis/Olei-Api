@@ -1,6 +1,6 @@
 import { dbConnection } from "../database";
 import { sellsQuery } from "../database/querys/sells";
-import BadRequestError from "../errors/BadRequestError";
+import { UnauthorizedError, ValidationError } from "../errors/CustomError";
 import { SellsInterface, SellsOrderConditionType } from "../interface/sells";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 
@@ -13,13 +13,14 @@ const getSellsService = async (
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
+
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     let query = sellsQuery.getSells;
@@ -64,12 +65,12 @@ const getSellsByClientService = async ({
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     let query = sellsQuery.getSellsByClient;
@@ -95,12 +96,12 @@ const getSellByIdService = async (sessionId: string, folio: string, Serie: strin
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     let query = sellsQuery.getSellById;
@@ -146,12 +147,12 @@ const getCobranzaService = async ({
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     let query = sellsQuery.getCobranza;
@@ -176,13 +177,13 @@ const getCobranzaService = async ({
 const getTotalSellsService = async (sessionId: string) => {
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     };
 
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     let query = sellsQuery.getTotalSells;
@@ -219,12 +220,12 @@ const getTotalSellsByClientService = async ({
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     let query = sellsQuery.getTotalSellsByClient;
@@ -270,12 +271,12 @@ const getTotalCobranzaService = async ({
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     let query = sellsQuery.getTotalCobranza;

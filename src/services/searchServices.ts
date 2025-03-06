@@ -1,6 +1,6 @@
 import { dbConnection, querys } from "../database";
-import BadRequestError from "../errors/BadRequestError";
-import { handleGetSession, handleGetWebSession } from "../utils/Redis/getSession";
+import { UnauthorizedError } from "../errors/CustomError";
+import { handleGetWebSession } from "../utils/Redis/getSession";
 
 
 interface searchServiceInterface {
@@ -16,7 +16,7 @@ const searchFamiliaService = async ({
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { Serverweb, Baseweb } = userFR;
@@ -42,7 +42,7 @@ const searchMarcaService = async ({
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { Serverweb, Baseweb } = userFR;
@@ -68,7 +68,7 @@ const searcCodigoService = async ({
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { Serverweb, Baseweb } = userFR;

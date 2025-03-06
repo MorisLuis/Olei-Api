@@ -1,11 +1,11 @@
 import { dbConnection } from "../database";
 import { orderQuerys } from "../database/querys/orders";
-import BadRequestError from "../errors/BadRequestError";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 import sql from 'mssql';
 import { numeroALetra } from "../utils/numeroALetra";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
 import { SellsDetailsInterface, SellsInterface } from "../interface/sells";
+import { UnauthorizedError, ValidationError } from "../errors/CustomError";
 
 interface postOrderServiceInterface {
     sessionId: string;
@@ -26,12 +26,12 @@ const postOrderService = async ({
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     };
     const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     const transaction = new sql.Transaction(pool);
@@ -78,12 +78,13 @@ const getOrderService = async ({
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
+
     };
     const { Serverweb, Baseweb, Id_Cliente, TipoDocOO } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     const getOrderQuery = orderQuerys.getOrder;
@@ -116,7 +117,8 @@ const getAllOrdersService = async ({
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
+
     }
 
     const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
@@ -124,7 +126,7 @@ const getAllOrdersService = async ({
     const pool = await dbConnection(Serverweb, Baseweb);
 
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     }
 
     const query = orderQuerys.getAllOrders;
@@ -158,12 +160,13 @@ const getOrderDetailsSells = async ({
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
+
     };
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     // Whe made a little variotion when the PageNumber is 999.
@@ -188,7 +191,8 @@ const getTotalAllOrdersService = async (sessionId: string) => {
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
+
     }
 
     const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
@@ -196,7 +200,7 @@ const getTotalAllOrdersService = async (sessionId: string) => {
     const pool = await dbConnection(Serverweb, Baseweb);
 
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     }
 
     const result = await pool?.request()
@@ -225,12 +229,13 @@ const getTotalOrderDetailsService = async ({
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
+
     };
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     const query = orderQuerys.getTotalOrderDetails;

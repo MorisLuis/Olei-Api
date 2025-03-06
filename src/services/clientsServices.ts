@@ -1,6 +1,6 @@
-import { dbConnection, querys } from "../database";
+import { dbConnection } from "../database";
 import { clientsQuerys } from "../database/querys/clients";
-import BadRequestError from "../errors/BadRequestError";
+import { UnauthorizedError, ValidationError } from "../errors/CustomError";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 import sql from 'mssql';
 
@@ -18,13 +18,14 @@ const getClientsService = async ({
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
+
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     let query = clientsQuerys.getClients;
@@ -54,13 +55,13 @@ const getClientIdService = async ({
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     let query = clientsQuerys.getClientId;
@@ -76,13 +77,13 @@ const getTotalClientsService = async (sessionId: string) => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     let query = clientsQuerys.getTotalClients;
@@ -106,14 +107,14 @@ const searchClientService = async ({
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true })
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
 
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: "Unable to establish a connection to the database", logging: true })
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     let query = clientsQuerys.getClientBySearch;

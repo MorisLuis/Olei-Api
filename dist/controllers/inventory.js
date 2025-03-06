@@ -1,15 +1,12 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchProductInventory = exports.getInventoryDetails = exports.getInventory = exports.postInventory = void 0;
 const database_1 = require("../database");
 const inventory_1 = require("../database/querys/inventory");
-const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const inventoryServices_1 = require("../services/inventoryServices");
 const inventoryValidations_1 = require("../validations/inventoryValidations");
 const zod_1 = require("zod");
+const CustomError_1 = require("../errors/CustomError");
 const postInventory = async (req, res, next) => {
     try {
         const sessionId = req.sessionID;
@@ -39,7 +36,7 @@ const getInventory = async (req, res, next) => {
         const { Folio } = inventoryValidations_1.getInventoryQuerySchema.parse(req.query);
         const pool = await (0, database_1.dbConnection)();
         if (!pool) {
-            throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+            throw new CustomError_1.ValidationError('Error al conectarse a base de datos');
         }
         const getInventoryQuery = inventory_1.inventoryQuerys.getInventory;
         const request = await pool.request()
@@ -63,7 +60,7 @@ const getInventoryDetails = async (req, res, next) => {
         const { Folio } = inventoryValidations_1.getInventoryQuerySchema.parse(req.query);
         const pool = await (0, database_1.dbConnection)();
         if (!pool) {
-            throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+            throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
         }
         const getInventoryQuery = inventory_1.inventoryQuerys.getInventoryDetails;
         const request = await pool.request()

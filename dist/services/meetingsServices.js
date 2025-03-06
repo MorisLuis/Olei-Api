@@ -6,27 +6,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteMeetingService = exports.postMeetingService = exports.updateMeetingService = exports.getMeetingByIdService = exports.getTotalMeetingsService = exports.getMeetingsService = void 0;
 const database_1 = require("../database");
 const bitacora_1 = require("../database/querys/bitacora");
-const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
+const CustomError_1 = require("../errors/CustomError");
 const meeting_1 = require("../interface/meeting");
 const getSession_1 = require("../utils/Redis/getSession");
 const mssql_1 = __importDefault(require("mssql"));
 const getMeetingsService = async ({ sessionId, PageNumber, Id_Cliente, TipoContacto, MeetingOrderCondition, FilterCliente, FilterTipoContacto }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     if (FilterCliente === 1 && !Id_Cliente) {
-        throw new BadRequestError_1.default({ code: 500, message: `Es necesario un Id_Cliente.`, logging: true });
+        throw new CustomError_1.ValidationError('Es necesario un Id_Cliente.');
     }
     ;
     if (FilterTipoContacto === 1 && !TipoContacto) {
-        throw new BadRequestError_1.default({ code: 500, message: `Es necesario un TipoContacto.`, logging: true });
+        throw new CustomError_1.ValidationError('Es necesario un TipoContacto.');
     }
     let query = bitacora_1.bitacoraQuerys.getMeetings;
     const request = await pool.request()
@@ -46,20 +46,20 @@ exports.getMeetingsService = getMeetingsService;
 const getTotalMeetingsService = async ({ sessionId, Id_Cliente, TipoContacto, FilterCliente, FilterTipoContacto }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     if (FilterCliente === 1 && !Id_Cliente) {
-        throw new BadRequestError_1.default({ code: 500, message: `Es necesario un Id_Cliente.`, logging: true });
+        throw new CustomError_1.ValidationError('Es necesario un Id_Cliente.');
     }
     ;
     if (FilterTipoContacto === 1 && !TipoContacto) {
-        throw new BadRequestError_1.default({ code: 500, message: `Es necesario un TipoContacto.`, logging: true });
+        throw new CustomError_1.ValidationError('Es necesario un TipoContacto.');
     }
     ;
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     let query = bitacora_1.bitacoraQuerys.getTotalMeetings;
@@ -76,13 +76,13 @@ exports.getTotalMeetingsService = getTotalMeetingsService;
 const getMeetingByIdService = async (id, sessionId) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     ;
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     let query = bitacora_1.bitacoraQuerys.getMeetingById;
@@ -96,15 +96,15 @@ exports.getMeetingByIdService = getMeetingByIdService;
 const updateMeetingService = async (id, sessionId, body) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     if (!id) {
-        throw new BadRequestError_1.default({ code: 500, message: 'No se adjunto un Id_Bitacora valido o existente', logging: true });
+        throw new CustomError_1.ValidationError('No se adjunto un Id_Bitacora valido o existente.');
     }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     //START TRANSACTION
@@ -112,7 +112,7 @@ const updateMeetingService = async (id, sessionId, body) => {
     await transaction.begin();
     const { Fecha, Hour, HourEnd, Titulo, Descripcion, TipoContacto, Comentarios } = body;
     if (TipoContacto && !meeting_1.validTipoContacto.includes(TipoContacto)) {
-        throw new BadRequestError_1.default({ code: 500, message: `No es valido el tipo de contacto`, logging: true });
+        throw new CustomError_1.ValidationError('No es valido el tipo de contacto');
     }
     ;
     const request = new mssql_1.default.Request(transaction)
@@ -134,12 +134,12 @@ exports.updateMeetingService = updateMeetingService;
 const postMeetingService = async (sessionId, body) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     //START TRANSACTION
@@ -149,11 +149,11 @@ const postMeetingService = async (sessionId, body) => {
     const query = bitacora_1.bitacoraQuerys.insertMeeting;
     const { Id_Almacen, Id_Cliente, Fecha, Hour, HourEnd, Titulo, Descripcion, TipoContacto, Comentarios } = body;
     if (!meeting_1.validTipoContacto.includes(TipoContacto)) {
-        throw new BadRequestError_1.default({ code: 500, message: `No es valido el tipo de contacto`, logging: true });
+        throw new CustomError_1.ValidationError('No es valido el tipo de contacto');
     }
     ;
     if (!Id_Cliente) {
-        throw new BadRequestError_1.default({ code: 500, message: 'Es necesario el id de el cliente', logging: true });
+        throw new CustomError_1.ValidationError('Es necesario el id de el cliente');
     }
     const result = await request
         .input('Id_Almacen', mssql_1.default.Int, Id_Almacen ?? 0)
@@ -174,12 +174,12 @@ exports.postMeetingService = postMeetingService;
 const deleteMeetingService = async (id, sessionId) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     //START TRANSACTION

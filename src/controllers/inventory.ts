@@ -1,10 +1,10 @@
 import { Response, Request, NextFunction } from "express";
 import { dbConnection } from "../database";
 import { inventoryQuerys } from "../database/querys/inventory";
-import BadRequestError from '../errors/BadRequestError';
 import { postInventoryService, searchProductInventoryService } from "../services/inventoryServices";
 import { getInventoryQuerySchema, postInventoryBodySchema, searchProductInventoryQuerySchema } from "../validations/inventoryValidations";
 import { z } from "zod";
+import { ValidationError } from "../errors/CustomError";
 
 const postInventory = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -40,7 +40,7 @@ const getInventory = async (req: Request, res: Response, next: NextFunction) => 
         const pool = await dbConnection();
 
         if (!pool) {
-            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+            throw new ValidationError('Error al conectarse a base de datos');
         }
 
         const getInventoryQuery = inventoryQuerys.getInventory;
@@ -68,7 +68,7 @@ const getInventoryDetails = async (req: Request, res: Response, next: NextFuncti
 
         const pool = await dbConnection()
         if (!pool) {
-            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+            throw new ValidationError('Error al conectarse a base de datos principal');
         }
 
         const getInventoryQuery = inventoryQuerys.getInventoryDetails;

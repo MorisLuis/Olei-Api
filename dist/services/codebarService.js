@@ -5,21 +5,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateCodebarService = void 0;
 const database_1 = require("../database");
-const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const getSession_1 = require("../utils/Redis/getSession");
 const identifyBarcodeType_1 = require("../utils/identifyBarcodeType");
 const costos_1 = require("../database/querys/costos");
 const uuid_1 = require("uuid");
 const mssql_1 = __importDefault(require("mssql"));
+const CustomError_1 = require("../errors/CustomError");
 const updateCodebarService = async (sessionId, codigoParam, Id_Marca, body) => {
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     const transaction = new mssql_1.default.Transaction(pool);
@@ -36,7 +36,7 @@ const updateCodebarService = async (sessionId, codigoParam, Id_Marca, body) => {
     ;
     if (!codigoParam || !Id_Marca) {
         await transaction.rollback();
-        throw new BadRequestError_1.default({ code: 404, message: `Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.`, logging: true });
+        throw new CustomError_1.ValidationError('Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.');
     }
     ;
     const keys = Object.keys(body);
