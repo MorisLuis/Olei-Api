@@ -39,8 +39,8 @@ const validateJWT = async (req, res, next) => {
             if (err) {
                 throw new CustomError_1.UnauthorizedError('Fallo la autenticación del token');
             }
-            const { id } = decoded;
-            req.Id_mobile = id;
+            const { Id_mobile } = decoded;
+            req.Id_mobile = Id_mobile;
             next();
         });
     }
