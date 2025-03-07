@@ -56,6 +56,8 @@ export const dbConnectionMain = async () => {
 
 
 export const closeDbConnection = async () => {
+
+    console.log("closeDbConnection")
     if (mainPool) {
         await mainPool.close();
         mainPool = null;

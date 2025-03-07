@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { dbConnectionMain, querys } from '../database';
 import sql from 'mssql';
+import moment from 'moment';
 
 const handleErrors = async (req: Request, res: Response) => {
 
@@ -13,11 +14,13 @@ const handleErrors = async (req: Request, res: Response) => {
         const request = new sql.Request(transaction);
 
         let query = querys.postError;
+        const fechaActualCDMX = moment().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
 
         await request
             .input('From', sql.VarChar, From || '')
             .input('Message', sql.VarChar, Message || '')
             .input('Id_Usuario', sql.VarChar, Id_Usuario || '')
+            .input('Fecha', sql.VarChar,fechaActualCDMX)
             .input('Metodo', sql.VarChar, Metodo || '')
             .input('code', sql.VarChar, code || '')
             .query(query);
@@ -59,11 +62,13 @@ const handleErrorsEndpoint = async ({
         const request = new sql.Request(transaction);
 
         let query = querys.postError;
+        const fechaActualCDMX = moment().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
 
         await request
             .input('From', sql.VarChar, From || '')
             .input('Message', sql.VarChar, Message || '')
             .input('Id_Usuario', sql.VarChar, Id_Usuario || '')
+            .input('Fecha', sql.VarChar,fechaActualCDMX)
             .input('Metodo', sql.VarChar, Metodo || '')
             .input('code', sql.VarChar, code || '')
             .query(query);
