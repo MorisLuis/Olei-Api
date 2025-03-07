@@ -1,40 +1,31 @@
 import { NextFunction, Request, Response } from "express";
-import { CustomError } from "../errors/CustomError";
+import { handleErrorsEndpoint } from "../controllers/errors";
 
-export const errorHandler = (
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
-  // Errores controlados (personalizados)
-  if (err instanceof CustomError) {
-    const { statusCode, errors } = err;
+interface ErrorResponse extends Error {
+  statusCode?: number;
+}
+const errorHandler = async (err: ErrorResponse, req: Request, res: Response, next: NextFunction): Promise<void> => {
+  console.log("errorHandler")
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'Internal Server Error';
+  const Id_Usuario = req.Id_mobile ?? req.IdUsuarioOLEI ?? req.Id_web ?? "Sin Usuario";
 
-    console.error("Error: ========================================");
-    console.error(
-      JSON.stringify(
-        {
-          code: statusCode,
-          errors,
-          stack: err.stack,
-        },
-        null,
-        2
-      )
-    );
+  console.error(`[ERROR] ${req.method} ${req.path} - ${message}`);
 
-    res.status(statusCode).json({
-      errors,
-      message: err.message,
+  // Intentamos guardar el error en la base de datos
+  try {
+    await handleErrorsEndpoint({
+      From: req.path,                    // O el nombre del módulo o componente donde ocurrió el error
+      Message: message,                  // Mensaje de error
+      Id_Usuario: Id_Usuario,  // O extraerlo de la sesión, si lo tienes
+      Metodo: req.method,                // Método HTTP
+      code: statusCode.toString()        // Código de error convertido a string
     });
-    return; // Finaliza la función sin devolver nada
+  } catch (loggingError) {
+    console.error('Error guardando log en la DB:', loggingError);
   }
 
-  // Errores no controlados
-  console.error("Unhandled error:", JSON.stringify(err, null, 2));
-  res.status(500).json({
-    errors: [{ message: "Something went wrong" }],
-    message: "Something went wrong",
-  });
+  res.status(statusCode).json({ error: message });
 };
+
+export { errorHandler };

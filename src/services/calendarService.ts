@@ -1,6 +1,6 @@
 import { dbConnection } from "../database";
 import { celendarQuerys } from "../database/querys/calendar";
-import BadRequestError from "../errors/BadRequestError";
+import { UnauthorizedError, ValidationError } from "../errors/CustomError";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 
 interface getCalendarServiceInterface {
@@ -18,14 +18,14 @@ const getCalendarTaskByMonthService = async ({
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
 
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     let query = celendarQuerys.getCalendarTasksMonth;
@@ -53,14 +53,14 @@ const getCalendarTaskByDayService = async ({
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
 
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     let query = celendarQuerys.getCalendarTasksDay;
@@ -90,14 +90,14 @@ const getCalendarTaskByMonthAndClientService = async ({
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnection(Serverweb, Baseweb);
 
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     let query = celendarQuerys.getCalendarTasksMonthByClient;

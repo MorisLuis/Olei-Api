@@ -1,32 +1,33 @@
 import { ConnectionPool } from "mssql";
 import { dbConnectionMain, querys } from "../database";
-import BadRequestError from "../errors/BadRequestError";
 import moment from "moment";
+import { NotFoundError, UnauthorizedError, ValidationError } from "../errors/CustomError";
 
 const loginWebService = async (email: string, password: string) => {
 
     if (email === "" || password === "") {
-        throw new BadRequestError({ code: 401, message: "Necesario escribir correo y contraseña", logging: true });
+        throw new ValidationError('Necesario escribir correo y contraseña')
     };
 
     const mainPool = await dbConnectionMain()
     if (!mainPool) {
-        throw new BadRequestError({ code: 500, message: "Error connecting to the main database", logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     }
 
     const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await getUserByEmailWeb(mainPool, email);
 
     if (!user) {
-        throw new BadRequestError({ code: 404, message: "Correo no encontrado", logging: true });
+        throw new NotFoundError(`No se encontro el usuario: ${email}`)
     }
 
     if (user.PasswordOOL.trim() !== password) {
-        throw new BadRequestError({ code: 404, message: "Contraseña incorrecta", logging: true });
+        throw new UnauthorizedError(`Contraseña incorrecta`)
     }
 
     const isExpired = await isSubscriptionExpired(Vigencia);
+
     if (isExpired) {
-        throw new BadRequestError({ code: 404, message: "Cuenta de usuario vencida", logging: true });
+        throw new UnauthorizedError(`Cuenta de usuario vencida`);
     }
 
     return {
@@ -48,7 +49,7 @@ const getUserByEmailWeb = async (mainPool: ConnectionPool, email: string) => {
     const user = result?.recordset[0]
 
     if (!user) {
-        throw new BadRequestError({ code: 404, message: "Usuario no encontrado", logging: true });
+        throw new NotFoundError(`No se encontro el usuario`)
     }
 
     return user

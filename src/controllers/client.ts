@@ -3,10 +3,10 @@ import { generateWebJWT } from '../helpers/generate-jwt';
 import { handleGetWebSession } from '../utils/Redis/getSession';
 import { UserWebSessionInterface } from '../interface/user';
 import { handleDeleteRedisSession } from '../utils/Redis/deleteRedis';
-import BadRequestError from '../errors/BadRequestError';
 import { getClientIdService, getClientsService, getTotalClientsService, searchClientService } from '../services/clientsServices';
 import { getClientIdQuerySchema, getClientsQuerySchema, searchClientQuerySchema, selectClientBodySchema } from '../validations/clientValidations';
 import { z } from 'zod';
+import { UnauthorizedError } from '../errors/CustomError';
 
 const getClients = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -83,7 +83,7 @@ const selectClient = async (req: Request, res: Response, next: NextFunction) => 
         const { user: userFR } = await handleGetWebSession({ sessionId });
 
         if (!userFR) {
-            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+            throw new UnauthorizedError('Sesion terminada')
         };
 
         const { Id } = userFR;

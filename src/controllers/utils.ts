@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { dbConnection } from '../database';
 import { handleGetWebSession } from '../utils/Redis/getSession';
-import BadRequestError from '../errors/BadRequestError';
 import { sellsQuery } from '../database/querys/sells';
 import { ConnectionPool } from 'mssql';
 import ExcelJS from 'exceljs'
+import { UnauthorizedError } from '../errors/CustomError';
 
 const getBanner = async (req: Request, res: Response) => {
 
@@ -12,7 +12,7 @@ const getBanner = async (req: Request, res: Response) => {
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     };
 
     const database = userFR?.Baseweb
@@ -26,16 +26,9 @@ const getBanner = async (req: Request, res: Response) => {
 }
 
 const getUtils = async (req: Request, res: Response) => {
-
-    try {
-
-        res.json({
-            ok: true
-        })
-
-    } catch (error) {
-        res.status(500).send(error);
-    }
+    return new Promise((resolve, reject) => {
+        reject('Error en la promesa!');
+    });
 };
 
 const getExcellTest = async (req: Request, res: Response) => {
@@ -44,7 +37,7 @@ const getExcellTest = async (req: Request, res: Response) => {
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     };
 
     const { Serverweb, Baseweb } = userFR;

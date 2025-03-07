@@ -6,20 +6,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getProductsByStockService = exports.getTotalProductsService = exports.getProducByIdWebService = exports.getProductsService = exports.searchProductService = void 0;
 const database_1 = require("../database");
 const productsWeb_1 = require("../database/querys/productsWeb");
-const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const getSession_1 = require("../utils/Redis/getSession");
 const mssql_1 = __importDefault(require("mssql"));
 const checkImageExists_1 = require("../utils/checkImageExists");
 const products_1 = require("../database/querys/products");
+const CustomError_1 = require("../errors/CustomError");
 const getProductsService = async ({ sessionId, page, limit, nombre, marca, familia, folio }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     let query = productsWeb_1.productsWebQuerys.getAllProducts;
     const result = await pool.request()
@@ -46,12 +46,12 @@ exports.getProductsService = getProductsService;
 const getProducByIdWebService = async ({ sessionId, codigo, Marca }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb, Id_ListPre, Id_Almacen } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     const result = await pool.request()
         .input("Codigo", codigo)
@@ -74,12 +74,12 @@ exports.getProducByIdWebService = getProducByIdWebService;
 const getTotalProductsService = async ({ sessionId, nombre, marca, familia, folio }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     const result = await pool.request()
         .input('nombre', mssql_1.default.VarChar, nombre)
@@ -101,13 +101,13 @@ exports.getTotalProductsService = getTotalProductsService;
 const searchProductService = async ({ sessionId, nombre, marca, familia, codigo }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     ;
     const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, Id_Almacen } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: "Unable to establish a connection to the database", logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     // Execute the SQL query
     const result = await pool.request()
@@ -126,16 +126,15 @@ const searchProductService = async ({ sessionId, nombre, marca, familia, codigo 
     };
 };
 exports.searchProductService = searchProductService;
-;
 const getProductsByStockService = async ({ sessionId, PageSize, PageNumber }) => {
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     let query = products_1.productsQuerys.getAllProductsByStock;
     const request = await pool.request()

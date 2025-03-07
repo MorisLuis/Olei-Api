@@ -93,11 +93,6 @@ const getCobranza = async (req: Request, res: Response, next: NextFunction) => {
         const { client } = getClientParamsSchema.parse(req.params);
         const sessionId = req.sessionRedis;
 
-        console.log({
-            PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart
-        })
-
-        console.log({client})
         const sells = await getCobranzaService({
             sessionId,
             Id_Cliente: client,

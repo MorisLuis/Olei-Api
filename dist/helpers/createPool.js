@@ -1,15 +1,12 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createPool = void 0;
 const database_1 = require("../database");
-const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
+const CustomError_1 = require("../errors/CustomError");
 const createPool = async (Serverweb, Baseweb) => {
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: `Error de conexión con la base de datos.`, logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos.');
     }
     return pool;
 };

@@ -14,13 +14,11 @@ export interface UserSessionInterface {
     userId?: string;
     userRol?: string;
     from: 'web' | 'mobil' | 'crm',
-
     TodosAlmacenes?: number;
-    Id_Almacen?: number;
-    AlmacenNombre?: string;
     Id_ListPre?: number;
 
-    SalidaSinExistencias?: Number
+    Id_Almacen?: number;
+    AlmacenNombre?: string;
 }
 
 export interface UserWebSessionInterface {

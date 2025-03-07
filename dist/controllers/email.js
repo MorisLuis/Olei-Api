@@ -7,8 +7,6 @@ exports.sendEmailWithPDF = exports.sendEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const generatePDF_1 = require("../utils/generatePDF");
 const emailValidations_1 = require("../validations/emailValidations");
-const sellsDocsServices_1 = require("../services/sellsDocsServices");
-const sellsValidations_1 = require("../validations/sellsValidations");
 // Configurar el transporte SMTP
 const transporter = nodemailer_1.default.createTransport({
     host: 'smtp.gmail.com',
@@ -42,26 +40,7 @@ const sendEmail = async (req, res, next) => {
 exports.sendEmail = sendEmail;
 const sendEmailWithPDF = async (req, res, next) => {
     const { destinatario, remitente, subject, text, nombreRemitente } = emailValidations_1.emailCobranzaBodySchema.parse(req.body);
-    const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaQuerySchema.parse(req.query);
-    const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
-    const sessionId = req.sessionRedis;
-    // Download data
-    const sells = await (0, sellsDocsServices_1.getCobranzaService)({
-        sessionId,
-        Id_Cliente: client,
-        PageNumber,
-        SellsOrderCondition: sellsOrderCondition,
-        TipoDoc,
-        FilterTipoDoc,
-        FilterNotExpired,
-        FilterExpired,
-        DateEnd: DateEnd || null,
-        DateExactly: DateExactly || null,
-        DateStart: DateStart || null
-    });
-    console.log(sells);
-    // Generate PDF
-    const pdfBuffer = await (0, generatePDF_1.generatePDF)(sells);
+    const pdfBuffer = await (0, generatePDF_1.generatePDF)({ name: 'prueba', message: "Primera prueba de pdf enviada por correo" });
     // Opciones del correo
     const mailOptions = {
         from: '"Olei Software" <moradoluisenrique@gmail.com>',

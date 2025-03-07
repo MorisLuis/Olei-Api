@@ -1,11 +1,10 @@
 import { Router } from "express";
 import { sendEmail, sendEmailWithPDF } from "../controllers/email";
-import { validateJWTWeb } from "../helpers/validate-jwt";
 
 
 const router = Router();
-router.post('/', sendEmailWithPDF);
-router.post('/cobranza/pdf/:client', validateJWTWeb, sendEmailWithPDF);
-router.post('/cobranza/excell', validateJWTWeb, sendEmailWithPDF);
+router.post('/', sendEmail);
+router.post('/cobranza/pdf', sendEmailWithPDF);
+router.post('/cobranza/excell', sendEmailWithPDF);
 
 export default router;

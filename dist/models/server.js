@@ -180,9 +180,19 @@ exports.default = Server;
 // Exportar la instancia de Redis
 const server = new Server();
 exports.redisClient = server.redis;
+// Listener para cerrar conexiones con SIGINT
 process.on('SIGINT', async () => {
     console.log('Cerrando conexiones...');
     await server.closeConnections();
     process.exit(0);
+});
+// Listeners globales para errores inesperados
+process.on('uncaughtException', (err) => {
+    console.error('🔥 Uncaught Exception:', err);
+    process.exit(1);
+});
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('💥 Unhandled Promise Rejection:', reason);
+    process.exit(1);
 });
 //# sourceMappingURL=server.js.map

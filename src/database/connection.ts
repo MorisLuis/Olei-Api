@@ -6,9 +6,7 @@ let pool: sql.ConnectionPool | null = null;
 
 
 export const dbConnection = async (server?: string, base?: string, user?: string, pass?: string) => {
-    
     if (!pool) {
-
         const dbConfig = {
             user: user || config.dbUser,
             password: pass || config.dbPassword,
@@ -23,8 +21,12 @@ export const dbConnection = async (server?: string, base?: string, user?: string
         try {
             pool = new sql.ConnectionPool(dbConfig);
             await pool.connect();
+            console.log('Conexión a la DB establecida.');
         } catch (error) {
-            throw error;
+            console.error('Error al conectar a la DB:', error);
+            // Reiniciamos pool para evitar estados corruptos
+            pool = null;
+            throw new Error('Error en la conexión a la base de datos');
         }
     }
     return pool;
@@ -54,6 +56,8 @@ export const dbConnectionMain = async () => {
 
 
 export const closeDbConnection = async () => {
+
+    console.log("closeDbConnection")
     if (mainPool) {
         await mainPool.close();
         mainPool = null;

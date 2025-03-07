@@ -28,7 +28,7 @@ router.get("/byStockCount", validateJWT, getTotalOfProductsByStock);
 router.get("/byStockAndCodeBar", validateJWT, getProductByStockAndCodeBar);
 
 // This enndpoint is used in WEB and APP to get product details.
-router.get("/:id", validateJWT, getProducById)
+router.get("/:id", validateJWT, getProducById) // Verify > if a i used this endpoint.
 
 
 

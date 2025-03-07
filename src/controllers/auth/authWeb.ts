@@ -4,8 +4,8 @@ import { generateWebJWT } from '../../helpers/generate-jwt';
 import { UserWebSessionInterface } from '../../interface/user';
 import { handleGetWebSession } from '../../utils/Redis/getSession';
 import { handleDeleteRedisSession } from '../../utils/Redis/deleteRedis';
-import BadRequestError from '../../errors/BadRequestError';
 import { loginWebService } from '../../services/authServices';
+import { UnauthorizedError } from '../../errors/CustomError';
 
 const loginWeb = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -56,7 +56,7 @@ const renewWeb = async (req: Request, res: Response, next: NextFunction) => {
         const { user: userFR } = await handleGetWebSession({ sessionId });
 
         if (!userFR) {
-            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+            throw new UnauthorizedError('Sesion terminada')
         }
 
         const { Id, TipoUsuario, Serverweb, Baseweb } = userFR;
@@ -91,7 +91,7 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
         const sessionId = req.sessionRedis;
 
         if (!sessionId) {
-            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+            throw new UnauthorizedError('Sesion terminada')
         }
         await closeDbConnection()
         await handleDeleteRedisSession({ sessionId });

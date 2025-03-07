@@ -23,9 +23,13 @@ const dbConnection = async (server, base, user, pass) => {
         try {
             pool = new mssql_1.default.ConnectionPool(dbConfig);
             await pool.connect();
+            console.log('Conexión a la DB establecida.');
         }
         catch (error) {
-            throw error;
+            console.error('Error al conectar a la DB:', error);
+            // Reiniciamos pool para evitar estados corruptos
+            pool = null;
+            throw new Error('Error en la conexión a la base de datos');
         }
     }
     return pool;
@@ -54,6 +58,7 @@ const dbConnectionMain = async () => {
 };
 exports.dbConnectionMain = dbConnectionMain;
 const closeDbConnection = async () => {
+    console.log("closeDbConnection");
     if (mainPool) {
         await mainPool.close();
         mainPool = null;

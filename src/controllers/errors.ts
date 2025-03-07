@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { dbConnectionMain, querys } from '../database';
 import sql from 'mssql';
+import moment from 'moment';
 
 const handleErrors = async (req: Request, res: Response) => {
 
@@ -13,11 +14,13 @@ const handleErrors = async (req: Request, res: Response) => {
         const request = new sql.Request(transaction);
 
         let query = querys.postError;
+        const fechaActualCDMX = moment().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
 
-        const result = await request
+        await request
             .input('From', sql.VarChar, From || '')
             .input('Message', sql.VarChar, Message || '')
             .input('Id_Usuario', sql.VarChar, Id_Usuario || '')
+            .input('Fecha', sql.VarChar,fechaActualCDMX)
             .input('Metodo', sql.VarChar, Metodo || '')
             .input('code', sql.VarChar, code || '')
             .query(query);
@@ -32,8 +35,53 @@ const handleErrors = async (req: Request, res: Response) => {
         return res.status(500).send(error);
     }
 
+};
+
+interface handleErrorsEndpointInterface {
+    From: string,
+    Message: string,
+    Id_Usuario: string,
+    Metodo: string,
+    code: string
+};
+
+const handleErrorsEndpoint = async ({
+    From,
+    Message,
+    Id_Usuario,
+    Metodo,
+    code
+}: handleErrorsEndpointInterface) => {
+
+
+    try {
+        const pool = await dbConnectionMain();
+
+        const transaction = new sql.Transaction(pool);
+        await transaction.begin();
+        const request = new sql.Request(transaction);
+
+        let query = querys.postError;
+        const fechaActualCDMX = moment().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
+
+        await request
+            .input('From', sql.VarChar, From || '')
+            .input('Message', sql.VarChar, Message || '')
+            .input('Id_Usuario', sql.VarChar, Id_Usuario || '')
+            .input('Fecha', sql.VarChar,fechaActualCDMX)
+            .input('Metodo', sql.VarChar, Metodo || '')
+            .input('code', sql.VarChar, code || '')
+            .query(query);
+
+        await transaction.commit();
+
+    } catch (error) {
+        console.log({error})
+    }
+
 }
 
 export {
-    handleErrors
+    handleErrors,
+    handleErrorsEndpoint
 }

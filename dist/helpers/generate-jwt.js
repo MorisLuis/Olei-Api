@@ -19,9 +19,9 @@ const generateJWTDB = ({ IdUsuarioOLEI }) => {
     });
 };
 exports.generateJWTDB = generateJWTDB;
-const generateJWT = ({ id }) => {
+const generateJWT = ({ Id_mobile }) => {
     return new Promise((resolve, reject) => {
-        const payload = { id };
+        const payload = { Id_mobile };
         jsonwebtoken_1.default.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
             expiresIn: process.env.JWT_EXPIRATION
         }, (error, token) => {

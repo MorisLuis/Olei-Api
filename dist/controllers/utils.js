@@ -6,14 +6,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getExcellTest = exports.getUtils = exports.getBanner = void 0;
 const database_1 = require("../database");
 const getSession_1 = require("../utils/Redis/getSession");
-const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const sells_1 = require("../database/querys/sells");
 const exceljs_1 = __importDefault(require("exceljs"));
+const CustomError_1 = require("../errors/CustomError");
 const getBanner = async (req, res) => {
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     ;
     const database = userFR?.Baseweb;
@@ -26,21 +26,16 @@ const getBanner = async (req, res) => {
 };
 exports.getBanner = getBanner;
 const getUtils = async (req, res) => {
-    try {
-        res.json({
-            ok: true
-        });
-    }
-    catch (error) {
-        res.status(500).send(error);
-    }
+    return new Promise((resolve, reject) => {
+        reject('Error en la promesa!');
+    });
 };
 exports.getUtils = getUtils;
 const getExcellTest = async (req, res) => {
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     ;
     const { Serverweb, Baseweb } = userFR;

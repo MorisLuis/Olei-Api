@@ -85,11 +85,11 @@ class Server {
         this.errorHandler();
     }
 
-    async connectDB() {
+    private async connectDB() {
         await dbConnectionMain();
     }
 
-    configureRedis() {
+    private configureRedis() {
         this.redis = new Redis({
             host: process.env.REDIS_HOST || '127.0.0.1',
             port: Number(process.env.REDIS_PORT as string) || 6379,
@@ -105,7 +105,7 @@ class Server {
         });
     }
 
-    configureSessions() {
+    private configureSessions() {
         if (this.redis) {
             const isProduction = process.env.ENVIRONMENT === 'production';
 
@@ -150,7 +150,7 @@ class Server {
         }
     }
 
-    middlewares() {
+    private middlewares() {
         const allowedOrigins = [
             'https://www.oleionline.com',
             'http://localhost:3000',
@@ -178,7 +178,7 @@ class Server {
         this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));
     }
 
-    routes() {
+    private routes() {
         this.app.use(this.paths.product, productRouter);
         this.app.use(this.paths.auth, authRouter);
         this.app.use(this.paths.search, searchRouter);
@@ -198,7 +198,7 @@ class Server {
         this.app.use(this.paths.almacenes, almacenesRouter);
     }
 
-    async closeConnections() {
+    public async closeConnections() {
         if (this.redis) {
             await this.redis.quit();
             console.log('Conexión a Redis cerrada');
@@ -207,12 +207,11 @@ class Server {
         console.log('Conexión a la base de datos cerrada');
     }
 
-
     errorHandler() {
         this.app.use(errorHandler);
     }
 
-    listen() {
+    public listen() {
         this.app.listen(this.port, () => {
             console.log("Servidor corriendo en puerto " + this.port);
         });
@@ -226,8 +225,20 @@ export default Server;
 const server = new Server();
 export const redisClient = server.redis;
 
+// Listener para cerrar conexiones con SIGINT
 process.on('SIGINT', async () => {
     console.log('Cerrando conexiones...');
     await server.closeConnections();
     process.exit(0);
+});
+
+// Listeners globales para errores inesperados
+process.on('uncaughtException', (err) => {
+    console.error('🔥 Uncaught Exception:', err);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('💥 Unhandled Promise Rejection:', reason);
+    process.exit(1);
 });

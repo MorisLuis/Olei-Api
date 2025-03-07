@@ -6,22 +6,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getOrderDetailsSells = exports.getTotalAllOrdersService = exports.getTotalOrderDetailsService = exports.getAllOrdersService = exports.getOrderService = exports.postOrderService = void 0;
 const database_1 = require("../database");
 const orders_1 = require("../database/querys/orders");
-const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
 const getSession_1 = require("../utils/Redis/getSession");
 const mssql_1 = __importDefault(require("mssql"));
 const numeroALetra_1 = require("../utils/numeroALetra");
 const convertArrayToXml_1 = require("../utils/convertArrayToXml");
+const CustomError_1 = require("../errors/CustomError");
 ;
 const postOrderService = async ({ sessionId, Total, Subtotal, sellsDetails, sellsData }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     ;
     const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     const transaction = new mssql_1.default.Transaction(pool);
@@ -53,13 +53,13 @@ exports.postOrderService = postOrderService;
 const getOrderService = async ({ sessionId, folio }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     ;
     const { Serverweb, Baseweb, Id_Cliente, TipoDocOO } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     const getOrderQuery = orders_1.orderQuerys.getOrder;
@@ -77,12 +77,12 @@ exports.getOrderService = getOrderService;
 const getAllOrdersService = async ({ sessionId, page, limit }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     const query = orders_1.orderQuerys.getAllOrders;
     const request = await pool.request()
@@ -100,13 +100,13 @@ exports.getAllOrdersService = getAllOrdersService;
 const getOrderDetailsSells = async ({ PageNumber, folio, sessionId }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     ;
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     // Whe made a little variotion when the PageNumber is 999.
@@ -126,12 +126,12 @@ exports.getOrderDetailsSells = getOrderDetailsSells;
 const getTotalAllOrdersService = async (sessionId) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     const result = await pool?.request()
         .input('TipoDocOO', TipoDocOO)
@@ -147,13 +147,13 @@ exports.getTotalAllOrdersService = getTotalAllOrdersService;
 const getTotalOrderDetailsService = async ({ folio, sessionId }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     ;
     const { Serverweb, Baseweb } = userFR;
     const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
     if (!pool) {
-        throw new BadRequestError_1.default({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
     const query = orders_1.orderQuerys.getTotalOrderDetails;

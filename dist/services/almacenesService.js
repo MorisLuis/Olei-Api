@@ -1,17 +1,14 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAlmacenByIdService = exports.getAlmacenesService = void 0;
 const database_1 = require("../database");
 const almacen_1 = require("../database/querys/almacen");
-const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
+const CustomError_1 = require("../errors/CustomError");
 const getSession_1 = require("../utils/Redis/getSession");
 const getAlmacenesService = async ({ sessionId }) => {
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { ServidorSQL, BaseSQL } = userFR;
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL);
@@ -25,7 +22,7 @@ exports.getAlmacenesService = getAlmacenesService;
 const getAlmacenByIdService = async ({ sessionId, Id_Almacen }) => {
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { ServidorSQL, BaseSQL } = userFR;
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL);

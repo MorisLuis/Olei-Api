@@ -1,5 +1,5 @@
 import { dbConnection, dbConnectionMain, querys } from "../database";
-import BadRequestError from "../errors/BadRequestError";
+import { NotFoundError, UnauthorizedError, ValidationError } from "../errors/CustomError";
 import { ValidationResult } from "../interface/user";
 import { handleGetSession } from "../utils/Redis/getSession";
 import sql from "mssql";
@@ -17,11 +17,11 @@ const loginDBAppService = async ({
     // Connection to server
     const mainPool = await dbConnectionMain();
     if (!mainPool) {
-        throw new BadRequestError({ code: 400, message: "Error connecting to the main database!", logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     }
 
     if (IdUsuarioOLEI.trim() === "" || PasswordOLEI.trim() === "") {
-        throw new BadRequestError({ code: 401, message: "Necesario enviar usuario y contraseña!", logging: true });
+        throw new ValidationError('Necesario enviar usuario y contraseña')
     }
 
     // Get data from DB.
@@ -34,18 +34,17 @@ const loginDBAppService = async ({
     const result = resp?.recordset[0];
 
     if (!result) {
-        throw new BadRequestError({ code: 404, message: `No se encontro el usuario: ${IdUsuarioOLEI}`, logging: true });
+        throw new NotFoundError(`No se encontro el usuario: ${IdUsuarioOLEI}`)
     }
 
     if (result?.PasswordOLEI && result?.PasswordOLEI.trim() !== PasswordOLEI) {
-        throw new BadRequestError({ code: 404, message: `Contraseña incorrecta`, logging: true });
+        throw new UnauthorizedError(`Contraseña incorrecta ${IdUsuarioOLEI}`)
     }
 
     return {
         result
     }
 }
-
 
 interface loginAppServiceInterface {
     sessionId: string;
@@ -62,7 +61,7 @@ const loginAppService = async ({
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
@@ -70,11 +69,11 @@ const loginAppService = async ({
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: "Error connecting to the main database", logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     }
 
     if (Id_Usuario.trim() === "" || password.trim() === "") {
-        throw new BadRequestError({ code: 404, message: "Necesario escribir correo y contraseña", logging: true });
+        throw new ValidationError('Necesario escribir correo y contraseña')
     }
 
     const request = pool.request();
@@ -86,11 +85,12 @@ const loginAppService = async ({
 
 
     if (validations[0].Tipo === "usuario" && validations[0].Resultado !== 1) {
-        throw new BadRequestError({ code: 404, message: "Correo no encontrado", logging: true });
+        throw new NotFoundError('Correo no encontrado')
+
     };
 
     if (validations[1].Tipo === "contrasena" && validations[1].Resultado !== 1) {
-        throw new BadRequestError({ code: 404, message: "Contraseña incorrecta", logging: true });
+        throw new UnauthorizedError('Contraseña incorrecta')
     };
 
     const userData = (result.recordsets as any)[1][0];
@@ -101,7 +101,6 @@ const loginAppService = async ({
         }
     }
 };
-
 
 export {
     loginDBAppService,

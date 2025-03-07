@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from 'express'
-import { dbConnection } from '../../database';
+import { dbConnection, querys } from '../../database';
 import { productsQuerys } from '../../database/querys/products';
 import { guessBarcodeType } from '../../utils/identifyBarcodeType';
 import { handleGetSession } from '../../utils/Redis/getSession';
 import { productsWebQuerys } from '../../database/querys/productsWeb';
-import BadRequestError from '../../errors/BadRequestError';
 import { getProductsByStockQuerySchema } from '../../validations/productsValidations';
 import { getProductsByStockService } from '../../services/productsServices';
+import { UnauthorizedError, ValidationError } from '../../errors/CustomError';
 
 
 const getProducById = async (req: Request, res: Response, next: NextFunction) => {
@@ -14,27 +14,29 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
     try {
         const { id } = req.params;
         const { Marca } = req.query;
+        const Id_Usuario = req.Id_mobile;
 
         const sessionId = req.sessionID;
         const { user: userFR } = await handleGetSession({ sessionId });
 
         if (!userFR) {
-            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+            throw new UnauthorizedError('Sesion terminada')
         }
 
         const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
         const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
+
         if (!pool) {
-            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+            throw new ValidationError('Error al conectarse a base de datos principal');
         }
 
         let query = productsWebQuerys.getProducById
 
-        if(
+        if (
             userFR.BaseSQL === 'OLEIDB1_ROSCO' ||
             userFR.BaseSQL === 'OLEIDB1_ROSCO_TEST'
-            ) {
+        ) {
             // We have to modify query to ROSCO
             query = productsWebQuerys.getProducByIdROSCO
         };
@@ -75,37 +77,33 @@ const getProductsByStock = async (req: Request, res: Response, next: NextFunctio
 };
 
 const getTotalOfProductsByStock = async (req: Request, res: Response, next: NextFunction) => {
-
     try {
-        const Id_Usuario = req.id;
-
+        const Id_Usuario = req.Id_mobile;
         const sessionId = req.sessionID;
         const { user: userFR } = await handleGetSession({ sessionId });
 
         if (!userFR) {
-            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+            throw new UnauthorizedError('Sesión terminada');
         }
 
-        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
+        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre} = userFR;
         const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
         if (!pool) {
-            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
+            throw new ValidationError('Error al conectarse a base de datos principal');
         }
 
         let query = productsQuerys.getTotalOfAllProductsByStock;
-
         const request = await pool.request()
             .input('Id_ListaPrecios', Id_ListPre)
             .input('Almacen', Id_Almacen)
             .query(query);
 
         const TotalProductos = request.recordset;
-
         res.json(TotalProductos);
 
     } catch (error) {
-        next(error)
+        next(error);
     }
 };
 
@@ -118,16 +116,11 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
         const { user: userFR } = await handleGetSession({ sessionId });
 
         if (!userFR) {
-            throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+            throw new UnauthorizedError('Sesion terminada')
         }
 
         const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
         const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
-
-        if (!pool) {
-            throw new BadRequestError({ code: 500, message: "No se pudo establecer la conexión con la base de datos", logging: true });
-        }
-
 
         let isEAN13orUPC14 = false;
         if (CodBar) {

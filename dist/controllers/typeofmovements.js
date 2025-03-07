@@ -7,13 +7,13 @@ exports.getTypeofmovements = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const getSession_1 = require("../utils/Redis/getSession");
-const BadRequestError_1 = __importDefault(require("../errors/BadRequestError"));
+const CustomError_1 = require("../errors/CustomError");
 const getTypeofmovements = async (req, res, next) => {
     try {
         const sessionId = req.sessionID;
         const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
         if (!userFR) {
-            throw new BadRequestError_1.default({ code: 401, message: "Sesion terminada", logging: true });
+            throw new CustomError_1.UnauthorizedError('Sesion terminada');
         }
         ;
         const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, userId } = userFR;

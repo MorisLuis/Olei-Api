@@ -1,10 +1,10 @@
 import { dbConnection } from "../database";
-import BadRequestError from "../errors/BadRequestError";
 import { handleGetSession } from "../utils/Redis/getSession";
 import { verifyIfIsEAN13 } from "../utils/identifyBarcodeType";
 import { costosQuerys } from "../database/querys/costos";
 import { v4 as uuidv4 } from 'uuid';
 import sql from 'mssql';
+import { UnauthorizedError, ValidationError } from "../errors/CustomError";
 
 type updateCodbar = {
     CodBar: string;
@@ -21,13 +21,13 @@ const updateCodebarService = async (
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     const transaction = new sql.Transaction(pool);
@@ -46,12 +46,9 @@ const updateCodebarService = async (
 
     if (!codigoParam || !Id_Marca) {
         await transaction.rollback();
-        throw new BadRequestError({ code: 404, message: `Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.`, logging: true });
+        throw new ValidationError('Se requieren los parámetros "codigo" e "Id_Marca" en la consulta.')
     };
 
-
-
-    const keys = Object.keys(body);
     const query = costosQuerys.updateCostos;
 
     // Codebar random

@@ -7,7 +7,6 @@ const getAlmacenes = async (req: Request, res: Response, next: NextFunction) => 
 
     try {
         const sessionId = req.sessionID;
-
         const { almacenes } = await getAlmacenesService({
             sessionId
         });
@@ -46,9 +45,7 @@ const updateAlmacenInRedis = async (req: Request, res: Response, next: NextFunct
             (req.session as any).user = datosDelUsuario;
         }
 
-
         res.json(almacen);
-
 
     } catch (error) {
         next(error)

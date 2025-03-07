@@ -1,7 +1,6 @@
-import { dbConnection, querys } from "../database";
-import { inventoryQuerys } from "../database/querys/inventory";
+import { dbConnection } from "../database";
 import { productsQuerys } from "../database/querys/products";
-import BadRequestError from "../errors/BadRequestError";
+import { UnauthorizedError, ValidationError } from "../errors/CustomError";
 import InventoryDetailsInterface from "../interface/inventoryDetails";
 import { handleGetSession } from "../utils/Redis/getSession";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
@@ -25,14 +24,14 @@ export const postInventoryService = async ({
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, TodosAlmacenes } = userFR;
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: `No se pudo establecer la conexión con la base de datos.`, logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
     const Accion = typeOfMovement.Accion;
@@ -93,12 +92,12 @@ interface searchProductInventoryServiceInterface {
 export const searchProductInventoryService = async ({
     sessionId,
     searchTerm,
-}: searchProductInventoryServiceInterface) => {
+} : searchProductInventoryServiceInterface ) => {
 
     const { user: userFR } = await handleGetSession({ sessionId });
 
     if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
+        throw new UnauthorizedError('Sesion terminada')
     }
 
     const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL } = userFR;
@@ -106,7 +105,7 @@ export const searchProductInventoryService = async ({
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
     if (!pool) {
-        throw new BadRequestError({ code: 500, message: "Unable to establish a connection to the database", logging: true });
+        throw new ValidationError('Error al conectarse a base de datos principal');
     }
 
     const query = productsQuerys.getProductsBySearchInventory;
@@ -122,76 +121,3 @@ export const searchProductInventoryService = async ({
         products
     }
 };
-
-
-interface getInventoryServiceInterface {
-    sessionId: string
-    Folio: number
-}
-
-export const getInventoryService = async ({
-    sessionId,
-    Folio
-}: getInventoryServiceInterface) => {
-
-
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
-
-    const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
-
-    if (!pool) {
-        throw new BadRequestError({ code: 500, message: "Unable to establish a connection to the database", logging: true });
-    };
-
-
-    const getInventoryQuery = inventoryQuerys.getInventory;
-    const request = await pool.request()
-        .input("Folio", Folio)
-        .query(getInventoryQuery)
-
-    let inventory = request.recordset[0];
-
-    return { inventory }
-}
-
-interface getInventoryDetailsServiceInterface {
-    sessionId: string;
-    Folio: number
-}
-
-export const getInventoryDetailsService = async ({
-    sessionId,
-    Folio
-} : getInventoryDetailsServiceInterface ) => {
-
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        throw new BadRequestError({ code: 401, message: "Sesion terminada", logging: true });
-    }
-
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
-
-    const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
-
-    if (!pool) {
-        throw new BadRequestError({ code: 500, message: "Unable to establish a connection to the database", logging: true });
-    };
-
-    const getInventoryQuery = inventoryQuerys.getInventoryDetails;
-    const request = await pool.request()
-        .input("Folio", Folio)
-        .query(getInventoryQuery)
-
-    const inventoryDetails = request.recordset;
-
-    return {
-        inventoryDetails
-    }
-}
