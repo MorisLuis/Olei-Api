@@ -83,7 +83,7 @@ exports.querys = {
         INSERT INTO [dbo].[ERRORES]
         ( [From], [Message], Id_Usuario, Fecha, Metodo, code )
         VALUES
-        ( @From, @Message, @Id_Usuario, GETDATE(), @Metodo, @code )
+        ( @From, @Message, @Id_Usuario, @Fecha, @Metodo, @code )
     `
 };
 //# sourceMappingURL=querys.js.map
