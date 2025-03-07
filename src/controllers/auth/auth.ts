@@ -133,7 +133,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             sessionId
         })
 
-        const token = await generateJWT({ Id_Usuario: Id_Usuario.trim() });
+        const token = await generateJWT({ Id_mobile: Id_Usuario.trim() });
 
         const datosDelUsuario: UserSessionInterface = {
             ...(req.session as any).user,
@@ -141,7 +141,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             userRol: userData.Id_Perfil,
             TodosAlmacenes: userData.TodosAlmacenes,
             Id_Almacen: userData.Id_Almacen,
-            AlmacenNombre: userData.AlmacenNombre
+            AlmacenNombre: userData.AlmacenNombre,
+            Id_ListPre: userData.Id_ListPre
         };
 
         // Session redis
@@ -190,7 +191,7 @@ const renewLogin = async (req: Request, res: Response, next: NextFunction) => {
             throw new ValidationError('ServidorSQL y BaseSQL son necesarios')
         };
 
-        const token = await generateJWT({ Id_Usuario: userId });
+        const token = await generateJWT({ Id_mobile: userId });
 
         if (!token) {
             throw new UnauthorizedError('Error al generar token')
@@ -200,7 +201,8 @@ const renewLogin = async (req: Request, res: Response, next: NextFunction) => {
             Id_Usuario: userId,
             TodosAlmacenes,
             Id_Almacen: userFR.Id_Almacen,
-            AlmacenNombre: userFR.AlmacenNombre
+            AlmacenNombre: userFR.AlmacenNombre,
+            Id_ListPre: userFR.Id_ListPre
         };
 
         res.json({
@@ -230,7 +232,9 @@ const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
             userRol: undefined,
             TodosAlmacenes: undefined,
             Id_Almacen: undefined,
-            AlmacenNombre: undefined
+            AlmacenNombre: undefined,
+            SalidaSinExistencias: undefined,
+            Id_ListPre: undefined
         };
 
         (req.session as any).user = datosDelUsuario;

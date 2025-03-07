@@ -1,14 +1,6 @@
 export const querys = {
 
     //Auth
-    getAuthLimitData: `
-        SELECT
-            Id_Almacen,
-            ActualizarListas AS Id_ListPre
-        FROM [dbo].[USUARIOS]
-        WHERE Id_Usuario = @Id_Usuario
-    `,
-
     authWeb: ` 
         SELECT 
             U.Id_UsuarioOOL,
@@ -90,30 +82,10 @@ export const querys = {
         Codigo; -- Luego orden alfabético
     `,
 
-    // TypeOfMovements
-    getTiposMovimiento: `
-        SELECT TOP (1000) 
-            [Id_TipoMovInv],
-            [Descripcion],
-            [Accion],
-            [Id_AlmDest]
-        FROM [dbo].[TIPOMOVSINV]
-    `,
-
-    getTipoDeMovimiento: `
-        SELECT 
-            [Id_TipoMovInv],
-            [Descripcion],
-            [Accion],
-            [Id_AlmDest]
-        FROM [dbo].[TIPOMOVSINV]
-        WHERE Id_TipoMovInv = @Id_TipoMovInv
-    `,
-
     postError: `
         INSERT INTO [dbo].[ERRORES]
         ( [From], [Message], Id_Usuario, Fecha, Metodo, code )
         VALUES
-        ( @From, @Message, @Id_Usuario, @Fecha, @Metodo, @code )
+        ( @From, @Message, @Id_Usuario, GETDATE(), @Metodo, @code )
     `
 }

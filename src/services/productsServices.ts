@@ -228,12 +228,8 @@ const getProductsByStockService = async ({
         throw new UnauthorizedError('Sesion terminada')
     }
 
-    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
+    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
-
-    const userquery = querys.getAuthLimitData;
-    const requestUser = await pool.request().input('Id_Usuario', userId).query(userquery)
-    const user = requestUser.recordset[0]
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -243,7 +239,7 @@ const getProductsByStockService = async ({
     const request = await pool.request()
         .input('PageSize', PageSize)
         .input('PageNumber', PageNumber)
-        .input('Id_ListaPrecios', user.Id_ListPre)
+        .input('Id_ListaPrecios', Id_ListPre)
         .input('Almacen', Id_Almacen)
         .query(query);
 

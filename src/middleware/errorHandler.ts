@@ -5,6 +5,7 @@ interface ErrorResponse extends Error {
   statusCode?: number;
 }
 const errorHandler = async (err: ErrorResponse, req: Request, res: Response, next: NextFunction): Promise<void> => {
+  console.log("errorHandler")
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
   const Id_Usuario = req.Id_mobile ?? req.IdUsuarioOLEI ?? req.Id_web ?? "Sin Usuario";

@@ -42,8 +42,8 @@ const validateJWT = async (req: Request, res: Response, next: NextFunction) => {
             if (err) {
                 throw new UnauthorizedError('Fallo la autenticación del token')
             }
-            const { id } = decoded as { id: string };
-            req.Id_mobile = id;
+            const { Id_mobile } = decoded as { Id_mobile: string };
+            req.Id_mobile = Id_mobile;
             next();
         });
     } catch (error) {
