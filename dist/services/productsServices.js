@@ -17,7 +17,7 @@ const getProductsService = async ({ sessionId, page, limit, nombre, marca, famil
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -49,7 +49,7 @@ const getProducByIdWebService = async ({ sessionId, codigo, Marca }) => {
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb, Id_ListPre, Id_Almacen } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -77,7 +77,7 @@ const getTotalProductsService = async ({ sessionId, nombre, marca, familia, foli
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -105,7 +105,7 @@ const searchProductService = async ({ sessionId, nombre, marca, familia, codigo 
     }
     ;
     const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, Id_Almacen } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -126,12 +126,13 @@ const searchProductService = async ({ sessionId, nombre, marca, familia, codigo 
     };
 };
 exports.searchProductService = searchProductService;
+;
 const getProductsByStockService = async ({ sessionId, PageSize, PageNumber }) => {
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
-    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');

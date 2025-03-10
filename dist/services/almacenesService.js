@@ -11,7 +11,7 @@ const getAlmacenesService = async ({ sessionId }) => {
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { ServidorSQL, BaseSQL } = userFR;
-    const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL);
+    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     const result = await pool.request().query(almacen_1.AlamacenQuery.getAlmacenes);
     const almacenes = result?.recordset;
     return {
@@ -25,7 +25,7 @@ const getAlmacenByIdService = async ({ sessionId, Id_Almacen }) => {
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { ServidorSQL, BaseSQL } = userFR;
-    const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL);
+    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     const result = await pool.request()
         .input('Id_Almacen', Id_Almacen)
         .query(almacen_1.AlamacenQuery.getAlmacenById);

@@ -1,4 +1,4 @@
-import { dbConnection, querys } from "../database";
+import { dbConnectionWeb, querys } from "../database";
 import { UnauthorizedError } from "../errors/CustomError";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 
@@ -20,7 +20,7 @@ const searchFamiliaService = async ({
     }
 
     const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
     const result = await pool.request()
         .input('Nombre', searchTerm)
@@ -46,7 +46,7 @@ const searchMarcaService = async ({
     }
 
     const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
     const result = await pool.request()
         .input('Nombre', searchTerm)
@@ -60,7 +60,7 @@ const searchMarcaService = async ({
 
 };
 
-const searcCodigoService = async ({
+const searchCodigoService = async ({
     sessionId,
     searchTerm
 }: searchServiceInterface ) => {
@@ -72,7 +72,7 @@ const searcCodigoService = async ({
     }
 
     const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
     const result = await pool.request()
         .input('Codigo', searchTerm)
@@ -90,5 +90,5 @@ const searcCodigoService = async ({
 export {
     searchFamiliaService,
     searchMarcaService,
-    searcCodigoService
+    searchCodigoService
 }

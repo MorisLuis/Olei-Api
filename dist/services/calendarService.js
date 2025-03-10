@@ -11,7 +11,7 @@ const getCalendarTaskByMonthService = async ({ sessionId, Mes, Anio }) => {
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -31,7 +31,7 @@ const getCalendarTaskByDayService = async ({ sessionId, Day }) => {
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -50,7 +50,7 @@ const getCalendarTaskByMonthAndClientService = async ({ sessionId, Mes, Anio, Id
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }

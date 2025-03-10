@@ -1,0 +1,143 @@
+import sql from "mssql";
+import config from "../config";
+import { UnauthorizedError } from "../errors/CustomError";
+
+let mainPool: sql.ConnectionPool | null = null;
+let pool: sql.ConnectionPool | null = null;
+
+
+export const dbConnection = async (server: string, base: string, user: string, pass: string) => {
+
+    try {
+
+        if (!server || !base) {
+            throw new UnauthorizedError('Servidor y base de datos son obligatorios para la conexión.');
+        }
+
+        // Si el pool existe y está conectado, reutilízalo
+        if (pool && pool.connected) {
+            console.log('Reutilizando conexión existente.');
+            return pool;
+        };
+
+        const dbConfig: sql.config = {
+            user: user || config.dbUser,
+            password: pass || config.dbPassword,
+            server: server,
+            database: base,
+            options: {
+                encrypt: true,
+                trustServerCertificate: true
+            },
+        };
+
+        // Cerrar pool anterior si existe pero no está conectado
+        if (pool) {
+            await pool.close();
+        };
+
+        pool = new sql.ConnectionPool(dbConfig);
+        await pool.connect();
+        console.log('Conexión a la DB establecida.');
+
+        // Manejo de errores en el pool
+        pool.on('error', async (err) => {
+            console.error('Error en la conexión a la DB:', err);
+            await pool?.close();
+            pool = null; // Resetear pool para evitar estados corruptos
+        });
+
+        return pool;
+
+    } catch (error) {
+        console.error('Error al conectar a la DB:', error);
+        pool = null;
+        throw new Error('Error en la conexión a la base de datos');
+    }
+};
+
+export const dbConnectionWeb = async (server: string, base: string) => {
+
+    try {
+
+        if (!server || !base) {
+            throw new UnauthorizedError('Servidor y base de datos son obligatorios para la conexión.');
+        }
+
+        // Si el pool existe y está conectado, reutilízalo
+        if (pool && pool.connected) {
+            console.log('Reutilizando conexión existente.');
+            return pool;
+        };
+
+        const dbConfig: sql.config = {
+            user: config.dbUser,
+            password: config.dbPassword,
+            server: server,
+            database: base,
+            options: {
+                encrypt: true,
+                trustServerCertificate: true
+            },
+        };
+
+        // Cerrar pool anterior si existe pero no está conectado
+        if (pool) {
+            await pool.close();
+        };
+
+        pool = new sql.ConnectionPool(dbConfig);
+        await pool.connect();
+        console.log('Conexión a la DB establecida.');
+
+        // Manejo de errores en el pool
+        pool.on('error', async (err) => {
+            console.error('Error en la conexión a la DB:', err);
+            await pool?.close();
+            pool = null; // Resetear pool para evitar estados corruptos
+        });
+
+        return pool;
+
+    } catch (error) {
+        console.error('Error al conectar a la DB:', error);
+        pool = null;
+        throw new Error('Error en la conexión a la base de datos');
+    }
+};
+
+export const dbConnectionMain = async () => {
+    if (!mainPool) {
+        const dbConfig = {
+            user: config.dbUser,
+            password: config.dbPassword,
+            server: config.dbServer,
+            database: config.dbDatabase,
+            options: {
+                encrypt: true,
+                trustServerCertificate: true
+            },
+        };
+
+        try {
+            mainPool = await sql.connect(dbConfig);
+        } catch (error) {
+            throw error;
+        }
+    }
+    return mainPool;
+};
+
+export const closeDbConnection = async () => {
+
+    console.log("closeDbConnection")
+    if (mainPool) {
+        await mainPool.close();
+        mainPool = null;
+    }
+
+    if (pool) {
+        await pool.close();
+        pool = null;
+    }
+};

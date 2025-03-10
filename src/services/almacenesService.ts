@@ -1,4 +1,4 @@
-import { dbConnection } from "../database";
+import { dbConnection, dbConnectionWeb } from "../database";
 import { AlamacenQuery } from "../database/querys/almacen";
 import { UnauthorizedError } from "../errors/CustomError";
 import { handleGetSession } from "../utils/Redis/getSession";
@@ -19,7 +19,7 @@ const getAlmacenesService = async ({
     }
 
     const { ServidorSQL, BaseSQL } = userFR;
-    const pool = await dbConnection(ServidorSQL, BaseSQL);
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     const result = await pool.request().query(AlamacenQuery.getAlmacenes);
     const almacenes = result?.recordset;
 
@@ -45,7 +45,7 @@ const getAlmacenByIdService = async ({
     }
 
     const { ServidorSQL, BaseSQL } = userFR;
-    const pool = await dbConnection(ServidorSQL, BaseSQL);
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     const result = await pool.request()
         .input('Id_Almacen', Id_Almacen)

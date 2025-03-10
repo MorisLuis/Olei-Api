@@ -1,4 +1,4 @@
-import { dbConnection, querys } from "../database";
+import { dbConnection, dbConnectionWeb } from "../database";
 import { productsWebQuerys } from "../database/querys/productsWeb";
 import { handleGetSession, handleGetWebSession } from "../utils/Redis/getSession";
 import sql from 'mssql';
@@ -33,7 +33,7 @@ const getProductsService = async ({
     }
 
     const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -84,7 +84,7 @@ const getProducByIdWebService = async ({
 
     const { Serverweb, Baseweb, Id_ListPre, Id_Almacen } = userFR;
 
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -135,7 +135,7 @@ const getTotalProductsService = async ({
 
     const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
 
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -184,7 +184,7 @@ export const searchProductService = async ({
     };
 
     const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, Id_Almacen } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -214,7 +214,8 @@ interface getProductsByStockServiceInterface {
     sessionId: string;
     PageSize: number;
     PageNumber: number;
-}
+};
+
 const getProductsByStockService = async ({
     sessionId,
     PageSize,
@@ -228,7 +229,7 @@ const getProductsByStockService = async ({
         throw new UnauthorizedError('Sesion terminada')
     }
 
-    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
     if (!pool) {

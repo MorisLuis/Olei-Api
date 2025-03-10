@@ -13,7 +13,7 @@ const getTables = async (req, res, next) => {
             throw new CustomError_1.UnauthorizedError('Sesion terminada');
         }
         const { Serverweb, Baseweb } = userFR;
-        const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+        const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
         const FamiliasResult = await pool?.request().query(database_1.querys.getFamilias);
         const Familias = FamiliasResult?.recordset.map(familia => familia.Nombre);
         const MarcaResult = await pool?.request().query(database_1.querys.getMarcas);

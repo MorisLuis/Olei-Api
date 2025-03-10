@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logout = exports.renewWeb = exports.loginWeb = void 0;
-const database_1 = require("../../database");
 const generate_jwt_1 = require("../../helpers/generate-jwt");
 const getSession_1 = require("../../utils/Redis/getSession");
 const deleteRedis_1 = require("../../utils/Redis/deleteRedis");
@@ -82,7 +81,6 @@ const logout = async (req, res, next) => {
         if (!sessionId) {
             throw new CustomError_1.UnauthorizedError('Sesion terminada');
         }
-        await (0, database_1.closeDbConnection)();
         await (0, deleteRedis_1.handleDeleteRedisSession)({ sessionId });
         res.json({ ok: true });
     }

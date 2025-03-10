@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { dbConnection, querys } from '../database';
+import { dbConnectionWeb, querys } from '../database';
 import { handleGetWebSession } from '../utils/Redis/getSession';
 import { UnauthorizedError } from '../errors/CustomError';
 
@@ -15,7 +15,7 @@ const getTables = async (req: Request, res: Response, next: NextFunction) => {
         }
     
         const { Serverweb, Baseweb } = userFR;
-        const pool = await dbConnection(Serverweb, Baseweb);
+        const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
         const FamiliasResult = await pool?.request().query(querys.getFamilias);
         const Familias = FamiliasResult?.recordset.map(familia => familia.Nombre);

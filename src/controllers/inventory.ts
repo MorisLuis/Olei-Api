@@ -11,9 +11,7 @@ const postInventory = async (req: Request, res: Response, next: NextFunction) =>
     try {
 
         const sessionId = req.sessionID;
-        console.log({sessionId})
         const Id_Usuario = req.Id_mobile;
-        console.log({Id_Usuario})
 
         const { inventoryDetails, typeOfMovement } = postInventoryBodySchema.parse(req.body);
 
@@ -36,7 +34,7 @@ const postInventory = async (req: Request, res: Response, next: NextFunction) =>
     }
 };
 
-const getInventory = async (req: Request, res: Response, next: NextFunction) => {
+/* const getInventory = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
         const { Folio } = getInventoryQuerySchema.parse(req.query);
@@ -90,7 +88,7 @@ const getInventoryDetails = async (req: Request, res: Response, next: NextFuncti
         }
     }
 };
-
+ */
 const searchProductInventory = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
@@ -115,7 +113,5 @@ const searchProductInventory = async (req: Request, res: Response, next: NextFun
 
 export {
     postInventory,
-    getInventory,
-    getInventoryDetails,
     searchProductInventory
 }

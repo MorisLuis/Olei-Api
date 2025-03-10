@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { dbConnection } from '../database';
+import { dbConnection, dbConnectionWeb } from '../database';
 import { handleGetWebSession } from '../utils/Redis/getSession';
 import { sellsQuery } from '../database/querys/sells';
 import { ConnectionPool } from 'mssql';
@@ -41,7 +41,7 @@ const getExcellTest = async (req: Request, res: Response) => {
     };
 
     const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
     try {
         // Obtenemos los datos de la base de datos en lotes

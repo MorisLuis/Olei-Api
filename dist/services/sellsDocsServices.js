@@ -11,7 +11,7 @@ const getSellsService = async (sessionId, PageNumber, SellsOrderCondition) => {
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -33,7 +33,7 @@ const getSellsByClientService = async ({ sessionId, PageNumber, Id_Cliente, Sell
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -62,7 +62,7 @@ const getSellByIdService = async (sessionId, folio, Serie, Id_Almacen, TipoDoc) 
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -85,7 +85,7 @@ const getCobranzaService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrde
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -115,7 +115,7 @@ const getTotalSellsService = async (sessionId) => {
     }
     ;
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -134,7 +134,7 @@ const getTotalSellsByClientService = async ({ sessionId, Id_Cliente, FilterTipoD
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -160,7 +160,7 @@ const getTotalCobranzaService = async ({ sessionId, Id_Cliente, FilterTipoDoc, F
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }

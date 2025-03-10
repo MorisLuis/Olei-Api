@@ -1,4 +1,4 @@
-import { dbConnection } from "../database";
+import {  dbConnectionWeb } from "../database";
 import { orderQuerys } from "../database/querys/orders";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 import sql from 'mssql';
@@ -29,7 +29,7 @@ const postOrderService = async ({
         throw new UnauthorizedError('Sesion terminada')
     };
     const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -82,7 +82,7 @@ const getOrderService = async ({
 
     };
     const { Serverweb, Baseweb, Id_Cliente, TipoDocOO } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -123,7 +123,7 @@ const getAllOrdersService = async ({
 
     const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
 
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -164,7 +164,7 @@ const getOrderDetailsSells = async ({
 
     };
     const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -197,7 +197,7 @@ const getTotalAllOrdersService = async (sessionId: string) => {
 
     const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
 
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -233,7 +233,7 @@ const getTotalOrderDetailsService = async ({
 
     };
     const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };

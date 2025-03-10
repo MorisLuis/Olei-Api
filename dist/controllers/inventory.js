@@ -1,18 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchProductInventory = exports.getInventoryDetails = exports.getInventory = exports.postInventory = void 0;
-const database_1 = require("../database");
-const inventory_1 = require("../database/querys/inventory");
+exports.searchProductInventory = exports.postInventory = void 0;
 const inventoryServices_1 = require("../services/inventoryServices");
 const inventoryValidations_1 = require("../validations/inventoryValidations");
 const zod_1 = require("zod");
-const CustomError_1 = require("../errors/CustomError");
 const postInventory = async (req, res, next) => {
     try {
         const sessionId = req.sessionID;
-        console.log({ sessionId });
         const Id_Usuario = req.Id_mobile;
-        console.log({ Id_Usuario });
         const { inventoryDetails, typeOfMovement } = inventoryValidations_1.postInventoryBodySchema.parse(req.body);
         const { Folio } = await (0, inventoryServices_1.postInventoryService)({
             sessionId,
@@ -33,54 +28,61 @@ const postInventory = async (req, res, next) => {
     }
 };
 exports.postInventory = postInventory;
-const getInventory = async (req, res, next) => {
+/* const getInventory = async (req: Request, res: Response, next: NextFunction) => {
+
     try {
-        const { Folio } = inventoryValidations_1.getInventoryQuerySchema.parse(req.query);
-        const pool = await (0, database_1.dbConnection)();
+        const { Folio } = getInventoryQuerySchema.parse(req.query);
+        const pool = await dbConnection();
+
         if (!pool) {
-            throw new CustomError_1.ValidationError('Error al conectarse a base de datos');
+            throw new ValidationError('Error al conectarse a base de datos');
         }
-        const getInventoryQuery = inventory_1.inventoryQuerys.getInventory;
+
+        const getInventoryQuery = inventoryQuerys.getInventory;
         const request = await pool.request()
             .input("Folio", Folio)
-            .query(getInventoryQuery);
+            .query(getInventoryQuery)
+
         let inventory = request.recordset[0];
-        res.json(inventory);
-    }
-    catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
+
+        res.json(inventory)
+
+    } catch (error) {
+        if (error instanceof z.ZodError) {
             res.status(400).json({ message: "Validation error", errors: error.errors });
-        }
-        else {
+        } else {
             next(error);
         }
     }
 };
-exports.getInventory = getInventory;
-const getInventoryDetails = async (req, res, next) => {
+
+const getInventoryDetails = async (req: Request, res: Response, next: NextFunction) => {
+
     try {
-        const { Folio } = inventoryValidations_1.getInventoryQuerySchema.parse(req.query);
-        const pool = await (0, database_1.dbConnection)();
+        const { Folio } = getInventoryQuerySchema.parse(req.query);
+
+        const pool = await dbConnection()
         if (!pool) {
-            throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
+        throw new ValidationError('Error al conectarse a base de datos principal');
         }
-        const getInventoryQuery = inventory_1.inventoryQuerys.getInventoryDetails;
+
+        const getInventoryQuery = inventoryQuerys.getInventoryDetails;
         const request = await pool.request()
             .input("Folio", Folio)
-            .query(getInventoryQuery);
+            .query(getInventoryQuery)
+
         const inventoryDetails = request.recordset;
-        res.json(inventoryDetails);
-    }
-    catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
+        res.json(inventoryDetails)
+
+    } catch (error) {
+        if (error instanceof z.ZodError) {
             res.status(400).json({ message: "Validation error", errors: error.errors });
-        }
-        else {
+        } else {
             next(error);
         }
     }
 };
-exports.getInventoryDetails = getInventoryDetails;
+ */
 const searchProductInventory = async (req, res, next) => {
     try {
         const { searchTerm } = inventoryValidations_1.searchProductInventoryQuerySchema.parse(req.query);
