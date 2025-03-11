@@ -110,12 +110,42 @@ export const productsQuerys = {
         SELECT TOP(10)
             P.Descripcion AS Descripcion,
             P.Codigo AS Codigo,
+            P.SKU,
+            C.CodBar,
             M.Nombre AS Marca,
             CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', E.Id_Almacen, '-', PR.Id_ListaPrecios) AS UniqueKey
         FROM [dbo].[PRODUCTOS] P
             JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
             JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
             JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-            WHERE Descripcion LIKE '%' + @searchTerm + '%'
+            JOIN [dbo].[COSTOS] C ON P.Codigo = C.Codigo
+        WHERE 
+            (P.Descripcion LIKE '%' + @searchTerm + '%' 
+            OR P.SKU LIKE '%' + @searchTerm + '%'
+            OR P.Codigo LIKE '%' + @searchTerm + '%')
+            AND E.Id_Almacen = @Id_Almacen 
+            AND PR.Id_ListaPrecios = @Id_ListPre;
+    `,
+
+    getProductsBySearchInventoryWithoutCodebar: `
+        SELECT TOP(10)
+            P.Descripcion AS Descripcion,
+            P.Codigo AS Codigo,
+            P.SKU,
+            C.CodBar,
+            M.Nombre AS Marca,
+            CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', E.Id_Almacen, '-', PR.Id_ListaPrecios) AS UniqueKey
+        FROM [dbo].[PRODUCTOS] P
+            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
+            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
+            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
+            JOIN [dbo].[COSTOS] C ON P.Codigo = C.Codigo
+        WHERE 
+            (P.Descripcion LIKE '%' + @searchTerm + '%' 
+            OR P.SKU LIKE '%' + @searchTerm + '%'
+            OR P.Codigo LIKE '%' + @searchTerm + '%')
+            AND E.Id_Almacen = @Id_Almacen 
+            AND PR.Id_ListaPrecios = @Id_ListPre
+            AND C.CodBar = '';
     `,
 }

@@ -15,7 +15,7 @@ const postInventory = async (req: Request, res: Response, next: NextFunction) =>
 
         const { inventoryDetails, typeOfMovement } = postInventoryBodySchema.parse(req.body);
 
-        const { Folio } = await postInventoryService({ 
+        const { Folio } = await postInventoryService({
             sessionId,
             inventoryDetails,
             typeOfMovement,
@@ -25,7 +25,7 @@ const postInventory = async (req: Request, res: Response, next: NextFunction) =>
         res.json({ Folio });
 
     } catch (error) {
-        console.log({error})
+        console.log({ error })
         if (error instanceof z.ZodError) {
             res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
@@ -89,15 +89,40 @@ const getInventoryDetails = async (req: Request, res: Response, next: NextFuncti
     }
 };
  */
+
 const searchProductInventory = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
         const { searchTerm } = searchProductInventoryQuerySchema.parse(req.query);
 
         const sessionId = req.sessionID;
-        const { products } = await searchProductInventoryService({ 
-            sessionId, 
-            searchTerm: searchTerm, 
+        const { products } = await searchProductInventoryService({
+            sessionId,
+            searchTerm: searchTerm,
+            withCodebar: true
+        })
+
+        res.json(products);
+
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: "Validation error", errors: error.errors });
+        } else {
+            next(error);
+        }
+    }
+};
+
+const searchProductInventoryWithoutCodebar = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const { searchTerm } = searchProductInventoryQuerySchema.parse(req.query);
+
+        const sessionId = req.sessionID;
+        const { products } = await searchProductInventoryService({
+            sessionId,
+            searchTerm: searchTerm,
+            withCodebar: false
         })
 
         res.json(products);
@@ -113,5 +138,6 @@ const searchProductInventory = async (req: Request, res: Response, next: NextFun
 
 export {
     postInventory,
-    searchProductInventory
+    searchProductInventory,
+    searchProductInventoryWithoutCodebar
 }

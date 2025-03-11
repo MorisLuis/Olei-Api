@@ -63,20 +63,29 @@ const postInventoryService = async ({ sessionId, inventoryDetails, typeOfMovemen
     };
 };
 exports.postInventoryService = postInventoryService;
-const searchProductInventoryService = async ({ sessionId, searchTerm, }) => {
+const searchProductInventoryService = async ({ sessionId, searchTerm, withCodebar }) => {
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
-    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL } = userFR;
+    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
-    const query = products_1.productsQuerys.getProductsBySearchInventory;
+    let query;
+    if (withCodebar) {
+        query = products_1.productsQuerys.getProductsBySearchInventory;
+    }
+    else {
+        query = products_1.productsQuerys.getProductsBySearchInventoryWithoutCodebar;
+    }
+    ;
     const result = await pool.request()
         .input("searchTerm", searchTerm)
         .input('Id_Usuario', userId)
+        .input('Id_Almacen', Id_Almacen)
+        .input('Id_ListPre', Id_ListPre)
         .query(query);
     const products = result.recordset;
     return {

@@ -87,12 +87,18 @@ export const postInventoryService = async ({
 interface searchProductInventoryServiceInterface {
     sessionId: string;
     searchTerm: string;
+
+
+
+    // handle if we get products with codebas or not
+    withCodebar: boolean
 }
 
 export const searchProductInventoryService = async ({
     sessionId,
     searchTerm,
-} : searchProductInventoryServiceInterface ) => {
+    withCodebar
+}: searchProductInventoryServiceInterface) => {
 
     const { user: userFR } = await handleGetSession({ sessionId });
 
@@ -100,7 +106,7 @@ export const searchProductInventoryService = async ({
         throw new UnauthorizedError('Sesion terminada')
     }
 
-    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL } = userFR;
+    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
 
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
@@ -108,10 +114,18 @@ export const searchProductInventoryService = async ({
         throw new ValidationError('Error al conectarse a base de datos principal');
     }
 
-    const query = productsQuerys.getProductsBySearchInventory;
+    let query;
+    if (withCodebar) {
+        query = productsQuerys.getProductsBySearchInventory;
+    } else {
+        query = productsQuerys.getProductsBySearchInventoryWithoutCodebar;
+    };
+
     const result = await pool.request()
         .input("searchTerm", searchTerm)
         .input('Id_Usuario', userId)
+        .input('Id_Almacen', Id_Almacen)
+        .input('Id_ListPre', Id_ListPre)
         .query(query);
 
     const products = result.recordset
