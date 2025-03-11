@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { searcCodigoService, searchFamiliaService, searchMarcaService } from '../../services/searchServices';
+import { searchCodigoService, searchFamiliaService, searchMarcaService } from '../../services/searchServices';
 import { simpleSearchQuerySchema } from '../../validations/searchValidations';
 
 
@@ -38,7 +38,7 @@ const getCodigos = async (req: Request, res: Response, next: NextFunction) => {
     const { searchTerm } = simpleSearchQuerySchema.parse(req.query);
     const sessionId = req.sessionRedis
 
-    const { codigos } = await searcCodigoService({
+    const { codigos } = await searchCodigoService({
         sessionId,
         searchTerm
     });

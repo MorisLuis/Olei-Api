@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import { closeDbConnection } from '../../database';
 import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
 import { UserSessionInterface } from '../../interface/user';
 import { handleGetSession } from '../../utils/Redis/getSession';
@@ -112,7 +111,6 @@ const logoutDB = async (req: Request, res: Response, next: NextFunction) => {
             throw new UnauthorizedError('Sesion terminada')
         }
         await handleDeleteRedisSession({ sessionId });
-        await closeDbConnection()
         res.json({ ok: true })
     } catch (error) {
         next(error);

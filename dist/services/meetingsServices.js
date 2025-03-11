@@ -16,7 +16,7 @@ const getMeetingsService = async ({ sessionId, PageNumber, Id_Cliente, TipoConta
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -57,7 +57,7 @@ const getTotalMeetingsService = async ({ sessionId, Id_Cliente, TipoContacto, Fi
     }
     ;
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -80,7 +80,7 @@ const getMeetingByIdService = async (id, sessionId) => {
     }
     ;
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -102,7 +102,7 @@ const updateMeetingService = async (id, sessionId, body) => {
         throw new CustomError_1.ValidationError('No se adjunto un Id_Bitacora valido o existente.');
     }
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -137,7 +137,7 @@ const postMeetingService = async (sessionId, body) => {
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -177,7 +177,7 @@ const deleteMeetingService = async (id, sessionId) => {
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }

@@ -39,7 +39,7 @@ const getExcellTest = async (req, res) => {
     }
     ;
     const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnection)(Serverweb, Baseweb);
+    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
     try {
         // Obtenemos los datos de la base de datos en lotes
         const data = await fetchDataInBatches(pool);

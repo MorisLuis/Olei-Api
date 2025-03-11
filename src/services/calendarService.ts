@@ -1,4 +1,4 @@
-import { dbConnection } from "../database";
+import { dbConnectionWeb } from "../database";
 import { celendarQuerys } from "../database/querys/calendar";
 import { UnauthorizedError, ValidationError } from "../errors/CustomError";
 import { handleGetWebSession } from "../utils/Redis/getSession";
@@ -22,7 +22,7 @@ const getCalendarTaskByMonthService = async ({
     }
 
     const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -57,7 +57,7 @@ const getCalendarTaskByDayService = async ({
     }
 
     const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -94,7 +94,7 @@ const getCalendarTaskByMonthAndClientService = async ({
     }
 
     const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');

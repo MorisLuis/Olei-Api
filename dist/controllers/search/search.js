@@ -30,7 +30,7 @@ exports.getMarcas = getMarcas;
 const getCodigos = async (req, res, next) => {
     const { searchTerm } = searchValidations_1.simpleSearchQuerySchema.parse(req.query);
     const sessionId = req.sessionRedis;
-    const { codigos } = await (0, searchServices_1.searcCodigoService)({
+    const { codigos } = await (0, searchServices_1.searchCodigoService)({
         sessionId,
         searchTerm
     });

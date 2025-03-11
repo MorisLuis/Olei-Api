@@ -7,12 +7,12 @@ exports.reportsCobranzaService = void 0;
 const sells_1 = require("../database/querys/sells");
 const exceljs_1 = __importDefault(require("exceljs"));
 const validateSession_1 = require("../helpers/validateSession");
-const createPool_1 = require("../helpers/createPool");
 const excelColumnsConfig_1 = __importDefault(require("../utils/excelColumnsConfig"));
 ;
 const reportsCobranzaService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, res }) => {
     const { user } = await (0, validateSession_1.validateSession)(sessionId);
-    const pool = await (0, createPool_1.createPool)(user.Serverweb, user.Baseweb);
+    /* const pool = await createPool(user.Serverweb, user.Baseweb);
+
     const data = await fetchDataInBatches({
         pool,
         PageNumber,
@@ -27,7 +27,8 @@ const reportsCobranzaService = async ({ sessionId, PageNumber, Id_Cliente, Sells
         DateStart,
         res
     });
-    await generateExcelStream(res, data);
+
+    await generateExcelStream(res, data) */
 };
 exports.reportsCobranzaService = reportsCobranzaService;
 const fetchDataInBatches = async ({ pool, Id_Cliente, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {

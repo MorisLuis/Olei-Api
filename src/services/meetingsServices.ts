@@ -1,4 +1,4 @@
-import { dbConnection } from "../database";
+import { dbConnectionWeb } from "../database";
 import { bitacoraQuerys } from "../database/querys/bitacora";
 import { UnauthorizedError, ValidationError } from "../errors/CustomError";
 import MeetingInterface, { MeetingOrderConditionType, validTipoContacto } from "../interface/meeting";
@@ -32,7 +32,7 @@ const getMeetingsService = async ({
     }
 
     const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -96,7 +96,7 @@ const getTotalMeetingsService = async ({
     };
 
     const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -124,7 +124,7 @@ const getMeetingByIdService = async (id: number, sessionId: string) => {
     };
 
     const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -153,7 +153,7 @@ const updateMeetingService = async (id: number, sessionId: string, body: Meeting
     }
 
     const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -203,7 +203,7 @@ const postMeetingService = async (sessionId: string, body: MeetingInterface) => 
     }
 
     const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -262,7 +262,7 @@ const deleteMeetingService = async (id: number, sessionId: string) => {
     }
 
     const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnection(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(Serverweb, Baseweb);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };

@@ -4,7 +4,6 @@ import { SellsInterface, SellsOrderConditionType } from "../interface/sells";
 import ExcelJS from 'exceljs';
 import { Response } from "express";
 import { validateSession } from "../helpers/validateSession";
-import { createPool } from "../helpers/createPool";
 import excelColumnsConfig from "../utils/excelColumnsConfig";
 
 interface reportsCobranzaServiceInterface {
@@ -38,7 +37,7 @@ const reportsCobranzaService = async ({
 }: reportsCobranzaServiceInterface) => {
 
     const { user } = await validateSession(sessionId);
-    const pool = await createPool(user.Serverweb, user.Baseweb);
+    /* const pool = await createPool(user.Serverweb, user.Baseweb);
 
     const data = await fetchDataInBatches({
         pool,
@@ -55,7 +54,7 @@ const reportsCobranzaService = async ({
         res
     });
 
-    await generateExcelStream(res, data)
+    await generateExcelStream(res, data) */
 };
 
 
