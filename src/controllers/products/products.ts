@@ -4,7 +4,7 @@ import { productsQuerys } from '../../database/querys/products';
 import { guessBarcodeType } from '../../utils/identifyBarcodeType';
 import { handleGetSession } from '../../utils/Redis/getSession';
 import { productsWebQuerys } from '../../database/querys/productsWeb';
-import { getProductsByStockQuerySchema } from '../../validations/productsValidations';
+import { getProductByStockAndCodeBarSchema, getProductsByStockQuerySchema } from '../../validations/productsValidations';
 import { getProductsByStockService } from '../../services/productsServices';
 import { UnauthorizedError, ValidationError } from '../../errors/CustomError';
 
@@ -78,7 +78,6 @@ const getProductsByStock = async (req: Request, res: Response, next: NextFunctio
 
 const getTotalOfProductsByStock = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const Id_Usuario = req.Id_mobile;
         const sessionId = req.sessionID;
         const { user: userFR } = await handleGetSession({ sessionId });
 
@@ -111,7 +110,8 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
 
 
     try {
-        const { CodBar, Codigo, SKU } = req.query;
+        console.log({query: req.query})
+        const { CodBar, Codigo, SKU } = getProductByStockAndCodeBarSchema.parse(req.query);
         const sessionId = req.sessionID;
         const { user: userFR } = await handleGetSession({ sessionId });
 
@@ -129,8 +129,10 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
 
         let request;
 
+        console.log({CodBar, Codigo, SKU})
         // This is an excepcion for codebar
         if (isEAN13orUPC14) { 
+            console.log("isEAN13orUPC14")
             let query = productsQuerys.getProductByStockAndCodeBarDV;
             request = await pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProductsByStockQuerySchema = exports.serachProductQuerySchema = exports.getTotalProductsQuerySchema = exports.getProducByIdWebQuerySchema = exports.getProductsQuerySchema = void 0;
+exports.getProductByStockAndCodeBarSchema = exports.getProductsByStockQuerySchema = exports.serachProductQuerySchema = exports.getTotalProductsQuerySchema = exports.getProducByIdWebQuerySchema = exports.getProductsQuerySchema = void 0;
 const zod_1 = require("zod");
 exports.getProductsQuerySchema = zod_1.z.object({
     page: zod_1.z.
@@ -67,5 +67,10 @@ exports.getProductsByStockQuerySchema = zod_1.z.object({
         preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
     PageSize: zod_1.z.
         preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
+});
+exports.getProductByStockAndCodeBarSchema = zod_1.z.object({
+    CodBar: zod_1.z.string().default(""),
+    Codigo: zod_1.z.string().default(""),
+    SKU: zod_1.z.string().default("")
 });
 //# sourceMappingURL=productsValidations.js.map

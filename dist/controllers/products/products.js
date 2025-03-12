@@ -64,7 +64,6 @@ const getProductsByStock = async (req, res, next) => {
 exports.getProductsByStock = getProductsByStock;
 const getTotalOfProductsByStock = async (req, res, next) => {
     try {
-        const Id_Usuario = req.Id_mobile;
         const sessionId = req.sessionID;
         const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
         if (!userFR) {
@@ -90,7 +89,8 @@ const getTotalOfProductsByStock = async (req, res, next) => {
 exports.getTotalOfProductsByStock = getTotalOfProductsByStock;
 const getProductByStockAndCodeBar = async (req, res, next) => {
     try {
-        const { CodBar, Codigo, SKU } = req.query;
+        console.log({ query: req.query });
+        const { CodBar, Codigo, SKU } = productsValidations_1.getProductByStockAndCodeBarSchema.parse(req.query);
         const sessionId = req.sessionID;
         const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
         if (!userFR) {
@@ -103,8 +103,10 @@ const getProductByStockAndCodeBar = async (req, res, next) => {
             isEAN13orUPC14 = (0, identifyBarcodeType_1.guessBarcodeType)(CodBar);
         }
         let request;
+        console.log({ CodBar, Codigo, SKU });
         // This is an excepcion for codebar
         if (isEAN13orUPC14) {
+            console.log("isEAN13orUPC14");
             let query = products_1.productsQuerys.getProductByStockAndCodeBarDV;
             request = await pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)
