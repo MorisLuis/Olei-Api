@@ -5,6 +5,7 @@ const zod_1 = require("zod");
 const inventoryDetailsItemSchema = zod_1.z.object({
     Codigo: zod_1.z
         .string()
+        .trim()
         .max(18, { message: "Codigo no puede exceder los 18 caracteres" }),
     Id_Marca: zod_1.z
         .number()

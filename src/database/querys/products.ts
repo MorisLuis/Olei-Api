@@ -39,6 +39,7 @@ export const productsQuerys = {
         SELECT
             TRIM(P.Descripcion) AS Descripcion,
             TRIM(P.Codigo) AS Codigo,
+            P.SKU,
             E.Existencia,
             E.Id_Almacen,
             M.Id_Marca,
@@ -50,10 +51,11 @@ export const productsQuerys = {
             JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
             JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
             JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
-            WHERE
-        PR.Id_ListaPrecios = @Id_ListaPrecios AND
-            (@CodBar IS NULL OR TRIM(CT.CodBar) = @CodBar)
+        WHERE PR.Id_ListaPrecios = @Id_ListaPrecios 
+        AND (@CodBar IS NULL OR TRIM(CT.CodBar) = @CodBar)
         AND (@Codigo IS NULL OR TRIM(P.Codigo) = @Codigo)
+        AND (@Codigo IS NULL OR TRIM(P.Codigo) = @Codigo)
+        AND (@SKU IS NULL OR TRIM(P.SKU) = @SKU)
         AND E.Id_Almacen = @Id_Almacen
     `,
 
@@ -133,6 +135,7 @@ export const productsQuerys = {
             P.Codigo AS Codigo,
             P.SKU,
             C.CodBar,
+            M.Id_Marca,
             M.Nombre AS Marca,
             CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', E.Id_Almacen, '-', PR.Id_ListaPrecios) AS UniqueKey
         FROM [dbo].[PRODUCTOS] P

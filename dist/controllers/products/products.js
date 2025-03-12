@@ -90,25 +90,27 @@ const getTotalOfProductsByStock = async (req, res, next) => {
 exports.getTotalOfProductsByStock = getTotalOfProductsByStock;
 const getProductByStockAndCodeBar = async (req, res, next) => {
     try {
-        const { CodBar, Codigo } = req.query;
+        const { CodBar, Codigo, SKU } = req.query;
         const sessionId = req.sessionID;
         const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
         if (!userFR) {
             throw new CustomError_1.UnauthorizedError('Sesion terminada');
         }
-        const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
+        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
         const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
         let isEAN13orUPC14 = false;
         if (CodBar) {
             isEAN13orUPC14 = (0, identifyBarcodeType_1.guessBarcodeType)(CodBar);
         }
         let request;
+        // This is an excepcion for codebar
         if (isEAN13orUPC14) {
             let query = products_1.productsQuerys.getProductByStockAndCodeBarDV;
             request = await pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)
                 .input('Id_ListaPrecios', Id_ListPre)
                 .input('Id_Almacen', Id_Almacen)
+                .input('SKU', SKU)
                 .query(query);
         }
         else {
@@ -118,6 +120,7 @@ const getProductByStockAndCodeBar = async (req, res, next) => {
                 .input("Codigo", Codigo === 'undefined' ? null : Codigo)
                 .input('Id_ListaPrecios', Id_ListPre)
                 .input('Id_Almacen', Id_Almacen)
+                .input('SKU', SKU)
                 .query(query);
         }
         const productByStockAndCodeBar = request.recordset;
