@@ -3,6 +3,7 @@ import { z } from "zod";
 const inventoryDetailsItemSchema = z.object({
     Codigo: z
         .string()
+        .trim()
         .max(18, { message: "Codigo no puede exceder los 18 caracteres" }),
     Id_Marca: z
         .number()

@@ -135,6 +135,7 @@ export const productsQuerys = {
             P.Codigo AS Codigo,
             P.SKU,
             C.CodBar,
+            M.Id_Marca,
             M.Nombre AS Marca,
             CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', E.Id_Almacen, '-', PR.Id_ListaPrecios) AS UniqueKey
         FROM [dbo].[PRODUCTOS] P
