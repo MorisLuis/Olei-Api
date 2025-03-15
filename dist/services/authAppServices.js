@@ -35,36 +35,43 @@ const loginDBAppService = async ({ IdUsuarioOLEI, PasswordOLEI }) => {
     };
 };
 exports.loginDBAppService = loginDBAppService;
+;
 const loginAppService = async ({ sessionId, Id_Usuario, password }) => {
+    // Verificar la sesión
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
-        throw new CustomError_1.UnauthorizedError('Sesion terminada');
+        throw new CustomError_1.UnauthorizedError('Sesión terminada');
     }
     const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+    // Conectar a la base de datos
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
+    // Validar los parámetros de entrada
     if (Id_Usuario.trim() === "" || password.trim() === "") {
         throw new CustomError_1.ValidationError('Necesario escribir correo y contraseña');
     }
+    // Ejecutar el procedimiento almacenado
     const result = await pool.request()
         .input('Id_Usuario', mssql_1.default.VarChar(50), Id_Usuario)
         .input('Password', mssql_1.default.VarChar(50), password)
         .execute('sp_AuthenticateAndGetMovement');
-    const validations = result.recordsets[0];
+    // Validar si recordsets es un arreglo o un objeto
+    const recordsets = Array.isArray(result.recordsets) ? result.recordsets : Object.values(result.recordsets);
+    // Verificar si el primer recordset tiene datos de validación
+    const validations = recordsets[0];
     if (validations[0].Tipo === "usuario" && validations[0].Resultado !== 1) {
         throw new CustomError_1.NotFoundError('Correo no encontrado');
     }
-    ;
     if (validations[1].Tipo === "contrasena" && validations[1].Resultado !== 1) {
         throw new CustomError_1.UnauthorizedError('Contraseña incorrecta');
     }
-    ;
-    const userData = result.recordsets[1][0];
+    // Extraer datos del usuario
+    const userData = recordsets[1];
     return {
         userData: {
-            ...userData
+            ...userData[0]
         }
     };
 };

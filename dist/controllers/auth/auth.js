@@ -37,6 +37,7 @@ const loginDB = async (req, res, next) => {
             BaseSQL: result.BaseSQL,
             RazonSocial: result.RazonSocial
         };
+        console.log("session", req.sessionID);
         return res.json({
             tokenDB,
             user

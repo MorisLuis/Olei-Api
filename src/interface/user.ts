@@ -9,7 +9,7 @@ export interface UserSessionInterface {
     PasswordOLEI?: string;
 
     RazonSocial: string;
-    SwImagenes: string;
+    SwImagenes: string | null;
     Vigencia: string;
     userId?: string;
     userRol?: string;
@@ -44,8 +44,8 @@ export interface UserWebSessionInterface {
     IsEmploye?: boolean
 }
 
-// interface of sp_AuthenticateAndGetMovement
-export interface UserAuthenticateAndGetMovementInterface {
+// Interface result of: sp_AuthenticateAndGetMovement
+export interface UserAuthenticateAndGetMovementResultInterface {
     Id_Perfil: string,
     Id_Almacen: number,
     TodosAlmacenes: number,
@@ -58,6 +58,20 @@ export interface UserAuthenticateAndGetMovementInterface {
     Accion: number,
     AlmacenNombre: string,
     SalidaSinExistencias: number
+}
+
+// Interface result of query: authDatabase
+export interface authResultInterface {
+    IdOLEI: number,
+    PasswordOLEI: number,
+    IdUsuarioOLEI: string,
+    ServidorSQL: string,
+    BaseSQL: string,
+    UsuarioSQL: string,
+    PasswordSQL: string,
+    RazonSocial: string,
+    SwImagenes: string | null,
+    Vigencia: string
 }
 
 export type ValidationResult = {
