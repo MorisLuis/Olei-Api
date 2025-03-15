@@ -112,8 +112,8 @@ exports.productsQuerys = {
         FROM [dbo].[PRODUCTOS] P
             JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
             JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-            JOIN [dbo].[COSTOS] C ON P.Codigo = C.Codigo
+            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca 
+            JOIN [dbo].[COSTOS] C ON P.Codigo = C.Codigo AND PR.Id_Marca = C.Id_Marca
         WHERE 
             (P.Descripcion LIKE '%' + @searchTerm + '%' 
             OR P.SKU LIKE '%' + @searchTerm + '%'
@@ -134,7 +134,7 @@ exports.productsQuerys = {
             JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
             JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
             JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-            JOIN [dbo].[COSTOS] C ON P.Codigo = C.Codigo
+            JOIN [dbo].[COSTOS] C ON P.Codigo = C.Codigo AND PR.Id_Marca = C.Id_Marca
         WHERE 
             (P.Descripcion LIKE '%' + @searchTerm + '%' 
             OR P.SKU LIKE '%' + @searchTerm + '%'
