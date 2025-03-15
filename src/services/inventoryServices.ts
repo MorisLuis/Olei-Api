@@ -2,6 +2,7 @@ import { dbConnection } from "../database";
 import { productsQuerys } from "../database/querys/products";
 import { UnauthorizedError, ValidationError } from "../errors/CustomError";
 import InventoryDetailsInterface from "../interface/inventoryDetails";
+import PorductInterface from "../interface/product";
 import { handleGetSession } from "../utils/Redis/getSession";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
 import { currentTime } from "../utils/currentTime";
@@ -19,7 +20,7 @@ export const postInventoryService = async ({
     inventoryDetails,
     typeOfMovement,
     Id_Usuario
-}: postInventoryServiceInterface) => {
+}: postInventoryServiceInterface): Promise<{ Folio: string }> => {
 
     const { user: userFR } = await handleGetSession({ sessionId });
 
@@ -27,7 +28,8 @@ export const postInventoryService = async ({
         throw new UnauthorizedError('Sesion terminada')
     }
 
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, TodosAlmacenes } = userFR;
+    /* TodosAlmacenes PENDING */
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
     if (!pool) {
@@ -87,9 +89,6 @@ export const postInventoryService = async ({
 interface searchProductInventoryServiceInterface {
     sessionId: string;
     searchTerm: string;
-
-
-
     // handle if we get products with codebas or not
     withCodebar: boolean
 }
@@ -98,7 +97,7 @@ export const searchProductInventoryService = async ({
     sessionId,
     searchTerm,
     withCodebar
-}: searchProductInventoryServiceInterface) => {
+}: searchProductInventoryServiceInterface): Promise<{ products: PorductInterface[] }> => {
 
     const { user: userFR } = await handleGetSession({ sessionId });
 

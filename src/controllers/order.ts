@@ -3,7 +3,7 @@ import { getAllOrdersParamsSchema, getOrderDetailsQuerrySchema, getOrderParamsSc
 import { getAllOrdersService, getOrderDetailsSells, getOrderService, getTotalOrderDetailsService, getTotalAllOrdersService, postOrderService } from "../services/orderServices";
 import { z } from "zod";
 
-const postOrder = async (req: Request, res: Response, next: NextFunction) => {
+const postOrder = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void>  => {
 
     try {
         // Get session from REDIS.
@@ -19,21 +19,21 @@ const postOrder = async (req: Request, res: Response, next: NextFunction) => {
             Total
         });
 
-        res.status(201).json({
+        return res.status(201).json({
             ok: true,
             folio
         });
 
     } catch (error) {
         if (error instanceof z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
-            next(error);
+            return next(error);
         }
     }
 };
 
-const getOrder = async (req: Request, res: Response, next: NextFunction) => {
+const getOrder = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const sessionId = req.sessionRedis
@@ -45,18 +45,18 @@ const getOrder = async (req: Request, res: Response, next: NextFunction) => {
         })
 
 
-        res.json(order)
+        return res.json(order)
 
     } catch (error) {
         if (error instanceof z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
-            next(error);
+            return next(error);
         }
     }
 };
 
-const getAllOrders = async (req: Request, res: Response, next: NextFunction) => {
+const getAllOrders = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
     try {
         const sessionId = req.sessionRedis
@@ -68,17 +68,17 @@ const getAllOrders = async (req: Request, res: Response, next: NextFunction) => 
             limit
         });
 
-        res.json(allOrders);
+        return res.json(allOrders);
     } catch (error) {
         if (error instanceof z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
-            next(error);
+            return next(error);
         }
     }
 };
 
-const getOrderDetails = async (req: Request, res: Response, next: NextFunction) => {
+const getOrderDetails = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
     try {
         const sessionId = req.sessionRedis
@@ -90,33 +90,33 @@ const getOrderDetails = async (req: Request, res: Response, next: NextFunction) 
             sessionId
         })
 
-        res.json(orderDetails)
+        return res.json(orderDetails)
 
     } catch (error) {
         if (error instanceof z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
-            next(error);
+            return next(error);
         }
     }
 };
 
-const getTotalAllOrders = async (req: Request, res: Response, next: NextFunction) => {
+const getTotalAllOrders = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
     try {
         const sessionId = req.sessionRedis;
         const { total } = await getTotalAllOrdersService(sessionId);
-        res.json({ total });
+        return res.json({ total });
     } catch (error) {
         if (error instanceof z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
-            next(error);
+            return next(error);
         }
     }
 };
 
-const getTotalOrderDetails = async (req: Request, res: Response, next: NextFunction) => {
+const getTotalOrderDetails = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
 
     try {
@@ -128,13 +128,13 @@ const getTotalOrderDetails = async (req: Request, res: Response, next: NextFunct
             sessionId
         })
 
-        res.json(orderDetails)
+        return res.json(orderDetails)
 
     } catch (error) {
         if (error instanceof z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
-            next(error);
+            return next(error);
         }
     }
 };

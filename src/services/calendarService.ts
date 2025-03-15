@@ -1,6 +1,7 @@
 import { dbConnectionWeb } from "../database";
 import { celendarQuerys } from "../database/querys/calendar";
 import { UnauthorizedError, ValidationError } from "../errors/CustomError";
+import MeetingInterface from "../interface/meeting";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 
 interface getCalendarServiceInterface {
@@ -13,7 +14,7 @@ const getCalendarTaskByMonthService = async ({
     sessionId,
     Mes,
     Anio
-}: getCalendarServiceInterface ) => {
+}: getCalendarServiceInterface): Promise<MeetingInterface[]> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -48,7 +49,7 @@ interface getCalendarTaskByDayServiceInterface {
 const getCalendarTaskByDayService = async ({
     sessionId,
     Day
-}: getCalendarTaskByDayServiceInterface ) => {
+}: getCalendarTaskByDayServiceInterface)  : Promise<MeetingInterface[]> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -85,7 +86,7 @@ const getCalendarTaskByMonthAndClientService = async ({
     Mes,
     Anio,
     Id_Cliente
-}: getCalendarByMonthAndClientServiceInterface ) => {
+}: getCalendarByMonthAndClientServiceInterface) : Promise<MeetingInterface[]>  => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 

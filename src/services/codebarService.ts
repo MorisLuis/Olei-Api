@@ -16,7 +16,7 @@ const updateCodebarService = async (
     codigoParam: string,
     Id_Marca: number,
     body: updateCodbar
-) => {
+): Promise<{ ok: boolean }> => {
 
     const { user: userFR } = await handleGetSession({ sessionId });
 

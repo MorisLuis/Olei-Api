@@ -112,14 +112,26 @@ const login = async (req, res, next) => {
             sessionId
         });
         const token = await (0, generate_jwt_1.generateJWT)({ Id_mobile: Id_Usuario.trim() });
+        if (!req.session.user) {
+            throw new CustomError_1.UnauthorizedError('User session is not defined');
+        }
         const datosDelUsuario = {
-            ...req.session.user,
+            ...(req.session).user,
             userId: Id_Usuario.trim(),
             userRol: userData.Id_Perfil,
             TodosAlmacenes: userData.TodosAlmacenes,
             Id_Almacen: userData.Id_Almacen,
             AlmacenNombre: userData.AlmacenNombre,
-            Id_ListPre: userData.Id_ListPre
+            Id_ListPre: userData.Id_ListPre,
+            ServidorSQL: req.session.user.ServidorSQL ?? '',
+            BaseSQL: req.session.user.BaseSQL ?? '',
+            UsuarioSQL: req.session.user.UsuarioSQL ?? '',
+            PasswordSQL: req.session.user.PasswordSQL ?? '',
+            IdUsuarioOLEI: req.session.user.IdUsuarioOLEI ?? '',
+            RazonSocial: req.session.user.RazonSocial ?? '',
+            SwImagenes: req.session.user.SwImagenes ?? '',
+            Vigencia: req.session.user.Vigencia ?? '',
+            from: req.session.user.from ?? 'mobil'
         };
         // Session redis
         req.session.user = datosDelUsuario;
@@ -190,6 +202,9 @@ const logoutUser = async (req, res, next) => {
         if (!userFR) {
             throw new CustomError_1.UnauthorizedError('Sesion terminada');
         }
+        if (!req.session.user) {
+            throw new CustomError_1.UnauthorizedError('User session is not defined');
+        }
         const datosDelUsuario = {
             ...req.session.user,
             userId: undefined,
@@ -197,11 +212,20 @@ const logoutUser = async (req, res, next) => {
             TodosAlmacenes: undefined,
             Id_Almacen: undefined,
             AlmacenNombre: undefined,
-            SalidaSinExistencias: undefined,
-            Id_ListPre: undefined
+            SalidaSinExistencias: 0,
+            Id_ListPre: undefined,
+            ServidorSQL: req.session.user.ServidorSQL ?? '',
+            BaseSQL: req.session.user.BaseSQL ?? '',
+            UsuarioSQL: req.session.user.UsuarioSQL ?? '',
+            PasswordSQL: req.session.user.PasswordSQL ?? '',
+            IdUsuarioOLEI: req.session.user.IdUsuarioOLEI ?? '',
+            RazonSocial: req.session.user.RazonSocial ?? '',
+            SwImagenes: req.session.user.SwImagenes ?? '',
+            Vigencia: req.session.user.Vigencia ?? '',
+            from: req.session.user.from ?? 'mobil'
         };
         req.session.user = datosDelUsuario;
-        res.json({
+        return res.json({
             user: datosDelUsuario
         });
     }

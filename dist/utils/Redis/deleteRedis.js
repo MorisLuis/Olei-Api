@@ -1,4 +1,5 @@
 "use strict";
+/* eslint-disable no-undef */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handleDeleteRedisSession = void 0;
 const server_1 = require("../../models/server");

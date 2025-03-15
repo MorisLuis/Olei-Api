@@ -5,7 +5,7 @@ const database_1 = require("../database");
 const almacen_1 = require("../database/querys/almacen");
 const CustomError_1 = require("../errors/CustomError");
 const getSession_1 = require("../utils/Redis/getSession");
-const getAlmacenesService = async ({ sessionId }) => {
+const getAlmacenesService = async (sessionId) => {
     const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
     if (!userFR) {
         throw new CustomError_1.UnauthorizedError('Sesion terminada');

@@ -7,7 +7,7 @@ import { loginAppService, loginDBAppService } from '../../services/authAppServic
 import { UnauthorizedError, ValidationError } from '../../errors/CustomError';
 
 // login global server
-const loginDB = async (req: Request, res: Response, next: NextFunction) => {
+const loginDB = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const { IdUsuarioOLEI, PasswordOLEI } = req.body;
@@ -38,7 +38,7 @@ const loginDB = async (req: Request, res: Response, next: NextFunction) => {
             from: 'mobil'
         };
 
-        (req.session as any).user = datosDelUsuario;
+        req.session.user = datosDelUsuario;
 
         // User to Frontend.
         const user = {
@@ -56,7 +56,7 @@ const loginDB = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-const renewDB = async (req: Request, res: Response, next: NextFunction) => {
+const renewDB = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         // Get session from REDIS.
@@ -92,7 +92,7 @@ const renewDB = async (req: Request, res: Response, next: NextFunction) => {
             throw new ValidationError('Información del usuario es necesaria')
         };
 
-        (req.session as any).user = userRedis
+        req.session.user = userRedis
 
         res.json({
             token,
@@ -104,7 +104,7 @@ const renewDB = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-const logoutDB = async (req: Request, res: Response, next: NextFunction) => {
+const logoutDB = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const sessionId = req.sessionID;
         if (!sessionId) {
@@ -119,7 +119,7 @@ const logoutDB = async (req: Request, res: Response, next: NextFunction) => {
 
 
 // login
-const login = async (req: Request, res: Response, next: NextFunction) => {
+const login = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const { Id_Usuario, password } = req.body;
@@ -133,18 +133,32 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
         const token = await generateJWT({ Id_mobile: Id_Usuario.trim() });
 
+        if (!req.session.user) {
+            throw new UnauthorizedError('User session is not defined');
+        }
+
         const datosDelUsuario: UserSessionInterface = {
-            ...(req.session as any).user,
+            ...(req.session).user,
             userId: Id_Usuario.trim(),
             userRol: userData.Id_Perfil,
             TodosAlmacenes: userData.TodosAlmacenes,
             Id_Almacen: userData.Id_Almacen,
             AlmacenNombre: userData.AlmacenNombre,
-            Id_ListPre: userData.Id_ListPre
+            Id_ListPre: userData.Id_ListPre,
+
+            ServidorSQL: req.session.user.ServidorSQL ?? '',
+            BaseSQL: req.session.user.BaseSQL ?? '',
+            UsuarioSQL: req.session.user.UsuarioSQL ?? '',
+            PasswordSQL: req.session.user.PasswordSQL ?? '',
+            IdUsuarioOLEI: req.session.user.IdUsuarioOLEI ?? '',
+            RazonSocial: req.session.user.RazonSocial ?? '',
+            SwImagenes: req.session.user.SwImagenes ?? '',
+            Vigencia: req.session.user.Vigencia ?? '',
+            from: req.session.user.from ?? 'mobil'
         };
 
         // Session redis
-        (req.session as any).user = datosDelUsuario;
+        req.session.user = datosDelUsuario;
 
         const userStorage = {
             Id_Usuario,
@@ -169,7 +183,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-const renewLogin = async (req: Request, res: Response, next: NextFunction) => {
+const renewLogin = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const sessionId = req.sessionID;
@@ -213,7 +227,7 @@ const renewLogin = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
-const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
+const logoutUser = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const sessionId = req.sessionID;
@@ -224,20 +238,34 @@ const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
             throw new UnauthorizedError('Sesion terminada')
         }
 
+        if (!req.session.user) {
+            throw new UnauthorizedError('User session is not defined');
+        }
+
         const datosDelUsuario: UserSessionInterface = {
-            ...(req.session as any).user,
+            ...req.session.user,
             userId: undefined,
             userRol: undefined,
             TodosAlmacenes: undefined,
             Id_Almacen: undefined,
             AlmacenNombre: undefined,
-            SalidaSinExistencias: undefined,
-            Id_ListPre: undefined
+            SalidaSinExistencias: 0,
+            Id_ListPre: undefined,
+
+            ServidorSQL: req.session.user.ServidorSQL ?? '',
+            BaseSQL: req.session.user.BaseSQL ?? '',
+            UsuarioSQL: req.session.user.UsuarioSQL ?? '',
+            PasswordSQL: req.session.user.PasswordSQL ?? '',
+            IdUsuarioOLEI: req.session.user.IdUsuarioOLEI ?? '',
+            RazonSocial: req.session.user.RazonSocial ?? '',
+            SwImagenes: req.session.user.SwImagenes ?? '',
+            Vigencia: req.session.user.Vigencia ?? '',
+            from: req.session.user.from ?? 'mobil'
         };
 
-        (req.session as any).user = datosDelUsuario;
+        req.session.user = datosDelUsuario;
 
-        res.json({
+        return res.json({
             user: datosDelUsuario
         })
 

@@ -1,6 +1,7 @@
 import { dbConnectionWeb } from "../database";
 import { clientsQuerys } from "../database/querys/clients";
 import { UnauthorizedError, ValidationError } from "../errors/CustomError";
+import { ClientInterface } from "../interface/client";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 import sql from 'mssql';
 
@@ -14,7 +15,7 @@ const getClientsService = async ({
     PageNumber,
     sessionId,
     OrderCondition
-}: getClientsServiceInterface) => {
+}: getClientsServiceInterface): Promise<ClientInterface[]> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
@@ -50,7 +51,7 @@ const getClientIdService = async ({
     sessionId,
     Id_Cliente,
     Id_Almacen
-}: getClientIdInterface) => {
+}: getClientIdInterface): Promise<ClientInterface> => {
 
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
@@ -73,7 +74,7 @@ const getClientIdService = async ({
     return quotes
 };
 
-const getTotalClientsService = async (sessionId: string) => {
+const getTotalClientsService = async (sessionId: string): Promise<number> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
@@ -102,7 +103,7 @@ interface searchClientServiceInterface {
 const searchClientService = async ({
     sessionId,
     term
-} : searchClientServiceInterface ) => {
+}: searchClientServiceInterface): Promise<{ Clients: ClientInterface[] }> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 

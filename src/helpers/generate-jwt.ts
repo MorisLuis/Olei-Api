@@ -6,26 +6,29 @@ interface generateJWTDBProps {
 }
 
 
-const generateJWTDB = ({ IdUsuarioOLEI }: generateJWTDBProps) => {
+const generateJWTDB = ({ IdUsuarioOLEI }: generateJWTDBProps): Promise<string> => {
     return new Promise((resolve, reject) => {
-        const payload = { IdUsuarioOLEI }
+        const payload = { IdUsuarioOLEI };
+
         jwt.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
             expiresIn: '31536000s' // 1 year
         }, (error, token) => {
             if (error) {
-                reject('No se pudo generar el token')
+                reject(new Error('No se pudo generar el token')); // Usa un Error en lugar de un string
+                return;
             }
-            resolve(token)
+            resolve(token as string);
         });
-    })
-}
+    });
+};
+
 
 
 interface generateJWTProps {
     Id_mobile: string
 }
 
-const generateJWT = ({ Id_mobile }: generateJWTProps) => {
+const generateJWT = ({ Id_mobile }: generateJWTProps) : Promise<string>  => {
     return new Promise((resolve, reject) => {
         const payload = { Id_mobile }
         jwt.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
@@ -34,7 +37,7 @@ const generateJWT = ({ Id_mobile }: generateJWTProps) => {
             if (error) {
                 reject('No se pudo generar el token')
             }
-            resolve(token)
+            resolve(token as string)
         })
     })
 }
@@ -45,7 +48,7 @@ interface generateJWTPropsWeb {
 }
 
 
-const generateWebJWT = ({ Id, sessionRedis }: generateJWTPropsWeb) => {
+const generateWebJWT = ({ Id, sessionRedis }: generateJWTPropsWeb): Promise<string>  => {
     return new Promise((resolve, reject) => {
         const payload = { Id, sessionRedis }
         jwt.sign(payload, process.env.SECRETORPRIVATEKEY || '', {
@@ -55,7 +58,7 @@ const generateWebJWT = ({ Id, sessionRedis }: generateJWTPropsWeb) => {
                 reject('No se pudo generar el token')
             }
 
-            resolve(token)
+            resolve(token as string)
         })
     })
 }

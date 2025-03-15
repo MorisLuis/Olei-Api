@@ -9,14 +9,14 @@ const getSells = async (req, res, next) => {
         const { PageNumber, sellsOrderCondition } = sellsValidations_1.getSellsQuerySchema.parse(req.query);
         const sessionId = req.sessionRedis;
         const sells = await (0, sellsDocsServices_1.getSellsService)(sessionId, PageNumber, sellsOrderCondition);
-        res.json(sells);
+        return res.json(sells);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
     ;
@@ -29,14 +29,14 @@ const getSellById = async (req, res, next) => {
         const { Serie, Id_Almacen, TipoDoc } = sellsValidations_1.getSellByIdQuerySchema.parse(req.query);
         const { folio } = sellsValidations_1.getSellByIdParamsSchema.parse(req.params);
         const sell = await (0, sellsDocsServices_1.getSellByIdService)(sessionId, folio, Serie, Id_Almacen, TipoDoc);
-        res.json(sell);
+        return res.json(sell);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
     ;
@@ -60,14 +60,14 @@ const getSellsByClient = async (req, res, next) => {
             DateExactly: DateExactly || null,
             DateStart: DateStart || null,
         });
-        res.json(sells);
+        return res.json(sells);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
 };
@@ -91,10 +91,10 @@ const getCobranza = async (req, res, next) => {
             DateExactly: DateExactly || null,
             DateStart: DateStart || null
         });
-        res.json(sells);
+        return res.json(sells);
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
     ;
 };
@@ -103,10 +103,10 @@ const getTotalSells = async (req, res, next) => {
     try {
         const sessionId = req.sessionRedis;
         const total = await (0, sellsDocsServices_1.getTotalSellsService)(sessionId);
-        res.json(total);
+        return res.json(total);
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
 };
 exports.getTotalSells = getTotalSells;
@@ -125,14 +125,14 @@ const getTotalSellsByClient = async (req, res, next) => {
             DateExactly: DateExactly || null,
             DateStart: DateStart || null,
         });
-        res.json(total);
+        return res.json(total);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
 };
@@ -153,14 +153,14 @@ const getTotalCobranza = async (req, res, next) => {
             DateExactly: DateExactly || null,
             DateStart: DateStart || null,
         });
-        res.json(total);
+        return res.json(total);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
 };

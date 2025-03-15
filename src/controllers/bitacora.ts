@@ -3,7 +3,7 @@ import { deleteMeetingService, getMeetingByIdService, getMeetingsService, getTot
 import MeetingInterface from "../interface/meeting";
 import { getMeetingByIdParmsSchema, getMeetingsQuerySchema, getTotalMeetingsQuerySchema, postBitacoraBodySchema, updateBitacoraBodySchema } from "../validations/bitacoraValidations";
 
-const getMeetings = async (req: Request, res: Response, next: NextFunction) => {
+const getMeetings = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const { PageNumber, meetginOrderCondition, FilterCliente, TipoContacto, Id_Cliente, FilterTipoContacto } = getMeetingsQuerySchema.parse(req.query);
@@ -19,14 +19,14 @@ const getMeetings = async (req: Request, res: Response, next: NextFunction) => {
             FilterCliente: FilterCliente
         });
 
-        res.json(meeting);
+        return res.json(meeting);
     } catch (error) {
-        next(error)
+        return next(error)
     };
 
 };
 
-const getTotalMeetings = async (req: Request, res: Response, next: NextFunction) => {
+const getTotalMeetings = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const { TipoContacto, Id_Cliente, FilterCliente, FilterTipoContacto } = getTotalMeetingsQuerySchema.parse(req.query);
         const sessionId = req.sessionRedis;
@@ -39,61 +39,61 @@ const getTotalMeetings = async (req: Request, res: Response, next: NextFunction)
             FilterTipoContacto
         });
 
-        res.json(total);
+        return res.json(total);
 
     } catch (error) {
-        next(error);
+        return next(error);
     }
 };
 
-const getMeetingById = async (req: Request, res: Response, next: NextFunction) => {
+const getMeetingById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const { id } = getMeetingByIdParmsSchema.parse(req.params);
         const sessionId = req.sessionRedis;
         const meeting = await getMeetingByIdService(id, sessionId);
-        res.json(meeting);
+        return res.json(meeting);
     } catch (error) {
-        next(error)
+        return next(error)
     };
 
 };
 
-const updateMeeting = async (req: Request, res: Response, next: NextFunction) => {
+const updateMeeting = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const { id } = getMeetingByIdParmsSchema.parse(req.params);
         const body = updateBitacoraBodySchema.parse(req.body.body) as MeetingInterface;
         const sessionId = req.sessionRedis
         const meeting = await updateMeetingService(id, sessionId, body)
-        res.json(meeting);
+        return res.json(meeting);
     } catch (error) {
-        next(error)
+        return next(error)
     };
 
 };
 
-const postMeeting = async (req: Request, res: Response, next: NextFunction) => {
+const postMeeting = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const body = postBitacoraBodySchema.parse(req.body.body) as MeetingInterface;
 
         const sessionId = req.sessionRedis;
         const meeting = await postMeetingService(sessionId, body);
-        res.json(meeting);
+        return res.json(meeting);
     } catch (error) {
-        next(error)
+        return next(error)
     };
 
 };
 
-const deleteMeeting = async (req: Request, res: Response, next: NextFunction) => {
+const deleteMeeting = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const { id } = getMeetingByIdParmsSchema.parse(req.params);
         const sessionId = req.sessionRedis;
         const meeting = await deleteMeetingService(id, sessionId)
-        res.json(meeting);
+        return res.json(meeting);
 
     } catch (error) {
         next(error)

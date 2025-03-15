@@ -7,7 +7,7 @@ const generatePDF = async (data) => {
     const page = pdfDoc.addPage([600, 400]);
     page.drawText(`Hola, ${data.name}!`, { x: 50, y: 350, size: 24, color: (0, pdf_lib_1.rgb)(0, 0, 0) });
     page.drawText(data.message, { x: 50, y: 300, size: 16, color: (0, pdf_lib_1.rgb)(0.2, 0.2, 0.8) });
-    return await pdfDoc.save();
+    return pdfDoc.save(); // Ya no es necesario el `await` aquí
 };
 exports.generatePDF = generatePDF;
 //# sourceMappingURL=generatePDF.js.map

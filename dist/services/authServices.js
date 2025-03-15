@@ -11,7 +11,6 @@ const loginWebService = async (email, password) => {
     if (email === "" || password === "") {
         throw new CustomError_1.ValidationError('Necesario escribir correo y contraseña');
     }
-    ;
     const mainPool = await (0, database_1.dbConnectionMain)();
     if (!mainPool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');

@@ -2,7 +2,6 @@ import { dbConnectionWeb, querys } from "../database";
 import { UnauthorizedError } from "../errors/CustomError";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 
-
 interface searchServiceInterface {
     sessionId: string;
     searchTerm: string;
@@ -11,7 +10,7 @@ interface searchServiceInterface {
 const searchFamiliaService = async ({
     sessionId,
     searchTerm
-}: searchServiceInterface) => {
+}: searchServiceInterface): Promise<{ familias: { Nombre: string }[] }> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -37,7 +36,7 @@ const searchFamiliaService = async ({
 const searchMarcaService = async ({
     sessionId,
     searchTerm
-}: searchServiceInterface) => {
+}: searchServiceInterface): Promise<{ marcas: { Nombre: string }[] }> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -63,7 +62,7 @@ const searchMarcaService = async ({
 const searchCodigoService = async ({
     sessionId,
     searchTerm
-}: searchServiceInterface ) => {
+}: searchServiceInterface): Promise<{ codigos: { Codigo: string }[] }> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 

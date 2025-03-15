@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
-import { dbConnection, dbConnectionWeb } from '../database';
+import { dbConnectionWeb } from '../database';
 import { handleGetWebSession } from '../utils/Redis/getSession';
 import { sellsQuery } from '../database/querys/sells';
 import { ConnectionPool } from 'mssql';
 import ExcelJS from 'exceljs'
-import { UnauthorizedError } from '../errors/CustomError';
+import { NotFoundError, UnauthorizedError } from '../errors/CustomError';
 
-const getBanner = async (req: Request, res: Response) => {
+const getBanner = async (req: Request, res: Response) : Promise<Response | void> => {
 
     const sessionId = req.sessionRedis;
     const { user: userFR } = await handleGetWebSession({ sessionId });
@@ -25,13 +25,8 @@ const getBanner = async (req: Request, res: Response) => {
     });
 }
 
-const getUtils = async (req: Request, res: Response) => {
-    return new Promise((resolve, reject) => {
-        reject('Error en la promesa!');
-    });
-};
 
-const getExcellTest = async (req: Request, res: Response) => {
+const getExcellTest = async (req: Request, res: Response) : Promise<Response | void> => {
 
     const sessionId = req.sessionRedis;
     const { user: userFR } = await handleGetWebSession({ sessionId });
@@ -50,14 +45,14 @@ const getExcellTest = async (req: Request, res: Response) => {
         // Generamos el archivo Excel y lo enviamos como respuesta
         await generateExcelStream(res, data);
     } catch (error) {
-        console.log({ error })
+        throw new NotFoundError(`${error}`)
     }
 
 };
 
-const fetchDataInBatches = async (pool: ConnectionPool): Promise<any[]> => {
+const fetchDataInBatches = async (pool: ConnectionPool): Promise<unknown[]> => {
     let offset = 1;
-    let results: any[] = [];
+    let results: unknown[] = [];
     const batchSize = 1000;
     let moreData = true;
 
@@ -101,7 +96,7 @@ const fetchDataInBatches = async (pool: ConnectionPool): Promise<any[]> => {
             }
 
         } catch (error) {
-            console.log({ error })
+            throw new NotFoundError(`${error}`)
         };
     };
 
@@ -136,6 +131,5 @@ const generateExcelStream = async (res: any, data: any[]) => {
 
 export {
     getBanner,
-    getUtils,
     getExcellTest
 };

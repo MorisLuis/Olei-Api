@@ -1,4 +1,5 @@
 "use strict";
+/* eslint-disable no-undef */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -7,12 +8,9 @@ exports.dbConnectionMain = exports.dbConnectionWeb = exports.dbConnection = void
 const mssql_1 = __importDefault(require("mssql"));
 const config_1 = __importDefault(require("../config"));
 let mainPool = null;
-// Mapa para almacenar las conexiones activas
-const connectionPools = new Map();
-// Límite de conexiones simultáneas
-const MAX_CONNECTIONS = 10;
-// Función para generar una clave única por servidor y base de datos
-const getPoolKey = (server, base) => `${server}-${base}`;
+const connectionPools = new Map(); // Mapa para almacenar las conexiones activas
+const MAX_CONNECTIONS = 10; // Límite de conexiones simultáneas
+const getPoolKey = (server, base) => `${server}-${base}`; // Función para generar una clave única por servidor y base de datos
 // Conexion App
 const dbConnection = async (server, base, user, pass) => {
     // Get pool key
@@ -104,12 +102,7 @@ const dbConnectionMain = async () => {
                 trustServerCertificate: true
             },
         };
-        try {
-            mainPool = await mssql_1.default.connect(dbConfig);
-        }
-        catch (error) {
-            throw error;
-        }
+        mainPool = await mssql_1.default.connect(dbConfig);
     }
     return mainPool;
 };

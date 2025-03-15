@@ -1,5 +1,5 @@
 
-export function toUpperCase(arg: string) {
+export function toUpperCase(arg: string) : string {
     return arg.toUpperCase();
 };
 

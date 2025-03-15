@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import { getProducByIdWebService, getProductsService, getTotalProductsService, searchProductService } from '../../services/productsServices';
 import { getProducByIdWebQuerySchema, getProductsQuerySchema, getTotalProductsQuerySchema, serachProductQuerySchema } from '../../validations/productsValidations';
 
-const getProducts = async (req: Request, res: Response, next: NextFunction) => {
+const getProducts = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
     try {
         const sessionId = req.sessionRedis;
         const { nombre, marca, familia, folio, page, limit } = getProductsQuerySchema.parse(req.query);
@@ -17,16 +17,16 @@ const getProducts = async (req: Request, res: Response, next: NextFunction) => {
             limit
         });
 
-        res.json({
+        return res.json({
             products
         });
 
     } catch (error) {
-        next(error)
+        return next(error)
     }
 };
 
-const getProducByIdWeb = async (req: Request, res: Response, next: NextFunction) => {
+const getProducByIdWeb = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
     try {
         // Get session from REDIS.
@@ -42,11 +42,11 @@ const getProducByIdWeb = async (req: Request, res: Response, next: NextFunction)
 
         return res.json(product);
     } catch (error) {
-        next(error)
+       return  next(error)
     }
 }
 
-const getTotalProducts = async (req: Request, res: Response, next: NextFunction) => {
+const getTotalProducts = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
     try {
         // Get session from REDIS.
@@ -61,14 +61,14 @@ const getTotalProducts = async (req: Request, res: Response, next: NextFunction)
             folio
         })
 
-        res.json({ total });
+        return res.json({ total });
 
     } catch (error) {
-        next(error)
+        return next(error)
     }
 };
 
-const searchProduct = async (req: Request, res: Response, next: NextFunction) => {
+const searchProduct = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
     try {
         // Get session from REDIS.
@@ -83,11 +83,11 @@ const searchProduct = async (req: Request, res: Response, next: NextFunction) =>
             marca
         })
 
-        res.json({
+        return res.json({
             products
         });
     } catch (error) {
-        next(error)
+        return next(error)
     }
 };
 

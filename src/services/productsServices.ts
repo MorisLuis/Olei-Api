@@ -5,6 +5,7 @@ import sql from 'mssql';
 import { getProductWithImages } from "../utils/checkImageExists";
 import { productsQuerys } from "../database/querys/products";
 import { UnauthorizedError, ValidationError } from "../errors/CustomError";
+import PorductInterface from "../interface/product";
 
 interface getProductsServiceInterface {
     sessionId: string;
@@ -24,7 +25,7 @@ const getProductsService = async ({
     marca,
     familia,
     folio
-}: getProductsServiceInterface) => {
+}: getProductsServiceInterface): Promise<{ products: PorductInterface[] }> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -74,7 +75,7 @@ const getProducByIdWebService = async ({
     sessionId,
     codigo,
     Marca
-}: getProducByIdWebServiceInterface) => {
+}: getProducByIdWebServiceInterface): Promise<{ product: PorductInterface }> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -125,7 +126,7 @@ const getTotalProductsService = async ({
     marca,
     familia,
     folio
-}: getTotalProductsServiceInterface) => {
+}: getTotalProductsServiceInterface): Promise<{ total: number }> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -175,7 +176,7 @@ export const searchProductService = async ({
     marca,
     familia,
     codigo
-}: searchProductServiceInterface) => {
+}: searchProductServiceInterface): Promise<{ products: PorductInterface[] }> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -220,7 +221,7 @@ const getProductsByStockService = async ({
     sessionId,
     PageSize,
     PageNumber
-}: getProductsByStockServiceInterface) => {
+}: getProductsByStockServiceInterface): Promise<{ products: PorductInterface[] }> => {
 
 
     const { user: userFR } = await handleGetSession({ sessionId });

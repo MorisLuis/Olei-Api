@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+
 import { redisClient } from "../../models/server";
 
 
@@ -6,7 +8,7 @@ interface handleDeleteRedisSessionInterface {
 }
 
 
-export const handleDeleteRedisSession = async ({ sessionId } : handleDeleteRedisSessionInterface )  => {
+export const handleDeleteRedisSession = async ({ sessionId } : handleDeleteRedisSessionInterface ) : Promise<void> => {
 
     await redisClient?.del(`sess:${sessionId}`, (err, response) => {
         if (err) {

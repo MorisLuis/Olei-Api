@@ -15,15 +15,14 @@ const postInventory = async (req, res, next) => {
             typeOfMovement,
             Id_Usuario
         });
-        res.json({ Folio });
+        return res.json({ Folio });
     }
     catch (error) {
-        console.log({ error });
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
 };
@@ -37,7 +36,7 @@ const searchProductInventory = async (req, res, next) => {
             searchTerm: searchTerm,
             withCodebar: true
         });
-        res.json(products);
+        return res.json(products);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
@@ -58,14 +57,14 @@ const searchProductInventoryWithoutCodebar = async (req, res, next) => {
             searchTerm: searchTerm,
             withCodebar: false
         });
-        res.json(products);
+        return res.json(products);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
 };

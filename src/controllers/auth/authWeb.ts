@@ -6,7 +6,7 @@ import { handleDeleteRedisSession } from '../../utils/Redis/deleteRedis';
 import { loginWebService } from '../../services/authServices';
 import { UnauthorizedError } from '../../errors/CustomError';
 
-const loginWeb = async (req: Request, res: Response, next: NextFunction) => {
+const loginWeb = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
     try {
         const { email, password } = req.body;
@@ -32,7 +32,7 @@ const loginWeb = async (req: Request, res: Response, next: NextFunction) => {
             from: 'web'
         };
 
-        (req.session as any).userWeb = datosDelUsuario;
+        req.session.userWeb = datosDelUsuario;
 
         // Generar token JWT
         const token = await generateWebJWT({ Id: user.Id_UsuarioOOL.trim(), sessionRedis: req.sessionID });
@@ -43,11 +43,11 @@ const loginWeb = async (req: Request, res: Response, next: NextFunction) => {
         });
 
     } catch (error) {
-        next(error)
+        return next(error)
     }
 };
 
-const renewWeb = async (req: Request, res: Response, next: NextFunction) => {
+const renewWeb = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
     try {
         // Get session from REDIS.
@@ -75,16 +75,16 @@ const renewWeb = async (req: Request, res: Response, next: NextFunction) => {
             return res.status(401).json({ message: 'Failed to generate token' });
         };
 
-        res.json({
+        return res.json({
             user: userFR,
             token
         });
     } catch (error) {
-        next(error)
+        return next(error)
     }
 }
 
-const logout = async (req: Request, res: Response, next: NextFunction) => {
+const logout = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
     try {
         const sessionId = req.sessionRedis;
@@ -93,10 +93,10 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
             throw new UnauthorizedError('Sesion terminada')
         }
         await handleDeleteRedisSession({ sessionId });
-        res.json({ ok: true })
+        return res.json({ ok: true })
 
     } catch (error) {
-        next(error)
+        return next(error)
     }
 }
 

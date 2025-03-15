@@ -4,7 +4,7 @@ import { getCalendarByMonthAndClientQuerySchema, getCalendarTaskByDayQuerySchema
 import { z } from "zod";
 
 
-const getCalendarTaskByMonth = async (req: Request, res: Response, next: NextFunction) => {
+const getCalendarTaskByMonth = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
     try {
         const { Anio, Mes } = getCalendarTaskByMonthQuerySchema.parse(req.query);
         const sessionId = req.sessionRedis;
@@ -14,17 +14,17 @@ const getCalendarTaskByMonth = async (req: Request, res: Response, next: NextFun
             Mes,
         });
 
-        res.json(tasks);
+        return res.json(tasks);
     } catch (error) {
         if (error instanceof z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
-            next(error);
+            return next(error);
         }
     }
 };
 
-const getCalendarTaskByDay = async (req: Request, res: Response, next: NextFunction) => {
+const getCalendarTaskByDay = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
     /* Timeline */
     try {
@@ -39,15 +39,15 @@ const getCalendarTaskByDay = async (req: Request, res: Response, next: NextFunct
         res.json(tasks);
     } catch (error) {
         if (error instanceof z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
-            next(error);
+            return next(error);
         }
     };
 
 };
 
-const getCalendarTaskByMonthAndClient = async (req: Request, res: Response, next: NextFunction) => {
+const getCalendarTaskByMonthAndClient = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
     try {
         const { Anio, Mes, Id_Cliente } = getCalendarByMonthAndClientQuerySchema.parse(req.query);
@@ -60,12 +60,12 @@ const getCalendarTaskByMonthAndClient = async (req: Request, res: Response, next
             Id_Cliente
         });
 
-        res.json(tasks);
+        return res.json(tasks);
     } catch (error) {
         if (error instanceof z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
-            next(error);
+            return next(error);
         }
     };
 

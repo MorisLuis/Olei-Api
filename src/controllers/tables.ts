@@ -3,7 +3,7 @@ import { dbConnectionWeb, querys } from '../database';
 import { handleGetWebSession } from '../utils/Redis/getSession';
 import { UnauthorizedError } from '../errors/CustomError';
 
-const getTables = async (req: Request, res: Response, next: NextFunction) => {
+const getTables = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void>  => {
 
     try {
         // Get session from REDIS.
@@ -26,14 +26,14 @@ const getTables = async (req: Request, res: Response, next: NextFunction) => {
         const FolioResult = await pool?.request().query(querys.getFolios);
         const Folio = FolioResult?.recordset.map(folio => folio.Codigo);
 
-        res.json({
+        return res.json({
             Familias,
             Marca,
             Folio
         });
 
     } catch (error) {
-        next(error)
+        return next(error)
     }
 };
 

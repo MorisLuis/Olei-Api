@@ -23,7 +23,7 @@ const getMeetingsService = async ({
     MeetingOrderCondition,
     FilterCliente,
     FilterTipoContacto
-}: getMeetingsServiceInterface) => {
+}: getMeetingsServiceInterface): Promise<MeetingInterface[]> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -78,7 +78,7 @@ const getTotalMeetingsService = async ({
     TipoContacto,
     FilterCliente,
     FilterTipoContacto
-}: getTotalMeetingsServiceInterface) => {
+}: getTotalMeetingsServiceInterface): Promise<number> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -116,7 +116,7 @@ const getTotalMeetingsService = async ({
 };
 
 
-const getMeetingByIdService = async (id: number, sessionId: string) => {
+const getMeetingByIdService = async (id: number, sessionId: string): Promise<MeetingInterface> => {
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
     if (!userFR) {
@@ -140,7 +140,7 @@ const getMeetingByIdService = async (id: number, sessionId: string) => {
     return quotes
 }
 
-const updateMeetingService = async (id: number, sessionId: string, body: MeetingInterface) => {
+const updateMeetingService = async (id: number, sessionId: string, body: MeetingInterface): Promise<{ result: MeetingInterface }> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -194,7 +194,7 @@ const updateMeetingService = async (id: number, sessionId: string, body: Meeting
 
 };
 
-const postMeetingService = async (sessionId: string, body: MeetingInterface) => {
+const postMeetingService = async (sessionId: string, body: MeetingInterface) : Promise<{ result: MeetingInterface }>=> {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -253,7 +253,7 @@ const postMeetingService = async (sessionId: string, body: MeetingInterface) => 
     return { result: result.recordset[0] }
 };
 
-const deleteMeetingService = async (id: number, sessionId: string) => {
+const deleteMeetingService = async (id: number, sessionId: string) : Promise<{ result: MeetingInterface }> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 

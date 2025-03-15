@@ -1,8 +1,21 @@
 import { dbConnection, dbConnectionMain, querys } from "../database";
 import { NotFoundError, UnauthorizedError, ValidationError } from "../errors/CustomError";
-import { ValidationResult } from "../interface/user";
+import { UserAuthenticateAndGetMovementInterface, ValidationResult } from "../interface/user";
 import { handleGetSession } from "../utils/Redis/getSession";
 import sql from "mssql";
+
+interface authInterface {
+    IdOLEI: number,
+    PasswordOLEI: number,
+    IdUsuarioOLEI: string,
+    ServidorSQL: string,
+    BaseSQL: string,
+    UsuarioSQL: string,
+    PasswordSQL: string,
+    RazonSocial: string,
+    SwImagenes: string,
+    Vigencia: string
+}
 
 interface loginDBAppServiceInterface {
     IdUsuarioOLEI: string;
@@ -12,7 +25,7 @@ interface loginDBAppServiceInterface {
 const loginDBAppService = async ({
     IdUsuarioOLEI,
     PasswordOLEI
-}: loginDBAppServiceInterface) => {
+}: loginDBAppServiceInterface): Promise<{ result: authInterface }> => {
 
     // Connection to server
     const mainPool = await dbConnectionMain();
@@ -56,7 +69,7 @@ const loginAppService = async ({
     sessionId,
     Id_Usuario,
     password
-}: loginAppServiceInterface) => {
+}: loginAppServiceInterface): Promise<{ userData: UserAuthenticateAndGetMovementInterface }> => {
 
     const { user: userFR } = await handleGetSession({ sessionId });
 
@@ -76,17 +89,15 @@ const loginAppService = async ({
         throw new ValidationError('Necesario escribir correo y contraseña')
     }
 
-    const request = pool.request();
-    request.input('Id_Usuario', sql.VarChar(50), Id_Usuario);
-    request.input('Password', sql.VarChar(50), password);
+    const result = await pool.request()
+        .input('Id_Usuario', sql.VarChar(50), Id_Usuario)
+        .input('Password', sql.VarChar(50), password)
+        .execute('sp_AuthenticateAndGetMovement');
 
-    const result = await request.execute('sp_AuthenticateAndGetMovement');
     const validations = (result.recordsets as any)[0] as ValidationResult[];
-
 
     if (validations[0].Tipo === "usuario" && validations[0].Resultado !== 1) {
         throw new NotFoundError('Correo no encontrado')
-
     };
 
     if (validations[1].Tipo === "contrasena" && validations[1].Resultado !== 1) {

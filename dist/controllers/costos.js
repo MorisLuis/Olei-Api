@@ -9,13 +9,12 @@ const updateCostos = async (req, res, next) => {
     const body = req.body;
     try {
         const resp = await (0, codebarService_1.updateCodebarService)(sessionId, codigoParam, Id_Marca, body);
-        res.json({
+        return res.json({
             resp
         });
     }
     catch (error) {
-        console.log({ error });
-        next(error);
+        return next(error);
     }
     ;
 };

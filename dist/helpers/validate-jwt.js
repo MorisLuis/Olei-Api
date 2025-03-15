@@ -7,71 +7,62 @@ exports.validateJWTWeb = exports.validateJWT = exports.validateJWTDB = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const CustomError_1 = require("../errors/CustomError");
 // Middleware to validate JWT from first login. (App)
-const validateJWTDB = async (req, res, next) => {
+const validateJWTDB = (req, _res, next) => {
     const token = req.headers['authorization']?.split(' ')[1];
     if (!token) {
-        throw new CustomError_1.UnauthorizedError('Acceso denegado. Falto token o es invalido');
+        return next(new CustomError_1.UnauthorizedError('Acceso denegado. Falto token o es invalido'));
     }
     try {
         jsonwebtoken_1.default.verify(token, process.env.SECRETORPRIVATEKEY || '', (err, decoded) => {
             if (err) {
-                throw new CustomError_1.UnauthorizedError('Fallo la autenticación del token');
+                return next(new CustomError_1.UnauthorizedError('Fallo la autenticación del token'));
             }
-            ;
             const { IdUsuarioOLEI } = decoded;
             req.IdUsuarioOLEI = IdUsuarioOLEI;
-            next();
+            return next();
         });
     }
     catch (error) {
-        next(error);
+        return next(new CustomError_1.UnauthorizedError(`Fallo la autenticación del token: ${error}`));
     }
 };
 exports.validateJWTDB = validateJWTDB;
 // Middleware to validate JWT from second login. (App)
-const validateJWT = async (req, res, next) => {
+const validateJWT = (req, _res, next) => {
     const token = req.headers['authorization']?.split(' ')[1];
     if (!token) {
-        throw new CustomError_1.UnauthorizedError('Acceso denegado. Falto token o es invalido');
+        return next(new CustomError_1.UnauthorizedError('Acceso denegado. Falto token o es invalido'));
     }
     try {
-        jsonwebtoken_1.default.verify(token, process.env.SECRETORPRIVATEKEY || '', (err, decoded) => {
-            if (err) {
-                throw new CustomError_1.UnauthorizedError('Fallo la autenticación del token');
-            }
-            const { Id_mobile } = decoded;
-            req.Id_mobile = Id_mobile;
-            next();
-        });
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.SECRETORPRIVATEKEY || '');
+        req.Id_mobile = decoded.Id_mobile;
+        next();
     }
     catch (error) {
-        next(error);
+        return next(new CustomError_1.UnauthorizedError(`Fallo la autenticación del token: ${error}`));
     }
 };
 exports.validateJWT = validateJWT;
-// (Web)
+/* web */
 const validateJWTWeb = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) {
-        return res.status(401).json({
+        res.status(401).json({
             ok: false,
             message: 'Access denied. Token missing or invalid.',
         });
+        return; // Retorna undefined
     }
     try {
-        jsonwebtoken_1.default.verify(token, process.env.SECRETORPRIVATEKEY || '', (err, decoded) => {
-            if (err) {
-                return res.status(500).json({ success: false, message: 'Failed to authenticate token' });
-            }
-            const { Id, sessionRedis } = decoded;
-            req.Id_web = Id;
-            req.sessionRedis = sessionRedis;
-            next();
-        });
+        const decoded = (await jsonwebtoken_1.default.verify(token, process.env.SECRETORPRIVATEKEY || ''));
+        const { Id, sessionRedis } = decoded;
+        req.Id_web = Id;
+        req.sessionRedis = sessionRedis;
+        next();
     }
     catch (error) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return next(new CustomError_1.UnauthorizedError(`Fallo la autenticación del token: ${error}`));
     }
 };
 exports.validateJWTWeb = validateJWTWeb;

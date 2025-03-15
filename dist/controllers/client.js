@@ -17,14 +17,14 @@ const getClients = async (req, res, next) => {
             PageNumber: PageNumber,
             OrderCondition: clientOrderCondition
         });
-        res.json(clients);
+        return res.json(clients);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
     ;
@@ -34,14 +34,14 @@ const getTotalClients = async (req, res, next) => {
     try {
         const sessionId = req.sessionRedis;
         const total = await (0, clientsServices_1.getTotalClientsService)(sessionId);
-        res.json(total);
+        return res.json(total);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
     ;
@@ -56,21 +56,21 @@ const getClientId = async (req, res, next) => {
             Id_Cliente,
             Id_Almacen
         });
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: clients ?? null
         });
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
             if (error instanceof zod_1.z.ZodError) {
-                res.status(400).json({ message: "Validation error", errors: error.errors });
+                return res.status(400).json({ message: "Validation error", errors: error.errors });
             }
             else {
-                next(error);
+                return next(error);
             }
             ;
         }
@@ -108,10 +108,10 @@ const selectClient = async (req, res, next) => {
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
 };
@@ -121,12 +121,12 @@ const searchClient = async (req, res, next) => {
         const sessionId = req.sessionRedis;
         const { term } = clientValidations_1.searchClientQuerySchema.parse(req.query);
         const { Clients } = await (0, clientsServices_1.searchClientService)({ sessionId, term });
-        res.json({
+        return res.json({
             Clients
         });
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
 };
 exports.searchClient = searchClient;

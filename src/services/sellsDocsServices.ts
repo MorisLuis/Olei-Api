@@ -9,7 +9,7 @@ const getSellsService = async (
     sessionId: string,
     PageNumber: number,
     SellsOrderCondition: SellsOrderConditionType | string
-) => {
+): Promise<SellsInterface[]> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
@@ -61,7 +61,7 @@ const getSellsByClientService = async ({
     DateEnd,
     DateExactly,
     DateStart
-}: getSellsByClientServiceInterface) => {
+}: getSellsByClientServiceInterface): Promise<SellsInterface[]> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
@@ -92,7 +92,13 @@ const getSellsByClientService = async ({
     return sells
 };
 
-const getSellByIdService = async (sessionId: string, folio: string, Serie: string, Id_Almacen: number, TipoDoc: SellsInterface['TipoDoc']) => {
+const getSellByIdService = async (
+    sessionId: string,
+    folio: string,
+    Serie: string,
+    Id_Almacen: number,
+    TipoDoc: SellsInterface['TipoDoc']
+): Promise<SellsInterface> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
@@ -143,7 +149,7 @@ const getCobranzaService = async ({
     DateEnd,
     DateExactly,
     DateStart
-}: getCobranzaInterface) => {
+}: getCobranzaInterface): Promise<SellsInterface[]> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
@@ -174,7 +180,7 @@ const getCobranzaService = async ({
     return sells
 };
 
-const getTotalSellsService = async (sessionId: string) => {
+const getTotalSellsService = async (sessionId: string): Promise<number> => {
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
         throw new UnauthorizedError('Sesion terminada')
@@ -216,7 +222,7 @@ const getTotalSellsByClientService = async ({
     DateEnd,
     DateExactly,
     DateStart
-}: getTotalSellsByClientServiceInterface) => {
+}: getTotalSellsByClientServiceInterface) : Promise<number> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
@@ -266,7 +272,7 @@ const getTotalCobranzaService = async ({
     DateEnd,
     DateExactly,
     DateStart
-}: getTotalCobranzaServiceInterface) => {
+}: getTotalCobranzaServiceInterface) : Promise<number> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 

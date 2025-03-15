@@ -12,7 +12,8 @@ const generateJWTDB = ({ IdUsuarioOLEI }) => {
             expiresIn: '31536000s' // 1 year
         }, (error, token) => {
             if (error) {
-                reject('No se pudo generar el token');
+                reject(new Error('No se pudo generar el token')); // Usa un Error en lugar de un string
+                return;
             }
             resolve(token);
         });

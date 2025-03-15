@@ -16,12 +16,12 @@ const getProducts = async (req, res, next) => {
             page,
             limit
         });
-        res.json({
+        return res.json({
             products
         });
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
 };
 exports.getProducts = getProducts;
@@ -39,7 +39,7 @@ const getProducByIdWeb = async (req, res, next) => {
         return res.json(product);
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
 };
 exports.getProducByIdWeb = getProducByIdWeb;
@@ -55,10 +55,10 @@ const getTotalProducts = async (req, res, next) => {
             familia,
             folio
         });
-        res.json({ total });
+        return res.json({ total });
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
 };
 exports.getTotalProducts = getTotalProducts;
@@ -74,12 +74,12 @@ const searchProduct = async (req, res, next) => {
             codigo,
             marca
         });
-        res.json({
+        return res.json({
             products
         });
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
 };
 exports.searchProduct = searchProduct;

@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.redisClient = void 0;
 // server.ts
+/* eslint-disable no-undef */
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const ioredis_1 = __importDefault(require("ioredis"));
@@ -103,7 +104,7 @@ class Server {
                 }
             }));
             // Middleware personalizado para ajustar el maxAge según el User-Agent
-            this.app.use((req, res, next) => {
+            this.app.use((req, _res, next) => {
                 const userAgent = req.headers['user-agent'];
                 if (userAgent && (userAgent.includes('Mobile') || userAgent.includes('OleiApp'))) {
                     // Si es una app móvil, ajustamos maxAge
@@ -121,9 +122,9 @@ class Server {
             'https://www.oleionline.com',
             'http://localhost:3000',
             'http://localhost:3001',
-            "https://olei-crm.vercel.app",
-            //Demos
-            "https://oleiweb-git-demo2-morisluis-projects.vercel.app"
+            'https://olei-crm.vercel.app',
+            // Demos
+            'https://oleiweb-git-demo2-morisluis-projects.vercel.app'
         ];
         const corsOptions = {
             origin: (origin, callback) => {
@@ -134,7 +135,7 @@ class Server {
                     callback(new Error('Not allowed by CORS'));
                 }
             },
-            credentials: true
+            credentials: true,
         };
         this.app.use((0, cors_1.default)(corsOptions));
         this.app.use(express_1.default.json({ limit: '50mb' }));
@@ -191,7 +192,7 @@ process.on('uncaughtException', (err) => {
     console.error('🔥 Uncaught Exception:', err);
     process.exit(1);
 });
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason) => {
     console.error('💥 Unhandled Promise Rejection:', reason);
     process.exit(1);
 });

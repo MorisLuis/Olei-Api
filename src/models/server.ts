@@ -1,6 +1,7 @@
 // server.ts
+/* eslint-disable no-undef */
 import express, { Application } from "express";
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import Redis from 'ioredis';
 import RedisStore from 'connect-redis';
 import session, { Store } from 'express-session';
@@ -135,7 +136,7 @@ class Server {
             }));
 
             // Middleware personalizado para ajustar el maxAge según el User-Agent
-            this.app.use((req, res, next) => {
+            this.app.use((req, _res, next) => {
                 const userAgent = req.headers['user-agent'];
 
                 if (userAgent && (userAgent.includes('Mobile') || userAgent.includes('OleiApp'))) {
@@ -150,33 +151,32 @@ class Server {
         }
     }
 
-    private middlewares() {
-        const allowedOrigins = [
+    private middlewares(): void {
+        const allowedOrigins: string[] = [
             'https://www.oleionline.com',
             'http://localhost:3000',
             'http://localhost:3001',
-            "https://olei-crm.vercel.app",
-
-            //Demos
-            "https://oleiweb-git-demo2-morisluis-projects.vercel.app"
+            'https://olei-crm.vercel.app',
+            // Demos
+            'https://oleiweb-git-demo2-morisluis-projects.vercel.app'
         ];
-
-        const corsOptions = {
-            origin: (origin: any, callback: any) => {
+    
+        const corsOptions: CorsOptions = {
+            origin: (origin: string | undefined, callback) => {
                 if (!origin || allowedOrigins.includes(origin)) {
                     callback(null, true);
                 } else {
                     callback(new Error('Not allowed by CORS'));
                 }
             },
-            credentials: true
+            credentials: true,
         };
-
+        
         this.app.use(cors(corsOptions));
-
         this.app.use(express.json({ limit: '50mb' }));
         this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));
     }
+    
 
     private routes() {
         this.app.use(this.paths.product, productRouter);
@@ -198,7 +198,7 @@ class Server {
         this.app.use(this.paths.almacenes, almacenesRouter);
     }
 
-    public async closeConnections() {
+    public async closeConnections(): Promise<void> {
         if (this.redis) {
             await this.redis.quit();
             console.log('Conexión a Redis cerrada');
@@ -207,11 +207,11 @@ class Server {
         console.log('Conexión a la base de datos cerrada');
     }
 
-    errorHandler() {
+    errorHandler(): void {
         this.app.use(errorHandler);
     }
 
-    public listen() {
+    public listen(): void {
         this.app.listen(this.port, () => {
             console.log("Servidor corriendo en puerto " + this.port);
         });
@@ -238,7 +238,7 @@ process.on('uncaughtException', (err) => {
     process.exit(1);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason) => {
     console.error('💥 Unhandled Promise Rejection:', reason);
     process.exit(1);
 });

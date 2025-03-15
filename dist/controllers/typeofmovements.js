@@ -22,10 +22,10 @@ const getTypeofmovements = async (req, res, next) => {
         request.input('Id_Usuario', mssql_1.default.VarChar(50), userId);
         const resultData = await request.execute('fn_GetTypeOfMovement');
         const TiposMovimiento = resultData?.recordset;
-        res.json(TiposMovimiento);
+        return res.json(TiposMovimiento);
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
 };
 exports.getTypeofmovements = getTypeofmovements;

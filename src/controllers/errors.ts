@@ -2,8 +2,9 @@ import { Request, Response } from 'express';
 import { dbConnectionMain, querys } from '../database';
 import sql from 'mssql';
 import moment from 'moment';
+import { NotFoundError } from '../errors/CustomError';
 
-const handleErrors = async (req: Request, res: Response) => {
+const handleErrors = async (req: Request, res: Response) : Promise<Response | void> => {
 
     try {
         const pool = await dbConnectionMain();
@@ -51,7 +52,7 @@ const handleErrorsEndpoint = async ({
     Id_Usuario,
     Metodo,
     code
-}: handleErrorsEndpointInterface) => {
+}: handleErrorsEndpointInterface)  : Promise<Response | void> => {
 
 
     try {
@@ -76,7 +77,7 @@ const handleErrorsEndpoint = async ({
         await transaction.commit();
 
     } catch (error) {
-        console.log({error})
+        throw new NotFoundError(`Error al conectarse a base de datos principal: ${error}`);
     }
 
 }

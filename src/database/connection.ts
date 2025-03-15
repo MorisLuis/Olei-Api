@@ -1,19 +1,16 @@
+/* eslint-disable no-undef */
+
 import sql from 'mssql';
 import config from "../config";
 
 let mainPool: sql.ConnectionPool | null = null;
+const connectionPools: Map<string, sql.ConnectionPool> = new Map(); // Mapa para almacenar las conexiones activas
+const MAX_CONNECTIONS = 10; // Límite de conexiones simultáneas
+const getPoolKey = (server: string, base: string) => `${server}-${base}`; // Función para generar una clave única por servidor y base de datos
 
-// Mapa para almacenar las conexiones activas
-const connectionPools: Map<string, sql.ConnectionPool> = new Map();
-
-// Límite de conexiones simultáneas
-const MAX_CONNECTIONS = 10;
-
-// Función para generar una clave única por servidor y base de datos
-const getPoolKey = (server: string, base: string) => `${server}-${base}`;
 
 // Conexion App
-export const dbConnection = async (server: string, base: string, user: string, pass: string) => {
+export const dbConnection = async (server: string, base: string, user: string, pass: string) : Promise<sql.ConnectionPool> => {
     // Get pool key
     const poolKey = getPoolKey(server, base);
 
@@ -56,7 +53,7 @@ export const dbConnection = async (server: string, base: string, user: string, p
 };
 
 // Conexion Web
-export const dbConnectionWeb = async (server: string, base: string) => {
+export const dbConnectionWeb = async (server: string, base: string) : Promise<sql.ConnectionPool> => {
     // Get pool key
     const poolKey = getPoolKey(server, base);
 
@@ -98,7 +95,7 @@ export const dbConnectionWeb = async (server: string, base: string) => {
 };
 
 // Conexion App Main
-export const dbConnectionMain = async () => {
+export const dbConnectionMain = async () : Promise<sql.ConnectionPool> => {
     if (!mainPool) {
         const dbConfig = {
             user: config.dbUser,
@@ -111,11 +108,8 @@ export const dbConnectionMain = async () => {
             },
         };
 
-        try {
-            mainPool = await sql.connect(dbConfig);
-        } catch (error) {
-            throw error;
-        }
+        mainPool = await sql.connect(dbConfig);
+
     }
     return mainPool;
 };

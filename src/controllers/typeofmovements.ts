@@ -5,7 +5,7 @@ import { handleGetSession } from '../utils/Redis/getSession';
 import { UnauthorizedError } from '../errors/CustomError';
 
 
-const getTypeofmovements = async (req: Request, res: Response, next: NextFunction) => {
+const getTypeofmovements = async (req: Request, res: Response, next: NextFunction): Promise<Response | void>   => {
     
     try {
         const sessionId = req.sessionID;
@@ -22,10 +22,10 @@ const getTypeofmovements = async (req: Request, res: Response, next: NextFunctio
         request.input('Id_Usuario', sql.VarChar(50), userId);
         const resultData = await request.execute('fn_GetTypeOfMovement');
         const TiposMovimiento = resultData?.recordset;
-        res.json(TiposMovimiento);
+        return res.json(TiposMovimiento);
 
     } catch (error) {
-        next(error)
+        return next(error)
     }
 }
 

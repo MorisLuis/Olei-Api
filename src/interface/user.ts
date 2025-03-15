@@ -16,7 +16,7 @@ export interface UserSessionInterface {
     from: 'web' | 'mobil' | 'crm',
     TodosAlmacenes?: number;
     Id_ListPre?: number;
-
+    SalidaSinExistencias?: number
     Id_Almacen?: number;
     AlmacenNombre?: string;
 }
@@ -42,6 +42,22 @@ export interface UserWebSessionInterface {
     SwSinStock: boolean, 
     SwsinPrecio: boolean, 
     IsEmploye?: boolean
+}
+
+// interface of sp_AuthenticateAndGetMovement
+export interface UserAuthenticateAndGetMovementInterface {
+    Id_Perfil: string,
+    Id_Almacen: number,
+    TodosAlmacenes: number,
+    Id_ListPre: number,
+    InventarioW: number,
+    TraspasosW: number,
+    Descripcion: string,
+    Id_TipoMovInv: number,
+    Id_AlmDest: number,
+    Accion: number,
+    AlmacenNombre: string,
+    SalidaSinExistencias: number
 }
 
 export type ValidationResult = {

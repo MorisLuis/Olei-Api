@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { dbConnection, querys } from '../../database';
+import { dbConnection } from '../../database';
 import { productsQuerys } from '../../database/querys/products';
 import { guessBarcodeType } from '../../utils/identifyBarcodeType';
 import { handleGetSession } from '../../utils/Redis/getSession';
@@ -9,12 +9,11 @@ import { getProductsByStockService } from '../../services/productsServices';
 import { UnauthorizedError, ValidationError } from '../../errors/CustomError';
 
 
-const getProducById = async (req: Request, res: Response, next: NextFunction) => {
+const getProducById = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
     try {
         const { id } = req.params;
         const { Marca } = req.query;
-        const Id_Usuario = req.Id_mobile;
 
         const sessionId = req.sessionID;
         const { user: userFR } = await handleGetSession({ sessionId });
@@ -57,7 +56,7 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
     }
 }
 
-const getProductsByStock = async (req: Request, res: Response, next: NextFunction) => {
+const getProductsByStock = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
     try {
         const { PageNumber, PageSize } = getProductsByStockQuerySchema.parse(req.query);
@@ -76,7 +75,7 @@ const getProductsByStock = async (req: Request, res: Response, next: NextFunctio
     }
 };
 
-const getTotalOfProductsByStock = async (req: Request, res: Response, next: NextFunction) => {
+const getTotalOfProductsByStock = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
     try {
         const sessionId = req.sessionID;
         const { user: userFR } = await handleGetSession({ sessionId });
@@ -106,11 +105,10 @@ const getTotalOfProductsByStock = async (req: Request, res: Response, next: Next
     }
 };
 
-const getProductByStockAndCodeBar = async (req: Request, res: Response, next: NextFunction) => {
+const getProductByStockAndCodeBar = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
 
     try {
-        console.log({query: req.query})
         const { CodBar, Codigo, SKU } = getProductByStockAndCodeBarSchema.parse(req.query);
         const sessionId = req.sessionID;
         const { user: userFR } = await handleGetSession({ sessionId });
@@ -129,10 +127,8 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
 
         let request;
 
-        console.log({CodBar, Codigo, SKU})
         // This is an excepcion for codebar
         if (isEAN13orUPC14) { 
-            console.log("isEAN13orUPC14")
             let query = productsQuerys.getProductByStockAndCodeBarDV;
             request = await pool.request()
                 .input("CodBar", CodBar === 'undefined' ? null : CodBar)

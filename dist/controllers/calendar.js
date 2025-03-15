@@ -13,14 +13,14 @@ const getCalendarTaskByMonth = async (req, res, next) => {
             Anio,
             Mes,
         });
-        res.json(tasks);
+        return res.json(tasks);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
 };
@@ -38,10 +38,10 @@ const getCalendarTaskByDay = async (req, res, next) => {
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
     ;
@@ -57,14 +57,14 @@ const getCalendarTaskByMonthAndClient = async (req, res, next) => {
             Mes,
             Id_Cliente
         });
-        res.json(tasks);
+        return res.json(tasks);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
     ;

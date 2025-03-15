@@ -2,25 +2,24 @@ import { NextFunction, Request, Response } from "express";
 import { getAlmacenByIdService, getAlmacenesService } from "../services/almacenesService";
 import { getAlmacenByIdQuerySchema } from "../validations/almacenValidations";
 import { UserSessionInterface } from "../interface/user";
+import { UnauthorizedError } from "../errors/CustomError";
 
-const getAlmacenes = async (req: Request, res: Response, next: NextFunction) => {
+const getAlmacenes = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const sessionId = req.sessionID;
-        const { almacenes } = await getAlmacenesService({
-            sessionId
-        });
+        const { almacenes } = await getAlmacenesService(sessionId);
 
-        res.json({
+        return res.json({
             almacenes
         });
 
     } catch (error) {
-        next(error)
+        return next(error)
     }
 };
 
-const updateAlmacenInRedis = async (req: Request, res: Response, next: NextFunction) => {
+const updateAlmacenInRedis = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
 
@@ -37,18 +36,33 @@ const updateAlmacenInRedis = async (req: Request, res: Response, next: NextFunct
         }
 
         if (almacen.Id_Almacen) {
+            if (!req.session.user) {
+                throw new UnauthorizedError('User session is not defined');
+            }
+        
             const datosDelUsuario: UserSessionInterface = {
-                ...(req.session as any).user,
+                ...req.session.user,
                 Id_Almacen: almacen.Id_Almacen,
-                AlmacenNombre: almacen.Nombre ?? ''
+                AlmacenNombre: almacen.Nombre ?? '', // Si no está disponible, usa ''
+                ServidorSQL: req.session.user.ServidorSQL ?? '',
+                BaseSQL: req.session.user.BaseSQL ?? '',
+                UsuarioSQL: req.session.user.UsuarioSQL ?? '',
+                PasswordSQL: req.session.user.PasswordSQL ?? '',
+                IdUsuarioOLEI: req.session.user.IdUsuarioOLEI ?? '',
+                RazonSocial: req.session.user.RazonSocial ?? '',
+                SwImagenes: req.session.user.SwImagenes ?? '',
+                Vigencia: req.session.user.Vigencia ?? '',
+                from: req.session.user.from ?? 'mobil'
             };
-            (req.session as any).user = datosDelUsuario;
+        
+            req.session.user = datosDelUsuario;
         }
+        
 
-        res.json(almacen);
+        return res.json(almacen);
 
     } catch (error) {
-        next(error)
+        return next(error)
     };
 
 }

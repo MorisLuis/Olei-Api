@@ -20,14 +20,14 @@ const getTables = async (req, res, next) => {
         const Marca = MarcaResult?.recordset.map(marca => marca.Nombre);
         const FolioResult = await pool?.request().query(database_1.querys.getFolios);
         const Folio = FolioResult?.recordset.map(folio => folio.Codigo);
-        res.json({
+        return res.json({
             Familias,
             Marca,
             Folio
         });
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
 };
 exports.getTables = getTables;

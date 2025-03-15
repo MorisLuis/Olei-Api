@@ -7,6 +7,7 @@ exports.sendEmailWithPDF = exports.sendEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const generatePDF_1 = require("../utils/generatePDF");
 const emailValidations_1 = require("../validations/emailValidations");
+const buffer_1 = require("buffer"); // Importa Buffer si es necesario
 // Configurar el transporte SMTP
 const transporter = nodemailer_1.default.createTransport({
     host: 'smtp.gmail.com',
@@ -29,12 +30,12 @@ const sendEmail = async (req, res, next) => {
     };
     try {
         await transporter.sendMail(mailOptions);
-        res.json({
+        return res.json({
             ok: true
         });
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
 };
 exports.sendEmail = sendEmail;
@@ -51,20 +52,21 @@ const sendEmailWithPDF = async (req, res, next) => {
         attachments: [
             {
                 filename: `Cobranza-${nombreRemitente}.pdf`,
-                content: Buffer.from(pdfBuffer),
+                content: buffer_1.Buffer.from(pdfBuffer),
                 contentType: 'application/pdf',
             },
         ],
     };
     try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Correo enviado: %s', info.messageId);
-        res.json({
+        await transporter.sendMail(mailOptions);
+        //const info = await transporter.sendMail(mailOptions);
+        //console.log('Correo enviado: %s', info.messageId);
+        return res.json({
             ok: true
         });
     }
     catch (error) {
-        console.error('Error al enviar el correo:', error);
+        return next(error);
     }
 };
 exports.sendEmailWithPDF = sendEmailWithPDF;

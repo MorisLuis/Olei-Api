@@ -38,7 +38,7 @@ const loginWeb = async (req, res, next) => {
         });
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
 };
 exports.loginWeb = loginWeb;
@@ -65,13 +65,13 @@ const renewWeb = async (req, res, next) => {
             return res.status(401).json({ message: 'Failed to generate token' });
         }
         ;
-        res.json({
+        return res.json({
             user: userFR,
             token
         });
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
 };
 exports.renewWeb = renewWeb;
@@ -82,10 +82,10 @@ const logout = async (req, res, next) => {
             throw new CustomError_1.UnauthorizedError('Sesion terminada');
         }
         await (0, deleteRedis_1.handleDeleteRedisSession)({ sessionId });
-        res.json({ ok: true });
+        return res.json({ ok: true });
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
 };
 exports.logout = logout;

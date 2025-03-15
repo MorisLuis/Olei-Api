@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handleGetWebSession = exports.handleGetSession = void 0;
+const CustomError_1 = require("../../errors/CustomError");
 const server_1 = require("../../models/server");
 const handleGetSession = async ({ sessionId }) => {
     try {
@@ -10,7 +11,7 @@ const handleGetSession = async ({ sessionId }) => {
         return { user };
     }
     catch (error) {
-        return { user: undefined };
+        throw new CustomError_1.UnauthorizedError(`Error en handleGetSession: ${error}`);
     }
 };
 exports.handleGetSession = handleGetSession;
@@ -22,7 +23,7 @@ const handleGetWebSession = async ({ sessionId }) => {
         return { user };
     }
     catch (error) {
-        return { user: undefined };
+        throw new CustomError_1.UnauthorizedError(`Error en handleGetWebSession: ${error}`);
     }
 };
 exports.handleGetWebSession = handleGetWebSession;

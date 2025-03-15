@@ -1,4 +1,4 @@
-import {  dbConnectionWeb } from "../database";
+import { dbConnectionWeb } from "../database";
 import { orderQuerys } from "../database/querys/orders";
 import { handleGetWebSession } from "../utils/Redis/getSession";
 import sql from 'mssql';
@@ -6,6 +6,7 @@ import { numeroALetra } from "../utils/numeroALetra";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
 import { SellsDetailsInterface, SellsInterface } from "../interface/sells";
 import { UnauthorizedError, ValidationError } from "../errors/CustomError";
+import OrderInterface from "../interface/order";
 
 interface postOrderServiceInterface {
     sessionId: string;
@@ -21,7 +22,7 @@ const postOrderService = async ({
     Subtotal,
     sellsDetails,
     sellsData
-}: postOrderServiceInterface) => {
+}: postOrderServiceInterface): Promise<{ folio: string }> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -73,7 +74,7 @@ interface getOrderServiceInterface {
 const getOrderService = async ({
     sessionId,
     folio
-}: getOrderServiceInterface) => {
+}: getOrderServiceInterface): Promise<{ order: OrderInterface }> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -112,7 +113,7 @@ const getAllOrdersService = async ({
     sessionId,
     page,
     limit
-}: getAllOrdersServiceInterface) => {
+}: getAllOrdersServiceInterface): Promise<{ allOrders: OrderInterface[] }> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -155,7 +156,7 @@ const getOrderDetailsSells = async ({
     PageNumber,
     folio,
     sessionId
-}: getOrderDetailsSellsInterface) => {
+}: getOrderDetailsSellsInterface): Promise<OrderInterface[]> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -186,7 +187,7 @@ const getOrderDetailsSells = async ({
     return orderDetails;
 };
 
-const getTotalAllOrdersService = async (sessionId: string) => {
+const getTotalAllOrdersService = async (sessionId: string): Promise<{ total: number }> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 
@@ -224,7 +225,7 @@ interface getTotalOrderDetailsSellsInterface {
 const getTotalOrderDetailsService = async ({
     folio,
     sessionId
-}: getTotalOrderDetailsSellsInterface) => {
+}: getTotalOrderDetailsSellsInterface): Promise<number> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 

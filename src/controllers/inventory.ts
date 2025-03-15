@@ -3,7 +3,7 @@ import { postInventoryService, searchProductInventoryService } from "../services
 import { postInventoryBodySchema, searchProductInventoryQuerySchema } from "../validations/inventoryValidations";
 import { z } from "zod";
 
-const postInventory = async (req: Request, res: Response, next: NextFunction) => {
+const postInventory = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
 
@@ -19,19 +19,18 @@ const postInventory = async (req: Request, res: Response, next: NextFunction) =>
             Id_Usuario
         });
 
-        res.json({ Folio });
+        return res.json({ Folio });
 
     } catch (error) {
-        console.log({ error })
         if (error instanceof z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
-            next(error);
+            return next(error);
         }
     }
 };
 
-const searchProductInventory = async (req: Request, res: Response, next: NextFunction) => {
+const searchProductInventory = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const { searchTerm } = searchProductInventoryQuerySchema.parse(req.query);
@@ -43,7 +42,7 @@ const searchProductInventory = async (req: Request, res: Response, next: NextFun
             withCodebar: true
         })
 
-        res.json(products);
+        return res.json(products);
 
     } catch (error) {
         if (error instanceof z.ZodError) {
@@ -54,7 +53,7 @@ const searchProductInventory = async (req: Request, res: Response, next: NextFun
     }
 };
 
-const searchProductInventoryWithoutCodebar = async (req: Request, res: Response, next: NextFunction) => {
+const searchProductInventoryWithoutCodebar = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const { searchTerm } = searchProductInventoryQuerySchema.parse(req.query);
@@ -66,13 +65,13 @@ const searchProductInventoryWithoutCodebar = async (req: Request, res: Response,
             withCodebar: false
         })
 
-        res.json(products);
+        return res.json(products);
 
     } catch (error) {
         if (error instanceof z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         } else {
-            next(error);
+            return next(error);
         }
     }
 };

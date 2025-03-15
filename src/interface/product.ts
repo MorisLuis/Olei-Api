@@ -13,7 +13,7 @@ export default interface PorductInterface {
     Id_ListaPrecios: number;
     Cantidad: number;
     Impuesto: number;
-    imagen: string;   
+    imagen: string | null;
     imagenes: Image[]
 }
 

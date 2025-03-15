@@ -16,7 +16,8 @@ const postInventoryService = async ({ sessionId, inventoryDetails, typeOfMovemen
     if (!userFR) {
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, TodosAlmacenes } = userFR;
+    /* TodosAlmacenes PENDING */
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');

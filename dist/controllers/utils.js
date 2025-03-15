@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getExcellTest = exports.getUtils = exports.getBanner = void 0;
+exports.getExcellTest = exports.getBanner = void 0;
 const database_1 = require("../database");
 const getSession_1 = require("../utils/Redis/getSession");
 const sells_1 = require("../database/querys/sells");
@@ -25,12 +25,6 @@ const getBanner = async (req, res) => {
     });
 };
 exports.getBanner = getBanner;
-const getUtils = async (req, res) => {
-    return new Promise((resolve, reject) => {
-        reject('Error en la promesa!');
-    });
-};
-exports.getUtils = getUtils;
 const getExcellTest = async (req, res) => {
     const sessionId = req.sessionRedis;
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
@@ -47,7 +41,7 @@ const getExcellTest = async (req, res) => {
         await generateExcelStream(res, data);
     }
     catch (error) {
-        console.log({ error });
+        throw new CustomError_1.NotFoundError(`${error}`);
     }
 };
 exports.getExcellTest = getExcellTest;
@@ -91,7 +85,7 @@ const fetchDataInBatches = async (pool) => {
             }
         }
         catch (error) {
-            console.log({ error });
+            throw new CustomError_1.NotFoundError(`${error}`);
         }
         ;
     }
