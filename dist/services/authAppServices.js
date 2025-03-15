@@ -48,10 +48,10 @@ const loginAppService = async ({ sessionId, Id_Usuario, password }) => {
     if (Id_Usuario.trim() === "" || password.trim() === "") {
         throw new CustomError_1.ValidationError('Necesario escribir correo y contraseña');
     }
-    const request = pool.request();
-    request.input('Id_Usuario', mssql_1.default.VarChar(50), Id_Usuario);
-    request.input('Password', mssql_1.default.VarChar(50), password);
-    const result = await request.execute('sp_AuthenticateAndGetMovement');
+    const result = await pool.request()
+        .input('Id_Usuario', mssql_1.default.VarChar(50), Id_Usuario)
+        .input('Password', mssql_1.default.VarChar(50), password)
+        .execute('sp_AuthenticateAndGetMovement');
     const validations = result.recordsets[0];
     if (validations[0].Tipo === "usuario" && validations[0].Resultado !== 1) {
         throw new CustomError_1.NotFoundError('Correo no encontrado');
