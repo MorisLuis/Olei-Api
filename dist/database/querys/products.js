@@ -141,7 +141,7 @@ exports.productsQuerys = {
             OR P.Codigo LIKE '%' + @searchTerm + '%')
             AND E.Id_Almacen = @Id_Almacen 
             AND PR.Id_ListaPrecios = @Id_ListPre
-            AND C.CodBar = '';
+            AND (C.CodBar = '' OR C.CodBar IS NULL);
     `,
 };
 //# sourceMappingURL=products.js.map
