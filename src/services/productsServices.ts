@@ -1,12 +1,16 @@
+import sql from 'mssql';
 import { dbConnection, dbConnectionWeb } from "../database";
 import { productsWebQuerys } from "../database/querys/productsWeb";
-import { handleGetSession, handleGetWebSession } from "../utils/Redis/getSession";
-import sql from 'mssql';
-import { getProductWithImages } from "../utils/checkImageExists";
 import { productsQuerys } from "../database/querys/products";
+
+import { handleGetSession, handleGetWebSession } from "../utils/Redis/getSession";
+import { getProductWithImages } from "../utils/checkImageExists";
 import { UnauthorizedError, ValidationError } from "../errors/CustomError";
 import PorductInterface from "../interface/product";
+import { guessBarcodeType } from '../utils/identifyBarcodeType';
 
+
+// Web endpoints
 interface getProductsServiceInterface {
     sessionId: string;
     page: number;
@@ -211,18 +215,22 @@ export const searchProductService = async ({
 
 };
 
+
+// App endpoints
 interface getProductsByStockServiceInterface {
     sessionId: string;
-    PageSize: number;
-    PageNumber: number;
+    PageSize?: number;
+    PageNumber?: number;
+
+    getTotal?: boolean;
 };
 
 const getProductsByStockService = async ({
     sessionId,
     PageSize,
-    PageNumber
+    PageNumber,
+    getTotal = false
 }: getProductsByStockServiceInterface): Promise<{ products: PorductInterface[] }> => {
-
 
     const { user: userFR } = await handleGetSession({ sessionId });
 
@@ -237,7 +245,13 @@ const getProductsByStockService = async ({
         throw new ValidationError('Error al conectarse a base de datos principal');
     }
 
-    let query = productsQuerys.getAllProductsByStock;
+    let query;
+    if (!getTotal) {
+        query = productsQuerys.getAllProductsByStock;
+    } else {
+        query = productsQuerys.getTotalOfAllProductsByStock;
+    };
+
     const request = await pool.request()
         .input('PageSize', PageSize)
         .input('PageNumber', PageNumber)
@@ -250,11 +264,117 @@ const getProductsByStockService = async ({
     return {
         products: productsByStock
     }
+};
+
+interface getProductByStockAndCodeBarServiceInterface {
+    sessionId: string;
+    CodBar: string;
+    SKU: string;
+    Codigo: string
 }
+
+const getProductByStockAndCodeBarService = async ({
+    sessionId,
+    CodBar,
+    SKU,
+    Codigo
+}: getProductByStockAndCodeBarServiceInterface) => {
+
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+    if (!userFR) throw new UnauthorizedError('Sesion terminada')
+
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
+    const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
+
+    let isEAN13orUPC14 = false;
+    if (CodBar) {
+        isEAN13orUPC14 = guessBarcodeType(CodBar)
+    }
+
+    let request;
+
+    // This is an excepcion for codebar
+    if (isEAN13orUPC14) {
+        let query = productsQuerys.getProductByStockAndCodeBarDV;
+        request = await pool.request()
+            .input("CodBar", CodBar === 'undefined' ? null : CodBar)
+            .input('Id_ListaPrecios', Id_ListPre)
+            .input('Id_Almacen', Id_Almacen)
+            .input('SKU', SKU)
+            .query(query);
+
+    } else {
+        let query = productsQuerys.getProductByStockAndCodeBar;
+        request = await pool.request()
+            .input("CodBar", CodBar === 'undefined' ? null : CodBar)
+            .input("Codigo", Codigo === 'undefined' ? null : Codigo)
+            .input('Id_ListaPrecios', Id_ListPre)
+            .input('Id_Almacen', Id_Almacen)
+            .input('SKU', SKU)
+            .query(query);
+    };
+
+    const productByStockAndCodeBar = request.recordset;
+
+    return { productByStockAndCodeBar }
+}
+
+interface searchProductInventoryServiceInterface {
+    sessionId: string;
+    searchTerm: string;
+    // handle if we get products with codebas or not
+    withCodebar: boolean
+}
+
+const searchProductByStockService = async ({
+    sessionId,
+    searchTerm,
+    withCodebar
+}: searchProductInventoryServiceInterface): Promise<{ products: PorductInterface[] }> => {
+
+    const { user: userFR } = await handleGetSession({ sessionId });
+
+    if (!userFR) {
+        throw new UnauthorizedError('Sesion terminada')
+    }
+
+    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
+
+    const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
+
+    if (!pool) {
+        throw new ValidationError('Error al conectarse a base de datos principal');
+    }
+
+    let query;
+    if (withCodebar) {
+        query = productsQuerys.getProductsBySearchInventory;
+    } else {
+        query = productsQuerys.getProductsBySearchInventoryWithoutCodebar;
+    };
+
+    const result = await pool.request()
+        .input("searchTerm", searchTerm)
+        .input('Id_Usuario', userId)
+        .input('Id_Almacen', Id_Almacen)
+        .input('Id_ListPre', Id_ListPre)
+        .query(query);
+
+    const products = result.recordset
+
+
+    return {
+        products
+    }
+};
+
 
 export {
     getProductsService,
     getProducByIdWebService,
     getTotalProductsService,
-    getProductsByStockService
+    getProductsByStockService,
+    searchProductByStockService,
+    getProductByStockAndCodeBarService
 }

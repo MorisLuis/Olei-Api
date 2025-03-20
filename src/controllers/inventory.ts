@@ -1,6 +1,6 @@
 import { Response, Request, NextFunction } from "express";
-import { postInventoryService, searchProductInventoryService } from "../services/inventoryServices";
-import { postInventoryBodySchema, searchProductInventoryQuerySchema } from "../validations/inventoryValidations";
+import { postInventoryService } from "../services/inventoryServices";
+import { postInventoryBodySchema } from "../validations/inventoryValidations";
 import { z } from "zod";
 
 const postInventory = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
@@ -30,54 +30,6 @@ const postInventory = async (req: Request, res: Response, next: NextFunction): P
     }
 };
 
-const searchProductInventory = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-
-    try {
-        const { searchTerm } = searchProductInventoryQuerySchema.parse(req.query);
-
-        const sessionId = req.sessionID;
-        const { products } = await searchProductInventoryService({
-            sessionId,
-            searchTerm: searchTerm,
-            withCodebar: true
-        })
-
-        return res.json(products);
-
-    } catch (error) {
-        if (error instanceof z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
-        } else {
-            next(error);
-        }
-    }
-};
-
-const searchProductInventoryWithoutCodebar = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-
-    try {
-        const { searchTerm } = searchProductInventoryQuerySchema.parse(req.query);
-
-        const sessionId = req.sessionID;
-        const { products } = await searchProductInventoryService({
-            sessionId,
-            searchTerm: searchTerm,
-            withCodebar: false
-        })
-
-        return res.json(products);
-
-    } catch (error) {
-        if (error instanceof z.ZodError) {
-            return res.status(400).json({ message: "Validation error", errors: error.errors });
-        } else {
-            return next(error);
-        }
-    }
-};
-
 export {
-    postInventory,
-    searchProductInventory,
-    searchProductInventoryWithoutCodebar
+    postInventory
 }

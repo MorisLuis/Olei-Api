@@ -15,11 +15,17 @@ const loginDB = async (req: Request, res: Response, next: NextFunction): Promise
         const { result } = await loginDBAppService({
             IdUsuarioOLEI,
             PasswordOLEI
-        })
+        });
+
+        console.log({IdUsuarioOLEI, PasswordOLEI})
 
         const tokenDB = await generateJWTDB({
             IdUsuarioOLEI: result.IdUsuarioOLEI.trim()
         });
+
+        if (!tokenDB) {
+            throw new UnauthorizedError('Error al generar token')
+        };
 
         // Session redis
         const datosDelUsuario: UserSessionInterface = {
@@ -64,16 +70,14 @@ const renewDB = async (req: Request, res: Response, next: NextFunction): Promise
         const { user: userFR } = await handleGetSession({ sessionId });
 
         if (!userFR) {
-            throw new UnauthorizedError('Sesion terminada')
+            return next(new UnauthorizedError('Usuario no encontrado en la sesión'));
         }
 
         const { BaseSQL, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
 
-        const token = await generateJWTDB({ IdUsuarioOLEI });
+        const tokenDB = await generateJWTDB({ IdUsuarioOLEI });
 
-        if (!token) {
-            throw new UnauthorizedError('Error al generar token')
-        };
+        if (!tokenDB) throw new UnauthorizedError('Error al generar token')
 
         // User to Redis.
         const userRedis: UserSessionInterface = {
@@ -82,20 +86,18 @@ const renewDB = async (req: Request, res: Response, next: NextFunction): Promise
             userRol: userRol ? userRol : undefined
         };
 
+        if (!userFR) throw new ValidationError('Información del usuario es necesaria')
+
+        req.session.user = userRedis
+
         // User to Frontend.
         const user = {
             BaseSQL: BaseSQL,
             RazonSocial: RazonSocial
         };
 
-        if (!userFR) {
-            throw new ValidationError('Información del usuario es necesaria')
-        };
-
-        req.session.user = userRedis
-
         res.json({
-            token,
+            token: tokenDB,
             user
         });
 
@@ -125,17 +127,21 @@ const login = async (req: Request, res: Response, next: NextFunction): Promise<R
         const { Id_Usuario, password } = req.body;
         const sessionId = req.sessionID;
 
+        if (!req.session.user) {
+            throw new UnauthorizedError('User session is not defined');
+        }
+
         const { userData } = await loginAppService({
             Id_Usuario,
             password,
             sessionId
+        });
+
+        console.log({ 
+            userData
         })
 
-        const token = await generateJWT({ Id_mobile: Id_Usuario.trim() });
-
-        if (!req.session.user) {
-            throw new UnauthorizedError('User session is not defined');
-        }
+        const token = await generateJWT({ Id_mobile: `${Id_Usuario.trim()}-${req.session.user.ServidorSQL}-${req.session.user.BaseSQL}` });
 
         const datosDelUsuario: UserSessionInterface = {
             ...(req.session).user,

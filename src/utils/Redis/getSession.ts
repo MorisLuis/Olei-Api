@@ -7,17 +7,20 @@ interface handleGetSessionInterface {
 }
 
 export const handleGetSession = async ({ sessionId }: handleGetSessionInterface): Promise<{ user: UserSessionInterface | undefined }> => {
-
     try {
-        const sessionData = await redisClient?.get(`sess:${sessionId}`);
-        const session = JSON.parse(sessionData as string);
-        const user: UserSessionInterface = session.user;
-        return { user }
-    } catch (error) {
-        throw new UnauthorizedError(`Error en handleGetSession: ${error}`);
-    }
+        if (!sessionId) throw new UnauthorizedError(`SessionId vacío`);
 
+        const sessionData = await redisClient?.get(`sess:${sessionId}`);
+        if (!sessionData) throw new UnauthorizedError('Sesión terminada');
+
+        const session = JSON.parse(sessionData as string);
+        return { user: session.user };
+    } catch (error) {
+        throw new UnauthorizedError(`Error obteniendo sesión: ${(error as Error).message}`);
+    }
 }
+
+
 export const handleGetWebSession = async ({ sessionId }: handleGetSessionInterface): Promise<{ user: UserWebSessionInterface | undefined }> => {
     try {
         if(!sessionId) throw new UnauthorizedError(`SessionId empty`);

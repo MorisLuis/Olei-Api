@@ -57,6 +57,8 @@ const loginAppService = async ({
     Id_Usuario,
     password
 }: loginAppServiceInterface): Promise<{ userData: UserAuthenticateAndGetMovementResultInterface }> => {
+
+
     // Verificar la sesión
     const { user: userFR } = await handleGetSession({ sessionId });
     if (!userFR) {
@@ -76,7 +78,7 @@ const loginAppService = async ({
         throw new ValidationError('Necesario escribir correo y contraseña');
     }
 
-    // Ejecutar el procedimiento almacenado
+    // Ejecutar el 'stores procedure'
     const result = await pool.request()
         .input('Id_Usuario', sql.VarChar(50), Id_Usuario)
         .input('Password', sql.VarChar(50), password)

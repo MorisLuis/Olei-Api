@@ -26,7 +26,6 @@ export const dbConnection = async (server: string, base: string, user: string, p
         throw new Error('⚠️ Límite de conexiones alcanzado. Inténtalo más tarde.');
     };
 
-
     const dbConfig: sql.config = {
         user: user || config.dbUser,
         password: pass || config.dbPassword,
