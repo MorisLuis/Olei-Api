@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PasswordChecker = exports.PasswordErrors = void 0;
 var PasswordErrors;
 (function (PasswordErrors) {
-    PasswordErrors["SHORT"] = "Password is to short!";
+    PasswordErrors["SHORT"] = "Password is too short!";
     PasswordErrors["NO_UPPER_CASE"] = "Upper case letter required!";
     PasswordErrors["NO_LOWER_CASE"] = "Lower case letter required!";
     PasswordErrors["NO_NUMBER"] = "At least one number required!";

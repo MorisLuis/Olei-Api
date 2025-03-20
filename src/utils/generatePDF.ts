@@ -1,10 +1,10 @@
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument, PDFFont, StandardFonts, rgb } from 'pdf-lib';
 import { SellsInterface } from '../interface/sells';
 import { formatCurrency } from './currency';
 import { formatTipoDoc } from './tipoDocFormat';
 
 // Función auxiliar para truncar texto
-const truncateText = (text: string, maxWidth: number, font: any, fontSize: number): string => {
+const truncateText = (text: string, maxWidth: number, font: PDFFont, fontSize: number): string => {
     let truncated = text;
     while (font.widthOfTextAtSize(truncated, fontSize) > maxWidth && truncated.length > 0) {
         truncated = truncated.slice(0, -1);

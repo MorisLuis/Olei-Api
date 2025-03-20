@@ -1,5 +1,5 @@
 export class StringUitls {
-    public toUpperCase(arg: string) {
+    public toUpperCase(arg: string) : string {
         if(!arg){
             throw new Error("Invalid argument!");
         }

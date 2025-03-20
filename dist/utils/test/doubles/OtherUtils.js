@@ -4,7 +4,7 @@ exports.toUpperCaseWithCb = void 0;
 function toUpperCaseWithCb(arg, callBack) {
     if (!arg) {
         callBack('Invalid argument!');
-        return;
+        return null;
     }
     callBack(`called function with ${arg}`);
     return arg.toUpperCase();

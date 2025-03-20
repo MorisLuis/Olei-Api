@@ -65,8 +65,6 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
         PageSize: 100
     });
 
-    console.log(sells)
-
     const pdfBuffer = await generatePDF(sells);
 
     // Opciones del correo
@@ -87,8 +85,9 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
 
     try {
         await transporter.sendMail(mailOptions);
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Correo enviado: %s', info.messageId);
+        await transporter.sendMail(mailOptions);
+        //const info = await transporter.sendMail(mailOptions);
+        //console.log('Correo enviado: %s', info.messageId);
 
         return res.json({
             ok: true

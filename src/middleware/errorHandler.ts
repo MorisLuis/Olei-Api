@@ -1,4 +1,4 @@
- /* eslint-disable no-undef */
+  
 
 import { Request, Response } from "express";
 import { handleErrorsEndpoint } from "../controllers/errors";

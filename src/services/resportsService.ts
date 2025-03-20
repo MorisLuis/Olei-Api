@@ -6,6 +6,7 @@ import { Response } from "express";
 import { validateSession } from "../helpers/validateSession";
 import excelColumnsConfig from "../utils/excelColumnsConfig";
 import { createPool } from "../helpers/createPool";
+import { NotFoundError } from "../errors/CustomError";
 
 interface reportsCobranzaServiceInterface {
     sessionId?: string,
@@ -35,7 +36,7 @@ const reportsCobranzaService = async ({
     DateExactly,
     DateStart,
     res
-}: reportsCobranzaServiceInterface) => {
+}: reportsCobranzaServiceInterface) : Promise<void> => {
 
     const { user } = await validateSession(sessionId);
     const pool = await createPool(user.Serverweb, user.Baseweb);
@@ -108,7 +109,7 @@ const fetchDataInBatches = async ({
             }
 
         } catch (error) {
-            console.log({ error })
+            throw new NotFoundError(`${error}`)
         };
     };
 

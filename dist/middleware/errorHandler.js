@@ -1,5 +1,4 @@
 "use strict";
-/* eslint-disable no-undef */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.errorHandler = void 0;
 const errors_1 = require("../controllers/errors");

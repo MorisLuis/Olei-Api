@@ -9,6 +9,7 @@ const exceljs_1 = __importDefault(require("exceljs"));
 const validateSession_1 = require("../helpers/validateSession");
 const excelColumnsConfig_1 = __importDefault(require("../utils/excelColumnsConfig"));
 const createPool_1 = require("../helpers/createPool");
+const CustomError_1 = require("../errors/CustomError");
 ;
 const reportsCobranzaService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, res }) => {
     const { user } = await (0, validateSession_1.validateSession)(sessionId);
@@ -60,7 +61,7 @@ const fetchDataInBatches = async ({ pool, Id_Cliente, SellsOrderCondition, Filte
             }
         }
         catch (error) {
-            console.log({ error });
+            throw new CustomError_1.NotFoundError(`${error}`);
         }
         ;
     }

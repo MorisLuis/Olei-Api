@@ -1,5 +1,5 @@
 // server.ts
-/* eslint-disable no-undef */
+ 
 import express, { Application } from "express";
 import cors, { CorsOptions } from 'cors';
 import Redis from 'ioredis';

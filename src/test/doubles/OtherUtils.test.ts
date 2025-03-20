@@ -28,7 +28,7 @@ describe.only('Tracking callbacks with Jest mocks', () => {
 
 describe('Tracking callbacks', () => {
 
-    let cbArgs : any[] = [];
+    let cbArgs : string[] = [];
     let timesCalled = 0;
 
     function callBackMocks(arg: string) {

@@ -11,7 +11,7 @@ import sql from 'mssql';
 interface postInventoryServiceInterface {
     sessionId: string;
     inventoryDetails: Partial<InventoryDetailsInterface>[];
-    typeOfMovement: { Accion: string, Id_TipoMovInv: Number, Id_AlmDest: Number };
+    typeOfMovement: { Accion: string, Id_TipoMovInv: number, Id_AlmDest: number };
     Id_Usuario: string;
 }
 

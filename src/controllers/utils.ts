@@ -5,6 +5,7 @@ import { sellsQuery } from '../database/querys/sells';
 import { ConnectionPool } from 'mssql';
 import ExcelJS from 'exceljs'
 import { NotFoundError, UnauthorizedError } from '../errors/CustomError';
+import { SellsInterface } from '../interface/sells';
 
 const getBanner = async (req: Request, res: Response) : Promise<Response | void> => {
 
@@ -50,9 +51,9 @@ const getExcellTest = async (req: Request, res: Response) : Promise<Response | v
 
 };
 
-const fetchDataInBatches = async (pool: ConnectionPool): Promise<unknown[]> => {
+const fetchDataInBatches = async (pool: ConnectionPool): Promise<SellsInterface[]> => {
     let offset = 1;
-    let results: unknown[] = [];
+    let results: SellsInterface[] = [];
     const batchSize = 1000;
     let moreData = true;
 
@@ -103,7 +104,7 @@ const fetchDataInBatches = async (pool: ConnectionPool): Promise<unknown[]> => {
     return results;
 }
 
-const generateExcelStream = async (res: any, data: any[]) => {
+const generateExcelStream = async (res: Response, data: SellsInterface[]) => {
     const workbook = new ExcelJS.Workbook();  // Crea una nueva instancia del libro de Excel
     const worksheet = workbook.addWorksheet('Datos');  // Añadimos una hoja llamada 'Datos'
 

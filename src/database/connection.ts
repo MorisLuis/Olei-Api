@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+ 
 
 import sql from 'mssql';
 import config from "../config";
