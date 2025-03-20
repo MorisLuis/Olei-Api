@@ -1,6 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getStringInfo = exports.toUpperCase = void 0;
+exports.getStringInfo = exports.toUpperCase = exports.StringUitls = void 0;
+class StringUitls {
+    toUpperCase(arg) {
+        if (!arg) {
+            throw new Error("Invalid argument!");
+        }
+        return toUpperCase(arg);
+    }
+}
+exports.StringUitls = StringUitls;
 function toUpperCase(arg) {
     return arg.toUpperCase();
 }

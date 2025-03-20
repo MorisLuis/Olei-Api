@@ -135,6 +135,8 @@ interface getCobranzaInterface {
     DateEnd: string | null,
     DateExactly: string | null,
     DateStart: string | null,
+
+    PageSize?: number
 };
 
 const getCobranzaService = async ({
@@ -148,13 +150,15 @@ const getCobranzaService = async ({
     TipoDoc,
     DateEnd,
     DateExactly,
-    DateStart
+    DateStart,
+    PageSize = 10
 }: getCobranzaInterface): Promise<SellsInterface[]> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
         throw new UnauthorizedError('Sesion terminada')
     }
+
     const { Serverweb, Baseweb } = userFR;
     const pool = await dbConnectionWeb(Serverweb, Baseweb);
     if (!pool) {
@@ -164,7 +168,7 @@ const getCobranzaService = async ({
     let query = sellsQuery.getCobranza;
     const request = await pool.request()
         .input('PageNumber', PageNumber)
-        .input('PageSize', 10)
+        .input('PageSize', PageSize)
         .input('Id_Cliente', Id_Cliente)
         .input('OrderCondition', SellsOrderCondition)
         .input('FilterTipoDoc', FilterTipoDoc)
@@ -179,6 +183,25 @@ const getCobranzaService = async ({
     const sells = request.recordset
     return sells
 };
+
+export const getAllCobranzaService = async (params: getCobranzaInterface): Promise<SellsInterface[]> => {
+    let allSells: SellsInterface[] = [];
+    let pageNumber = params.PageNumber || 1;
+    const pageSize = params.PageSize || 100;
+    let hasMore = true;
+
+    while (hasMore) {
+        const sellsPage = await getCobranzaService({ ...params, PageNumber: pageNumber, PageSize: pageSize });
+        if (sellsPage.length > 0) {
+            allSells = allSells.concat(sellsPage);
+            pageNumber++;
+        } else {
+            hasMore = false;
+        }
+    }
+    return allSells;
+};
+
 
 const getTotalSellsService = async (sessionId: string): Promise<number> => {
     const { user: userFR } = await handleGetWebSession({ sessionId });
@@ -222,7 +245,7 @@ const getTotalSellsByClientService = async ({
     DateEnd,
     DateExactly,
     DateStart
-}: getTotalSellsByClientServiceInterface) : Promise<number> => {
+}: getTotalSellsByClientServiceInterface): Promise<number> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
     if (!userFR) {
@@ -272,7 +295,7 @@ const getTotalCobranzaService = async ({
     DateEnd,
     DateExactly,
     DateStart
-}: getTotalCobranzaServiceInterface) : Promise<number> => {
+}: getTotalCobranzaServiceInterface): Promise<number> => {
 
     const { user: userFR } = await handleGetWebSession({ sessionId });
 

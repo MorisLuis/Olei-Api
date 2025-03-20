@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTotalCobranzaService = exports.getTotalSellsByClientService = exports.getTotalSellsService = exports.getCobranzaService = exports.getSellByIdService = exports.getSellsByClientService = exports.getSellsService = void 0;
+exports.getTotalCobranzaService = exports.getTotalSellsByClientService = exports.getTotalSellsService = exports.getCobranzaService = exports.getSellByIdService = exports.getSellsByClientService = exports.getSellsService = exports.getAllCobranzaService = void 0;
 const database_1 = require("../database");
 const sells_1 = require("../database/querys/sells");
 const CustomError_1 = require("../errors/CustomError");
@@ -79,7 +79,7 @@ const getSellByIdService = async (sessionId, folio, Serie, Id_Almacen, TipoDoc) 
 };
 exports.getSellByIdService = getSellByIdService;
 ;
-const getCobranzaService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
+const getCobranzaService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, PageSize = 10 }) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
@@ -93,7 +93,7 @@ const getCobranzaService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrde
     let query = sells_1.sellsQuery.getCobranza;
     const request = await pool.request()
         .input('PageNumber', PageNumber)
-        .input('PageSize', 10)
+        .input('PageSize', PageSize)
         .input('Id_Cliente', Id_Cliente)
         .input('OrderCondition', SellsOrderCondition)
         .input('FilterTipoDoc', FilterTipoDoc)
@@ -108,6 +108,24 @@ const getCobranzaService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrde
     return sells;
 };
 exports.getCobranzaService = getCobranzaService;
+const getAllCobranzaService = async (params) => {
+    let allSells = [];
+    let pageNumber = params.PageNumber || 1;
+    const pageSize = params.PageSize || 100;
+    let hasMore = true;
+    while (hasMore) {
+        const sellsPage = await getCobranzaService({ ...params, PageNumber: pageNumber, PageSize: pageSize });
+        if (sellsPage.length > 0) {
+            allSells = allSells.concat(sellsPage);
+            pageNumber++;
+        }
+        else {
+            hasMore = false;
+        }
+    }
+    return allSells;
+};
+exports.getAllCobranzaService = getAllCobranzaService;
 const getTotalSellsService = async (sessionId) => {
     const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
     if (!userFR) {

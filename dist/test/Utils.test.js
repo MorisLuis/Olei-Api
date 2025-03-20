@@ -3,6 +3,32 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // server.test.ts
 const utilsTest_1 = require("../utils/utilsTest");
 describe('Utils Test Suite', () => {
+    describe.only('StringUtils tests', () => {
+        let sut;
+        beforeEach(() => {
+            sut = new utilsTest_1.StringUitls;
+            console.log("setup");
+        });
+        afterAll(() => {
+            console.log("Teardown");
+        });
+        it('Should return correct uppercase', () => {
+            const actual = sut.toUpperCase('abc');
+            expect(actual).toBe('ABC');
+            console.log("actual test");
+        });
+        it('Should throw error on invalid argument - function', () => {
+            function expectError() {
+                return sut.toUpperCase('');
+            }
+            ;
+            expect(expectError).toThrow();
+            expect(expectError).toThrowError('Invalid argument!');
+        });
+        it.only('Should throw error on invalid argument - arrow function', () => {
+            expect(() => sut.toUpperCase('')).toThrowError('Invalid argument!');
+        });
+    });
     it('should return uppercase', () => {
         // arrange:
         // Configuración de lo necesario para la prueba, incluye:
@@ -53,7 +79,8 @@ describe('Utils Test Suite', () => {
             expect(actual.extraInfo).toEqual({});
         });
     });
-    describe.only('ToUpperCase examples', () => {
+    // Parametrized tests.
+    describe('ToUpperCase examples', () => {
         it.each([
             { input: 'abc', expected: 'ABC' },
             { input: 'My-String', expected: 'MY-STRING' },

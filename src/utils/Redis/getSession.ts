@@ -20,6 +20,7 @@ export const handleGetSession = async ({ sessionId }: handleGetSessionInterface)
 }
 export const handleGetWebSession = async ({ sessionId }: handleGetSessionInterface): Promise<{ user: UserWebSessionInterface | undefined }> => {
     try {
+        if(!sessionId) throw new UnauthorizedError(`SessionId empty`);
         const sessionData = await redisClient?.get(`sess:${sessionId}`);
         const session = JSON.parse(sessionData as string);
         const user: UserWebSessionInterface = session.userWeb;

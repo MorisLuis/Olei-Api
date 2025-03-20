@@ -52,7 +52,7 @@ export interface SellsDetailsInterface {
 }
 
 
-export type typeTipoDoc = 0 | 1 | 2 | 3 | 4;
+export type typeTipoDoc = 0 | 1 | 2 | 3 | 4 | 6;
 export const TipoDoc: typeTipoDoc[] = [0, 1, 2, 3, 4];
 
 export type SellsOrderConditionType = 'Nombre' | 'Saldo' | 'Total';

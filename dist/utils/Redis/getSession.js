@@ -17,6 +17,8 @@ const handleGetSession = async ({ sessionId }) => {
 exports.handleGetSession = handleGetSession;
 const handleGetWebSession = async ({ sessionId }) => {
     try {
+        if (!sessionId)
+            throw new CustomError_1.UnauthorizedError(`SessionId empty`);
         const sessionData = await server_1.redisClient?.get(`sess:${sessionId}`);
         const session = JSON.parse(sessionData);
         const user = session.userWeb;

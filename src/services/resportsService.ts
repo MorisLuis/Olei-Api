@@ -5,6 +5,7 @@ import ExcelJS from 'exceljs';
 import { Response } from "express";
 import { validateSession } from "../helpers/validateSession";
 import excelColumnsConfig from "../utils/excelColumnsConfig";
+import { createPool } from "../helpers/createPool";
 
 interface reportsCobranzaServiceInterface {
     sessionId?: string,
@@ -37,7 +38,7 @@ const reportsCobranzaService = async ({
 }: reportsCobranzaServiceInterface) => {
 
     const { user } = await validateSession(sessionId);
-    /* const pool = await createPool(user.Serverweb, user.Baseweb);
+    const pool = await createPool(user.Serverweb, user.Baseweb);
 
     const data = await fetchDataInBatches({
         pool,
@@ -54,7 +55,7 @@ const reportsCobranzaService = async ({
         res
     });
 
-    await generateExcelStream(res, data) */
+    await generateExcelStream(res, data)
 };
 
 
