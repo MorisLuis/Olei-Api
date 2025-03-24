@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { validateJWTWeb } from "../helpers/validate-jwt";
 import { getCodigos, getFamilias, getMarcas } from "../controllers/search/search";
+import { validateJWTWeb } from "../middleware/validateJWT";
 
 
 const router = Router()

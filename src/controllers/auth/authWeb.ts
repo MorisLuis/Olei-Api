@@ -1,41 +1,38 @@
 import { NextFunction, Request, Response } from 'express';
-import { generateWebJWT } from '../../helpers/generate-jwt';
 import { UserWebSessionInterface } from '../../interface/user';
-import { handleGetWebSession } from '../../utils/Redis/getSession';
-import { handleDeleteRedisSession } from '../../utils/Redis/deleteRedis';
 import { loginWebService } from '../../services/authServices';
 import { UnauthorizedError } from '../../errors/CustomError';
+import { generateAccessTokenWeb, generateRefreshTokenWeb } from '../../helpers/generate-jwt';
+import { v4 } from 'uuid';
+import { generateRedisSessionWeb, handleDeleteRedisSession } from '../../helpers/generate-redis';
 
-const loginWeb = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+const loginWeb = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const { email, password } = req.body;
-        const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await loginWebService(email, password);
-        const { Id_UsuarioOOL, Nombre, Id_Cliente, SwImagenes, SwSinStock, TipoUsuario, Id_Almacen } = user;
+        const user = await loginWebService(email, password);
 
         const datosDelUsuario: UserWebSessionInterface = {
-            Id: Id_UsuarioOOL.trim(),
-            Nombre: Nombre.trim(),
-            Serverweb: ServidorSQL.trim(),
-            Baseweb: BaseSQL.trim(),
-            Id_Cliente: Id_Cliente || 0,
-            Id_ListPre,
-            Vigencia: Vigencia,
-            SwImagenes: SwImagenes,
-            SwSinStock: SwSinStock,
-            SwsinPrecio,
-            TipoDocOO,
-            TipoUsuario: TipoUsuario,
-            Id_Almacen: Id_Almacen,
-            Id_Usuario: UsuarioSQL,
-            PrecioIncIVA: 0,
+            ...user,
             from: 'web'
         };
 
-        req.session.userWeb = datosDelUsuario;
+        // Generar un ID de sesión único
+        const sessionId = v4();
 
-        // Generar token JWT
-        const token = await generateWebJWT({ Id: user.Id_UsuarioOOL.trim(), sessionRedis: req.sessionID });
+        const token = generateAccessTokenWeb(sessionId)
+        const refreshToken = generateRefreshTokenWeb(sessionId);
+
+        // Guardar la sesión en Redis con expiración (1 hora)
+        await generateRedisSessionWeb(sessionId, datosDelUsuario)
+
+        // Enviar el refreshToken en cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        });
 
         return res.json({
             user: datosDelUsuario,
@@ -47,54 +44,50 @@ const loginWeb = async (req: Request, res: Response, next: NextFunction) : Promi
     }
 };
 
-const renewWeb = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+const renewWeb = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         // Get session from REDIS.
-        const sessionId = req.sessionRedis;
-        const { user: userFR } = await handleGetWebSession({ sessionId });
+        const userSession = req.sessionWeb;
+        const sessionId = req.sessionId;
+        const refreshToken = req.cookies.refreshToken;
 
-        if (!userFR) {
-            throw new UnauthorizedError('Sesion terminada')
+        if (!refreshToken) {
+            return res.status(401).json({ message: "No hay refresh token" });
         }
 
-        const { Id, TipoUsuario, Serverweb, Baseweb } = userFR;
+        // Guardar la sesión en Redis con expiración (1 hora)
+        await generateRedisSessionWeb(sessionId, userSession)
 
-        if (!Id && !TipoUsuario) {
-            return res.status(401).json({ message: 'Id and rol are neccessary' });
-        };
+        // Generar el token JWT que incluye el sessionId
+        const newToken = generateAccessTokenWeb(sessionId)
+        const newRefreshToken = generateRefreshTokenWeb(sessionId);
 
-        if (!Serverweb && !Baseweb) {
-            return res.status(401).json({ message: 'Server and base data is neccessary' });
-        };
-
-        let token
-        token = await generateWebJWT({ Id, sessionRedis: sessionId });
-
-        if (!token) {
-            return res.status(401).json({ message: 'Failed to generate token' });
-        };
+        // Enviar el refreshToken en cookie
+        res.cookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        });
 
         return res.json({
-            user: userFR,
-            token
+            user: userSession,
+            token: newToken
         });
+
     } catch (error) {
         return next(error)
     }
-}
+};
 
-const logout = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+const logout = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const sessionId = req.sessionRedis;
-
-        if (!sessionId) {
-            throw new UnauthorizedError('Sesion terminada')
-        }
-        await handleDeleteRedisSession({ sessionId });
+        const sessionId = req.sessionId;
+        if (!sessionId) throw new UnauthorizedError('Sesion terminada')
+        await handleDeleteRedisSession(sessionId);
         return res.json({ ok: true })
-
     } catch (error) {
         return next(error)
     }

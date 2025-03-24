@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { updateCostos } from "../controllers/costos";
-import { validateJWT } from "../helpers/validate-jwt";
+import { validateJWT } from "../middleware/validateJWT";
 
 
 const router = Router();

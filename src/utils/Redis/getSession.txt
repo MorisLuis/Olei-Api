@@ -1,6 +1,6 @@
+import redisClient from "../../config/redisClient";
 import { UnauthorizedError } from "../../errors/CustomError";
 import { UserSessionInterface, UserWebSessionInterface } from "../../interface/user";
-import { redisClient } from "../../models/server";
 
 interface handleGetSessionInterface {
     sessionId?: string;
@@ -10,7 +10,7 @@ export const handleGetSession = async ({ sessionId }: handleGetSessionInterface)
     try {
         if (!sessionId) throw new UnauthorizedError(`SessionId vacío`);
 
-        const sessionData = await redisClient?.get(`sess:${sessionId}`);
+        const sessionData = await redisClient?.get(`session:${sessionId}`);
         if (!sessionData) throw new UnauthorizedError('Sesión terminada');
 
         const session = JSON.parse(sessionData as string);
@@ -30,5 +30,35 @@ export const handleGetWebSession = async ({ sessionId }: handleGetSessionInterfa
         return { user };
     } catch (error) {
         throw new UnauthorizedError(`Error en handleGetWebSession: ${error}`);
+    }
+};
+
+export const updateSession = async (sessionId: string, newData: any) => {
+
+    try {
+        // Obtener la sesión actual desde Redis
+        redisClient?.get(`session:${sessionId}`, (err, sessionData) => {
+            if (err || !sessionData) {
+                console.error('Error obteniendo la sesión o sesión no encontrada');
+                return;
+            }
+
+            // Parseamos la sesión existente
+            let session = JSON.parse(sessionData);
+
+            // 🔥 Modificamos la sesión con los nuevos datos
+            session = { ...session, ...newData };
+
+            // Guardamos la sesión actualizada en Redis
+            redisClient?.set(`session:${sessionId}`, JSON.stringify(session), (err) => {
+                if (err) {
+                    console.error('Error actualizando la sesión en Redis:', err);
+                } else {
+                    console.log('Sesión actualizada exitosamente');
+                }
+            });
+        });
+    } catch (error) {
+        console.error('Error al actualizar la sesión:', error);
     }
 };

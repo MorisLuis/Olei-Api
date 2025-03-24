@@ -6,20 +6,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getOrderDetailsSells = exports.getTotalAllOrdersService = exports.getTotalOrderDetailsService = exports.getAllOrdersService = exports.getOrderService = exports.postOrderService = void 0;
 const database_1 = require("../database");
 const orders_1 = require("../database/querys/orders");
-const getSession_1 = require("../utils/Redis/getSession");
 const mssql_1 = __importDefault(require("mssql"));
 const numeroALetra_1 = require("../utils/numeroALetra");
 const convertArrayToXml_1 = require("../utils/convertArrayToXml");
 const CustomError_1 = require("../errors/CustomError");
 ;
-const postOrderService = async ({ sessionId, Total, Subtotal, sellsDetails, sellsData }) => {
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new CustomError_1.UnauthorizedError('Sesion terminada');
-    }
-    ;
-    const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
-    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
+const postOrderService = async ({ userSession, Total, Subtotal, sellsDetails, sellsData }) => {
+    const { ServidorSQL, BaseSQL, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userSession;
+    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -31,6 +25,13 @@ const postOrderService = async ({ sessionId, Total, Subtotal, sellsDetails, sell
     const CantLetra = (0, numeroALetra_1.numeroALetra)(Total);
     const xmlDataSales = await (0, convertArrayToXml_1.convertArrayToXml)(sellsData);
     const xmlDataSalesDetails = await (0, convertArrayToXml_1.convertArrayToXml)(sellsDetails);
+    if (!Id_Almacen) {
+        throw new CustomError_1.ValidationError("Id Almacen necesario");
+    }
+    ;
+    if (!Id_Cliente) {
+        throw new CustomError_1.ValidationError("Id Cliente necesario");
+    }
     const result = await request
         .input('xmlDataSales', mssql_1.default.Xml, xmlDataSales)
         .input('xmlDataSalesDetails', mssql_1.default.Xml, xmlDataSalesDetails)
@@ -50,14 +51,9 @@ const postOrderService = async ({ sessionId, Total, Subtotal, sellsDetails, sell
     };
 };
 exports.postOrderService = postOrderService;
-const getOrderService = async ({ sessionId, folio }) => {
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new CustomError_1.UnauthorizedError('Sesion terminada');
-    }
-    ;
-    const { Serverweb, Baseweb, Id_Cliente, TipoDocOO } = userFR;
-    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
+const getOrderService = async ({ userSession, folio }) => {
+    const { ServidorSQL, BaseSQL, Id_Cliente, TipoDocOO } = userSession;
+    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -74,13 +70,9 @@ const getOrderService = async ({ sessionId, folio }) => {
     };
 };
 exports.getOrderService = getOrderService;
-const getAllOrdersService = async ({ sessionId, page, limit }) => {
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new CustomError_1.UnauthorizedError('Sesion terminada');
-    }
-    const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
-    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
+const getAllOrdersService = async ({ userSession, page, limit }) => {
+    const { ServidorSQL, BaseSQL, TipoDocOO, Id_Cliente } = userSession;
+    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -97,14 +89,9 @@ const getAllOrdersService = async ({ sessionId, page, limit }) => {
     };
 };
 exports.getAllOrdersService = getAllOrdersService;
-const getOrderDetailsSells = async ({ PageNumber, folio, sessionId }) => {
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new CustomError_1.UnauthorizedError('Sesion terminada');
-    }
-    ;
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
+const getOrderDetailsSells = async ({ PageNumber, folio, userSession }) => {
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -123,13 +110,9 @@ const getOrderDetailsSells = async ({ PageNumber, folio, sessionId }) => {
     return orderDetails;
 };
 exports.getOrderDetailsSells = getOrderDetailsSells;
-const getTotalAllOrdersService = async (sessionId) => {
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new CustomError_1.UnauthorizedError('Sesion terminada');
-    }
-    const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
-    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
+const getTotalAllOrdersService = async (userSession) => {
+    const { ServidorSQL, BaseSQL, TipoDocOO, Id_Cliente } = userSession;
+    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -144,14 +127,9 @@ const getTotalAllOrdersService = async (sessionId) => {
 };
 exports.getTotalAllOrdersService = getTotalAllOrdersService;
 ;
-const getTotalOrderDetailsService = async ({ folio, sessionId }) => {
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new CustomError_1.UnauthorizedError('Sesion terminada');
-    }
-    ;
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
+const getTotalOrderDetailsService = async ({ folio, userSession }) => {
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -161,7 +139,7 @@ const getTotalOrderDetailsService = async ({ folio, sessionId }) => {
         .input('folio', mssql_1.default.Int, folio)
         .query(query);
     const total = request.recordset[0].TotalCount;
-    return total;
+    return { total };
 };
 exports.getTotalOrderDetailsService = getTotalOrderDetailsService;
 //# sourceMappingURL=orderServices.js.map

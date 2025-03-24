@@ -1,29 +1,24 @@
 import { dbConnectionWeb } from "../database";
 import { clientsQuerys } from "../database/querys/clients";
-import { UnauthorizedError, ValidationError } from "../errors/CustomError";
+import { ValidationError } from "../errors/CustomError";
 import { ClientInterface } from "../interface/client";
-import { handleGetWebSession } from "../utils/Redis/getSession";
+import { UserWebSessionInterface } from "../interface/user";
 import sql from 'mssql';
 
 interface getClientsServiceInterface {
     PageNumber: number,
-    sessionId: string,
+    userSession: UserWebSessionInterface,
     OrderCondition: string
 };
 
 const getClientsService = async ({
     PageNumber,
-    sessionId,
+    userSession,
     OrderCondition
 }: getClientsServiceInterface): Promise<ClientInterface[]> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -42,25 +37,20 @@ const getClientsService = async ({
 };
 
 interface getClientIdInterface {
-    sessionId: string,
+    userSession: UserWebSessionInterface,
     Id_Cliente: number,
     Id_Almacen: number
 };
 
 const getClientIdService = async ({
-    sessionId,
+    userSession,
     Id_Cliente,
     Id_Almacen
 }: getClientIdInterface): Promise<ClientInterface> => {
 
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -74,15 +64,10 @@ const getClientIdService = async ({
     return quotes
 };
 
-const getTotalClientsService = async (sessionId: string): Promise<number> => {
+const getTotalClientsService = async (userSession: UserWebSessionInterface): Promise<number> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -96,23 +81,18 @@ const getTotalClientsService = async (sessionId: string): Promise<number> => {
 };
 
 interface searchClientServiceInterface {
-    sessionId: string;
+    userSession: UserWebSessionInterface;
     term: string
 };
 
 const searchClientService = async ({
-    sessionId,
+    userSession,
     term
 }: searchClientServiceInterface): Promise<{ Clients: ClientInterface[] }> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');

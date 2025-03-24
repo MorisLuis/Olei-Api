@@ -1,4 +1,4 @@
-export default interface PorductInterface {
+export default interface ProductInterface {
     Descripcion: string;
     Id_Familia: number
     Codigo: string;

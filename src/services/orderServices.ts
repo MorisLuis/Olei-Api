@@ -1,15 +1,15 @@
 import { dbConnectionWeb } from "../database";
 import { orderQuerys } from "../database/querys/orders";
-import { handleGetWebSession } from "../utils/Redis/getSession";
 import sql from 'mssql';
 import { numeroALetra } from "../utils/numeroALetra";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
 import { SellsDetailsInterface, SellsInterface } from "../interface/sells";
-import { UnauthorizedError, ValidationError } from "../errors/CustomError";
+import { ValidationError } from "../errors/CustomError";
 import OrderInterface from "../interface/order";
+import { UserWebSessionInterface } from "../interface/user";
 
 interface postOrderServiceInterface {
-    sessionId: string;
+    userSession: UserWebSessionInterface;
     Total: number;
     Subtotal: number;
     sellsDetails: Partial<SellsDetailsInterface>[];
@@ -17,20 +17,16 @@ interface postOrderServiceInterface {
 };
 
 const postOrderService = async ({
-    sessionId,
+    userSession,
     Total,
     Subtotal,
     sellsDetails,
     sellsData
 }: postOrderServiceInterface): Promise<{ folio: string }> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    };
-    const { Serverweb, Baseweb, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -42,8 +38,17 @@ const postOrderService = async ({
     const TotalImpuesto = Total - Subtotal;
     const CantLetra = numeroALetra(Total);
 
+
     const xmlDataSales = await convertArrayToXml(sellsData);
     const xmlDataSalesDetails = await convertArrayToXml(sellsDetails);
+
+    if(!Id_Almacen) {
+        throw new ValidationError("Id Almacen necesario")
+    };
+
+    if(!Id_Cliente) {
+        throw new ValidationError("Id Cliente necesario")
+    }
 
     const result = await request
         .input('xmlDataSales', sql.Xml, xmlDataSales)
@@ -67,23 +72,17 @@ const postOrderService = async ({
 };
 
 interface getOrderServiceInterface {
-    sessionId: string;
+    userSession: UserWebSessionInterface;
     folio: string;
 }
 
 const getOrderService = async ({
-    sessionId,
+    userSession,
     folio
 }: getOrderServiceInterface): Promise<{ order: OrderInterface }> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-
-    };
-    const { Serverweb, Baseweb, Id_Cliente, TipoDocOO } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL, Id_Cliente, TipoDocOO } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -91,9 +90,7 @@ const getOrderService = async ({
     const getOrderQuery = orderQuerys.getOrder;
 
     const request = await pool.request()
-        .input('Id_Cliente', sql.Int, Id_Cliente)
         .input('folio', sql.Int, folio)
-        .input('TipoDocOO', TipoDocOO)
         .query(getOrderQuery);
 
     const order = request.recordset[0];
@@ -104,27 +101,20 @@ const getOrderService = async ({
 };
 
 interface getAllOrdersServiceInterface {
-    sessionId: string;
+    userSession: UserWebSessionInterface;
     page: number;
     limit: number;
 }
 
 const getAllOrdersService = async ({
-    sessionId,
+    userSession,
     page,
     limit
 }: getAllOrdersServiceInterface): Promise<{ allOrders: OrderInterface[] }> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
+    const { ServidorSQL, BaseSQL, TipoDocOO, Id_Cliente } = userSession;
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-
-    }
-
-    const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
-
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -149,23 +139,17 @@ const getAllOrdersService = async ({
 interface getOrderDetailsSellsInterface {
     PageNumber: number;
     folio: string;
-    sessionId: string;
+    userSession: UserWebSessionInterface;
 }
 
 const getOrderDetailsSells = async ({
     PageNumber,
     folio,
-    sessionId
+    userSession
 }: getOrderDetailsSellsInterface): Promise<OrderInterface[]> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-
-    };
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -187,18 +171,11 @@ const getOrderDetailsSells = async ({
     return orderDetails;
 };
 
-const getTotalAllOrdersService = async (sessionId: string): Promise<{ total: number }> => {
+const getTotalAllOrdersService = async (userSession: UserWebSessionInterface): Promise<{ total: number }> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
+    const { ServidorSQL, BaseSQL, TipoDocOO, Id_Cliente } = userSession;
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-
-    }
-
-    const { Serverweb, Baseweb, TipoDocOO, Id_Cliente } = userFR;
-
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -219,22 +196,16 @@ const getTotalAllOrdersService = async (sessionId: string): Promise<{ total: num
 
 interface getTotalOrderDetailsSellsInterface {
     folio: string;
-    sessionId: string;
+    userSession: UserWebSessionInterface;
 };
 
 const getTotalOrderDetailsService = async ({
     folio,
-    sessionId
-}: getTotalOrderDetailsSellsInterface): Promise<number> => {
+    userSession
+}: getTotalOrderDetailsSellsInterface): Promise<{ total: number }> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-
-    };
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -246,7 +217,7 @@ const getTotalOrderDetailsService = async ({
 
     const total = request.recordset[0].TotalCount
 
-    return total;
+    return { total };
 };
 
 export {

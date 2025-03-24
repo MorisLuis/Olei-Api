@@ -3,9 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateJWTWeb = exports.validateJWT = exports.validateJWTDB = void 0;
+exports.validateJWTWeb = exports.validateJWT = exports.validateJWTDB = exports.authMiddleware = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const CustomError_1 = require("../errors/CustomError");
+const server_1 = require("../models/server");
 // Middleware to validate JWT from first login. (App)
 const validateJWTDB = (req, _res, next) => {
     const token = req.headers['authorization']?.split(' ')[1];
@@ -66,4 +67,37 @@ const validateJWTWeb = async (req, res, next) => {
     }
 };
 exports.validateJWTWeb = validateJWTWeb;
+const authMiddleware = async (req, res, next, isLogin) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({
+            ok: false,
+            message: 'Access denied. Token missing or invalid.',
+        });
+    }
+    try {
+        const decoded = (await jsonwebtoken_1.default.verify(token, 's3Cr3t' || ''));
+        const { sessionId } = decoded;
+        req.sessionId = sessionId;
+        return server_1.redisClient?.get(`session:${sessionId}`, (err, sessionData) => {
+            if (err || !sessionData) {
+                return res.status(401).json({ message: 'Sesión no válida' });
+            }
+            const session = JSON.parse(sessionData);
+            console.log({ isLogin });
+            // Verificar si las conexiones requeridas están activas
+            if (!isLogin && (!session.userConected || !session.serverConected)) {
+                return res.status(403).json({ message: 'Server connection required' });
+            }
+            req.sessionId = sessionId;
+            req.session = JSON.parse(sessionData);
+            return next();
+        });
+    }
+    catch (error) {
+        return next(new CustomError_1.UnauthorizedError(`Fallo la autenticación del token: ${error}`));
+    }
+};
+exports.authMiddleware = authMiddleware;
 //# sourceMappingURL=validate-jwt.js.map

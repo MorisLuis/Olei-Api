@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
 import { dbConnection } from '../../database';
-import { handleGetSession } from '../../utils/Redis/getSession';
 import { productsWebQuerys } from '../../database/querys/productsWeb';
 import { getProductByStockAndCodeBarSchema, getProductsByStockQuerySchema } from '../../validations/productsValidations';
 import { getProductByStockAndCodeBarService, getProductsByStockService, searchProductByStockService } from '../../services/productsServices';
@@ -13,14 +12,8 @@ const getProducById = async (req: Request, res: Response, next: NextFunction): P
         const { id } = req.params;
         const { Marca } = req.query;
 
-        const sessionId = req.sessionID;
-        const { user: userFR } = await handleGetSession({ sessionId });
-
-        if (!userFR) {
-            return next(new UnauthorizedError('Usuario no encontrado en la sesión'));
-        }
-
-        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
+        const userSession = req.session;
+        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userSession;
         const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
         if (!pool) {
@@ -30,8 +23,8 @@ const getProducById = async (req: Request, res: Response, next: NextFunction): P
         let query = productsWebQuerys.getProducById
 
         if (
-            userFR.BaseSQL === 'OLEIDB1_ROSCO' ||
-            userFR.BaseSQL === 'OLEIDB1_ROSCO_TEST'
+            userSession.BaseSQL === 'OLEIDB1_ROSCO' ||
+            userSession.BaseSQL === 'OLEIDB1_ROSCO_TEST'
         ) {
             // We have to modify query to ROSCO
             query = productsWebQuerys.getProducByIdROSCO
@@ -53,14 +46,18 @@ const getProducById = async (req: Request, res: Response, next: NextFunction): P
     }
 }
 
-const getProductsByStock = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+const getProductsByStock = async (req: Request, res: Response, next: NextFunction): Promise<Response | void>  => {
 
     try {
         const { PageNumber, PageSize } = getProductsByStockQuerySchema.parse(req.query);
-        const sessionId = req.sessionID;
+        const userSession = req.session;
+
+        if (!userSession) {
+            throw new UnauthorizedError('Sesion terminada')
+        }
 
         const { products } = await getProductsByStockService({
-            sessionId,
+            userSession,
             PageNumber,
             PageSize
         })
@@ -74,10 +71,10 @@ const getProductsByStock = async (req: Request, res: Response, next: NextFunctio
 
 const getTotalOfProductsByStock = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
-        const sessionId = req.sessionID;
+        const userSession = req.session;
 
         const { products: TotalProductos } = await getProductsByStockService({
-            sessionId,
+            userSession,
             getTotal: true
         })
 
@@ -92,13 +89,13 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
 
     try {
         const { CodBar, Codigo, SKU } = getProductByStockAndCodeBarSchema.parse(req.query);
-        const sessionId = req.sessionID;
+        const userSession = req.session;
 
         const { productByStockAndCodeBar } = await getProductByStockAndCodeBarService({
             CodBar,
             Codigo,
             SKU,
-            sessionId
+            userSession
         })
 
         res.json(productByStockAndCodeBar)
@@ -112,10 +109,9 @@ const searchProductInventory = async (req: Request, res: Response, next: NextFun
 
     try {
         const { searchTerm } = searchProductInventoryQuerySchema.parse(req.query);
-        const sessionId = req.sessionID;
-        console.log({sessionId})
+        const userSession = req.session;
         const { products } = await searchProductByStockService({
-            sessionId,
+            userSession,
             searchTerm: searchTerm,
             withCodebar: true
         })
@@ -132,9 +128,9 @@ const searchProductInventoryWithoutCodebar = async (req: Request, res: Response,
     try {
         const { searchTerm } = searchProductInventoryQuerySchema.parse(req.query);
 
-        const sessionId = req.sessionID;
+        const userSession = req.session;
         const { products } = await searchProductByStockService({
-            sessionId,
+            userSession,
             searchTerm: searchTerm,
             withCodebar: false
         })

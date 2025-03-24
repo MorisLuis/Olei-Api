@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const typeofmovements_1 = require("../controllers/typeofmovements");
-const validate_jwt_1 = require("../helpers/validate-jwt");
+const validateJWT_1 = require("../middleware/validateJWT");
 const router = (0, express_1.Router)();
-router.get('/', validate_jwt_1.validateJWT, typeofmovements_1.getTypeofmovements);
+router.get('/', validateJWT_1.validateJWT, typeofmovements_1.getTypeofmovements);
 exports.default = router;
 //# sourceMappingURL=typeofmovementsRouter.js.map

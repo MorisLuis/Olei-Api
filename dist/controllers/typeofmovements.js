@@ -6,17 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTypeofmovements = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
-const getSession_1 = require("../utils/Redis/getSession");
-const CustomError_1 = require("../errors/CustomError");
 const getTypeofmovements = async (req, res, next) => {
     try {
-        const sessionId = req.sessionID;
-        const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
-        if (!userFR) {
-            throw new CustomError_1.UnauthorizedError('Sesion terminada');
-        }
-        ;
-        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, userId } = userFR;
+        const session = req.session;
+        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, userId } = session;
         const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
         const request = pool.request();
         request.input('Id_Usuario', mssql_1.default.VarChar(50), userId);

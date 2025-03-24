@@ -1,29 +1,23 @@
 import { dbConnectionWeb } from "../database";
 import { celendarQuerys } from "../database/querys/calendar";
-import { UnauthorizedError, ValidationError } from "../errors/CustomError";
+import { ValidationError } from "../errors/CustomError";
 import MeetingInterface from "../interface/meeting";
-import { handleGetWebSession } from "../utils/Redis/getSession";
+import { UserWebSessionInterface } from "../interface/user";
 
 interface getCalendarServiceInterface {
-    sessionId: string;
+    userSession: UserWebSessionInterface;
     Mes: string;
     Anio: string
 }
 
 const getCalendarTaskByMonthService = async ({
-    sessionId,
+    userSession,
     Mes,
     Anio
 }: getCalendarServiceInterface): Promise<MeetingInterface[]> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -42,23 +36,17 @@ const getCalendarTaskByMonthService = async ({
 
 
 interface getCalendarTaskByDayServiceInterface {
-    sessionId: string;
+    userSession: UserWebSessionInterface;
     Day: string;
 }
 
 const getCalendarTaskByDayService = async ({
-    sessionId,
+    userSession,
     Day
 }: getCalendarTaskByDayServiceInterface)  : Promise<MeetingInterface[]> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -75,27 +63,21 @@ const getCalendarTaskByDayService = async ({
 };
 
 interface getCalendarByMonthAndClientServiceInterface {
-    sessionId: string;
+    userSession: UserWebSessionInterface;
     Mes: number | string;
     Anio: number | string;
     Id_Cliente: number;
 }
 
 const getCalendarTaskByMonthAndClientService = async ({
-    sessionId,
+    userSession,
     Mes,
     Anio,
     Id_Cliente
 }: getCalendarByMonthAndClientServiceInterface) : Promise<MeetingInterface[]>  => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');

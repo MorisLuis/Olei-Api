@@ -6,14 +6,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.reportsCobranzaService = void 0;
 const sells_1 = require("../database/querys/sells");
 const exceljs_1 = __importDefault(require("exceljs"));
-const validateSession_1 = require("../helpers/validateSession");
 const excelColumnsConfig_1 = __importDefault(require("../utils/excelColumnsConfig"));
 const createPool_1 = require("../helpers/createPool");
 const CustomError_1 = require("../errors/CustomError");
 ;
-const reportsCobranzaService = async ({ sessionId, PageNumber, Id_Cliente, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, res }) => {
-    const { user } = await (0, validateSession_1.validateSession)(sessionId);
-    const pool = await (0, createPool_1.createPool)(user.Serverweb, user.Baseweb);
+const reportsCobranzaService = async ({ userSession, PageNumber, Id_Cliente, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, res }) => {
+    if (!userSession) {
+        throw new CustomError_1.UnauthorizedError('Sesion terminada');
+    }
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await (0, createPool_1.createPool)(ServidorSQL, BaseSQL);
+    if (!pool) {
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
+    }
     const data = await fetchDataInBatches({
         pool,
         PageNumber,

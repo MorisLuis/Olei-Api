@@ -1,12 +1,10 @@
- 
-
 import sql from 'mssql';
 import config from "../config";
 
 let mainPool: sql.ConnectionPool | null = null;
 const connectionPools: Map<string, sql.ConnectionPool> = new Map(); // Mapa para almacenar las conexiones activas
 const MAX_CONNECTIONS = 10; // Límite de conexiones simultáneas
-const getPoolKey = (server: string, base: string) => `${server}-${base}`; // Función para generar una clave única por servidor y base de datos
+const getPoolKey = (server: string, base: string) => `${server.trim()}-${base.trim()}`; // Función para generar una clave única por servidor y base de datos
 
 
 // Conexion App
@@ -43,10 +41,10 @@ export const dbConnection = async (server: string, base: string, user: string, p
         await pool.connect();
         connectionPools.set(poolKey, pool);
 
-        console.log(`✅ Conectado a SQL Server: ${server}, DB: ${base}`);
+        console.log(`✅ Conectado a SQL Server: ${server.trim()}, DB: ${base.trim()}`);
         return pool;
     } catch (error) {
-        console.error(`❌ Error al conectar con SQL Server (${server} - ${base}):`, error);
+        console.error(`❌ Error al conectar con SQL Server (${server.trim()} - ${base.trim()}):`, error);
         throw error;
     }
 };
@@ -71,8 +69,8 @@ export const dbConnectionWeb = async (server: string, base: string) : Promise<sq
     const dbConfig: sql.config = {
         user: config.dbUser,
         password: config.dbPassword,
-        server: server,
-        database: base,
+        server: server.trim(),
+        database: base.trim(),
         options: {
             encrypt: true,
             trustServerCertificate: true
@@ -85,10 +83,10 @@ export const dbConnectionWeb = async (server: string, base: string) : Promise<sq
         await pool.connect();
         connectionPools.set(poolKey, pool);
 
-        console.log(`✅ Conectado a SQL Server: ${server}, DB: ${base}`);
+        console.log(`✅ Conectado a SQL Server: ${server.trim()}, DB: ${base.trim()}`);
         return pool;
     } catch (error) {
-        console.error(`❌ Error al conectar con SQL Server (${server} - ${base}):`, error);
+        console.error(`❌ Error al conectar con SQL Server (${server.trim()} - ${base.trim()}):`, error);
         throw error;
     }
 };

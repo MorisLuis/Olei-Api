@@ -10,8 +10,8 @@ import {
     getTotalOfProductsByStock,
     
 } from "../controllers/products/products";
-import { validateJWT, validateJWTWeb } from "../helpers/validate-jwt";
 import { getProducByIdWeb, getProducts, getTotalProducts, searchProduct } from "../controllers/products/productsWeb";
+import { validateJWT, validateJWTWeb } from "../middleware/validateJWT";
 
 
 const router = Router()

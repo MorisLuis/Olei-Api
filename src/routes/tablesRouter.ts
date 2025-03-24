@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { getTables } from "../controllers/tables";
-import { validateJWTWeb } from "../helpers/validate-jwt";
+import { validateJWT } from "../middleware/validateJWT";
 
 
 const router = Router()
 
-router.get("/", validateJWTWeb, getTables)
+router.get("/", validateJWT, getTables)
 
 export default router;

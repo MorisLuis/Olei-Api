@@ -45,9 +45,9 @@ const sendEmailWithPDF = async (req, res, next) => {
     const { destinatario, remitente, subject, text, nombreRemitente } = emailValidations_1.emailCobranzaBodySchema.parse(req.body);
     const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaQuerySchema.parse(req.query);
     const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
-    const sessionId = req.sessionID;
+    const userSession = req.sessionWeb;
     const sells = await (0, sellsDocsServices_1.getAllCobranzaService)({
-        sessionId,
+        userSession,
         Id_Cliente: client,
         PageNumber: PageNumber || 1,
         SellsOrderCondition: sellsOrderCondition,

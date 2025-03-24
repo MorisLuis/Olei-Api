@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.loginAppService = exports.loginDBAppService = void 0;
 const database_1 = require("../database");
 const CustomError_1 = require("../errors/CustomError");
-const getSession_1 = require("../utils/Redis/getSession");
 const mssql_1 = __importDefault(require("mssql"));
 const loginDBAppService = async ({ IdUsuarioOLEI, PasswordOLEI }) => {
     // Connection to server
@@ -36,13 +35,8 @@ const loginDBAppService = async ({ IdUsuarioOLEI, PasswordOLEI }) => {
 };
 exports.loginDBAppService = loginDBAppService;
 ;
-const loginAppService = async ({ sessionId, Id_Usuario, password }) => {
-    // Verificar la sesión
-    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
-    if (!userFR) {
-        throw new CustomError_1.UnauthorizedError('Sesión terminada');
-    }
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+const loginAppService = async ({ session, Id_Usuario, password }) => {
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = session;
     // Conectar a la base de datos
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
@@ -52,7 +46,7 @@ const loginAppService = async ({ sessionId, Id_Usuario, password }) => {
     if (Id_Usuario.trim() === "" || password.trim() === "") {
         throw new CustomError_1.ValidationError('Necesario escribir correo y contraseña');
     }
-    // Ejecutar el procedimiento almacenado
+    // Ejecutar el 'stores procedure'
     const result = await pool.request()
         .input('Id_Usuario', mssql_1.default.VarChar(50), Id_Usuario)
         .input('Password', mssql_1.default.VarChar(50), password)

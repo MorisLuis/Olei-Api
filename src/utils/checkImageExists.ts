@@ -1,10 +1,10 @@
 import fetch from 'node-fetch';
-import PorductInterface from "../interface/product";
+import ProductInterface from "../interface/product";
 
 interface getImageInterface {
     baseSQL: string,
     Codigo: string,
-    product: PorductInterface
+    product: ProductInterface
 }
 
 export const getProductWithImages = async ({
@@ -25,9 +25,9 @@ export const getProductWithImages = async ({
         while (attempt < maxAttempts) {
             let imageUrl;
             if (attempt === 0) {
-                imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${Codigo.trim()}.jpg`;
+                imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB.trim()}/${Codigo.trim()}.jpg`;
             } else {
-                imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${Codigo.trim()}_${attempt}.jpg`;
+                imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB.trim()}/${Codigo.trim()}_${attempt}.jpg`;
             }
 
             // Verifica si la imagen existe
@@ -51,9 +51,9 @@ export const getProductWithImages = async ({
     return product
 };
 
-export const getProductsWithImage = async (products: PorductInterface[]): Promise<PorductInterface[]> => {
+export const getProductsWithImage = async (products: ProductInterface[]): Promise<ProductInterface[]> => {
     const productsWithImages = await Promise.all(
-        products.map(async (product: PorductInterface) => {
+        products.map(async (product: ProductInterface) => {
             let imageExists : boolean = false;
             if (product.imagen) {
                 imageExists = await checkImageExist(product.imagen);

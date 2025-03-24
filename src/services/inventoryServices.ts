@@ -1,87 +1,82 @@
 import { dbConnection } from "../database";
-import { productsQuerys } from "../database/querys/products";
-import { UnauthorizedError, ValidationError } from "../errors/CustomError";
+import { ValidationError } from "../errors/CustomError";
 import InventoryDetailsInterface from "../interface/inventoryDetails";
-import PorductInterface from "../interface/product";
-import { handleGetSession } from "../utils/Redis/getSession";
+import { UserSessionInterface } from "../interface/user";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
 import { currentTime } from "../utils/currentTime";
 import sql from 'mssql';
 
 interface postInventoryServiceInterface {
-    sessionId: string;
+    userSession: UserSessionInterface;
     inventoryDetails: Partial<InventoryDetailsInterface>[];
     typeOfMovement: { Accion: string, Id_TipoMovInv: number, Id_AlmDest: number };
-    Id_Usuario: string;
 }
 
 export const postInventoryService = async ({
-    sessionId,
+    userSession,
     inventoryDetails,
-    typeOfMovement,
-    Id_Usuario
-}: postInventoryServiceInterface): Promise<{ Folio: string }> => {
+    typeOfMovement
+}: postInventoryServiceInterface): Promise<{ Folio: number }> => {
 
-    const { user: userFR } = await handleGetSession({ sessionId });
+    try {
+        /* TodosAlmacenes PENDING */
+        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, userId } = userSession;
+        const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
+        if (!pool) {
+            throw new ValidationError('Error al conectarse a base de datos principal');
+        };
 
-    /* TodosAlmacenes PENDING */
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen } = userFR;
-    const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
+        const Accion = typeOfMovement.Accion;
+        const Id_TipoMovInv = typeOfMovement.Id_TipoMovInv;
+        const ExpectedRows = inventoryDetails.length;
+        const ExpectedTotalQuantity: number = inventoryDetails.reduce((sum, item) => sum + (item.Cantidad ?? 0), 0);
 
-    if (!pool) {
-        throw new ValidationError('Error al conectarse a base de datos principal');
-    };
+        const transaction = new sql.Transaction(pool);
+        await transaction.begin();
+        const request = new sql.Request(transaction);
 
-    const Accion = typeOfMovement.Accion;
-    const Id_TipoMovInv = typeOfMovement.Id_TipoMovInv;
-    const ExpectedRows = inventoryDetails.length;
-    const ExpectedTotalQuantity = inventoryDetails.reduce((sum: any, item: any) => sum + item.Cantidad, 0);
+        // Si Accion es igual a 3, es traspaso. Si no es entrada o salida.
+        const AlmacenDestino = typeOfMovement.Accion === '3' ? typeOfMovement?.Id_AlmDest : Id_Almacen
 
-    const transaction = new sql.Transaction(pool);
-    await transaction.begin();
-    const request = new sql.Request(transaction);
+        // Get the inventory data.
+        const inventoryData = {
+            Estado: 1, // If it were 0 it would mean a inventory was cancelled
+            Fecha: currentTime(),
+            Id_TipoMovInv: typeOfMovement?.Id_TipoMovInv,
+            Id_AlmacenDest: AlmacenDestino,
+            SwPendiente: 0,
+            Descripcion: '',
+            SwTr: 0,
+            FolioReq: null,
+            AlmReq: 0,
+        };
 
-    // Si Accion es igual a 3, es traspaso. Si no es entrada o salida.
-    const AlmacenDestino = typeOfMovement.Accion === '3' ? typeOfMovement?.Id_AlmDest : Id_Almacen
+        const xmlDataInventory = await convertArrayToXml(inventoryData);
+        const xmlDataInventoryDetails = await convertArrayToXml(inventoryDetails);
 
-    // Get the inventory data.
-    const inventoryData = {
-        Estado: 1, // If it were 0 it would mean a inventory was cancelled
-        Fecha: currentTime(),
-        Id_TipoMovInv: typeOfMovement?.Id_TipoMovInv,
-        Id_AlmacenDest: AlmacenDestino,
-        SwPendiente: 0,
-        Descripcion: '',
-        SwTr: 0,
-        FolioReq: null,
-        AlmReq: 0,
-    };
+        const result = await request
+            .input('xmlDataInventory', sql.Xml, xmlDataInventory)
+            .input('xmlDataInventoryDetails', sql.Xml, xmlDataInventoryDetails)
+            .input('Accion', sql.Int, Accion)
+            .input('Id_TipoMovInv', sql.Int, Id_TipoMovInv)
+            .input('Id_Almacen', sql.Int, Id_Almacen)
+            .input('user', sql.NVarChar(50), userId)
+            .input('ExpectedRows', sql.Int, ExpectedRows)
+            .input('ExpectedTotalQuantity', sql.Decimal(18, 0), ExpectedTotalQuantity)
+            .output('Folio', sql.Int)
+            .execute('fn_ExecuteInventory');
 
-    const xmlDataInventory = await convertArrayToXml(inventoryData);
-    const xmlDataInventoryDetails = await convertArrayToXml(inventoryDetails);
+        const Folio = result.output.Folio;
 
-    const result = await request
-        .input('xmlDataInventory', sql.Xml, xmlDataInventory)
-        .input('xmlDataInventoryDetails', sql.Xml, xmlDataInventoryDetails)
-        .input('Accion', sql.Int, Accion)
-        .input('Id_TipoMovInv', sql.Int, Id_TipoMovInv)
-        .input('Id_Almacen', sql.Int, Id_Almacen)
-        .input('user', sql.NVarChar(50), Id_Usuario)
-        .input('ExpectedRows', sql.Int, ExpectedRows)
-        .input('ExpectedTotalQuantity', sql.Decimal(18, 0), ExpectedTotalQuantity)
-        .output('Folio', sql.Int)
-        .execute('fn_ExecuteInventory');
+        await transaction.commit();
 
-    const Folio = result.output.Folio;
+        return {
+            Folio
+        }
 
-    await transaction.commit();
-
-    return {
-        Folio
+    } catch (error) {
+        throw new ValidationError(`${error}`);
     }
 
 };

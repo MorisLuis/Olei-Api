@@ -3,16 +3,16 @@ import { dbConnection, dbConnectionWeb } from "../database";
 import { productsWebQuerys } from "../database/querys/productsWeb";
 import { productsQuerys } from "../database/querys/products";
 
-import { handleGetSession, handleGetWebSession } from "../utils/Redis/getSession";
 import { getProductWithImages } from "../utils/checkImageExists";
-import { UnauthorizedError, ValidationError } from "../errors/CustomError";
-import PorductInterface from "../interface/product";
+import { ValidationError } from "../errors/CustomError";
+import ProductInterface from "../interface/product";
 import { guessBarcodeType } from '../utils/identifyBarcodeType';
+import { UserSessionInterface, UserWebSessionInterface } from '../interface/user';
 
 
 // Web endpoints
 interface getProductsServiceInterface {
-    sessionId: string;
+    userSession: UserWebSessionInterface;
     page: number;
     limit: number;
     nombre: string;
@@ -22,23 +22,18 @@ interface getProductsServiceInterface {
 }
 
 const getProductsService = async ({
-    sessionId,
+    userSession,
     page,
     limit,
     nombre,
     marca,
     familia,
     folio
-}: getProductsServiceInterface): Promise<{ products: PorductInterface[] }> => {
+}: getProductsServiceInterface): Promise<{ products: ProductInterface[] }> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -58,7 +53,7 @@ const getProductsService = async ({
         .input('Id_Almacen', sql.Int, Id_Almacen)
         .input('page', sql.Int, page)
         .input('limit', sql.Int, limit)
-        .input('baseSQL', sql.VarChar, Baseweb ?? '')
+        .input('baseSQL', sql.VarChar, BaseSQL ?? '')
         .query(query);
 
     const products = result.recordset;
@@ -70,26 +65,21 @@ const getProductsService = async ({
 };
 
 interface getProducByIdWebServiceInterface {
-    sessionId: string;
+    userSession: UserWebSessionInterface;
     codigo: string;
     Marca: string;
 };
 
 const getProducByIdWebService = async ({
-    sessionId,
+    userSession,
     codigo,
     Marca
-}: getProducByIdWebServiceInterface): Promise<{ product: PorductInterface }> => {
+}: getProducByIdWebServiceInterface): Promise<{ product: ProductInterface }> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
+    const { ServidorSQL, BaseSQL, Id_ListPre, Id_Almacen } = userSession;
 
-    const { Serverweb, Baseweb, Id_ListPre, Id_Almacen } = userFR;
-
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -100,12 +90,12 @@ const getProducByIdWebService = async ({
         .input("Marca", Marca)
         .input("ListaPrecios", Id_ListPre)
         .input("Almacen", Id_Almacen)
-        .input('baseSQL', sql.VarChar, Baseweb || '')
+        .input('baseSQL', sql.VarChar, BaseSQL || '')
         .query(productsWebQuerys.getProducById);
 
     const productBefore = result?.recordset[0];
     const product = await getProductWithImages({
-        baseSQL: Baseweb,
+        baseSQL: BaseSQL,
         Codigo: productBefore.Codigo,
         product: productBefore
     });
@@ -117,7 +107,7 @@ const getProducByIdWebService = async ({
 };
 
 interface getTotalProductsServiceInterface {
-    sessionId: string;
+    userSession: UserWebSessionInterface;
     nombre: string;
     marca: string;
     familia: string;
@@ -125,22 +115,17 @@ interface getTotalProductsServiceInterface {
 }
 
 const getTotalProductsService = async ({
-    sessionId,
+    userSession,
     nombre,
     marca,
     familia,
     folio
 }: getTotalProductsServiceInterface): Promise<{ total: number }> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
+    const { ServidorSQL, BaseSQL, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userSession;
 
-    const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, SwImagenes, Id_Almacen } = userFR;
-
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -167,7 +152,7 @@ const getTotalProductsService = async ({
 };
 
 interface searchProductServiceInterface {
-    sessionId: string;
+    userSession: UserWebSessionInterface;
     nombre: string;
     marca: string;
     familia: string;
@@ -175,21 +160,16 @@ interface searchProductServiceInterface {
 }
 
 export const searchProductService = async ({
-    sessionId,
+    userSession,
     nombre,
     marca,
     familia,
     codigo
-}: searchProductServiceInterface): Promise<{ products: PorductInterface[] }> => {
+}: searchProductServiceInterface): Promise<{ products: ProductInterface[] }> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    };
-
-    const { Serverweb, Baseweb, Id_ListPre, SwSinStock, SwsinPrecio, Id_Almacen } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL, Id_ListPre, SwSinStock, SwsinPrecio, Id_Almacen } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -218,7 +198,7 @@ export const searchProductService = async ({
 
 // App endpoints
 interface getProductsByStockServiceInterface {
-    sessionId: string;
+    userSession: UserSessionInterface;
     PageSize?: number;
     PageNumber?: number;
 
@@ -226,19 +206,14 @@ interface getProductsByStockServiceInterface {
 };
 
 const getProductsByStockService = async ({
-    sessionId,
+    userSession,
     PageSize,
     PageNumber,
     getTotal = false
-}: getProductsByStockServiceInterface): Promise<{ products: PorductInterface[] }> => {
+}: getProductsByStockServiceInterface): Promise<{ products: ProductInterface[] }> => {
 
-    const { user: userFR } = await handleGetSession({ sessionId });
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userSession;
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
     if (!pool) {
@@ -267,24 +242,20 @@ const getProductsByStockService = async ({
 };
 
 interface getProductByStockAndCodeBarServiceInterface {
-    sessionId: string;
+    userSession: UserSessionInterface;
     CodBar: string;
     SKU: string;
     Codigo: string
 }
 
 const getProductByStockAndCodeBarService = async ({
-    sessionId,
+    userSession,
     CodBar,
     SKU,
     Codigo
-}: getProductByStockAndCodeBarServiceInterface) => {
+}: getProductByStockAndCodeBarServiceInterface) : Promise<{ productByStockAndCodeBar: ProductInterface[]}> => {
 
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) throw new UnauthorizedError('Sesion terminada')
-
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userSession;
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
     let isEAN13orUPC14 = false;
@@ -321,25 +292,19 @@ const getProductByStockAndCodeBarService = async ({
 }
 
 interface searchProductInventoryServiceInterface {
-    sessionId: string;
+    userSession: UserSessionInterface;
     searchTerm: string;
     // handle if we get products with codebas or not
     withCodebar: boolean
 }
 
 const searchProductByStockService = async ({
-    sessionId,
+    userSession,
     searchTerm,
     withCodebar
-}: searchProductInventoryServiceInterface): Promise<{ products: PorductInterface[] }> => {
+}: searchProductInventoryServiceInterface): Promise<{ products: ProductInterface[] }> => {
 
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
+    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userSession;
 
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 

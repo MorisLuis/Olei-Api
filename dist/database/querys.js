@@ -5,15 +5,15 @@ exports.querys = {
     //Auth
     authWeb: ` 
         SELECT 
-            U.Id_UsuarioOOL,
-            U.PasswordOOL,
             U.ServidorSQL,
             U.BaseSQL,
-            U.TipoUsuario,
+            U.Id_UsuarioOOL,
+            U.PasswordOOL,
             U.Id_UsuarioOLEI,
             U.PasswordOLEI,
-            U.Id_ClienteDBCLIENTES,
+            U.TipoUsuario,
             U.Id_Cliente,
+            U.Id_Almacen,
             UC.SwImagenes, 
             UC.SwSinStock, 
             UC.SwsinPrecio, 

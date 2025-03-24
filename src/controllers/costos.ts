@@ -4,20 +4,20 @@ import { updateCodbarQuerySchema } from '../validations/costosValidations';
 
 const updateCostos = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
 
-    const sessionId = req.sessionID;
+    const userSession = req.session;
     const { codigo: codigoParam, Id_Marca } = updateCodbarQuerySchema.parse(req.query);
     const body = req.body;
 
     try {
-        const resp = await updateCodebarService(
-            sessionId,
+        const { CodBar, codigo } = await updateCodebarService(
+            userSession,
             codigoParam,
             Id_Marca,
             body
         );
 
         return res.json({
-            resp
+            CodBar, codigo
         })
     } catch (error) {
         return next(error)

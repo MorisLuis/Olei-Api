@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { validateJWT } from "../helpers/validate-jwt";
 import { postInventory } from "../controllers/inventory";
 import { searchProductInventory, searchProductInventoryWithoutCodebar } from "../controllers/products/products";
+import { validateJWT } from "../middleware/validateJWT";
 
 
 const router = Router();

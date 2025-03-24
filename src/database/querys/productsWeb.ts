@@ -17,7 +17,7 @@ export const productsWebQuerys = {
                 PR.Precio,
                 TRIM(E.Codigo) AS CodigoExistencia,
                 CT.Impto AS Impuesto,
-                'https://oleistorage.blob.core.windows.net/' +  LOWER(SUBSTRING(@baseSQL, CHARINDEX('_', @baseSQL) + 1, LEN(@baseSQL))) + '/' + TRIM(P.Codigo) + '.jpg' AS imagen,
+                'https://oleistorage.blob.core.windows.net/' +  LOWER(SUBSTRING(TRIM(@baseSQL), CHARINDEX('_', TRIM(@baseSQL)) + 1, LEN(@baseSQL))) + '/' + TRIM(P.Codigo) + '.jpg' AS imagen,
                 ROW_NUMBER() OVER (ORDER BY P.Codigo) AS RowNum
             FROM [dbo].[PRODUCTOS] P
             JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia

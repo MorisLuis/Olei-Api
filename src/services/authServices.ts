@@ -2,28 +2,9 @@ import { ConnectionPool } from "mssql";
 import { dbConnectionMain, querys } from "../database";
 import moment from "moment";
 import { NotFoundError, UnauthorizedError, ValidationError } from "../errors/CustomError";
+import { UserWebSessionInterface } from "../interface/user";
 
-interface UserResponseInterface {
-    SwsinPrecio: boolean;
-    TipoDocOO: number;
-    ServidorSQL: string;
-    BaseSQL: string;
-    Vigencia: string; // Suponiendo que Vigencia es una cadena
-    Id_ListPre: number;
-    UsuarioSQL: string;
-    PasswordOOL: string; // Esta es la propiedad que estás validando en la función
-
-    Id_UsuarioOOL: string, 
-    Nombre: string,
-    Id_Cliente: number,
-    SwImagenes: boolean,
-    SwSinStock: boolean,
-    TipoUsuario: string,
-    Id_Almacen: number
-}
-
-
-const loginWebService = async (email: string, password: string): Promise<UserResponseInterface> => {
+const loginWebService = async (email: string, password: string): Promise<UserWebSessionInterface> => {
     if (email === "" || password === "") {
         throw new ValidationError('Necesario escribir correo y contraseña');
     }
@@ -33,7 +14,7 @@ const loginWebService = async (email: string, password: string): Promise<UserRes
         throw new ValidationError('Error al conectarse a base de datos principal');
     }
 
-    const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await getUserByEmailWeb(mainPool, email);
+    const user = await getUserByEmailWeb(mainPool, email);
 
     if (!user) {
         throw new NotFoundError(`No se encontro el usuario: ${email}`);
@@ -43,28 +24,19 @@ const loginWebService = async (email: string, password: string): Promise<UserRes
         throw new UnauthorizedError(`Contraseña incorrecta`);
     }
 
-    const isExpired = await isSubscriptionExpired(Vigencia);
+    const isExpired = await isSubscriptionExpired(user.Vigencia);
 
     if (isExpired) {
         throw new UnauthorizedError(`Cuenta de usuario vencida`);
     }
 
-    return {
-        SwsinPrecio,
-        TipoDocOO,
-        ServidorSQL,
-        BaseSQL,
-        Vigencia,
-        Id_ListPre,
-        UsuarioSQL,
-        ...user
-    };
+    return user;
 };
 
 // Utils
-const getUserByEmailWeb = async (mainPool: ConnectionPool, email: string): Promise<UserResponseInterface> => {
-    const query_DB = querys.authWeb;
-    const result = await mainPool.request().input('email', email).query(query_DB);
+const getUserByEmailWeb = async (mainPool: ConnectionPool, email: string): Promise<UserWebSessionInterface> => {
+    const query = querys.authWeb;
+    const result = await mainPool.request().input('email', email).query(query);
     const user = result?.recordset[0]
 
     if (!user) {

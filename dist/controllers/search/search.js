@@ -6,9 +6,9 @@ const searchValidations_1 = require("../../validations/searchValidations");
 const getFamilias = async (req, res, next) => {
     try {
         const { searchTerm } = searchValidations_1.simpleSearchQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const { familias } = await (0, searchServices_1.searchFamiliaService)({
-            sessionId,
+            userSession,
             searchTerm
         });
         return res.json({
@@ -23,9 +23,9 @@ exports.getFamilias = getFamilias;
 const getMarcas = async (req, res, next) => {
     try {
         const { searchTerm } = searchValidations_1.simpleSearchQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const { marcas } = await (0, searchServices_1.searchMarcaService)({
-            sessionId,
+            userSession,
             searchTerm
         });
         return res.json({
@@ -40,9 +40,9 @@ exports.getMarcas = getMarcas;
 const getCodigos = async (req, res, next) => {
     try {
         const { searchTerm } = searchValidations_1.simpleSearchQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const { codigos } = await (0, searchServices_1.searchCodigoService)({
-            sessionId,
+            userSession,
             searchTerm
         });
         return res.json({

@@ -1,37 +1,32 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logout = exports.renewWeb = exports.loginWeb = void 0;
-const generate_jwt_1 = require("../../helpers/generate-jwt");
-const getSession_1 = require("../../utils/Redis/getSession");
-const deleteRedis_1 = require("../../utils/Redis/deleteRedis");
 const authServices_1 = require("../../services/authServices");
 const CustomError_1 = require("../../errors/CustomError");
+const generate_jwt_1 = require("../../helpers/generate-jwt");
+const uuid_1 = require("uuid");
+const generate_redis_1 = require("../../helpers/generate-redis");
 const loginWeb = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-        const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await (0, authServices_1.loginWebService)(email, password);
-        const { Id_UsuarioOOL, Nombre, Id_Cliente, SwImagenes, SwSinStock, TipoUsuario, Id_Almacen } = user;
+        const user = await (0, authServices_1.loginWebService)(email, password);
         const datosDelUsuario = {
-            Id: Id_UsuarioOOL.trim(),
-            Nombre: Nombre.trim(),
-            Serverweb: ServidorSQL.trim(),
-            Baseweb: BaseSQL.trim(),
-            Id_Cliente: Id_Cliente || 0,
-            Id_ListPre,
-            Vigencia: Vigencia,
-            SwImagenes: SwImagenes,
-            SwSinStock: SwSinStock,
-            SwsinPrecio,
-            TipoDocOO,
-            TipoUsuario: TipoUsuario,
-            Id_Almacen: Id_Almacen,
-            Id_Usuario: UsuarioSQL,
-            PrecioIncIVA: 0,
+            ...user,
             from: 'web'
         };
-        req.session.userWeb = datosDelUsuario;
-        // Generar token JWT
-        const token = await (0, generate_jwt_1.generateWebJWT)({ Id: user.Id_UsuarioOOL.trim(), sessionRedis: req.sessionID });
+        // Generar un ID de sesión único
+        const sessionId = (0, uuid_1.v4)();
+        const token = (0, generate_jwt_1.generateAccessTokenWeb)(sessionId);
+        const refreshToken = (0, generate_jwt_1.generateRefreshTokenWeb)(sessionId);
+        // Guardar la sesión en Redis con expiración (1 hora)
+        await (0, generate_redis_1.generateRedisSessionWeb)(sessionId, datosDelUsuario);
+        // Enviar el refreshToken en cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        });
         return res.json({
             user: datosDelUsuario,
             token
@@ -45,29 +40,27 @@ exports.loginWeb = loginWeb;
 const renewWeb = async (req, res, next) => {
     try {
         // Get session from REDIS.
-        const sessionId = req.sessionRedis;
-        const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-        if (!userFR) {
-            throw new CustomError_1.UnauthorizedError('Sesion terminada');
+        const userSession = req.sessionWeb;
+        const sessionId = req.sessionId;
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            return res.status(401).json({ message: "No hay refresh token" });
         }
-        const { Id, TipoUsuario, Serverweb, Baseweb } = userFR;
-        if (!Id && !TipoUsuario) {
-            return res.status(401).json({ message: 'Id and rol are neccessary' });
-        }
-        ;
-        if (!Serverweb && !Baseweb) {
-            return res.status(401).json({ message: 'Server and base data is neccessary' });
-        }
-        ;
-        let token;
-        token = await (0, generate_jwt_1.generateWebJWT)({ Id, sessionRedis: sessionId });
-        if (!token) {
-            return res.status(401).json({ message: 'Failed to generate token' });
-        }
-        ;
+        // Guardar la sesión en Redis con expiración (1 hora)
+        await (0, generate_redis_1.generateRedisSessionWeb)(sessionId, userSession);
+        // Generar el token JWT que incluye el sessionId
+        const newToken = (0, generate_jwt_1.generateAccessTokenWeb)(sessionId);
+        const newRefreshToken = (0, generate_jwt_1.generateRefreshTokenWeb)(sessionId);
+        // Enviar el refreshToken en cookie
+        res.cookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        });
         return res.json({
-            user: userFR,
-            token
+            user: userSession,
+            token: newToken
         });
     }
     catch (error) {
@@ -77,11 +70,10 @@ const renewWeb = async (req, res, next) => {
 exports.renewWeb = renewWeb;
 const logout = async (req, res, next) => {
     try {
-        const sessionId = req.sessionRedis;
-        if (!sessionId) {
+        const sessionId = req.sessionId;
+        if (!sessionId)
             throw new CustomError_1.UnauthorizedError('Sesion terminada');
-        }
-        await (0, deleteRedis_1.handleDeleteRedisSession)({ sessionId });
+        await (0, generate_redis_1.handleDeleteRedisSession)(sessionId);
         return res.json({ ok: true });
     }
     catch (error) {

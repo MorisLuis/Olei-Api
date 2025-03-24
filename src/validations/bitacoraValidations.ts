@@ -7,12 +7,12 @@ export const getMeetingsQuerySchema = z.object({
         .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number())
         .refine((val) => val > 0 && val < 100, { message: "PageNumber debe ser un número positivo mayor que 0 y menor que 100" }),
 
-    meetginOrderCondition: z
+    meetingOrderCondition: z
         .string()
         .refine(
             (val): val is MeetingOrderConditionType =>
                 val === undefined || MeetingOrderCondition.includes(val as MeetingOrderConditionType),
-            { message: "meetginOrderCondition debe ser 'Nombre', 'Saldo', 'Total'" }
+            { message: "meetingOrderCondition debe ser 'Nombre', 'Saldo', 'Total'" }
         ),
 
     FilterTipoContacto: z.union([z.string(), z.number()]).optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),

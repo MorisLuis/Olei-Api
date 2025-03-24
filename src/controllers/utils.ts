@@ -1,22 +1,16 @@
 import { Request, Response } from 'express';
 import { dbConnectionWeb } from '../database';
-import { handleGetWebSession } from '../utils/Redis/getSession';
 import { sellsQuery } from '../database/querys/sells';
 import { ConnectionPool } from 'mssql';
 import ExcelJS from 'exceljs'
-import { NotFoundError, UnauthorizedError } from '../errors/CustomError';
+import { NotFoundError } from '../errors/CustomError';
 import { SellsInterface } from '../interface/sells';
 
 const getBanner = async (req: Request, res: Response) : Promise<Response | void> => {
 
-    const sessionId = req.sessionRedis;
-    const { user: userFR } = await handleGetWebSession({ sessionId });
+    const userSession = req.sessionWeb;
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    };
-
-    const database = userFR?.Baseweb
+    const database = userSession?.BaseSQL
     const databaseSplit = database?.split('_')
     const newPath = databaseSplit?.[1]?.toLowerCase().trim();
     const banner = newPath ? `https://oleistorage.blob.core.windows.net/${newPath}/BANNER.png` : '/Banner_olei.png';
@@ -29,15 +23,10 @@ const getBanner = async (req: Request, res: Response) : Promise<Response | void>
 
 const getExcellTest = async (req: Request, res: Response) : Promise<Response | void> => {
 
-    const sessionId = req.sessionRedis;
-    const { user: userFR } = await handleGetWebSession({ sessionId });
+    const userSession = req.sessionWeb;
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    };
-
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     try {
         // Obtenemos los datos de la base de datos en lotes

@@ -1,7 +1,6 @@
 import { dbConnection, dbConnectionMain, querys } from "../database";
 import { NotFoundError, UnauthorizedError, ValidationError } from "../errors/CustomError";
-import { UserAuthenticateAndGetMovementResultInterface, ValidationResult, authResultInterface } from "../interface/user";
-import { handleGetSession } from "../utils/Redis/getSession";
+import { UserAuthenticateAndGetMovementResultInterface, UserSessionInterface, ValidationResult, authResultInterface } from "../interface/user";
 import sql from "mssql";
 
 interface loginDBAppServiceInterface {
@@ -47,25 +46,19 @@ const loginDBAppService = async ({
 }
 
 interface loginAppServiceInterface {
-    sessionId: string;
+    session: UserSessionInterface;
     Id_Usuario: string;
     password: string;
 };
 
 const loginAppService = async ({
-    sessionId,
+    session,
     Id_Usuario,
     password
 }: loginAppServiceInterface): Promise<{ userData: UserAuthenticateAndGetMovementResultInterface }> => {
 
 
-    // Verificar la sesión
-    const { user: userFR } = await handleGetSession({ sessionId });
-    if (!userFR) {
-        throw new UnauthorizedError('Sesión terminada');
-    }
-
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = session;
 
     // Conectar a la base de datos
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);

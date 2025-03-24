@@ -7,9 +7,9 @@ exports.getMeetingsQuerySchema = zod_1.z.object({
     PageNumber: zod_1.z
         .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number())
         .refine((val) => val > 0 && val < 100, { message: "PageNumber debe ser un número positivo mayor que 0 y menor que 100" }),
-    meetginOrderCondition: zod_1.z
+    meetingOrderCondition: zod_1.z
         .string()
-        .refine((val) => val === undefined || meeting_1.MeetingOrderCondition.includes(val), { message: "meetginOrderCondition debe ser 'Nombre', 'Saldo', 'Total'" }),
+        .refine((val) => val === undefined || meeting_1.MeetingOrderCondition.includes(val), { message: "meetingOrderCondition debe ser 'Nombre', 'Saldo', 'Total'" }),
     FilterTipoContacto: zod_1.z.union([zod_1.z.string(), zod_1.z.number()]).optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterCliente: zod_1.z.union([zod_1.z.string(), zod_1.z.number()]).optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     TipoContacto: zod_1.z

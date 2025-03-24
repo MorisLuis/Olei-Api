@@ -7,8 +7,8 @@ const zod_1 = require("zod");
 const getSells = async (req, res, next) => {
     try {
         const { PageNumber, sellsOrderCondition } = sellsValidations_1.getSellsQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis;
-        const sells = await (0, sellsDocsServices_1.getSellsService)(sessionId, PageNumber, sellsOrderCondition);
+        const userSession = req.sessionWeb;
+        const sells = await (0, sellsDocsServices_1.getSellsService)(userSession, PageNumber, sellsOrderCondition);
         return res.json(sells);
     }
     catch (error) {
@@ -25,10 +25,10 @@ exports.getSells = getSells;
 const getSellById = async (req, res, next) => {
     try {
         // Get session from REDIS.
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const { Serie, Id_Almacen, TipoDoc } = sellsValidations_1.getSellByIdQuerySchema.parse(req.query);
         const { folio } = sellsValidations_1.getSellByIdParamsSchema.parse(req.params);
-        const sell = await (0, sellsDocsServices_1.getSellByIdService)(sessionId, folio, Serie, Id_Almacen, TipoDoc);
+        const sell = await (0, sellsDocsServices_1.getSellByIdService)(userSession, folio, Serie, Id_Almacen, TipoDoc);
         return res.json(sell);
     }
     catch (error) {
@@ -46,9 +46,9 @@ const getSellsByClient = async (req, res, next) => {
     try {
         const { PageNumber, sellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart } = sellsValidations_1.getSellsByClientQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const sells = await (0, sellsDocsServices_1.getSellsByClientService)({
-            sessionId,
+            userSession,
             Id_Cliente: client,
             PageNumber,
             SellsOrderCondition: sellsOrderCondition,
@@ -77,9 +77,9 @@ const getCobranza = async (req, res, next) => {
         // Get session from REDIS.
         const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const sells = await (0, sellsDocsServices_1.getCobranzaService)({
-            sessionId,
+            userSession,
             Id_Cliente: client,
             PageNumber,
             SellsOrderCondition: sellsOrderCondition,
@@ -101,8 +101,8 @@ const getCobranza = async (req, res, next) => {
 exports.getCobranza = getCobranza;
 const getTotalSells = async (req, res, next) => {
     try {
-        const sessionId = req.sessionRedis;
-        const total = await (0, sellsDocsServices_1.getTotalSellsService)(sessionId);
+        const userSession = req.sessionWeb;
+        const total = await (0, sellsDocsServices_1.getTotalSellsService)(userSession);
         return res.json(total);
     }
     catch (error) {
@@ -115,7 +115,7 @@ const getTotalSellsByClient = async (req, res, next) => {
         const params = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const { FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, } = sellsValidations_1.getTotalSellsByClientQuerySchema.parse(req.query);
         const total = await (0, sellsDocsServices_1.getTotalSellsByClientService)({
-            sessionId: req.sessionRedis,
+            userSession: req.sessionWeb,
             Id_Cliente: params.client,
             TipoDoc,
             FilterTipoDoc,
@@ -141,10 +141,10 @@ const getTotalCobranza = async (req, res, next) => {
     try {
         const { FilterTipoDoc, TipoDoc, FilterNotExpired, FilterExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getTotalCobranzaQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const total = await (0, sellsDocsServices_1.getTotalCobranzaService)({
             Id_Cliente: client,
-            sessionId,
+            userSession,
             TipoDoc,
             FilterTipoDoc,
             FilterNotExpired,

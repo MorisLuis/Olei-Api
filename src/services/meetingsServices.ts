@@ -1,12 +1,12 @@
 import { dbConnectionWeb } from "../database";
 import { bitacoraQuerys } from "../database/querys/bitacora";
-import { UnauthorizedError, ValidationError } from "../errors/CustomError";
+import { ValidationError } from "../errors/CustomError";
 import MeetingInterface, { MeetingOrderConditionType, validTipoContacto } from "../interface/meeting";
-import { handleGetWebSession } from "../utils/Redis/getSession";
+import { UserWebSessionInterface } from "../interface/user";
 import sql from 'mssql';
 
 interface getMeetingsServiceInterface {
-    sessionId: string,
+    userSession: UserWebSessionInterface,
     PageNumber: number,
     Id_Cliente: number,
     TipoContacto: number,
@@ -16,7 +16,7 @@ interface getMeetingsServiceInterface {
 }
 
 const getMeetingsService = async ({
-    sessionId,
+    userSession,
     PageNumber,
     Id_Cliente,
     TipoContacto,
@@ -25,14 +25,9 @@ const getMeetingsService = async ({
     FilterTipoContacto
 }: getMeetingsServiceInterface): Promise<MeetingInterface[]> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -65,7 +60,7 @@ const getMeetingsService = async ({
 
 
 interface getTotalMeetingsServiceInterface {
-    sessionId: string,
+    userSession: UserWebSessionInterface,
     Id_Cliente: number,
     TipoContacto: number,
     FilterCliente: 0 | 1,
@@ -73,18 +68,12 @@ interface getTotalMeetingsServiceInterface {
 };
 
 const getTotalMeetingsService = async ({
-    sessionId,
+    userSession,
     Id_Cliente,
     TipoContacto,
     FilterCliente,
     FilterTipoContacto
 }: getTotalMeetingsServiceInterface): Promise<number> => {
-
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
 
     if (FilterCliente === 1 && !Id_Cliente) {
         throw new ValidationError('Es necesario un Id_Cliente.')
@@ -95,8 +84,8 @@ const getTotalMeetingsService = async ({
         throw new ValidationError('Es necesario un TipoContacto.')
     };
 
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -116,15 +105,10 @@ const getTotalMeetingsService = async ({
 };
 
 
-const getMeetingByIdService = async (id: number, sessionId: string): Promise<MeetingInterface> => {
-    const { user: userFR } = await handleGetWebSession({ sessionId });
+const getMeetingByIdService = async (id: number, userSession: UserWebSessionInterface): Promise<MeetingInterface> => {
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    };
-
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -140,20 +124,15 @@ const getMeetingByIdService = async (id: number, sessionId: string): Promise<Mee
     return quotes
 }
 
-const updateMeetingService = async (id: number, sessionId: string, body: MeetingInterface): Promise<{ result: MeetingInterface }> => {
+const updateMeetingService = async (id: number, userSession: UserWebSessionInterface, body: MeetingInterface): Promise<{ result: MeetingInterface }> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
 
     if (!id) {
         throw new ValidationError('No se adjunto un Id_Bitacora valido o existente.');
     }
 
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -194,16 +173,11 @@ const updateMeetingService = async (id: number, sessionId: string, body: Meeting
 
 };
 
-const postMeetingService = async (sessionId: string, body: MeetingInterface) : Promise<{ result: MeetingInterface }>=> {
+const postMeetingService = async (userSession: UserWebSessionInterface, body: MeetingInterface) : Promise<{ result: MeetingInterface }>=> {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -253,16 +227,10 @@ const postMeetingService = async (sessionId: string, body: MeetingInterface) : P
     return { result: result.recordset[0] }
 };
 
-const deleteMeetingService = async (id: number, sessionId: string) : Promise<{ result: MeetingInterface }> => {
+const deleteMeetingService = async (id: number, userSession: UserWebSessionInterface) : Promise<{ result: MeetingInterface }> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };

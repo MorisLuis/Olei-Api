@@ -1,13 +1,11 @@
 import { Router } from "express";
-import { validateJWTWeb } from "../helpers/validate-jwt";
 import { getCalendarTaskByDay, getCalendarTaskByMonth, getCalendarTaskByMonthAndClient } from "../controllers/calendar";
-
+import { validateJWTWeb } from "../middleware/validateJWT";
 
 const router = Router();
 
 router.get('/month', validateJWTWeb, getCalendarTaskByMonth);
 router.get('/day', validateJWTWeb, getCalendarTaskByDay);
 router.get('/monthAndClient', validateJWTWeb, getCalendarTaskByMonthAndClient);
-
 
 export default router;

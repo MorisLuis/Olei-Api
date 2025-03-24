@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { getClientId, getClients, getTotalClients, searchClient, selectClient } from "../controllers/client";
-import { validateJWTWeb } from "../helpers/validate-jwt";
+import { validateJWTWeb } from "../middleware/validateJWT";
 
 
 const router = Router();

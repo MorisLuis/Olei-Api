@@ -1,7 +1,6 @@
 import { dbConnectionWeb } from "../database";
 import { AlamacenQuery } from "../database/querys/almacen";
-import { UnauthorizedError } from "../errors/CustomError";
-import { handleGetSession } from "../utils/Redis/getSession";
+import { UserSessionInterface } from "../interface/user";
 
 interface AlmacenInterface {
     Id_Almacen: number;
@@ -9,14 +8,9 @@ interface AlmacenInterface {
     Nombre: string;
 }
 
-const getAlmacenesService = async (sessionId: string): Promise<{ almacenes: AlmacenInterface[] }> => {
-    const { user: userFR } = await handleGetSession({ sessionId });
+const getAlmacenesService = async (userSession: UserSessionInterface): Promise<{ almacenes: AlmacenInterface[] }> => {
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada');
-    }
-
-    const { ServidorSQL, BaseSQL } = userFR;
+    const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     const result = await pool.request().query(AlamacenQuery.getAlmacenes);
     const almacenes = result?.recordset;
@@ -27,19 +21,14 @@ const getAlmacenesService = async (sessionId: string): Promise<{ almacenes: Alma
 };
 
 interface getAlmacenByIdServiceInterface {
-    sessionId: string;
+    userSession: UserSessionInterface;
     Id_Almacen: number;
 }
 
-const getAlmacenByIdService = async ({ sessionId, Id_Almacen }: getAlmacenByIdServiceInterface): Promise<{ almacen: AlmacenInterface }> => {
+const getAlmacenByIdService = async ({ userSession, Id_Almacen }: getAlmacenByIdServiceInterface): Promise<{ almacen: AlmacenInterface }> => {
 
-    const { user: userFR } = await handleGetSession({ sessionId });
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { ServidorSQL, BaseSQL } = userFR;
+    const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     const result = await pool.request()

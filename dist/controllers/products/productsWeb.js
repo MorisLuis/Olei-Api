@@ -5,10 +5,10 @@ const productsServices_1 = require("../../services/productsServices");
 const productsValidations_1 = require("../../validations/productsValidations");
 const getProducts = async (req, res, next) => {
     try {
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const { nombre, marca, familia, folio, page, limit } = productsValidations_1.getProductsQuerySchema.parse(req.query);
         const { products } = await (0, productsServices_1.getProductsService)({
-            sessionId,
+            userSession,
             nombre,
             marca,
             familia,
@@ -16,9 +16,8 @@ const getProducts = async (req, res, next) => {
             page,
             limit
         });
-        return res.json({
-            products
-        });
+        const response = { products };
+        return res.json(response);
     }
     catch (error) {
         return next(error);
@@ -27,16 +26,16 @@ const getProducts = async (req, res, next) => {
 exports.getProducts = getProducts;
 const getProducByIdWeb = async (req, res, next) => {
     try {
-        // Get session from REDIS.
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const { id: codigo } = req.params;
         const { Marca } = productsValidations_1.getProducByIdWebQuerySchema.parse(req.query);
         const { product } = await (0, productsServices_1.getProducByIdWebService)({
-            sessionId,
+            userSession,
             codigo,
             Marca
         });
-        return res.json(product);
+        const response = { product };
+        return res.json(response);
     }
     catch (error) {
         return next(error);
@@ -45,17 +44,17 @@ const getProducByIdWeb = async (req, res, next) => {
 exports.getProducByIdWeb = getProducByIdWeb;
 const getTotalProducts = async (req, res, next) => {
     try {
-        // Get session from REDIS.
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const { nombre, marca, familia, folio } = productsValidations_1.getTotalProductsQuerySchema.parse(req.query);
         const { total } = await (0, productsServices_1.getTotalProductsService)({
-            sessionId,
+            userSession,
             nombre,
             marca,
             familia,
             folio
         });
-        return res.json({ total });
+        const response = { total };
+        return res.json(response);
     }
     catch (error) {
         return next(error);
@@ -64,19 +63,17 @@ const getTotalProducts = async (req, res, next) => {
 exports.getTotalProducts = getTotalProducts;
 const searchProduct = async (req, res, next) => {
     try {
-        // Get session from REDIS.
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const { nombre, familia, codigo, marca } = productsValidations_1.serachProductQuerySchema.parse(req.query);
         const { products } = await (0, productsServices_1.searchProductService)({
-            sessionId,
+            userSession,
             nombre,
             familia,
             codigo,
             marca
         });
-        return res.json({
-            products
-        });
+        const response = { products };
+        return res.json(response);
     }
     catch (error) {
         return next(error);

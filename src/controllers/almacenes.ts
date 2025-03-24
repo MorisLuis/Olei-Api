@@ -3,12 +3,13 @@ import { getAlmacenByIdService, getAlmacenesService } from "../services/almacene
 import { getAlmacenByIdQuerySchema } from "../validations/almacenValidations";
 import { UserSessionInterface } from "../interface/user";
 import { UnauthorizedError } from "../errors/CustomError";
+import { updateSession } from "../helpers/generate-redis";
 
 const getAlmacenes = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const sessionId = req.sessionID;
-        const { almacenes } = await getAlmacenesService(sessionId);
+        const userSession = req.session;
+        const { almacenes } = await getAlmacenesService(userSession);
 
         return res.json({
             almacenes
@@ -24,10 +25,11 @@ const updateAlmacenInRedis = async (req: Request, res: Response, next: NextFunct
     try {
 
         const { Id_Almacen } = getAlmacenByIdQuerySchema.parse(req.query);
-        const sessionId = req.sessionID;
+        const userSession = req.session;
+        const sessionId = req.sessionId;
 
         const { almacen } = await getAlmacenByIdService({
-            sessionId,
+            userSession,
             Id_Almacen
         });
 
@@ -36,28 +38,19 @@ const updateAlmacenInRedis = async (req: Request, res: Response, next: NextFunct
         }
 
         if (almacen.Id_Almacen) {
-            if (!req.session.user) {
+            if (!userSession) {
                 throw new UnauthorizedError('User session is not defined');
             }
-        
+
             const datosDelUsuario: UserSessionInterface = {
-                ...req.session.user,
+                ...userSession,
                 Id_Almacen: almacen.Id_Almacen,
-                AlmacenNombre: almacen.Nombre ?? '', // Si no está disponible, usa ''
-                ServidorSQL: req.session.user.ServidorSQL ?? '',
-                BaseSQL: req.session.user.BaseSQL ?? '',
-                UsuarioSQL: req.session.user.UsuarioSQL ?? '',
-                PasswordSQL: req.session.user.PasswordSQL ?? '',
-                IdUsuarioOLEI: req.session.user.IdUsuarioOLEI ?? '',
-                RazonSocial: req.session.user.RazonSocial ?? '',
-                SwImagenes: req.session.user.SwImagenes ?? '',
-                Vigencia: req.session.user.Vigencia ?? '',
-                from: req.session.user.from ?? 'mobil'
+                AlmacenNombre: almacen.Nombre ?? '',
             };
-        
-            req.session.user = datosDelUsuario;
+
+
+            updateSession(sessionId, datosDelUsuario)
         }
-        
 
         return res.json(almacen);
 
@@ -65,7 +58,7 @@ const updateAlmacenInRedis = async (req: Request, res: Response, next: NextFunct
         return next(error)
     };
 
-}
+};
 
 export {
     getAlmacenes,

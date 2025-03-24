@@ -16,10 +16,10 @@ const getProductWithImages = async ({ baseSQL, Codigo, product }) => {
         while (attempt < maxAttempts) {
             let imageUrl;
             if (attempt === 0) {
-                imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${Codigo.trim()}.jpg`;
+                imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB.trim()}/${Codigo.trim()}.jpg`;
             }
             else {
-                imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB}/${Codigo.trim()}_${attempt}.jpg`;
+                imageUrl = `https://oleistorage.blob.core.windows.net/${imageDB.trim()}/${Codigo.trim()}_${attempt}.jpg`;
             }
             // Verifica si la imagen existe
             const imageExists = await (0, exports.checkImageExist)(imageUrl);

@@ -5,11 +5,12 @@ import { z } from "zod";
 
 
 const getCalendarTaskByMonth = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+    
     try {
         const { Anio, Mes } = getCalendarTaskByMonthQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const tasks = await getCalendarTaskByMonthService({
-            sessionId,
+            userSession,
             Anio,
             Mes,
         });
@@ -29,10 +30,10 @@ const getCalendarTaskByDay = async (req: Request, res: Response, next: NextFunct
     /* Timeline */
     try {
         const { Day } = getCalendarTaskByDayQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
 
         const tasks = await getCalendarTaskByDayService({
-            sessionId,
+            userSession,
             Day
         });
 
@@ -51,10 +52,10 @@ const getCalendarTaskByMonthAndClient = async (req: Request, res: Response, next
 
     try {
         const { Anio, Mes, Id_Cliente } = getCalendarByMonthAndClientQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis
+        const userSession = req.sessionWeb
 
         const tasks = await getCalendarTaskByMonthAndClientService({
-            sessionId,
+            userSession,
             Anio,
             Mes,
             Id_Cliente

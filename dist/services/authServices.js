@@ -15,33 +15,24 @@ const loginWebService = async (email, password) => {
     if (!mainPool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
-    const { SwsinPrecio, TipoDocOO, ServidorSQL, BaseSQL, Vigencia, Id_ListPre, UsuarioSQL, ...user } = await getUserByEmailWeb(mainPool, email);
+    const user = await getUserByEmailWeb(mainPool, email);
     if (!user) {
         throw new CustomError_1.NotFoundError(`No se encontro el usuario: ${email}`);
     }
     if (user.PasswordOOL.trim() !== password) {
         throw new CustomError_1.UnauthorizedError(`Contraseña incorrecta`);
     }
-    const isExpired = await isSubscriptionExpired(Vigencia);
+    const isExpired = await isSubscriptionExpired(user.Vigencia);
     if (isExpired) {
         throw new CustomError_1.UnauthorizedError(`Cuenta de usuario vencida`);
     }
-    return {
-        SwsinPrecio,
-        TipoDocOO,
-        ServidorSQL,
-        BaseSQL,
-        Vigencia,
-        Id_ListPre,
-        UsuarioSQL,
-        ...user
-    };
+    return user;
 };
 exports.loginWebService = loginWebService;
 // Utils
 const getUserByEmailWeb = async (mainPool, email) => {
-    const query_DB = database_1.querys.authWeb;
-    const result = await mainPool.request().input('email', email).query(query_DB);
+    const query = database_1.querys.authWeb;
+    const result = await mainPool.request().input('email', email).query(query);
     const user = result?.recordset[0];
     if (!user) {
         throw new CustomError_1.NotFoundError(`No se encontro el usuario`);

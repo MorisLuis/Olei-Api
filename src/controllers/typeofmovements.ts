@@ -1,21 +1,12 @@
 import { NextFunction, Request, Response } from 'express'
 import { dbConnection } from '../database';
 import sql from "mssql";
-import { handleGetSession } from '../utils/Redis/getSession';
-import { UnauthorizedError } from '../errors/CustomError';
-
 
 const getTypeofmovements = async (req: Request, res: Response, next: NextFunction): Promise<Response | void>   => {
     
     try {
-        const sessionId = req.sessionID;
-        const { user: userFR } = await handleGetSession({ sessionId });
-    
-        if (!userFR) {
-            throw new UnauthorizedError('Sesion terminada')
-        };
-
-        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, userId } = userFR;
+        const session = req.session;
+        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, userId } = session;
         const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
         const request = pool.request();

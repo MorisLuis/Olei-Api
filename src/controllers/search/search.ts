@@ -7,10 +7,10 @@ const getFamilias = async (req: Request, res: Response, next: NextFunction): Pro
 
     try {
         const { searchTerm } = simpleSearchQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis
+        const userSession = req.sessionWeb
 
         const { familias } = await searchFamiliaService({
-            sessionId,
+            userSession,
             searchTerm
         });
 
@@ -28,10 +28,10 @@ const getMarcas = async (req: Request, res: Response, next: NextFunction): Promi
     try {
 
         const { searchTerm } = simpleSearchQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis
+        const userSession = req.sessionWeb
 
         const { marcas } = await searchMarcaService({
-            sessionId,
+            userSession,
             searchTerm
         });
 
@@ -47,10 +47,10 @@ const getCodigos = async (req: Request, res: Response, next: NextFunction): Prom
 
     try {
         const { searchTerm } = simpleSearchQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis
+        const userSession = req.sessionWeb
 
         const { codigos } = await searchCodigoService({
-            sessionId,
+            userSession,
             searchTerm
         });
 

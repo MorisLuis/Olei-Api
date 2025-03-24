@@ -1,13 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import { generateJWT, generateJWTDB } from '../../helpers/generate-jwt';
 import { UserSessionInterface } from '../../interface/user';
-import { handleGetSession } from '../../utils/Redis/getSession';
-import { handleDeleteRedisSession } from '../../utils/Redis/deleteRedis';
 import { loginAppService, loginDBAppService } from '../../services/authAppServices';
-import { UnauthorizedError, ValidationError } from '../../errors/CustomError';
+import { UnauthorizedError } from '../../errors/CustomError';
+import { v4 } from 'uuid';
+import { generateAccessToken, generateRefreshToken } from '../../helpers/generate-jwt';
+import { generateRedisSession, handleDeleteRedisSession, updateSession } from '../../helpers/generate-redis';
 
-// login global server
-const loginDB = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+const loginServer = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const { IdUsuarioOLEI, PasswordOLEI } = req.body;
@@ -17,171 +16,75 @@ const loginDB = async (req: Request, res: Response, next: NextFunction): Promise
             PasswordOLEI
         });
 
-        console.log({IdUsuarioOLEI, PasswordOLEI})
-
-        const tokenDB = await generateJWTDB({
-            IdUsuarioOLEI: result.IdUsuarioOLEI.trim()
-        });
-
-        if (!tokenDB) {
-            throw new UnauthorizedError('Error al generar token')
-        };
-
         // Session redis
         const datosDelUsuario: UserSessionInterface = {
             ServidorSQL: result.ServidorSQL.trim(),
             BaseSQL: result.BaseSQL.trim(),
-            PasswordSQL: result.PasswordSQL.trim(),
             UsuarioSQL: result.UsuarioSQL.trim(),
+            PasswordSQL: result.PasswordSQL.trim(),
 
             IdUsuarioOLEI: result.IdUsuarioOLEI.trim(),
+            PasswordOLEI: result.PasswordOLEI,
 
             RazonSocial: result.RazonSocial.trim(),
             SwImagenes: result.SwImagenes,
             Vigencia: result.Vigencia,
-            userId: undefined,
-            userRol: undefined,
-            from: 'mobil'
+            from: 'mobil',
+            userConected: false,
+            serverConected: true
         };
 
-        req.session.user = datosDelUsuario;
+        // Generar un ID de sesión único
+        const sessionId = v4();
 
-        // User to Frontend.
-        const user = {
-            BaseSQL: result.BaseSQL,
-            RazonSocial: result.RazonSocial
-        };
+        // Guardar la sesión en Redis con expiración (1 hora)
+        await generateRedisSession(sessionId, datosDelUsuario)
+
+        // Generar el token JWT que incluye el sessionId
+        const token = generateAccessToken(sessionId)
+        const refreshToken = generateRefreshToken(sessionId);
 
         return res.json({
-            tokenDB,
-            user
-        });
+            user: datosDelUsuario,
+            token,
+            refreshToken
+        })
 
     } catch (error) {
         next(error);
     }
 };
 
-const renewDB = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-
-    try {
-        // Get session from REDIS.
-        const sessionId = req.sessionID;
-        const { user: userFR } = await handleGetSession({ sessionId });
-
-        if (!userFR) {
-            return next(new UnauthorizedError('Usuario no encontrado en la sesión'));
-        }
-
-        const { BaseSQL, IdUsuarioOLEI, RazonSocial, userId, userRol } = userFR;
-
-        const tokenDB = await generateJWTDB({ IdUsuarioOLEI });
-
-        if (!tokenDB) throw new UnauthorizedError('Error al generar token')
-
-        // User to Redis.
-        const userRedis: UserSessionInterface = {
-            ...userFR,
-            userId: userId ? userId : undefined,
-            userRol: userRol ? userRol : undefined
-        };
-
-        if (!userFR) throw new ValidationError('Información del usuario es necesaria')
-
-        req.session.user = userRedis
-
-        // User to Frontend.
-        const user = {
-            BaseSQL: BaseSQL,
-            RazonSocial: RazonSocial
-        };
-
-        res.json({
-            token: tokenDB,
-            user
-        });
-
-    } catch (error) {
-        next(error);
-    }
-};
-
-const logoutDB = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-    try {
-        const sessionId = req.sessionID;
-        if (!sessionId) {
-            throw new UnauthorizedError('Sesion terminada')
-        }
-        await handleDeleteRedisSession({ sessionId });
-        res.json({ ok: true })
-    } catch (error) {
-        next(error);
-    }
-}
-
-
-// login
 const login = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
+        const session = req.session;
+        const sessionId = req.sessionId;
+
         const { Id_Usuario, password } = req.body;
-        const sessionId = req.sessionID;
-
-        if (!req.session.user) {
-            throw new UnauthorizedError('User session is not defined');
-        }
-
         const { userData } = await loginAppService({
             Id_Usuario,
             password,
-            sessionId
+            session
         });
 
-        console.log({ 
-            userData
-        })
-
-        const token = await generateJWT({ Id_mobile: `${Id_Usuario.trim()}-${req.session.user.ServidorSQL}-${req.session.user.BaseSQL}` });
-
         const datosDelUsuario: UserSessionInterface = {
-            ...(req.session).user,
+            ...session,
             userId: Id_Usuario.trim(),
             userRol: userData.Id_Perfil,
             TodosAlmacenes: userData.TodosAlmacenes,
+            SalidaSinExistencias: userData.SalidaSinExistencias,
             Id_Almacen: userData.Id_Almacen,
-            AlmacenNombre: userData.AlmacenNombre,
             Id_ListPre: userData.Id_ListPre,
-
-            ServidorSQL: req.session.user.ServidorSQL ?? '',
-            BaseSQL: req.session.user.BaseSQL ?? '',
-            UsuarioSQL: req.session.user.UsuarioSQL ?? '',
-            PasswordSQL: req.session.user.PasswordSQL ?? '',
-            IdUsuarioOLEI: req.session.user.IdUsuarioOLEI ?? '',
-            RazonSocial: req.session.user.RazonSocial ?? '',
-            SwImagenes: req.session.user.SwImagenes ?? '',
-            Vigencia: req.session.user.Vigencia ?? '',
-            from: req.session.user.from ?? 'mobil'
-        };
-
-        // Session redis
-        req.session.user = datosDelUsuario;
-
-        const userStorage = {
-            Id_Usuario,
-            TodosAlmacenes: userData.TodosAlmacenes,
-            Id_Almacen: userData.Id_Almacen,
             AlmacenNombre: userData.AlmacenNombre,
-            Id_TipoMovInv: {
-                Id_TipoMovInv: userData.Id_TipoMovInv,
-                Accion: userData.Accion,
-                Descripcion: userData.Descripcion,
-                Id_AlmDest: userData.Id_AlmDest
-            }
+            serverConected: session.serverConected,
+            userConected: true,
         };
+
+        updateSession(sessionId, datosDelUsuario);
 
         return res.json({
-            userStorage,
-            token
+            user: datosDelUsuario
         });
 
     } catch (error) {
@@ -189,102 +92,75 @@ const login = async (req: Request, res: Response, next: NextFunction): Promise<R
     }
 };
 
-const renewLogin = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-
+const logoutServer = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
-        const sessionId = req.sessionID;
-        const { user: userFR } = await handleGetSession({ sessionId });
-
-        if (!userFR) {
-            throw new UnauthorizedError('Sesion terminada')
-        }
-
-        const { ServidorSQL, BaseSQL, userId, userRol, TodosAlmacenes } = userFR;
-
-        if (!userId || !userRol) {
-            throw new ValidationError('userId y userRol son necesarios')
-        };
-
-        if (!ServidorSQL || !BaseSQL) {
-            throw new ValidationError('ServidorSQL y BaseSQL son necesarios')
-        };
-
-        const token = await generateJWT({ Id_mobile: userId });
-
-        if (!token) {
-            throw new UnauthorizedError('Error al generar token')
-        };
-
-        const user = {
-            Id_Usuario: userId,
-            TodosAlmacenes,
-            Id_Almacen: userFR.Id_Almacen,
-            AlmacenNombre: userFR.AlmacenNombre,
-            Id_ListPre: userFR.Id_ListPre
-        };
-
-        res.json({
-            user,
-            token
-        });
-
+        const sessionId = req.sessionId;
+        if (!sessionId) throw new UnauthorizedError('Sesion terminada')
+        await handleDeleteRedisSession(sessionId)
+        res.json({ ok: true })
     } catch (error) {
         next(error);
-    }
-}
+    };
+};
 
 const logoutUser = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const sessionId = req.sessionID;
+        const sessionUser = req.session;
+        const sessionId = req.sessionId;
 
-        const { user: userFR } = await handleGetSession({ sessionId });
-
-        if (!userFR) {
+        if (!sessionUser) {
             throw new UnauthorizedError('Sesion terminada')
         }
 
-        if (!req.session.user) {
-            throw new UnauthorizedError('User session is not defined');
-        }
-
         const datosDelUsuario: UserSessionInterface = {
-            ...req.session.user,
-            userId: undefined,
-            userRol: undefined,
-            TodosAlmacenes: undefined,
-            Id_Almacen: undefined,
-            AlmacenNombre: undefined,
-            SalidaSinExistencias: 0,
-            Id_ListPre: undefined,
-
-            ServidorSQL: req.session.user.ServidorSQL ?? '',
-            BaseSQL: req.session.user.BaseSQL ?? '',
-            UsuarioSQL: req.session.user.UsuarioSQL ?? '',
-            PasswordSQL: req.session.user.PasswordSQL ?? '',
-            IdUsuarioOLEI: req.session.user.IdUsuarioOLEI ?? '',
-            RazonSocial: req.session.user.RazonSocial ?? '',
-            SwImagenes: req.session.user.SwImagenes ?? '',
-            Vigencia: req.session.user.Vigencia ?? '',
-            from: req.session.user.from ?? 'mobil'
+            ...sessionUser,
+            userConected: false
         };
 
-        req.session.user = datosDelUsuario;
+        updateSession(sessionId, datosDelUsuario);
 
         return res.json({
             user: datosDelUsuario
-        })
+        });
 
     } catch (error) {
         next(error);
     }
-}
+};
+
+const refresh = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+
+    try {
+        const session = req.session;
+        const sessionId = req.sessionId;
+        const refreshToken = req.body.refreshToken;
+        if (!refreshToken) {
+            return res.status(401).json({ message: "No hay refresh token" });
+        }
+
+        // Guardar la sesión en Redis con expiración (1 hora)
+        await generateRedisSession(sessionId, session)
+
+        // Generar el token JWT que incluye el sessionId
+        const newToken = generateAccessToken(sessionId)
+        const newRefreshToken = generateRefreshToken(sessionId);
+
+        res.json({
+            token: newToken,
+            user: session,
+            refreshToken: newRefreshToken
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
 
 export {
-    loginDB,
+    loginServer,
     login,
-    renewDB,
-    renewLogin,
     logoutUser,
-    logoutDB
+    logoutServer,
+    refresh
 }
