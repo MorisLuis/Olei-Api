@@ -124,6 +124,13 @@ const getProductsByStockService = async ({ userSession, PageSize, PageNumber, ge
         query = products_1.productsQuerys.getTotalOfAllProductsByStock;
     }
     ;
+    if (!Id_Almacen) {
+        throw new CustomError_1.ValidationError("Id Almacen necesario");
+    }
+    ;
+    if (!Id_ListPre) {
+        throw new CustomError_1.ValidationError("Id_ListPre necesario");
+    }
     const request = await pool.request()
         .input('PageSize', PageSize)
         .input('PageNumber', PageNumber)

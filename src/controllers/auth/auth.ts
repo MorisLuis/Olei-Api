@@ -68,6 +68,8 @@ const login = async (req: Request, res: Response, next: NextFunction): Promise<R
             session
         });
 
+
+        console.log({userData})
         const datosDelUsuario: UserSessionInterface = {
             ...session,
             userId: Id_Usuario.trim(),
@@ -96,6 +98,7 @@ const logoutServer = async (req: Request, res: Response, next: NextFunction): Pr
     try {
         const sessionId = req.sessionId;
         if (!sessionId) throw new UnauthorizedError('Sesion terminada')
+        console.log("logoutServer!!!")
         await handleDeleteRedisSession(sessionId)
         res.json({ ok: true })
     } catch (error) {
@@ -131,9 +134,11 @@ const logoutUser = async (req: Request, res: Response, next: NextFunction): Prom
 
 const refresh = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
+    console.log("refresh token activado!!!")
     try {
         const session = req.session;
         const sessionId = req.sessionId;
+
         const refreshToken = req.body.refreshToken;
         if (!refreshToken) {
             return res.status(401).json({ message: "No hay refresh token" });

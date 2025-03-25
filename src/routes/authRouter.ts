@@ -15,7 +15,7 @@ router.post("/loginServer", loginServer);
 router.post("/login", validateJWTLogin, login);
 
 router.get('/logoutUser', validateJWT, logoutUser);
-router.get('/logoutServer', validateJWT, logoutServer);
+router.get('/logoutServer', validateJWTLogin, logoutServer);
 
 router.post('/refresh', validateRefreshJWT, refresh);
 

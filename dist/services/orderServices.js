@@ -60,9 +60,7 @@ const getOrderService = async ({ userSession, folio }) => {
     ;
     const getOrderQuery = orders_1.orderQuerys.getOrder;
     const request = await pool.request()
-        .input('Id_Cliente', mssql_1.default.Int, Id_Cliente)
         .input('folio', mssql_1.default.Int, folio)
-        .input('TipoDocOO', TipoDocOO)
         .query(getOrderQuery);
     const order = request.recordset[0];
     return {

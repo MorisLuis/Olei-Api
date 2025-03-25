@@ -23,17 +23,18 @@ const updateAlmacenInRedis = async (req, res, next) => {
         const { Id_Almacen } = almacenValidations_1.getAlmacenByIdQuerySchema.parse(req.query);
         const userSession = req.session;
         const sessionId = req.sessionId;
+        if (!userSession) {
+            throw new CustomError_1.UnauthorizedError('User session is not defined');
+        }
+        ;
         const { almacen } = await (0, almacenesService_1.getAlmacenByIdService)({
             userSession,
             Id_Almacen
         });
         if (!almacen) {
-            return res.status(404).json({ message: 'Almacen no encontrado' });
+            throw new CustomError_1.NotFoundError('Almacen no encontrado');
         }
         if (almacen.Id_Almacen) {
-            if (!userSession) {
-                throw new CustomError_1.UnauthorizedError('User session is not defined');
-            }
             const datosDelUsuario = {
                 ...userSession,
                 Id_Almacen: almacen.Id_Almacen,

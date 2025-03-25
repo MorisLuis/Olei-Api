@@ -58,6 +58,7 @@ const validateJWT = async (req: Request, _res: Response, next: NextFunction) : P
     const authHeader = req.headers['authorization'];
     const token = authHeader?.split(' ')[1];
 
+    console.log({token})
     if (!token) {
         return next(new UnauthorizedError('Acceso denegado. Falta token o es invalido'));
     }
@@ -103,7 +104,7 @@ const validateJWTWeb = async (req: Request, _res: Response, next: NextFunction) 
     }
 
     try {
-        const decoded = jwt.verify(token, 'access_secret') as JwtPayload;
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET || 'access_secret') as JwtPayload;
         const sessionId = decoded.sessionId;
 
         req.sessionId = sessionId;
@@ -138,11 +139,11 @@ const validateRefreshJWT = async (req: Request, _res: Response, next: NextFuncti
     }
 
     try {
-        console.log("token_key", process.env.REFRESH_TOKEN_SECRET)
         // Verificar el refreshToken usando la clave secreta específica para el refreshToken
         const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as JwtPayload;
         const sessionId = decoded.sessionId;
 
+        console.log({sessionId})
         req.sessionId = sessionId;
 
         // Buscar la sesión en Redis usando el sessionId
