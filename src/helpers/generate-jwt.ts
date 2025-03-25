@@ -5,6 +5,7 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'refresh_secret
 
 /** Genera un Access Token con expiración corta (ej. 15min) */
 export const generateAccessToken = (sessionId: string): string => {
+    console.log({ACCESS_TOKEN_SECRET})
     return jwt.sign({ sessionId }, ACCESS_TOKEN_SECRET, { expiresIn: '30s' });
 };
 
