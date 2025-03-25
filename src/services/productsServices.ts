@@ -3,7 +3,7 @@ import { dbConnection, dbConnectionWeb } from "../database";
 import { productsWebQuerys } from "../database/querys/productsWeb";
 import { productsQuerys } from "../database/querys/products";
 
-import { getProductWithImages } from "../utils/checkImageExists";
+import { getProductWithImages, getProductsWithImage } from "../utils/checkImageExists";
 import { ValidationError } from "../errors/CustomError";
 import ProductInterface from "../interface/product";
 import { guessBarcodeType } from '../utils/identifyBarcodeType';
@@ -57,9 +57,10 @@ const getProductsService = async ({
         .query(query);
 
     const products = result.recordset;
+    const productsWithImages = await getProductsWithImage(products)
 
     return {
-        products
+        products: productsWithImages
     }
 
 };
@@ -228,11 +229,11 @@ const getProductsByStockService = async ({
     };
 
 
-    if(!Id_Almacen) {
+    if (!Id_Almacen) {
         throw new ValidationError("Id Almacen necesario")
     };
 
-    if(!Id_ListPre) {
+    if (!Id_ListPre) {
         throw new ValidationError("Id_ListPre necesario")
     }
 
@@ -262,7 +263,7 @@ const getProductByStockAndCodeBarService = async ({
     CodBar,
     SKU,
     Codigo
-}: getProductByStockAndCodeBarServiceInterface) : Promise<{ productByStockAndCodeBar: ProductInterface[]}> => {
+}: getProductByStockAndCodeBarServiceInterface): Promise<{ productByStockAndCodeBar: ProductInterface[] }> => {
 
     const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userSession;
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);

@@ -33,8 +33,9 @@ const getProductsService = async ({ userSession, page, limit, nombre, marca, fam
         .input('baseSQL', mssql_1.default.VarChar, BaseSQL ?? '')
         .query(query);
     const products = result.recordset;
+    const productsWithImages = await (0, checkImageExists_1.getProductsWithImage)(products);
     return {
-        products
+        products: productsWithImages
     };
 };
 exports.getProductsService = getProductsService;

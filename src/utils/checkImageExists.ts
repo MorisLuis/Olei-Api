@@ -52,6 +52,7 @@ export const getProductWithImages = async ({
 };
 
 export const getProductsWithImage = async (products: ProductInterface[]): Promise<ProductInterface[]> => {
+
     const productsWithImages = await Promise.all(
         products.map(async (product: ProductInterface) => {
             let imageExists : boolean = false;
