@@ -1,31 +1,20 @@
 import { NextFunction, Request, Response } from 'express'
-import { dbConnection, querys } from '../../database';
-import { productsQuerys } from '../../database/querys/products';
-import { guessBarcodeType } from '../../utils/identifyBarcodeType';
-import { handleGetSession } from '../../utils/Redis/getSession';
+import { dbConnection } from '../../database';
 import { productsWebQuerys } from '../../database/querys/productsWeb';
 import { getProductByStockAndCodeBarSchema, getProductsByStockQuerySchema } from '../../validations/productsValidations';
-import { getProductsByStockService } from '../../services/productsServices';
+import { getProductByStockAndCodeBarService, getProductsByStockService, searchProductByStockService } from '../../services/productsServices';
 import { UnauthorizedError, ValidationError } from '../../errors/CustomError';
+import { searchProductInventoryQuerySchema } from '../../validations/inventoryValidations';
 
-
-const getProducById = async (req: Request, res: Response, next: NextFunction) => {
+const getProducById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const { id } = req.params;
         const { Marca } = req.query;
-        const Id_Usuario = req.Id_mobile;
 
-        const sessionId = req.sessionID;
-        const { user: userFR } = await handleGetSession({ sessionId });
-
-        if (!userFR) {
-            throw new UnauthorizedError('Sesion terminada')
-        }
-
-        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
+        const userSession = req.session;
+        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userSession;
         const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
-
 
         if (!pool) {
             throw new ValidationError('Error al conectarse a base de datos principal');
@@ -34,8 +23,8 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
         let query = productsWebQuerys.getProducById
 
         if (
-            userFR.BaseSQL === 'OLEIDB1_ROSCO' ||
-            userFR.BaseSQL === 'OLEIDB1_ROSCO_TEST'
+            userSession.BaseSQL === 'OLEIDB1_ROSCO' ||
+            userSession.BaseSQL === 'OLEIDB1_ROSCO_TEST'
         ) {
             // We have to modify query to ROSCO
             query = productsWebQuerys.getProducByIdROSCO
@@ -57,14 +46,18 @@ const getProducById = async (req: Request, res: Response, next: NextFunction) =>
     }
 }
 
-const getProductsByStock = async (req: Request, res: Response, next: NextFunction) => {
+const getProductsByStock = async (req: Request, res: Response, next: NextFunction): Promise<Response | void>  => {
 
     try {
         const { PageNumber, PageSize } = getProductsByStockQuerySchema.parse(req.query);
-        const sessionId = req.sessionID;
+        const userSession = req.session;
+
+        if (!userSession) {
+            throw new UnauthorizedError('Sesion terminada')
+        }
 
         const { products } = await getProductsByStockService({
-            sessionId,
+            userSession,
             PageNumber,
             PageSize
         })
@@ -76,29 +69,15 @@ const getProductsByStock = async (req: Request, res: Response, next: NextFunctio
     }
 };
 
-const getTotalOfProductsByStock = async (req: Request, res: Response, next: NextFunction) => {
+const getTotalOfProductsByStock = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
-        const sessionId = req.sessionID;
-        const { user: userFR } = await handleGetSession({ sessionId });
+        const userSession = req.session;
 
-        if (!userFR) {
-            throw new UnauthorizedError('Sesión terminada');
-        }
+        const { products: TotalProductos } = await getProductsByStockService({
+            userSession,
+            getTotal: true
+        })
 
-        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre} = userFR;
-        const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
-
-        if (!pool) {
-            throw new ValidationError('Error al conectarse a base de datos principal');
-        }
-
-        let query = productsQuerys.getTotalOfAllProductsByStock;
-        const request = await pool.request()
-            .input('Id_ListaPrecios', Id_ListPre)
-            .input('Almacen', Id_Almacen)
-            .query(query);
-
-        const TotalProductos = request.recordset;
         res.json(TotalProductos);
 
     } catch (error) {
@@ -106,53 +85,19 @@ const getTotalOfProductsByStock = async (req: Request, res: Response, next: Next
     }
 };
 
-const getProductByStockAndCodeBar = async (req: Request, res: Response, next: NextFunction) => {
-
+const getProductByStockAndCodeBar = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        console.log({query: req.query})
         const { CodBar, Codigo, SKU } = getProductByStockAndCodeBarSchema.parse(req.query);
-        const sessionId = req.sessionID;
-        const { user: userFR } = await handleGetSession({ sessionId });
+        const userSession = req.session;
 
-        if (!userFR) {
-            throw new UnauthorizedError('Sesion terminada')
-        }
+        const { productByStockAndCodeBar } = await getProductByStockAndCodeBarService({
+            CodBar,
+            Codigo,
+            SKU,
+            userSession
+        })
 
-        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userFR;
-        const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
-
-        let isEAN13orUPC14 = false;
-        if (CodBar) {
-            isEAN13orUPC14 = guessBarcodeType(CodBar)
-        }
-
-        let request;
-
-        console.log({CodBar, Codigo, SKU})
-        // This is an excepcion for codebar
-        if (isEAN13orUPC14) { 
-            console.log("isEAN13orUPC14")
-            let query = productsQuerys.getProductByStockAndCodeBarDV;
-            request = await pool.request()
-                .input("CodBar", CodBar === 'undefined' ? null : CodBar)
-                .input('Id_ListaPrecios', Id_ListPre)
-                .input('Id_Almacen', Id_Almacen)
-                .input('SKU', SKU)
-                .query(query);
-
-        } else {
-            let query = productsQuerys.getProductByStockAndCodeBar;
-            request = await pool.request()
-                .input("CodBar", CodBar === 'undefined' ? null : CodBar)
-                .input("Codigo", Codigo === 'undefined' ? null : Codigo)
-                .input('Id_ListaPrecios', Id_ListPre)
-                .input('Id_Almacen', Id_Almacen)
-                .input('SKU', SKU)
-                .query(query);
-
-        }
-        const productByStockAndCodeBar = request.recordset;
         res.json(productByStockAndCodeBar)
 
     } catch (error) {
@@ -160,12 +105,48 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
     }
 };
 
+const searchProductInventory = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
+    try {
+        const { searchTerm } = searchProductInventoryQuerySchema.parse(req.query);
+        const userSession = req.session;
+        const { products } = await searchProductByStockService({
+            userSession,
+            searchTerm: searchTerm,
+            withCodebar: true
+        })
 
+        return res.json(products);
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+const searchProductInventoryWithoutCodebar = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+
+    try {
+        const { searchTerm } = searchProductInventoryQuerySchema.parse(req.query);
+
+        const userSession = req.session;
+        const { products } = await searchProductByStockService({
+            userSession,
+            searchTerm: searchTerm,
+            withCodebar: false
+        })
+
+        return res.json(products);
+
+    } catch (error) {
+        return next(error);
+    }
+};
 
 export {
     getProducById,
     getProductsByStock,
     getTotalOfProductsByStock,
-    getProductByStockAndCodeBar
+    getProductByStockAndCodeBar,
+    searchProductInventory,
+    searchProductInventoryWithoutCodebar
 }

@@ -3,44 +3,49 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateAlmacenInRedis = exports.getAlmacenes = void 0;
 const almacenesService_1 = require("../services/almacenesService");
 const almacenValidations_1 = require("../validations/almacenValidations");
+const CustomError_1 = require("../errors/CustomError");
+const generate_redis_1 = require("../helpers/generate-redis");
 const getAlmacenes = async (req, res, next) => {
     try {
-        const sessionId = req.sessionID;
-        const { almacenes } = await (0, almacenesService_1.getAlmacenesService)({
-            sessionId
-        });
-        res.json({
+        const userSession = req.session;
+        const { almacenes } = await (0, almacenesService_1.getAlmacenesService)(userSession);
+        return res.json({
             almacenes
         });
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
 };
 exports.getAlmacenes = getAlmacenes;
 const updateAlmacenInRedis = async (req, res, next) => {
     try {
         const { Id_Almacen } = almacenValidations_1.getAlmacenByIdQuerySchema.parse(req.query);
-        const sessionId = req.sessionID;
+        const userSession = req.session;
+        const sessionId = req.sessionId;
+        if (!userSession) {
+            throw new CustomError_1.UnauthorizedError('User session is not defined');
+        }
+        ;
         const { almacen } = await (0, almacenesService_1.getAlmacenByIdService)({
-            sessionId,
+            userSession,
             Id_Almacen
         });
         if (!almacen) {
-            return res.status(404).json({ message: 'Almacen no encontrado' });
+            throw new CustomError_1.NotFoundError('Almacen no encontrado');
         }
         if (almacen.Id_Almacen) {
             const datosDelUsuario = {
-                ...req.session.user,
+                ...userSession,
                 Id_Almacen: almacen.Id_Almacen,
-                AlmacenNombre: almacen.Nombre ?? ''
+                AlmacenNombre: almacen.Nombre ?? '',
             };
-            req.session.user = datosDelUsuario;
+            (0, generate_redis_1.updateSession)(sessionId, datosDelUsuario);
         }
-        res.json(almacen);
+        return res.json(almacen);
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
     ;
 };

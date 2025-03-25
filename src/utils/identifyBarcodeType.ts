@@ -1,6 +1,14 @@
 import { barcodes } from './codebarTypes';
 
-export const identifyBarcodeType = (codebar?: string) => {
+interface BarcodeType {
+    type: string;
+    id: number;
+    errorMessage: string;
+    keyboardType: string;
+    maxLength: number;
+}
+
+export const identifyBarcodeType = (codebar?: string): BarcodeType | null => {
     if (!codebar) return null; // Verificación rápida para cadenas undefined o null
 
     for (let i = barcodes.length - 1; i >= 0; i--) {
@@ -19,7 +27,7 @@ export const identifyBarcodeType = (codebar?: string) => {
     return null;
 };
 
-export const guessBarcodeType = (code: any) => {
+export const guessBarcodeType = (code: string) : boolean => {
 
     if (/^[0-9]{12}$/.test(code)) {
         //UPC-A
@@ -33,7 +41,7 @@ export const guessBarcodeType = (code: any) => {
 };
 
 
-export const verifyIfIsEAN13 = (code: any) => {
+export const verifyIfIsEAN13 = (code: string)  : boolean=> {
 
     //EAN13
     if (/^[0-9]{13}$/.test(code)) {

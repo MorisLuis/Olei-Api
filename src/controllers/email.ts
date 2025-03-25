@@ -2,6 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 import nodemailer from 'nodemailer';
 import { generatePDF } from '../utils/generatePDF';
 import { emailBodySchema, emailCobranzaBodySchema } from '../validations/emailValidations';
+import { Buffer } from 'buffer';  // Importa Buffer si es necesario
+import { getClientParamsSchema, getCobranzaQuerySchema } from '../validations/sellsValidations';
+import { getAllCobranzaService } from '../services/sellsDocsServices';
 
 // Configurar el transporte SMTP
 const transporter = nodemailer.createTransport({
@@ -15,7 +18,7 @@ const transporter = nodemailer.createTransport({
 });
 
 
-const sendEmail = async (req: Request, res: Response, next: NextFunction) => {
+const sendEmail = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     const { destinatario, remitente, subject, text } = emailBodySchema.parse(req.body)
 
@@ -31,20 +34,39 @@ const sendEmail = async (req: Request, res: Response, next: NextFunction) => {
     try {
         await transporter.sendMail(mailOptions);
 
-        res.json({
+        return res.json({
             ok: true
         });
 
     } catch (error) {
-        next(error)
+        return next(error)
     }
 };
 
-const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction) => {
+const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
-    const { destinatario, remitente, subject, text, nombreRemitente } = emailCobranzaBodySchema.parse(req.body)
-    const pdfBuffer = await generatePDF({ name: 'prueba', message: "Primera prueba de pdf enviada por correo" });
-    
+    const { destinatario, remitente, subject, text, nombreRemitente } = emailCobranzaBodySchema.parse(req.body);
+    const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaQuerySchema.parse(req.query);
+    const { client } = getClientParamsSchema.parse(req.params);
+    const userSession = req.sessionWeb;
+
+    const sells = await getAllCobranzaService({
+        userSession,
+        Id_Cliente: client,
+        PageNumber: PageNumber || 1,
+        SellsOrderCondition: sellsOrderCondition,
+        TipoDoc,
+        FilterTipoDoc,
+        FilterNotExpired,
+        FilterExpired,
+        DateEnd: DateEnd || null,
+        DateExactly: DateExactly || null,
+        DateStart: DateStart || null,
+        PageSize: 100
+    });
+
+    const pdfBuffer = await generatePDF(sells);
+
     // Opciones del correo
     const mailOptions = {
         from: '"Olei Software" <moradoluisenrique@gmail.com>',
@@ -62,15 +84,17 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
     };
 
     try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Correo enviado: %s', info.messageId);
+        await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
+        //const info = await transporter.sendMail(mailOptions);
+        //console.log('Correo enviado: %s', info.messageId);
 
-        res.json({
+        return res.json({
             ok: true
         });
 
     } catch (error) {
-        console.error('Error al enviar el correo:', error);
+        return next(error)
     }
 };
 

@@ -1,3 +1,5 @@
+/// <reference path="./types/express-session.d.ts" />
+
 import Server from "./models/server";
 import dotenv from "dotenv";
 

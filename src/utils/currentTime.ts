@@ -1,6 +1,6 @@
 import moment from 'moment-timezone';
 
-export const currentTime = () => {
+export const currentTime = (): string => {
     const tz = 'America/Monterrey'; // Zona horaria deseada
     const format = "YYYY-MM-DDTHH:mm:ss.sssZ"; // Formato ISO 8601
 

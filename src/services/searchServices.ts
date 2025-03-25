@@ -1,26 +1,18 @@
 import { dbConnectionWeb, querys } from "../database";
-import { UnauthorizedError } from "../errors/CustomError";
-import { handleGetWebSession } from "../utils/Redis/getSession";
-
+import { UserWebSessionInterface } from "../interface/user";
 
 interface searchServiceInterface {
-    sessionId: string;
+    userSession: UserWebSessionInterface;
     searchTerm: string;
 }
 
 const searchFamiliaService = async ({
-    sessionId,
+    userSession,
     searchTerm
-}: searchServiceInterface) => {
+}: searchServiceInterface): Promise<{ familias: { Nombre: string }[] }> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     const result = await pool.request()
         .input('Nombre', searchTerm)
@@ -35,18 +27,13 @@ const searchFamiliaService = async ({
 };
 
 const searchMarcaService = async ({
-    sessionId,
+    userSession,
     searchTerm
-}: searchServiceInterface) => {
+}: searchServiceInterface): Promise<{ marcas: { Nombre: string }[] }> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     const result = await pool.request()
         .input('Nombre', searchTerm)
@@ -61,18 +48,13 @@ const searchMarcaService = async ({
 };
 
 const searchCodigoService = async ({
-    sessionId,
+    userSession,
     searchTerm
-}: searchServiceInterface ) => {
+}: searchServiceInterface): Promise<{ codigos: { Codigo: string }[] }> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     const result = await pool.request()
         .input('Codigo', searchTerm)

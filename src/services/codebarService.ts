@@ -1,10 +1,10 @@
 import { dbConnection } from "../database";
-import { handleGetSession } from "../utils/Redis/getSession";
 import { verifyIfIsEAN13 } from "../utils/identifyBarcodeType";
 import { costosQuerys } from "../database/querys/costos";
 import { v4 as uuidv4 } from 'uuid';
 import sql from 'mssql';
-import { UnauthorizedError, ValidationError } from "../errors/CustomError";
+import { ValidationError } from "../errors/CustomError";
+import { UserSessionInterface } from "../interface/user";
 
 type updateCodbar = {
     CodBar: string;
@@ -12,19 +12,14 @@ type updateCodbar = {
 };
 
 const updateCodebarService = async (
-    sessionId: string,
+    userSession: UserSessionInterface,
     codigoParam: string,
     Id_Marca: number,
     body: updateCodbar
-) => {
+): Promise<{ codigo: string, CodBar: string }> => {
 
-    const { user: userFR } = await handleGetSession({ sessionId });
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userSession;
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -66,7 +61,10 @@ const updateCodebarService = async (
     await request.query(query);
     await transaction.commit();
 
-    return { ok: true }
+    return {
+        codigo: codigoParam,
+        CodBar
+    }
 };
 
 

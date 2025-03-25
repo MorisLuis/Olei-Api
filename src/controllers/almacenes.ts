@@ -2,56 +2,62 @@ import { NextFunction, Request, Response } from "express";
 import { getAlmacenByIdService, getAlmacenesService } from "../services/almacenesService";
 import { getAlmacenByIdQuerySchema } from "../validations/almacenValidations";
 import { UserSessionInterface } from "../interface/user";
+import { NotFoundError, UnauthorizedError } from "../errors/CustomError";
+import { updateSession } from "../helpers/generate-redis";
 
-const getAlmacenes = async (req: Request, res: Response, next: NextFunction) => {
+const getAlmacenes = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const sessionId = req.sessionID;
-        const { almacenes } = await getAlmacenesService({
-            sessionId
-        });
+        const userSession = req.session;
+        const { almacenes } = await getAlmacenesService(userSession);
 
-        res.json({
+        return res.json({
             almacenes
         });
 
     } catch (error) {
-        next(error)
+        return next(error)
     }
 };
 
-const updateAlmacenInRedis = async (req: Request, res: Response, next: NextFunction) => {
+const updateAlmacenInRedis = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
 
         const { Id_Almacen } = getAlmacenByIdQuerySchema.parse(req.query);
-        const sessionId = req.sessionID;
+        const userSession = req.session;
+        const sessionId = req.sessionId;
+
+        if (!userSession) {
+            throw new UnauthorizedError('User session is not defined');
+        };
 
         const { almacen } = await getAlmacenByIdService({
-            sessionId,
+            userSession,
             Id_Almacen
         });
 
         if (!almacen) {
-            return res.status(404).json({ message: 'Almacen no encontrado' });
+            throw new NotFoundError('Almacen no encontrado')
         }
 
         if (almacen.Id_Almacen) {
             const datosDelUsuario: UserSessionInterface = {
-                ...(req.session as any).user,
+                ...userSession,
                 Id_Almacen: almacen.Id_Almacen,
-                AlmacenNombre: almacen.Nombre ?? ''
+                AlmacenNombre: almacen.Nombre ?? '',
             };
-            (req.session as any).user = datosDelUsuario;
+
+            updateSession(sessionId, datosDelUsuario)
         }
 
-        res.json(almacen);
+        return res.json(almacen);
 
     } catch (error) {
-        next(error)
+        return next(error)
     };
 
-}
+};
 
 export {
     getAlmacenes,

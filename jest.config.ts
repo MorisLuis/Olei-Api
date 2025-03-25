@@ -1,15 +1,18 @@
 import type { Config } from '@jest/types';
 
+const baseDir = '<rootDir>/src/utils/test/doubles';
+const baseTestDir = '<rootDir>/src/test/doubles';
+
 const config: Config.InitialOptions = {
     preset: 'ts-jest',
     testEnvironment: 'node',
     verbose: true,
     collectCoverage: true,
     collectCoverageFrom: [
-        '<rootDir>/src/test/*.ts'
+        `${baseDir}/**/*.ts`
     ],
-    testPathIgnorePatterns: [
-        '<rootDir>/dist/'
+    testMatch: [
+        `${baseTestDir}/**/*.ts`
     ]
 }
 

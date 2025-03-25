@@ -4,18 +4,17 @@ exports.updateCostos = void 0;
 const codebarService_1 = require("../services/codebarService");
 const costosValidations_1 = require("../validations/costosValidations");
 const updateCostos = async (req, res, next) => {
-    const sessionId = req.sessionID;
+    const userSession = req.session;
     const { codigo: codigoParam, Id_Marca } = costosValidations_1.updateCodbarQuerySchema.parse(req.query);
     const body = req.body;
     try {
-        const resp = await (0, codebarService_1.updateCodebarService)(sessionId, codigoParam, Id_Marca, body);
-        res.json({
-            resp
+        const { CodBar, codigo } = await (0, codebarService_1.updateCodebarService)(userSession, codigoParam, Id_Marca, body);
+        return res.json({
+            CodBar, codigo
         });
     }
     catch (error) {
-        console.log({ error });
-        next(error);
+        return next(error);
     }
     ;
 };

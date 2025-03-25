@@ -7,20 +7,20 @@ const zod_1 = require("zod");
 const getCalendarTaskByMonth = async (req, res, next) => {
     try {
         const { Anio, Mes } = calendarValidations_1.getCalendarTaskByMonthQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const tasks = await (0, calendarService_1.getCalendarTaskByMonthService)({
-            sessionId,
+            userSession,
             Anio,
             Mes,
         });
-        res.json(tasks);
+        return res.json(tasks);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
 };
@@ -29,19 +29,19 @@ const getCalendarTaskByDay = async (req, res, next) => {
     /* Timeline */
     try {
         const { Day } = calendarValidations_1.getCalendarTaskByDayQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const tasks = await (0, calendarService_1.getCalendarTaskByDayService)({
-            sessionId,
+            userSession,
             Day
         });
         res.json(tasks);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
     ;
@@ -50,21 +50,21 @@ exports.getCalendarTaskByDay = getCalendarTaskByDay;
 const getCalendarTaskByMonthAndClient = async (req, res, next) => {
     try {
         const { Anio, Mes, Id_Cliente } = calendarValidations_1.getCalendarByMonthAndClientQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const tasks = await (0, calendarService_1.getCalendarTaskByMonthAndClientService)({
-            sessionId,
+            userSession,
             Anio,
             Mes,
             Id_Cliente
         });
-        res.json(tasks);
+        return res.json(tasks);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
     ;

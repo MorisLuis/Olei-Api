@@ -2,18 +2,13 @@ import sql from 'mssql';
 import config from "../config";
 
 let mainPool: sql.ConnectionPool | null = null;
+const connectionPools: Map<string, sql.ConnectionPool> = new Map(); // Mapa para almacenar las conexiones activas
+const MAX_CONNECTIONS = 10; // Límite de conexiones simultáneas
+const getPoolKey = (server: string, base: string) => `${server.trim()}-${base.trim()}`; // Función para generar una clave única por servidor y base de datos
 
-// Mapa para almacenar las conexiones activas
-const connectionPools: Map<string, sql.ConnectionPool> = new Map();
-
-// Límite de conexiones simultáneas
-const MAX_CONNECTIONS = 10;
-
-// Función para generar una clave única por servidor y base de datos
-const getPoolKey = (server: string, base: string) => `${server}-${base}`;
 
 // Conexion App
-export const dbConnection = async (server: string, base: string, user: string, pass: string) => {
+export const dbConnection = async (server: string, base: string, user: string, pass: string) : Promise<sql.ConnectionPool> => {
     // Get pool key
     const poolKey = getPoolKey(server, base);
 
@@ -28,7 +23,6 @@ export const dbConnection = async (server: string, base: string, user: string, p
     if (connectionPools.size >= MAX_CONNECTIONS) {
         throw new Error('⚠️ Límite de conexiones alcanzado. Inténtalo más tarde.');
     };
-
 
     const dbConfig: sql.config = {
         user: user || config.dbUser,
@@ -47,16 +41,16 @@ export const dbConnection = async (server: string, base: string, user: string, p
         await pool.connect();
         connectionPools.set(poolKey, pool);
 
-        console.log(`✅ Conectado a SQL Server: ${server}, DB: ${base}`);
+        console.log(`✅ Conectado a SQL Server: ${server.trim()}, DB: ${base.trim()}`);
         return pool;
     } catch (error) {
-        console.error(`❌ Error al conectar con SQL Server (${server} - ${base}):`, error);
+        console.error(`❌ Error al conectar con SQL Server (${server.trim()} - ${base.trim()}):`, error);
         throw error;
     }
 };
 
 // Conexion Web
-export const dbConnectionWeb = async (server: string, base: string) => {
+export const dbConnectionWeb = async (server: string, base: string) : Promise<sql.ConnectionPool> => {
     // Get pool key
     const poolKey = getPoolKey(server, base);
 
@@ -75,8 +69,8 @@ export const dbConnectionWeb = async (server: string, base: string) => {
     const dbConfig: sql.config = {
         user: config.dbUser,
         password: config.dbPassword,
-        server: server,
-        database: base,
+        server: server.trim(),
+        database: base.trim(),
         options: {
             encrypt: true,
             trustServerCertificate: true
@@ -89,16 +83,16 @@ export const dbConnectionWeb = async (server: string, base: string) => {
         await pool.connect();
         connectionPools.set(poolKey, pool);
 
-        console.log(`✅ Conectado a SQL Server: ${server}, DB: ${base}`);
+        console.log(`✅ Conectado a SQL Server: ${server.trim()}, DB: ${base.trim()}`);
         return pool;
     } catch (error) {
-        console.error(`❌ Error al conectar con SQL Server (${server} - ${base}):`, error);
+        console.error(`❌ Error al conectar con SQL Server (${server.trim()} - ${base.trim()}):`, error);
         throw error;
     }
 };
 
 // Conexion App Main
-export const dbConnectionMain = async () => {
+export const dbConnectionMain = async () : Promise<sql.ConnectionPool> => {
     if (!mainPool) {
         const dbConfig = {
             user: config.dbUser,
@@ -111,11 +105,8 @@ export const dbConnectionMain = async () => {
             },
         };
 
-        try {
-            mainPool = await sql.connect(dbConfig);
-        } catch (error) {
-            throw error;
-        }
+        mainPool = await sql.connect(dbConfig);
+
     }
     return mainPool;
 };

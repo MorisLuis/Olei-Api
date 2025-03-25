@@ -3,20 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getExcellTest = exports.getUtils = exports.getBanner = void 0;
+exports.getExcellTest = exports.getBanner = void 0;
 const database_1 = require("../database");
-const getSession_1 = require("../utils/Redis/getSession");
 const sells_1 = require("../database/querys/sells");
 const exceljs_1 = __importDefault(require("exceljs"));
 const CustomError_1 = require("../errors/CustomError");
 const getBanner = async (req, res) => {
-    const sessionId = req.sessionRedis;
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new CustomError_1.UnauthorizedError('Sesion terminada');
-    }
-    ;
-    const database = userFR?.Baseweb;
+    const userSession = req.sessionWeb;
+    const database = userSession?.BaseSQL;
     const databaseSplit = database?.split('_');
     const newPath = databaseSplit?.[1]?.toLowerCase().trim();
     const banner = newPath ? `https://oleistorage.blob.core.windows.net/${newPath}/BANNER.png` : '/Banner_olei.png';
@@ -25,21 +19,10 @@ const getBanner = async (req, res) => {
     });
 };
 exports.getBanner = getBanner;
-const getUtils = async (req, res) => {
-    return new Promise((resolve, reject) => {
-        reject('Error en la promesa!');
-    });
-};
-exports.getUtils = getUtils;
 const getExcellTest = async (req, res) => {
-    const sessionId = req.sessionRedis;
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new CustomError_1.UnauthorizedError('Sesion terminada');
-    }
-    ;
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
+    const userSession = req.sessionWeb;
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     try {
         // Obtenemos los datos de la base de datos en lotes
         const data = await fetchDataInBatches(pool);
@@ -47,7 +30,7 @@ const getExcellTest = async (req, res) => {
         await generateExcelStream(res, data);
     }
     catch (error) {
-        console.log({ error });
+        throw new CustomError_1.NotFoundError(`${error}`);
     }
 };
 exports.getExcellTest = getExcellTest;
@@ -91,7 +74,7 @@ const fetchDataInBatches = async (pool) => {
             }
         }
         catch (error) {
-            console.log({ error });
+            throw new CustomError_1.NotFoundError(`${error}`);
         }
         ;
     }

@@ -1,0 +1,31 @@
+import { v4 } from "uuid";
+import redisClient from "../../config/redisClient";
+import jwt from 'jsonwebtoken';
+import { UserWebSessionInterface } from "../../interface/user";
+
+interface createSessionWebInterface {
+    datosDelUsuario: UserWebSessionInterface
+};
+
+const createSessionWeb = async ({
+    datosDelUsuario
+}: createSessionWebInterface): Promise<{ token: string }> => {
+
+    // Generar un ID de sesión único
+    const sessionId = v4();
+
+    // Guardar la sesión en Redis con expiración (1 hora)
+    await redisClient.set(`session:${sessionId}`, JSON.stringify(datosDelUsuario), 'EX', 3600);
+
+    // Generar el token JWT que incluye el sessionId
+    const token = jwt.sign({ sessionId }, 's3Cr3t', { expiresIn: '1h' });
+
+    return {
+        token
+    }
+};
+
+
+export {
+    createSessionWeb
+}

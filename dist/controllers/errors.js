@@ -7,6 +7,7 @@ exports.handleErrorsEndpoint = exports.handleErrors = void 0;
 const database_1 = require("../database");
 const mssql_1 = __importDefault(require("mssql"));
 const moment_1 = __importDefault(require("moment"));
+const CustomError_1 = require("../errors/CustomError");
 const handleErrors = async (req, res) => {
     try {
         const pool = await (0, database_1.dbConnectionMain)();
@@ -54,7 +55,7 @@ const handleErrorsEndpoint = async ({ From, Message, Id_Usuario, Metodo, code })
         await transaction.commit();
     }
     catch (error) {
-        console.log({ error });
+        throw new CustomError_1.NotFoundError(`Error al conectarse a base de datos principal: ${error}`);
     }
 };
 exports.handleErrorsEndpoint = handleErrorsEndpoint;

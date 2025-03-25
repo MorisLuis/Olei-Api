@@ -1,23 +1,19 @@
 import { dbConnectionWeb } from "../database";
 import { sellsQuery } from "../database/querys/sells";
-import { UnauthorizedError, ValidationError } from "../errors/CustomError";
+import { ValidationError } from "../errors/CustomError";
 import { SellsInterface, SellsOrderConditionType } from "../interface/sells";
-import { handleGetWebSession } from "../utils/Redis/getSession";
+import { UserWebSessionInterface } from "../interface/user";
 
 
 const getSellsService = async (
-    sessionId: string,
+    userSession: UserWebSessionInterface,
     PageNumber: number,
     SellsOrderCondition: SellsOrderConditionType | string
-) => {
+): Promise<SellsInterface[]> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
 
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -36,7 +32,7 @@ const getSellsService = async (
 };
 
 export interface getSellsByClientServiceInterface {
-    sessionId: string,
+    userSession: UserWebSessionInterface,
     PageNumber: number,
     Id_Cliente: number,
     SellsOrderCondition: SellsOrderConditionType | string,
@@ -50,7 +46,7 @@ export interface getSellsByClientServiceInterface {
 };
 
 const getSellsByClientService = async ({
-    sessionId,
+    userSession,
     PageNumber,
     Id_Cliente,
     SellsOrderCondition,
@@ -61,14 +57,10 @@ const getSellsByClientService = async ({
     DateEnd,
     DateExactly,
     DateStart
-}: getSellsByClientServiceInterface) => {
+}: getSellsByClientServiceInterface): Promise<SellsInterface[]> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -92,14 +84,16 @@ const getSellsByClientService = async ({
     return sells
 };
 
-const getSellByIdService = async (sessionId: string, folio: string, Serie: string, Id_Almacen: number, TipoDoc: SellsInterface['TipoDoc']) => {
+const getSellByIdService = async (
+    userSession: UserWebSessionInterface,
+    folio: string,
+    Serie: string,
+    Id_Almacen: number,
+    TipoDoc: SellsInterface['TipoDoc']
+): Promise<SellsInterface> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -118,7 +112,7 @@ const getSellByIdService = async (sessionId: string, folio: string, Serie: strin
 };
 
 interface getCobranzaInterface {
-    sessionId: string,
+    userSession: UserWebSessionInterface,
     PageNumber: number,
     Id_Cliente: number,
     SellsOrderCondition: SellsOrderConditionType | string,
@@ -129,10 +123,12 @@ interface getCobranzaInterface {
     DateEnd: string | null,
     DateExactly: string | null,
     DateStart: string | null,
+
+    PageSize?: number
 };
 
 const getCobranzaService = async ({
-    sessionId,
+    userSession,
     PageNumber,
     Id_Cliente,
     SellsOrderCondition,
@@ -142,15 +138,13 @@ const getCobranzaService = async ({
     TipoDoc,
     DateEnd,
     DateExactly,
-    DateStart
-}: getCobranzaInterface) => {
+    DateStart,
+    PageSize = 10
+}: getCobranzaInterface): Promise<SellsInterface[]> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -158,7 +152,7 @@ const getCobranzaService = async ({
     let query = sellsQuery.getCobranza;
     const request = await pool.request()
         .input('PageNumber', PageNumber)
-        .input('PageSize', 10)
+        .input('PageSize', PageSize)
         .input('Id_Cliente', Id_Cliente)
         .input('OrderCondition', SellsOrderCondition)
         .input('FilterTipoDoc', FilterTipoDoc)
@@ -174,14 +168,29 @@ const getCobranzaService = async ({
     return sells
 };
 
-const getTotalSellsService = async (sessionId: string) => {
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    };
+export const getAllCobranzaService = async (params: getCobranzaInterface): Promise<SellsInterface[]> => {
+    let allSells: SellsInterface[] = [];
+    let pageNumber = params.PageNumber || 1;
+    const pageSize = params.PageSize || 100;
+    let hasMore = true;
 
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    while (hasMore) {
+        const sellsPage = await getCobranzaService({ ...params, PageNumber: pageNumber, PageSize: pageSize });
+        if (sellsPage.length > 0) {
+            allSells = allSells.concat(sellsPage);
+            pageNumber++;
+        } else {
+            hasMore = false;
+        }
+    }
+    return allSells;
+};
+
+
+const getTotalSellsService = async (userSession: UserWebSessionInterface): Promise<number> => {;
+
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -195,7 +204,7 @@ const getTotalSellsService = async (sessionId: string) => {
 };
 
 interface getTotalSellsByClientServiceInterface {
-    sessionId: string,
+    userSession: UserWebSessionInterface,
     Id_Cliente: number,
     TipoDoc?: SellsInterface['TipoDoc']
     FilterTipoDoc: 0 | 1,
@@ -207,7 +216,7 @@ interface getTotalSellsByClientServiceInterface {
 };
 
 const getTotalSellsByClientService = async ({
-    sessionId,
+    userSession,
     Id_Cliente,
     FilterTipoDoc,
     FilterExpired,
@@ -216,14 +225,10 @@ const getTotalSellsByClientService = async ({
     DateEnd,
     DateExactly,
     DateStart
-}: getTotalSellsByClientServiceInterface) => {
+}: getTotalSellsByClientServiceInterface): Promise<number> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -245,7 +250,7 @@ const getTotalSellsByClientService = async ({
 };
 
 interface getTotalCobranzaServiceInterface {
-    sessionId: string,
+    userSession: UserWebSessionInterface,
     Id_Cliente: number,
     TipoDoc?: SellsInterface['TipoDoc']
     FilterTipoDoc: 0 | 1,
@@ -257,7 +262,7 @@ interface getTotalCobranzaServiceInterface {
 }
 
 const getTotalCobranzaService = async ({
-    sessionId,
+    userSession,
     Id_Cliente,
     FilterTipoDoc,
     FilterExpired,
@@ -266,15 +271,10 @@ const getTotalCobranzaService = async ({
     DateEnd,
     DateExactly,
     DateStart
-}: getTotalCobranzaServiceInterface) => {
+}: getTotalCobranzaServiceInterface): Promise<number> => {
 
-    const { user: userFR } = await handleGetWebSession({ sessionId });
-
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await dbConnectionWeb(Serverweb, Baseweb);
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };

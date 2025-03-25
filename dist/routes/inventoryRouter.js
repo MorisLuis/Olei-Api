@@ -2,12 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const inventory_1 = require("../controllers/inventory");
-const validate_jwt_1 = require("../helpers/validate-jwt");
+const products_1 = require("../controllers/products/products");
+const validateJWT_1 = require("../middleware/validateJWT");
 const router = (0, express_1.Router)();
-/* router.get('/', getInventory);
-router.get('/inventoryDetails', getInventoryDetails); */
-router.post('/', validate_jwt_1.validateJWT, inventory_1.postInventory);
-router.get('/search/product', validate_jwt_1.validateJWT, inventory_1.searchProductInventory);
-router.get('/search/product/withoutcodebar', validate_jwt_1.validateJWT, inventory_1.searchProductInventoryWithoutCodebar);
+router.post('/', validateJWT_1.validateJWT, inventory_1.postInventory);
+router.get('/search/product', validateJWT_1.validateJWT, products_1.searchProductInventory);
+router.get('/search/product/withoutcodebar', validateJWT_1.validateJWT, products_1.searchProductInventoryWithoutCodebar);
 exports.default = router;
 //# sourceMappingURL=inventoryRouter.js.map

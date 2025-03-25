@@ -1,21 +1,14 @@
 import { NextFunction, Request, Response } from 'express'
 import { dbConnectionWeb, querys } from '../database';
-import { handleGetWebSession } from '../utils/Redis/getSession';
-import { UnauthorizedError } from '../errors/CustomError';
 
-const getTables = async (req: Request, res: Response, next: NextFunction) => {
+const getTables = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void>  => {
 
     try {
         // Get session from REDIS.
-        const sessionId = req.sessionRedis
-        const { user: userFR } = await handleGetWebSession({ sessionId });
-    
-        if (!userFR) {
-            throw new UnauthorizedError('Sesion terminada')
-        }
-    
-        const { Serverweb, Baseweb } = userFR;
-        const pool = await dbConnectionWeb(Serverweb, Baseweb);
+        const userSession = req.sessionWeb
+
+        const { ServidorSQL, BaseSQL } = userSession;
+        const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
         const FamiliasResult = await pool?.request().query(querys.getFamilias);
         const Familias = FamiliasResult?.recordset.map(familia => familia.Nombre);
@@ -26,14 +19,14 @@ const getTables = async (req: Request, res: Response, next: NextFunction) => {
         const FolioResult = await pool?.request().query(querys.getFolios);
         const Folio = FolioResult?.recordset.map(folio => folio.Codigo);
 
-        res.json({
+        return res.json({
             Familias,
             Marca,
             Folio
         });
 
     } catch (error) {
-        next(error)
+        return next(error)
     }
 };
 

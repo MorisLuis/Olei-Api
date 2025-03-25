@@ -3,11 +3,13 @@ import { sellsQuery } from "../database/querys/sells";
 import { SellsInterface, SellsOrderConditionType } from "../interface/sells";
 import ExcelJS from 'exceljs';
 import { Response } from "express";
-import { validateSession } from "../helpers/validateSession";
 import excelColumnsConfig from "../utils/excelColumnsConfig";
+import { createPool } from "../helpers/createPool";
+import { NotFoundError, UnauthorizedError, ValidationError } from "../errors/CustomError";
+import { UserWebSessionInterface } from "../interface/user";
 
 interface reportsCobranzaServiceInterface {
-    sessionId?: string,
+    userSession?: UserWebSessionInterface,
     PageNumber: number,
     Id_Cliente: number,
     SellsOrderCondition: SellsOrderConditionType | string,
@@ -22,7 +24,7 @@ interface reportsCobranzaServiceInterface {
 };
 
 const reportsCobranzaService = async ({
-    sessionId,
+    userSession,
     PageNumber,
     Id_Cliente,
     SellsOrderCondition,
@@ -34,10 +36,19 @@ const reportsCobranzaService = async ({
     DateExactly,
     DateStart,
     res
-}: reportsCobranzaServiceInterface) => {
+}: reportsCobranzaServiceInterface): Promise<void> => {
 
-    const { user } = await validateSession(sessionId);
-    /* const pool = await createPool(user.Serverweb, user.Baseweb);
+    if (!userSession) {
+        throw new UnauthorizedError('Sesion terminada')
+    }
+
+    const { ServidorSQL, BaseSQL } = userSession;
+
+    const pool = await createPool(ServidorSQL, BaseSQL);
+
+    if (!pool) {
+        throw new ValidationError('Error al conectarse a base de datos principal');
+    }
 
     const data = await fetchDataInBatches({
         pool,
@@ -54,7 +65,7 @@ const reportsCobranzaService = async ({
         res
     });
 
-    await generateExcelStream(res, data) */
+    await generateExcelStream(res, data)
 };
 
 
@@ -107,7 +118,7 @@ const fetchDataInBatches = async ({
             }
 
         } catch (error) {
-            console.log({ error })
+            throw new NotFoundError(`${error}`)
         };
     };
 
@@ -116,7 +127,7 @@ const fetchDataInBatches = async ({
 
 const generateExcelStream = async (res: Response, data: SellsInterface[]) => {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Datos'); 
+    const worksheet = workbook.addWorksheet('Datos');
     worksheet.columns = excelColumnsConfig.cobranza
 
     for (let i = 0; i < data.length; i++) {

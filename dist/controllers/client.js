@@ -1,30 +1,27 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTotalClients = exports.searchClient = exports.selectClient = exports.getClientId = exports.getClients = void 0;
-const generate_jwt_1 = require("../helpers/generate-jwt");
-const getSession_1 = require("../utils/Redis/getSession");
-const deleteRedis_1 = require("../utils/Redis/deleteRedis");
 const clientsServices_1 = require("../services/clientsServices");
 const clientValidations_1 = require("../validations/clientValidations");
 const zod_1 = require("zod");
-const CustomError_1 = require("../errors/CustomError");
+const generate_redis_1 = require("../helpers/generate-redis");
 const getClients = async (req, res, next) => {
     try {
         const { PageNumber, clientOrderCondition } = clientValidations_1.getClientsQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const clients = await (0, clientsServices_1.getClientsService)({
-            sessionId,
+            userSession,
             PageNumber: PageNumber,
             OrderCondition: clientOrderCondition
         });
-        res.json(clients);
+        return res.json(clients);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
     ;
@@ -32,17 +29,12 @@ const getClients = async (req, res, next) => {
 exports.getClients = getClients;
 const getTotalClients = async (req, res, next) => {
     try {
-        const sessionId = req.sessionRedis;
-        const total = await (0, clientsServices_1.getTotalClientsService)(sessionId);
-        res.json(total);
+        const userSession = req.sessionWeb;
+        const total = await (0, clientsServices_1.getTotalClientsService)(userSession);
+        return res.json({ total });
     }
     catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
-        }
-        else {
-            next(error);
-        }
+        return next(error);
     }
     ;
 };
@@ -50,43 +42,25 @@ exports.getTotalClients = getTotalClients;
 const getClientId = async (req, res, next) => {
     try {
         const { Id_Almacen, Id_Cliente } = clientValidations_1.getClientIdQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const clients = await (0, clientsServices_1.getClientIdService)({
-            sessionId,
+            userSession,
             Id_Cliente,
             Id_Almacen
         });
-        res.status(200).json({
-            success: true,
-            data: clients ?? null
+        return res.json({
+            data: clients
         });
     }
     catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
-        }
-        else {
-            if (error instanceof zod_1.z.ZodError) {
-                res.status(400).json({ message: "Validation error", errors: error.errors });
-            }
-            else {
-                next(error);
-            }
-            ;
-        }
+        return next(error);
     }
 };
 exports.getClientId = getClientId;
 const selectClient = async (req, res, next) => {
     try {
-        // Get session from REDIS.
-        const sessionId = req.sessionRedis;
-        const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-        if (!userFR) {
-            throw new CustomError_1.UnauthorizedError('Sesion terminada');
-        }
-        ;
-        const { Id } = userFR;
+        const userSession = req.sessionWeb;
+        const sessionId = req.sessionId;
         const { Id_Cliente, Id_Almacen, Id_ListPre } = clientValidations_1.selectClientBodySchema.parse(req.body);
         const client = {
             Id_Almacen: Id_Almacen,
@@ -95,38 +69,30 @@ const selectClient = async (req, res, next) => {
             IsEmploye: true
         };
         const datosDelUsuario = {
-            ...userFR,
+            ...userSession,
             ...client
         };
-        req.session.userWeb = datosDelUsuario;
-        const token = await (0, generate_jwt_1.generateWebJWT)({ Id: Id, sessionRedis: req.sessionID });
-        (0, deleteRedis_1.handleDeleteRedisSession)({ sessionId });
+        (0, generate_redis_1.updateWebSession)(sessionId, datosDelUsuario);
         return res.json({
-            ok: true,
-            token
+            ok: true
         });
     }
     catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
-        }
-        else {
-            next(error);
-        }
+        return next(error);
     }
 };
 exports.selectClient = selectClient;
 const searchClient = async (req, res, next) => {
     try {
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const { term } = clientValidations_1.searchClientQuerySchema.parse(req.query);
-        const { Clients } = await (0, clientsServices_1.searchClientService)({ sessionId, term });
-        res.json({
+        const { Clients } = await (0, clientsServices_1.searchClientService)({ userSession, term });
+        return res.json({
             Clients
         });
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
 };
 exports.searchClient = searchClient;

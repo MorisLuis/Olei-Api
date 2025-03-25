@@ -1,0 +1,21 @@
+import redisClient from "../../config/redisClient";
+
+interface handleDeleteRedisSessionInterface {
+    sessionId: string;
+}
+
+export const handleDeleteRedisSession = async ({ sessionId }: handleDeleteRedisSessionInterface): Promise<void> => {
+
+    await redisClient?.del(`session:${sessionId}`, (err, response) => {
+        if (err) {
+            console.error('Error al eliminar la sesión:', err);
+        } else {
+            if (response === 1) {
+                console.log('Sesión eliminada exitosamente');
+            } else {
+                console.log('Sesión no encontrada en Redis');
+            }
+        }
+    });
+
+}

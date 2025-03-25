@@ -1,4 +1,4 @@
-export default interface PorductInterface {
+export default interface ProductInterface {
     Descripcion: string;
     Id_Familia: number
     Codigo: string;
@@ -13,7 +13,7 @@ export default interface PorductInterface {
     Id_ListaPrecios: number;
     Cantidad: number;
     Impuesto: number;
-    imagen: string;   
+    imagen: string | null;
     imagenes: Image[]
 }
 

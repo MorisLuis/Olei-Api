@@ -1,14 +1,20 @@
 import { NextFunction, Request, Response } from 'express'
 import { getProducByIdWebService, getProductsService, getTotalProductsService, searchProductService } from '../../services/productsServices';
 import { getProducByIdWebQuerySchema, getProductsQuerySchema, getTotalProductsQuerySchema, serachProductQuerySchema } from '../../validations/productsValidations';
+import ProductInterface from '../../interface/product';
 
-const getProducts = async (req: Request, res: Response, next: NextFunction) => {
+const getProducts = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<Response<{ products: ProductInterface[] }> | void> => {
+
     try {
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const { nombre, marca, familia, folio, page, limit } = getProductsQuerySchema.parse(req.query);
 
         const { products } = await getProductsService({
-            sessionId,
+            userSession,
             nombre,
             marca,
             familia,
@@ -17,77 +23,88 @@ const getProducts = async (req: Request, res: Response, next: NextFunction) => {
             limit
         });
 
-        res.json({
-            products
-        });
+        const response: { products: ProductInterface[] } = { products };
+        return res.json(response);
 
     } catch (error) {
-        next(error)
+        return next(error);
     }
 };
 
-const getProducByIdWeb = async (req: Request, res: Response, next: NextFunction) => {
+
+const getProducByIdWeb = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<Response<{ product: ProductInterface }> | void> => {
 
     try {
-        // Get session from REDIS.
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const { id: codigo } = req.params;
         const { Marca } = getProducByIdWebQuerySchema.parse(req.query);
 
         const { product } = await getProducByIdWebService({
-            sessionId,
+            userSession,
             codigo,
             Marca
         });
 
-        return res.json(product);
+        const response: { product: ProductInterface } = { product };
+        return res.json(response);
+
     } catch (error) {
-        next(error)
+        return next(error)
     }
 }
 
-const getTotalProducts = async (req: Request, res: Response, next: NextFunction) => {
+const getTotalProducts = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<Response<{ total: number }> | void> => {
 
     try {
-        // Get session from REDIS.
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const { nombre, marca, familia, folio } = getTotalProductsQuerySchema.parse(req.query);
 
         const { total } = await getTotalProductsService({
-            sessionId,
+            userSession,
             nombre,
             marca,
             familia,
             folio
         })
 
-        res.json({ total });
+        const response: { total: number } = { total };
+        return res.json(response);
 
     } catch (error) {
-        next(error)
+        return next(error)
     }
 };
 
-const searchProduct = async (req: Request, res: Response, next: NextFunction) => {
+const searchProduct = async (
+    req: Request, 
+    res: Response, 
+    next: NextFunction
+    ): Promise<Response<{ products: ProductInterface[] }> | void> => {
 
     try {
-        // Get session from REDIS.
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const { nombre, familia, codigo, marca } = serachProductQuerySchema.parse(req.query);
 
         const { products } = await searchProductService({
-            sessionId,
+            userSession,
             nombre,
             familia,
             codigo,
             marca
         })
 
-        res.json({
-            products
-        });
+        const response: { products: ProductInterface[] } = { products };
+        return res.json(response);
     } catch (error) {
-        next(error)
+        return next(error)
     }
 };
 

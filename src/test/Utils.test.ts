@@ -1,7 +1,39 @@
 // server.test.ts
-import { getStringInfo, toUpperCase } from '../utils/utilsTest';
+import { getStringInfo, toUpperCase, StringUitls } from '../utils/utilsTest';
 
 describe('Utils Test Suite', () => {
+
+    describe.only('StringUtils tests', () => {
+
+        let sut: StringUitls;
+
+        beforeEach(() => {
+            sut = new StringUitls;
+            console.log("setup")
+        });
+
+        afterAll(() => {
+            console.log("Teardown")
+        })
+    
+        it('Should return correct uppercase', () => {
+            const actual = sut.toUpperCase('abc');
+            expect(actual).toBe('ABC');
+            console.log("actual test")
+        });
+
+        it('Should throw error on invalid argument - function', () => {
+            function expectError() {
+                return sut.toUpperCase('')
+            };
+            expect(expectError).toThrow();
+            expect(expectError).toThrowError('Invalid argument!');
+        });
+
+        it.only('Should throw error on invalid argument - arrow function', () => {
+            expect(() => sut.toUpperCase('')).toThrowError('Invalid argument!');
+        })
+    })
 
     it('should return uppercase', () => {
 
@@ -69,7 +101,8 @@ describe('Utils Test Suite', () => {
     });
 
 
-    describe.only('ToUpperCase examples', () => {
+    // Parametrized tests.
+    describe('ToUpperCase examples', () => {
         it.each([
             { input: 'abc', expected: 'ABC' },
             { input: 'My-String', expected: 'MY-STRING' },

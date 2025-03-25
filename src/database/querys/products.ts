@@ -1,7 +1,6 @@
 export const productsQuerys = {
 
 
-
     // Get Products by Stock. Pagination.
     getAllProductsByStock: `
         SELECT
@@ -24,7 +23,6 @@ export const productsQuerys = {
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY
     `,
-
 
     getTotalOfAllProductsByStock: `
         SELECT COUNT(*) AS TotalProductos
@@ -82,7 +80,7 @@ export const productsQuerys = {
     // Get number of products.
     getTotalProducts: "SELECT COUNT(*) FROM [dbo].[CLIENTES]",
 
-    // Search products. ***
+    // SEARCH PRODUCTS.
     getProductsBySearch: `
         SELECT TOP(10)
             TRIM(P.Descripcion) AS Descripcion
@@ -128,7 +126,7 @@ export const productsQuerys = {
             AND E.Id_Almacen = @Id_Almacen 
             AND PR.Id_ListaPrecios = @Id_ListPre;
     `,
-
+    // Search products without codebar.
     getProductsBySearchInventoryWithoutCodebar: `
         SELECT TOP(10)
             P.Descripcion AS Descripcion,

@@ -76,7 +76,7 @@ exports.productsQuerys = {
     `,
     // Get number of products.
     getTotalProducts: "SELECT COUNT(*) FROM [dbo].[CLIENTES]",
-    // Search products. ***
+    // SEARCH PRODUCTS.
     getProductsBySearch: `
         SELECT TOP(10)
             TRIM(P.Descripcion) AS Descripcion
@@ -121,6 +121,7 @@ exports.productsQuerys = {
             AND E.Id_Almacen = @Id_Almacen 
             AND PR.Id_ListaPrecios = @Id_ListPre;
     `,
+    // Search products without codebar.
     getProductsBySearchInventoryWithoutCodebar: `
         SELECT TOP(10)
             P.Descripcion AS Descripcion,

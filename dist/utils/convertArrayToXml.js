@@ -31,22 +31,22 @@ const convertArrayToXml = (data) => {
         // Crear el nodo raíz 'Root'
         const root = xmlbuilder.create('Root');
         // Manejar el caso en el que `data` es un solo objeto
-        if (!Array.isArray(data)) {
-            data = [data];
-        }
+        const dataArray = Array.isArray(data) ? data : [data];
         // Agregar cada objeto del arreglo como un nodo 'Item'
-        data.forEach((item) => {
+        dataArray.forEach((item) => {
             const itemElement = root.ele('Item');
-            for (const [key, value] of Object.entries(item)) {
-                //@ts-ignore
-                itemElement.ele(key, value);
-            }
+            Object.entries(item).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    itemElement.ele(key, value.toString());
+                }
+            });
         });
         // Convertir el objeto XML a una cadena con formato
-        return root.end({ pretty: true, indent: '        ', newline: '\n' });
+        return root.end({ pretty: true, indent: '    ', newline: '\n' });
     }
     catch (error) {
-        return error;
+        console.error("Error converting to XML:", error);
+        return undefined;
     }
 };
 exports.convertArrayToXml = convertArrayToXml;

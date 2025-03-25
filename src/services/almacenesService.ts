@@ -1,57 +1,41 @@
-import { dbConnection, dbConnectionWeb } from "../database";
+import { dbConnectionWeb } from "../database";
 import { AlamacenQuery } from "../database/querys/almacen";
-import { UnauthorizedError } from "../errors/CustomError";
-import { handleGetSession } from "../utils/Redis/getSession";
+import { UserSessionInterface } from "../interface/user";
 
-
-interface getAlmacenesServiceInterface {
-    sessionId: string;
+interface AlmacenInterface {
+    Id_Almacen: number;
+    IdOLEI: number;
+    Nombre: string;
 }
 
-const getAlmacenesService = async ({
-    sessionId
-} :  getAlmacenesServiceInterface ) => {
+const getAlmacenesService = async (userSession: UserSessionInterface): Promise<{ almacenes: AlmacenInterface[] }> => {
 
-    const { user: userFR } = await handleGetSession({ sessionId });
-
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { ServidorSQL, BaseSQL } = userFR;
+    const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     const result = await pool.request().query(AlamacenQuery.getAlmacenes);
     const almacenes = result?.recordset;
 
     return {
         almacenes
-    }
-}
+    };
+};
 
 interface getAlmacenByIdServiceInterface {
-    sessionId: string;
+    userSession: UserSessionInterface;
     Id_Almacen: number;
 }
 
-const getAlmacenByIdService = async ({
-    sessionId,
-    Id_Almacen
-} :  getAlmacenByIdServiceInterface ) => {
+const getAlmacenByIdService = async ({ userSession, Id_Almacen }: getAlmacenByIdServiceInterface): Promise<{ almacen: AlmacenInterface }> => {
 
-    const { user: userFR } = await handleGetSession({ sessionId });
 
-    if (!userFR) {
-        throw new UnauthorizedError('Sesion terminada')
-    }
-
-    const { ServidorSQL, BaseSQL } = userFR;
+    const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     const result = await pool.request()
         .input('Id_Almacen', Id_Almacen)
         .query(AlamacenQuery.getAlmacenById);
 
-        const almacen = result?.recordset[0];
+    const almacen = result?.recordset[0];
 
     return {
         almacen

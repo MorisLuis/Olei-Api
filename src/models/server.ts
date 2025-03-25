@@ -1,9 +1,7 @@
 // server.ts
+
 import express, { Application } from "express";
-import cors from 'cors';
-import Redis from 'ioredis';
-import RedisStore from 'connect-redis';
-import session, { Store } from 'express-session';
+import cors, { CorsOptions } from 'cors';
 import { dbConnectionMain } from "../database/connection";
 
 // Rutas
@@ -26,11 +24,11 @@ import reportsRouter from "../routes/reportsRouter";
 import almacenesRouter from "../routes/almacenesRouter";
 
 import { errorHandler } from "../middleware/errorHandler";
+import cookieParser from 'cookie-parser';  // Asegúrate de importar cookie-parser
 
 class Server {
     public app: Application;
     private port: string;
-    public redis: Redis | null;
 
     private paths: {
         product: string,
@@ -55,7 +53,6 @@ class Server {
     constructor() {
         this.app = express();
         this.port = process.env.PORT || "5001";
-        this.redis = null;
         this.paths = {
             product: "/api/product",
             auth: "/api/auth",
@@ -77,8 +74,6 @@ class Server {
         };
 
         this.connectDB();
-        this.configureRedis();
-        this.configureSessions();
         this.middlewares();
         this.routes();
 
@@ -89,94 +84,36 @@ class Server {
         await dbConnectionMain();
     }
 
-    private configureRedis() {
-        this.redis = new Redis({
-            host: process.env.REDIS_HOST || '127.0.0.1',
-            port: Number(process.env.REDIS_PORT as string) || 6379,
-            password: process.env.REDIS_PASSWORD
-        });
 
-        this.redis.on('connect', () => {
-            console.log('Conectado a Redis');
-        });
 
-        this.redis.on('error', (err) => {
-            console.error('Error de conexión a Redis:', err);
-        });
-    }
-
-    private configureSessions() {
-        if (this.redis) {
-            const isProduction = process.env.ENVIRONMENT === 'production';
-
-            // Define el TTL y maxAge para móvil y web
-            const webMaxAgeInSeconds = 12 * 60 * 60; // 8 horas para la web
-            const mobileMaxAgeInSeconds = 365 * 24 * 60 * 60; // 1 año en móvil
-
-            // Define el store de Redis, una sola vez
-            const store = new RedisStore({
-                client: this.redis,
-                ttl: webMaxAgeInSeconds // Default ttl
-            }) as Store;
-
-            // Configurar express-session una vez para toda la aplicación
-            this.app.use(session({
-                secret: process.env.REDIS_SECRET as string,
-                name: 'sid',
-                store: store,
-                resave: false,
-                saveUninitialized: false,
-                cookie: {
-                    secure: isProduction ? 'auto' : false, // true en producción, false en local
-                    httpOnly: true,
-                    sameSite: isProduction ? 'none' : 'lax', // 'none' para producción, 'lax' para local
-                    maxAge: webMaxAgeInSeconds * 1000 // Default maxAge
-                }
-            }));
-
-            // Middleware personalizado para ajustar el maxAge según el User-Agent
-            this.app.use((req, res, next) => {
-                const userAgent = req.headers['user-agent'];
-
-                if (userAgent && (userAgent.includes('Mobile') || userAgent.includes('OleiApp'))) {
-                    // Si es una app móvil, ajustamos maxAge
-                    req.session.cookie.maxAge = mobileMaxAgeInSeconds * 1000;
-                }
-
-                next();
-            });
-        } else {
-            console.error('Redis no está configurado, las sesiones no se almacenarán en Redis');
-        }
-    }
-
-    private middlewares() {
-        const allowedOrigins = [
+    private middlewares(): void {
+        const allowedOrigins: string[] = [
             'https://www.oleionline.com',
             'http://localhost:3000',
             'http://localhost:3001',
-            "https://olei-crm.vercel.app",
-
-            //Demos
-            "https://oleiweb-git-demo2-morisluis-projects.vercel.app"
+            'https://olei-crm.vercel.app',
+            // Demos
+            'https://oleiweb-git-demo2-morisluis-projects.vercel.app'
         ];
-
-        const corsOptions = {
-            origin: (origin: any, callback: any) => {
+    
+        const corsOptions: CorsOptions = {
+            origin: (origin: string | undefined, callback) => {
                 if (!origin || allowedOrigins.includes(origin)) {
                     callback(null, true);
                 } else {
                     callback(new Error('Not allowed by CORS'));
                 }
             },
-            credentials: true
+            credentials: true,
         };
-
+        
         this.app.use(cors(corsOptions));
-
         this.app.use(express.json({ limit: '50mb' }));
         this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+        this.app.use(cookieParser());  // Agrega esta línea
     }
+    
 
     private routes() {
         this.app.use(this.paths.product, productRouter);
@@ -198,23 +135,20 @@ class Server {
         this.app.use(this.paths.almacenes, almacenesRouter);
     }
 
-    public async closeConnections() {
-        if (this.redis) {
-            await this.redis.quit();
-            console.log('Conexión a Redis cerrada');
-        }
+    public async closeConnections(): Promise<void> {
         await dbConnectionMain().then(pool => pool.close()).catch(() => { });
         console.log('Conexión a la base de datos cerrada');
     }
 
-    errorHandler() {
-        this.app.use(errorHandler);
+
+    public listen(): void {
+        this.app.listen(this.port, () => {
+            console.log("✅ Servidor corriendo en puerto " + this.port);
+        });
     }
 
-    public listen() {
-        this.app.listen(this.port, () => {
-            console.log("Servidor corriendo en puerto " + this.port);
-        });
+    errorHandler(): void {
+        this.app.use(errorHandler);
     }
 
 }
@@ -223,22 +157,21 @@ export default Server;
 
 // Exportar la instancia de Redis
 const server = new Server();
-export const redisClient = server.redis;
 
 // Listener para cerrar conexiones con SIGINT
 process.on('SIGINT', async () => {
-    console.log('Cerrando conexiones...');
+    console.log('❌ Cerrando conexiones...');
     await server.closeConnections();
     process.exit(0);
 });
 
 // Listeners globales para errores inesperados
-process.on('uncaughtException', (err) => {
+/* process.on('uncaughtException', (err) => {
     console.error('🔥 Uncaught Exception:', err);
     process.exit(1);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason) => {
     console.error('💥 Unhandled Promise Rejection:', reason);
     process.exit(1);
-});
+}); */

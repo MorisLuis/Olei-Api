@@ -7,12 +7,9 @@ exports.dbConnectionMain = exports.dbConnectionWeb = exports.dbConnection = void
 const mssql_1 = __importDefault(require("mssql"));
 const config_1 = __importDefault(require("../config"));
 let mainPool = null;
-// Mapa para almacenar las conexiones activas
-const connectionPools = new Map();
-// Límite de conexiones simultáneas
-const MAX_CONNECTIONS = 10;
-// Función para generar una clave única por servidor y base de datos
-const getPoolKey = (server, base) => `${server}-${base}`;
+const connectionPools = new Map(); // Mapa para almacenar las conexiones activas
+const MAX_CONNECTIONS = 10; // Límite de conexiones simultáneas
+const getPoolKey = (server, base) => `${server.trim()}-${base.trim()}`; // Función para generar una clave única por servidor y base de datos
 // Conexion App
 const dbConnection = async (server, base, user, pass) => {
     // Get pool key
@@ -43,11 +40,11 @@ const dbConnection = async (server, base, user, pass) => {
         const pool = new mssql_1.default.ConnectionPool(dbConfig);
         await pool.connect();
         connectionPools.set(poolKey, pool);
-        console.log(`✅ Conectado a SQL Server: ${server}, DB: ${base}`);
+        console.log(`✅ Conectado a SQL Server: ${server.trim()}, DB: ${base.trim()}`);
         return pool;
     }
     catch (error) {
-        console.error(`❌ Error al conectar con SQL Server (${server} - ${base}):`, error);
+        console.error(`❌ Error al conectar con SQL Server (${server.trim()} - ${base.trim()}):`, error);
         throw error;
     }
 };
@@ -70,8 +67,8 @@ const dbConnectionWeb = async (server, base) => {
     const dbConfig = {
         user: config_1.default.dbUser,
         password: config_1.default.dbPassword,
-        server: server,
-        database: base,
+        server: server.trim(),
+        database: base.trim(),
         options: {
             encrypt: true,
             trustServerCertificate: true
@@ -82,11 +79,11 @@ const dbConnectionWeb = async (server, base) => {
         const pool = new mssql_1.default.ConnectionPool(dbConfig);
         await pool.connect();
         connectionPools.set(poolKey, pool);
-        console.log(`✅ Conectado a SQL Server: ${server}, DB: ${base}`);
+        console.log(`✅ Conectado a SQL Server: ${server.trim()}, DB: ${base.trim()}`);
         return pool;
     }
     catch (error) {
-        console.error(`❌ Error al conectar con SQL Server (${server} - ${base}):`, error);
+        console.error(`❌ Error al conectar con SQL Server (${server.trim()} - ${base.trim()}):`, error);
         throw error;
     }
 };
@@ -104,12 +101,7 @@ const dbConnectionMain = async () => {
                 trustServerCertificate: true
             },
         };
-        try {
-            mainPool = await mssql_1.default.connect(dbConfig);
-        }
-        catch (error) {
-            throw error;
-        }
+        mainPool = await mssql_1.default.connect(dbConfig);
     }
     return mainPool;
 };

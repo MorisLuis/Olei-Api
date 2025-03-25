@@ -7,16 +7,16 @@ const zod_1 = require("zod");
 const getSells = async (req, res, next) => {
     try {
         const { PageNumber, sellsOrderCondition } = sellsValidations_1.getSellsQuerySchema.parse(req.query);
-        const sessionId = req.sessionRedis;
-        const sells = await (0, sellsDocsServices_1.getSellsService)(sessionId, PageNumber, sellsOrderCondition);
-        res.json(sells);
+        const userSession = req.sessionWeb;
+        const sells = await (0, sellsDocsServices_1.getSellsService)(userSession, PageNumber, sellsOrderCondition);
+        return res.json(sells);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
     ;
@@ -25,18 +25,18 @@ exports.getSells = getSells;
 const getSellById = async (req, res, next) => {
     try {
         // Get session from REDIS.
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const { Serie, Id_Almacen, TipoDoc } = sellsValidations_1.getSellByIdQuerySchema.parse(req.query);
         const { folio } = sellsValidations_1.getSellByIdParamsSchema.parse(req.params);
-        const sell = await (0, sellsDocsServices_1.getSellByIdService)(sessionId, folio, Serie, Id_Almacen, TipoDoc);
-        res.json(sell);
+        const sell = await (0, sellsDocsServices_1.getSellByIdService)(userSession, folio, Serie, Id_Almacen, TipoDoc);
+        return res.json(sell);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
     ;
@@ -46,9 +46,9 @@ const getSellsByClient = async (req, res, next) => {
     try {
         const { PageNumber, sellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart } = sellsValidations_1.getSellsByClientQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const sells = await (0, sellsDocsServices_1.getSellsByClientService)({
-            sessionId,
+            userSession,
             Id_Cliente: client,
             PageNumber,
             SellsOrderCondition: sellsOrderCondition,
@@ -60,14 +60,14 @@ const getSellsByClient = async (req, res, next) => {
             DateExactly: DateExactly || null,
             DateStart: DateStart || null,
         });
-        res.json(sells);
+        return res.json(sells);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
 };
@@ -77,9 +77,9 @@ const getCobranza = async (req, res, next) => {
         // Get session from REDIS.
         const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const sells = await (0, sellsDocsServices_1.getCobranzaService)({
-            sessionId,
+            userSession,
             Id_Cliente: client,
             PageNumber,
             SellsOrderCondition: sellsOrderCondition,
@@ -91,22 +91,22 @@ const getCobranza = async (req, res, next) => {
             DateExactly: DateExactly || null,
             DateStart: DateStart || null
         });
-        res.json(sells);
+        return res.json(sells);
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
     ;
 };
 exports.getCobranza = getCobranza;
 const getTotalSells = async (req, res, next) => {
     try {
-        const sessionId = req.sessionRedis;
-        const total = await (0, sellsDocsServices_1.getTotalSellsService)(sessionId);
-        res.json(total);
+        const userSession = req.sessionWeb;
+        const total = await (0, sellsDocsServices_1.getTotalSellsService)(userSession);
+        return res.json(total);
     }
     catch (error) {
-        next(error);
+        return next(error);
     }
 };
 exports.getTotalSells = getTotalSells;
@@ -115,7 +115,7 @@ const getTotalSellsByClient = async (req, res, next) => {
         const params = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const { FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, } = sellsValidations_1.getTotalSellsByClientQuerySchema.parse(req.query);
         const total = await (0, sellsDocsServices_1.getTotalSellsByClientService)({
-            sessionId: req.sessionRedis,
+            userSession: req.sessionWeb,
             Id_Cliente: params.client,
             TipoDoc,
             FilterTipoDoc,
@@ -125,14 +125,14 @@ const getTotalSellsByClient = async (req, res, next) => {
             DateExactly: DateExactly || null,
             DateStart: DateStart || null,
         });
-        res.json(total);
+        return res.json(total);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
 };
@@ -141,10 +141,10 @@ const getTotalCobranza = async (req, res, next) => {
     try {
         const { FilterTipoDoc, TipoDoc, FilterNotExpired, FilterExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getTotalCobranzaQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
-        const sessionId = req.sessionRedis;
+        const userSession = req.sessionWeb;
         const total = await (0, sellsDocsServices_1.getTotalCobranzaService)({
             Id_Cliente: client,
-            sessionId,
+            userSession,
             TipoDoc,
             FilterTipoDoc,
             FilterNotExpired,
@@ -153,14 +153,14 @@ const getTotalCobranza = async (req, res, next) => {
             DateExactly: DateExactly || null,
             DateStart: DateStart || null,
         });
-        res.json(total);
+        return res.json(total);
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
-            res.status(400).json({ message: "Validation error", errors: error.errors });
+            return res.status(400).json({ message: "Validation error", errors: error.errors });
         }
         else {
-            next(error);
+            return next(error);
         }
     }
 };

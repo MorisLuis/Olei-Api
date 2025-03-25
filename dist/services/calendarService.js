@@ -4,14 +4,9 @@ exports.getCalendarTaskByMonthAndClientService = exports.getCalendarTaskByDaySer
 const database_1 = require("../database");
 const calendar_1 = require("../database/querys/calendar");
 const CustomError_1 = require("../errors/CustomError");
-const getSession_1 = require("../utils/Redis/getSession");
-const getCalendarTaskByMonthService = async ({ sessionId, Mes, Anio }) => {
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new CustomError_1.UnauthorizedError('Sesion terminada');
-    }
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
+const getCalendarTaskByMonthService = async ({ userSession, Mes, Anio }) => {
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -25,13 +20,9 @@ const getCalendarTaskByMonthService = async ({ sessionId, Mes, Anio }) => {
     return quotes;
 };
 exports.getCalendarTaskByMonthService = getCalendarTaskByMonthService;
-const getCalendarTaskByDayService = async ({ sessionId, Day }) => {
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new CustomError_1.UnauthorizedError('Sesion terminada');
-    }
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
+const getCalendarTaskByDayService = async ({ userSession, Day }) => {
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
@@ -44,13 +35,9 @@ const getCalendarTaskByDayService = async ({ sessionId, Day }) => {
     return quotes;
 };
 exports.getCalendarTaskByDayService = getCalendarTaskByDayService;
-const getCalendarTaskByMonthAndClientService = async ({ sessionId, Mes, Anio, Id_Cliente }) => {
-    const { user: userFR } = await (0, getSession_1.handleGetWebSession)({ sessionId });
-    if (!userFR) {
-        throw new CustomError_1.UnauthorizedError('Sesion terminada');
-    }
-    const { Serverweb, Baseweb } = userFR;
-    const pool = await (0, database_1.dbConnectionWeb)(Serverweb, Baseweb);
+const getCalendarTaskByMonthAndClientService = async ({ userSession, Mes, Anio, Id_Cliente }) => {
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }

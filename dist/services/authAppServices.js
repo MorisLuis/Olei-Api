@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.loginAppService = exports.loginDBAppService = void 0;
 const database_1 = require("../database");
 const CustomError_1 = require("../errors/CustomError");
-const getSession_1 = require("../utils/Redis/getSession");
 const mssql_1 = __importDefault(require("mssql"));
 const loginDBAppService = async ({ IdUsuarioOLEI, PasswordOLEI }) => {
     // Connection to server
@@ -35,36 +34,38 @@ const loginDBAppService = async ({ IdUsuarioOLEI, PasswordOLEI }) => {
     };
 };
 exports.loginDBAppService = loginDBAppService;
-const loginAppService = async ({ sessionId, Id_Usuario, password }) => {
-    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
-    if (!userFR) {
-        throw new CustomError_1.UnauthorizedError('Sesion terminada');
-    }
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+;
+const loginAppService = async ({ session, Id_Usuario, password }) => {
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = session;
+    // Conectar a la base de datos
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
+    // Validar los parámetros de entrada
     if (Id_Usuario.trim() === "" || password.trim() === "") {
         throw new CustomError_1.ValidationError('Necesario escribir correo y contraseña');
     }
-    const request = pool.request();
-    request.input('Id_Usuario', mssql_1.default.VarChar(50), Id_Usuario);
-    request.input('Password', mssql_1.default.VarChar(50), password);
-    const result = await request.execute('sp_AuthenticateAndGetMovement');
-    const validations = result.recordsets[0];
+    // Ejecutar el 'stores procedure'
+    const result = await pool.request()
+        .input('Id_Usuario', mssql_1.default.VarChar(50), Id_Usuario)
+        .input('Password', mssql_1.default.VarChar(50), password)
+        .execute('sp_AuthenticateAndGetMovement');
+    // Validar si recordsets es un arreglo o un objeto
+    const recordsets = Array.isArray(result.recordsets) ? result.recordsets : Object.values(result.recordsets);
+    // Verificar si el primer recordset tiene datos de validación
+    const validations = recordsets[0];
     if (validations[0].Tipo === "usuario" && validations[0].Resultado !== 1) {
         throw new CustomError_1.NotFoundError('Correo no encontrado');
     }
-    ;
     if (validations[1].Tipo === "contrasena" && validations[1].Resultado !== 1) {
         throw new CustomError_1.UnauthorizedError('Contraseña incorrecta');
     }
-    ;
-    const userData = result.recordsets[1][0];
+    // Extraer datos del usuario
+    const userData = recordsets[1];
     return {
         userData: {
-            ...userData
+            ...userData[0]
         }
     };
 };

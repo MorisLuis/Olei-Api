@@ -5,18 +5,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateCodebarService = void 0;
 const database_1 = require("../database");
-const getSession_1 = require("../utils/Redis/getSession");
 const identifyBarcodeType_1 = require("../utils/identifyBarcodeType");
 const costos_1 = require("../database/querys/costos");
 const uuid_1 = require("uuid");
 const mssql_1 = __importDefault(require("mssql"));
 const CustomError_1 = require("../errors/CustomError");
-const updateCodebarService = async (sessionId, codigoParam, Id_Marca, body) => {
-    const { user: userFR } = await (0, getSession_1.handleGetSession)({ sessionId });
-    if (!userFR) {
-        throw new CustomError_1.UnauthorizedError('Sesion terminada');
-    }
-    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userFR;
+const updateCodebarService = async (userSession, codigoParam, Id_Marca, body) => {
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = userSession;
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
@@ -52,7 +47,10 @@ const updateCodebarService = async (sessionId, codigoParam, Id_Marca, body) => {
     request.input('CodBar', mssql_1.default.NVarChar, CodBar);
     await request.query(query);
     await transaction.commit();
-    return { ok: true };
+    return {
+        codigo: codigoParam,
+        CodBar
+    };
 };
 exports.updateCodebarService = updateCodebarService;
 //# sourceMappingURL=codebarService.js.map

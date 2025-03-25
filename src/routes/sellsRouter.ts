@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { validateJWTWeb } from "../helpers/validate-jwt";
 import { getCobranza, getSellById, getSells, getSellsByClient, getTotalCobranza, getTotalSells, getTotalSellsByClient } from "../controllers/sells";
+import { validateJWTWeb } from "../middleware/validateJWT";
 
 
 const router = Router();
