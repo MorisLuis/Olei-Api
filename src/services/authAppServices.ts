@@ -37,7 +37,7 @@ const loginDBAppService = async ({
     }
 
     if (result?.PasswordOLEI && result?.PasswordOLEI.trim() !== PasswordOLEI) {
-        throw new UnauthorizedError(`Contraseña incorrecta ${IdUsuarioOLEI}`)
+        throw new NotFoundError(`Contraseña incorrecta ${IdUsuarioOLEI}`)
     }
 
     return {
@@ -88,7 +88,7 @@ const loginAppService = async ({
     }
 
     if (validations[1].Tipo === "contrasena" && validations[1].Resultado !== 1) {
-        throw new UnauthorizedError('Contraseña incorrecta');
+        throw new NotFoundError('Contraseña incorrecta');
     }
 
     // Extraer datos del usuario

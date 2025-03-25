@@ -27,7 +27,7 @@ const loginDBAppService = async ({ IdUsuarioOLEI, PasswordOLEI }) => {
         throw new CustomError_1.NotFoundError(`No se encontro el usuario: ${IdUsuarioOLEI}`);
     }
     if (result?.PasswordOLEI && result?.PasswordOLEI.trim() !== PasswordOLEI) {
-        throw new CustomError_1.UnauthorizedError(`Contraseña incorrecta ${IdUsuarioOLEI}`);
+        throw new CustomError_1.NotFoundError(`Contraseña incorrecta ${IdUsuarioOLEI}`);
     }
     return {
         result
@@ -59,7 +59,7 @@ const loginAppService = async ({ session, Id_Usuario, password }) => {
         throw new CustomError_1.NotFoundError('Correo no encontrado');
     }
     if (validations[1].Tipo === "contrasena" && validations[1].Resultado !== 1) {
-        throw new CustomError_1.UnauthorizedError('Contraseña incorrecta');
+        throw new CustomError_1.NotFoundError('Contraseña incorrecta');
     }
     // Extraer datos del usuario
     const userData = recordsets[1];
