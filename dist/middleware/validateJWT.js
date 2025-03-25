@@ -51,7 +51,6 @@ exports.validateJWTLogin = validateJWTLogin;
 const validateJWT = async (req, _res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader?.split(' ')[1];
-    console.log({ token });
     if (!token) {
         return next(new CustomError_1.UnauthorizedError('Acceso denegado. Falta token o es invalido'));
     }
@@ -121,7 +120,6 @@ const validateRefreshJWT = async (req, _res, next) => {
         // Verificar el refreshToken usando la clave secreta específica para el refreshToken
         const decoded = jsonwebtoken_1.default.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
         const sessionId = decoded.sessionId;
-        console.log({ sessionId });
         req.sessionId = sessionId;
         // Buscar la sesión en Redis usando el sessionId
         const sessionDataRaw = await redisClient_1.default.get(`session:${sessionId}`);

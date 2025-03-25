@@ -7,18 +7,20 @@ const errorHandler = async (err, req, res, _next) => {
     const message = err.message || 'Internal Server Error';
     const Id_Usuario = req.Id_mobile ?? req.IdUsuarioOLEI ?? req.Id_web ?? "Sin Usuario";
     console.error(`[ERROR] ${req.method} ${req.path} - ${message}`);
-    // Intentamos guardar el error en la base de datos
-    try {
-        await (0, errors_1.handleErrorsEndpoint)({
-            From: req.path, // O el nombre del módulo o componente donde ocurrió el error
-            Message: message, // Mensaje de error
-            Id_Usuario: Id_Usuario, // O extraerlo de la sesión, si lo tienes
-            Metodo: req.method, // Método HTTP
-            code: statusCode.toString() // Código de error convertido a string
-        });
-    }
-    catch (loggingError) {
-        console.error('Error guardando log en la DB:', loggingError);
+    // Omitir errores de "Token expirado o inválido: TokenExpiredError: jwt expired" por que es el error de refresh token
+    if (!message.includes("Token expirado o inválido: TokenExpiredError: jwt expired")) {
+        try {
+            await (0, errors_1.handleErrorsEndpoint)({
+                From: req.path, // Endpoint donde ocurrió el error
+                Message: message, // Mensaje de error
+                Id_Usuario: Id_Usuario, // ID del usuario
+                Metodo: req.method, // Método HTTP
+                code: statusCode.toString() // Código de error convertido a string
+            });
+        }
+        catch (loggingError) {
+            console.error('Error guardando log en la DB:', loggingError);
+        }
     }
     res.status(statusCode).json({ error: message });
 };

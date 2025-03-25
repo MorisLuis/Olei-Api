@@ -56,7 +56,6 @@ const login = async (req, res, next) => {
             password,
             session
         });
-        console.log({ userData });
         const datosDelUsuario = {
             ...session,
             userId: Id_Usuario.trim(),
@@ -84,7 +83,6 @@ const logoutServer = async (req, res, next) => {
         const sessionId = req.sessionId;
         if (!sessionId)
             throw new CustomError_1.UnauthorizedError('Sesion terminada');
-        console.log("logoutServer!!!");
         await (0, generate_redis_1.handleDeleteRedisSession)(sessionId);
         res.json({ ok: true });
     }
@@ -116,7 +114,6 @@ const logoutUser = async (req, res, next) => {
 };
 exports.logoutUser = logoutUser;
 const refresh = async (req, res, next) => {
-    console.log("refresh token activado!!!");
     try {
         const session = req.session;
         const sessionId = req.sessionId;
