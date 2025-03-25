@@ -50,6 +50,7 @@ const login = async (req, res, next) => {
     try {
         const session = req.session;
         const sessionId = req.sessionId;
+        console.log({ sessionId });
         const { Id_Usuario, password } = req.body;
         const { userData } = await (0, authAppServices_1.loginAppService)({
             Id_Usuario,

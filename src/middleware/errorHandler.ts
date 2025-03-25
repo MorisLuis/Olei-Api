@@ -1,4 +1,4 @@
-  
+
 
 import { NextFunction, Request, Response } from "express";
 import { handleErrorsEndpoint } from "../controllers/errors";
@@ -15,7 +15,13 @@ const errorHandler = async (err: ErrorResponse, req: Request, res: Response, _ne
   console.error(`[ERROR] ${req.method} ${req.path} - ${message}`);
 
   // Omitir errores de "Token expirado o inválido: TokenExpiredError: jwt expired" por que es el error de refresh token
-  if (!message.includes("Token expirado o inválido: TokenExpiredError: jwt expired")) {
+  // Omitir errores de 'login'.
+  if (
+    !message.includes("Token expirado o inválido: TokenExpiredError: jwt expired") &&
+    req.path !== '/api/auth/login' &&
+    req.path !== '/api/auth/loginServer' &&
+    req.path !== '/api/auth/loginWeb'
+  ) {
     try {
       await handleErrorsEndpoint({
         From: req.path,                    // Endpoint donde ocurrió el error
