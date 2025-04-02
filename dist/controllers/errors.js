@@ -17,13 +17,13 @@ const handleErrors = async (req, res) => {
         const request = new mssql_1.default.Request(transaction);
         let query = database_1.querys.postError;
         const fechaActualCDMX = (0, moment_1.default)().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
-        await request
+        const resp = await request
             .input('From', mssql_1.default.VarChar, From || '')
             .input('Message', mssql_1.default.VarChar, Message || '')
             .input('Id_Usuario', mssql_1.default.VarChar, Id_Usuario || '')
             .input('Fecha', mssql_1.default.VarChar, fechaActualCDMX)
             .input('Metodo', mssql_1.default.VarChar, Metodo || '')
-            .input('code', mssql_1.default.VarChar, code || '')
+            .input('code', mssql_1.default.Int, code || '')
             .query(query);
         await transaction.commit();
         return res.json({

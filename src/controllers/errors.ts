@@ -4,7 +4,7 @@ import sql from 'mssql';
 import moment from 'moment';
 import { NotFoundError } from '../errors/CustomError';
 
-const handleErrors = async (req: Request, res: Response) : Promise<Response | void> => {
+const handleErrors = async (req: Request, res: Response): Promise<Response | void> => {
 
     try {
         const pool = await dbConnectionMain();
@@ -14,16 +14,17 @@ const handleErrors = async (req: Request, res: Response) : Promise<Response | vo
         await transaction.begin();
         const request = new sql.Request(transaction);
 
+
         let query = querys.postError;
         const fechaActualCDMX = moment().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
 
-        await request
+        const resp = await request
             .input('From', sql.VarChar, From || '')
             .input('Message', sql.VarChar, Message || '')
             .input('Id_Usuario', sql.VarChar, Id_Usuario || '')
-            .input('Fecha', sql.VarChar,fechaActualCDMX)
+            .input('Fecha', sql.VarChar, fechaActualCDMX)
             .input('Metodo', sql.VarChar, Metodo || '')
-            .input('code', sql.VarChar, code || '')
+            .input('code', sql.Int, code || '')
             .query(query);
 
         await transaction.commit();
@@ -52,7 +53,7 @@ const handleErrorsEndpoint = async ({
     Id_Usuario,
     Metodo,
     code
-}: handleErrorsEndpointInterface)  : Promise<Response | void> => {
+}: handleErrorsEndpointInterface): Promise<Response | void> => {
 
 
     try {
@@ -69,7 +70,7 @@ const handleErrorsEndpoint = async ({
             .input('From', sql.VarChar, From || '')
             .input('Message', sql.VarChar, Message || '')
             .input('Id_Usuario', sql.VarChar, Id_Usuario || '')
-            .input('Fecha', sql.VarChar,fechaActualCDMX)
+            .input('Fecha', sql.VarChar, fechaActualCDMX)
             .input('Metodo', sql.VarChar, Metodo || '')
             .input('code', sql.VarChar, code || '')
             .query(query);

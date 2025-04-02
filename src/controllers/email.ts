@@ -45,7 +45,6 @@ const sendEmail = async (req: Request, res: Response, next: NextFunction): Promi
 
 const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
-    console.log({body: req.body})
     const {
         destinatario,
         remitente,

@@ -42,7 +42,6 @@ const sendEmail = async (req, res, next) => {
 };
 exports.sendEmail = sendEmail;
 const sendEmailWithPDF = async (req, res, next) => {
-    console.log({ body: req.body });
     const { destinatario, remitente, subject, text, nombreRemitente } = emailValidations_1.emailCobranzaBodySchema.parse(req.body);
     const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaQuerySchema.parse(req.query);
     const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
