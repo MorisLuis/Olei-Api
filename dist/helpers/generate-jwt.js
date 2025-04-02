@@ -19,7 +19,6 @@ const generateRefreshToken = (sessionId) => {
 exports.generateRefreshToken = generateRefreshToken;
 /** Genera un Access Token con expiración corta (ej. 15min) */
 const generateAccessTokenWeb = (sessionId) => {
-    console.log({ ACCESS_TOKEN_SECRET, sessionId });
     return jsonwebtoken_1.default.sign({ sessionId }, 'access_secret', { expiresIn: '15m' });
 };
 exports.generateAccessTokenWeb = generateAccessTokenWeb;

@@ -45,6 +45,7 @@ const sendEmail = async (req: Request, res: Response, next: NextFunction): Promi
 
 const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
+    console.log({body: req.body})
     const {
         destinatario,
         remitente,
@@ -103,9 +104,6 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
 
     try {
         await transporter.sendMail(mailOptions);
-        await transporter.sendMail(mailOptions);
-        //const info = await transporter.sendMail(mailOptions);
-        //console.log('Correo enviado: %s', info.messageId);
 
         return res.json({
             ok: true

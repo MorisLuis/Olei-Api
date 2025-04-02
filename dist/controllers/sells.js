@@ -153,7 +153,7 @@ const getTotalCobranza = async (req, res, next) => {
             DateExactly: DateExactly || null,
             DateStart: DateStart || null,
         });
-        return res.json(total);
+        return res.json({ total });
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
