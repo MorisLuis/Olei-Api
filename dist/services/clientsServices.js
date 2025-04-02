@@ -39,8 +39,8 @@ const getClientIdService = async ({ userSession, Id_Cliente, Id_Almacen }) => {
         .input('Id_Cliente', Id_Cliente)
         .input('Id_Almacen', Id_Almacen)
         .query(query);
-    const quotes = request.recordset[0];
-    return quotes;
+    const client = request.recordset[0];
+    return client;
 };
 exports.getClientIdService = getClientIdService;
 const getTotalClientsService = async (userSession) => {
@@ -69,9 +69,9 @@ const searchClientService = async ({ userSession, term }) => {
     const result = await pool.request()
         .input('nombre', mssql_1.default.VarChar, term)
         .query(query);
-    const Clients = result.recordset;
+    const clients = result.recordset;
     return {
-        Clients
+        clients
     };
 };
 exports.searchClientService = searchClientService;

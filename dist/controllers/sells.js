@@ -9,15 +9,12 @@ const getSells = async (req, res, next) => {
         const { PageNumber, sellsOrderCondition } = sellsValidations_1.getSellsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
         const sells = await (0, sellsDocsServices_1.getSellsService)(userSession, PageNumber, sellsOrderCondition);
-        return res.json(sells);
+        return res.json({
+            sells
+        });
     }
     catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
-            return res.status(400).json({ message: "Validation error", errors: error.errors });
-        }
-        else {
-            return next(error);
-        }
+        return next(error);
     }
     ;
 };
@@ -29,7 +26,9 @@ const getSellById = async (req, res, next) => {
         const { Serie, Id_Almacen, TipoDoc } = sellsValidations_1.getSellByIdQuerySchema.parse(req.query);
         const { folio } = sellsValidations_1.getSellByIdParamsSchema.parse(req.params);
         const sell = await (0, sellsDocsServices_1.getSellByIdService)(userSession, folio, Serie, Id_Almacen, TipoDoc);
-        return res.json(sell);
+        return res.json({
+            sell
+        });
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
@@ -60,7 +59,9 @@ const getSellsByClient = async (req, res, next) => {
             DateExactly: DateExactly || null,
             DateStart: DateStart || null,
         });
-        return res.json(sells);
+        return res.json({
+            sells
+        });
     }
     catch (error) {
         if (error instanceof zod_1.z.ZodError) {
@@ -91,7 +92,9 @@ const getCobranza = async (req, res, next) => {
             DateExactly: DateExactly || null,
             DateStart: DateStart || null
         });
-        return res.json(sells);
+        return res.json({
+            sells
+        });
     }
     catch (error) {
         return next(error);
@@ -103,7 +106,7 @@ const getTotalSells = async (req, res, next) => {
     try {
         const userSession = req.sessionWeb;
         const total = await (0, sellsDocsServices_1.getTotalSellsService)(userSession);
-        return res.json(total);
+        return res.json({ total });
     }
     catch (error) {
         return next(error);
@@ -125,15 +128,12 @@ const getTotalSellsByClient = async (req, res, next) => {
             DateExactly: DateExactly || null,
             DateStart: DateStart || null,
         });
-        return res.json(total);
+        return res.json({
+            total
+        });
     }
     catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
-            return res.status(400).json({ message: "Validation error", errors: error.errors });
-        }
-        else {
-            return next(error);
-        }
+        return next(error);
     }
 };
 exports.getTotalSellsByClient = getTotalSellsByClient;

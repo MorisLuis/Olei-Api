@@ -110,6 +110,7 @@ const updateMeetingService = async (id, userSession, body) => {
     const result = await request.query(query);
     await transaction.commit();
     // END TRANSACTION
+    console.log("result", result.recordset[0]);
     return { result: result.recordset[0] };
 };
 exports.updateMeetingService = updateMeetingService;

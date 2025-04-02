@@ -60,8 +60,8 @@ const getClientIdService = async ({
         .input('Id_Cliente', Id_Cliente)
         .input('Id_Almacen', Id_Almacen)
         .query(query);
-    const quotes = request.recordset[0]
-    return quotes
+    const client = request.recordset[0]
+    return client
 };
 
 const getTotalClientsService = async (userSession: UserWebSessionInterface): Promise<number> => {
@@ -88,7 +88,7 @@ interface searchClientServiceInterface {
 const searchClientService = async ({
     userSession,
     term
-}: searchClientServiceInterface): Promise<{ Clients: ClientInterface[] }> => {
+}: searchClientServiceInterface): Promise<{ clients: ClientInterface[] }> => {
 
 
     const { ServidorSQL, BaseSQL } = userSession;
@@ -103,10 +103,10 @@ const searchClientService = async ({
         .input('nombre', sql.VarChar, term)
         .query(query);
 
-    const Clients = result.recordset;
+    const clients = result.recordset;
 
     return {
-        Clients
+        clients
     }
 }
 

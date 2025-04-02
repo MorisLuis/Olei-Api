@@ -103,7 +103,7 @@ const validateJWTWeb = async (req: Request, _res: Response, next: NextFunction) 
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET || 'access_secret') as JwtPayload;
+        const decoded = jwt.verify(token, 'access_secret') as JwtPayload;
         const sessionId = decoded.sessionId;
 
         req.sessionId = sessionId;
@@ -124,6 +124,7 @@ const validateJWTWeb = async (req: Request, _res: Response, next: NextFunction) 
         }
 
     } catch (error) {
+        console.log({error})
         next(new ForbiddenError(`Token expirado o inválido: ${error}`));
     }
 };

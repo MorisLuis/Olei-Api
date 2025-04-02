@@ -61,21 +61,23 @@ exports.postBitacoraBodySchema = zod_1.z.object({
         .string()
         .optional()
         .refine(val => val ? val.length <= 5 : true, { message: "Hour no puede tener más de 5 caracteres." }),
-    Id_Almacen: zod_1.z.number().int().positive().optional(), // Opcional
-    Id_Cliente: zod_1.z.number().int().positive().optional(), // Opcional
+    Id_Almacen: zod_1.z.number().int().positive().optional(),
+    Id_Cliente: zod_1.z.number().int().positive().optional(),
     Comentarios: zod_1.z.string().optional(),
 });
 exports.updateBitacoraBodySchema = zod_1.z.object({
     Fecha: zod_1.z
         .preprocess((val) => (typeof val === "string" ? new Date(val) : val), zod_1.z.date())
-        .refine((val) => !isNaN(val.getTime()), { message: "Fecha debe ser una fecha válida." }),
+        .refine((val) => !isNaN(val.getTime()), { message: "Fecha debe ser una fecha válida." })
+        .optional(),
     Titulo: zod_1.z
         .string()
-        .nonempty("El título es obligatorio."),
+        .optional(),
     TipoContacto: zod_1.z
         .union([zod_1.z.string(), zod_1.z.number()]) // Permite que sea string o number
         .transform((val) => (typeof val === "string" ? parseInt(val, 10) : val)) // Convierte string a número si es necesario
-        .refine((val) => meeting_1.validTipoContacto.includes(val), { message: "TipoContacto debe ser 0, 1, 2, 3 o 4" }),
+        .refine((val) => meeting_1.validTipoContacto.includes(val), { message: "TipoContacto debe ser 0, 1, 2, 3 o 4" })
+        .optional(),
     Descripcion: zod_1.z.string().optional(),
     HourEnd: zod_1.z
         .string()
@@ -85,8 +87,8 @@ exports.updateBitacoraBodySchema = zod_1.z.object({
         .string()
         .optional()
         .refine(val => val ? val.length <= 5 : true, { message: "Hour no puede tener más de 5 caracteres." }),
-    Id_Almacen: zod_1.z.number().int().positive().optional(), // Opcional
-    Id_Cliente: zod_1.z.number().int().positive().optional(), // Opcional
-    Comentarios: zod_1.z.string().optional(),
+    Id_Almacen: zod_1.z.number().int().positive().optional(),
+    Id_Cliente: zod_1.z.number().int().positive().optional(),
+    Comentarios: zod_1.z.string().optional()
 });
 //# sourceMappingURL=bitacoraValidations.js.map

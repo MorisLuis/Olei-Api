@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCalendarTaskByMonthAndClient = exports.getCalendarTaskByDay = exports.getCalendarTaskByMonth = void 0;
 const calendarService_1 = require("../services/calendarService");
 const calendarValidations_1 = require("../validations/calendarValidations");
-const zod_1 = require("zod");
 const getCalendarTaskByMonth = async (req, res, next) => {
     try {
         const { Anio, Mes } = calendarValidations_1.getCalendarTaskByMonthQuerySchema.parse(req.query);
@@ -13,15 +12,12 @@ const getCalendarTaskByMonth = async (req, res, next) => {
             Anio,
             Mes,
         });
-        return res.json(tasks);
+        return res.json({
+            tasks
+        });
     }
     catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
-            return res.status(400).json({ message: "Validation error", errors: error.errors });
-        }
-        else {
-            return next(error);
-        }
+        return next(error);
     }
 };
 exports.getCalendarTaskByMonth = getCalendarTaskByMonth;
@@ -34,15 +30,12 @@ const getCalendarTaskByDay = async (req, res, next) => {
             userSession,
             Day
         });
-        res.json(tasks);
+        res.json({
+            tasks
+        });
     }
     catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
-            return res.status(400).json({ message: "Validation error", errors: error.errors });
-        }
-        else {
-            return next(error);
-        }
+        return next(error);
     }
     ;
 };
@@ -57,15 +50,12 @@ const getCalendarTaskByMonthAndClient = async (req, res, next) => {
             Mes,
             Id_Cliente
         });
-        return res.json(tasks);
+        return res.json({
+            tasks
+        });
     }
     catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
-            return res.status(400).json({ message: "Validation error", errors: error.errors });
-        }
-        else {
-            return next(error);
-        }
+        return next(error);
     }
     ;
 };

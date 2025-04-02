@@ -1,6 +1,7 @@
 import { dbConnectionWeb } from "../database";
 import { celendarQuerys } from "../database/querys/calendar";
 import { ValidationError } from "../errors/CustomError";
+import { CalendarInterface } from "../interface/calendar";
 import MeetingInterface from "../interface/meeting";
 import { UserWebSessionInterface } from "../interface/user";
 
@@ -14,7 +15,7 @@ const getCalendarTaskByMonthService = async ({
     userSession,
     Mes,
     Anio
-}: getCalendarServiceInterface): Promise<MeetingInterface[]> => {
+}: getCalendarServiceInterface): Promise<CalendarInterface[]> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -43,7 +44,7 @@ interface getCalendarTaskByDayServiceInterface {
 const getCalendarTaskByDayService = async ({
     userSession,
     Day
-}: getCalendarTaskByDayServiceInterface)  : Promise<MeetingInterface[]> => {
+}: getCalendarTaskByDayServiceInterface)  : Promise<CalendarInterface[]> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);

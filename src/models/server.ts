@@ -17,7 +17,7 @@ import typeofmovementsRouter from "../routes/typeofmovementsRouter";
 import utilsRouter from "../routes/utilsRouter";
 import errorsRouter from "../routes/errorsRouter";
 import sellsRouter from "../routes/sellsRouter";
-import meetingsRouter from "../routes/bitacoraRouter";
+import meetingsRouter from "../routes/meetingRouter";
 import calendarRouter from "../routes/calendarRouter";
 import emailRouter from "../routes/emailRouter";
 import reportsRouter from "../routes/reportsRouter";

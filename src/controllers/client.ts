@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 import { UserWebSessionInterface } from '../interface/user';
 import { getClientIdService, getClientsService, getTotalClientsService, searchClientService } from '../services/clientsServices';
 import { getClientIdQuerySchema, getClientsQuerySchema, searchClientQuerySchema, selectClientBodySchema } from '../validations/clientValidations';
-import { z } from 'zod';
 import { updateWebSession } from '../helpers/generate-redis';
 
 const getClients = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
@@ -17,13 +16,12 @@ const getClients = async (req: Request, res: Response, next: NextFunction): Prom
             OrderCondition: clientOrderCondition
         });
 
-        return res.json(clients);
+        return res.json({
+            ok: true,
+            clients
+        });
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            return res.status(400).json({ message: "Validation error", errors: error.errors });
-        } else {
-            return next(error);
-        }
+        return next(error);
     };
 
 };
@@ -45,14 +43,14 @@ const getClientId = async (req: Request, res: Response, next: NextFunction): Pro
         const { Id_Almacen, Id_Cliente } = getClientIdQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
-        const clients = await getClientIdService({
+        const client = await getClientIdService({
             userSession,
             Id_Cliente,
             Id_Almacen
         });
 
         return res.json({
-            data: clients
+            client
         });
     } catch (error) {
         return next(error);
@@ -94,10 +92,10 @@ const searchClient = async (req: Request, res: Response, next: NextFunction): Pr
     try {
         const userSession = req.sessionWeb
         const { term } = searchClientQuerySchema.parse(req.query)
-        const { Clients } = await searchClientService({ userSession, term })
+        const { clients } = await searchClientService({ userSession, term })
 
         return res.json({
-            Clients
+            clients
         })
 
     } catch (error) {

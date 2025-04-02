@@ -45,8 +45,26 @@ const sendEmail = async (req: Request, res: Response, next: NextFunction): Promi
 
 const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
-    const { destinatario, remitente, subject, text, nombreRemitente } = emailCobranzaBodySchema.parse(req.body);
-    const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaQuerySchema.parse(req.query);
+    const {
+        destinatario,
+        remitente,
+        subject,
+        text,
+        nombreRemitente
+    } = emailCobranzaBodySchema.parse(req.body);
+
+    const {
+        PageNumber,
+        sellsOrderCondition,
+        FilterTipoDoc,
+        TipoDoc,
+        FilterExpired,
+        FilterNotExpired,
+        DateEnd,
+        DateExactly,
+        DateStart
+    } = getCobranzaQuerySchema.parse(req.query);
+
     const { client } = getClientParamsSchema.parse(req.params);
     const userSession = req.sessionWeb;
 

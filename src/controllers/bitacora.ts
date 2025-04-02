@@ -9,7 +9,7 @@ const getMeetings = async (req: Request, res: Response, next: NextFunction): Pro
         const { PageNumber, meetingOrderCondition, FilterCliente, TipoContacto, Id_Cliente, FilterTipoContacto } = getMeetingsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
-        const meeting = await getMeetingsService({
+        const meetings = await getMeetingsService({
             PageNumber,
             userSession,
             MeetingOrderCondition: meetingOrderCondition,
@@ -19,7 +19,9 @@ const getMeetings = async (req: Request, res: Response, next: NextFunction): Pro
             FilterCliente: FilterCliente
         });
 
-        return res.json(meeting);
+        return res.json({
+            meetings
+        });
     } catch (error) {
         return next(error)
     };
@@ -39,7 +41,9 @@ const getTotalMeetings = async (req: Request, res: Response, next: NextFunction)
             FilterTipoContacto
         });
 
-        return res.json(total);
+        return res.json({
+            total
+        });
 
     } catch (error) {
         return next(error);
@@ -52,7 +56,9 @@ const getMeetingById = async (req: Request, res: Response, next: NextFunction): 
         const { id } = getMeetingByIdParmsSchema.parse(req.params);
         const userSession = req.sessionWeb;
         const meeting = await getMeetingByIdService(id, userSession);
-        return res.json(meeting);
+        return res.json({
+            meeting
+        });
     } catch (error) {
         return next(error)
     };
@@ -68,7 +74,6 @@ const updateMeeting = async (req: Request, res: Response, next: NextFunction): P
         const meeting = await updateMeetingService(id, userSession, body)
         return res.json(meeting);
     } catch (error) {
-        console.log({error})
         return next(error)
     };
 

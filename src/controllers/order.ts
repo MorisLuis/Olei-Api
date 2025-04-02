@@ -24,7 +24,7 @@ const postOrder = async (req: Request, res: Response, next: NextFunction): Promi
         });
 
     } catch (error) {
-        console.log({error})
+        console.log({ error })
         return next(error);
     }
 };
@@ -72,13 +72,15 @@ const getOrderDetails = async (req: Request, res: Response, next: NextFunction):
         const userSession = req.sessionWeb
         const { folio, PageNumber } = getOrderDetailsQuerrySchema.parse(req.query);
 
-        const orderDetails = await getOrderDetailsSells({
+        const { orderDetails } = await getOrderDetailsSells({
             folio,
             PageNumber,
             userSession
         })
 
-        return res.json(orderDetails)
+        return res.json({
+            orderDetails
+        })
 
     } catch (error) {
         return next(error);
@@ -100,17 +102,18 @@ const getTotalAllOrders = async (req: Request, res: Response, next: NextFunction
 
 const getTotalOrderDetails = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
-
     try {
         const userSession = req.sessionWeb
         const { folio } = getTotalOrderDetailsQuerrySchema.parse(req.query);
 
-        const orderDetails = await getTotalOrderDetailsService({
+        const { total } = await getTotalOrderDetailsService({
             folio,
             userSession
         })
 
-        return res.json(orderDetails)
+        return res.json({
+            total
+        })
 
     } catch (error) {
         return next(error);

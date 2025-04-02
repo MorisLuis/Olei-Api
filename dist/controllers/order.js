@@ -62,12 +62,14 @@ const getOrderDetails = async (req, res, next) => {
     try {
         const userSession = req.sessionWeb;
         const { folio, PageNumber } = orderValidations_1.getOrderDetailsQuerrySchema.parse(req.query);
-        const orderDetails = await (0, orderServices_1.getOrderDetailsSells)({
+        const { orderDetails } = await (0, orderServices_1.getOrderDetailsSells)({
             folio,
             PageNumber,
             userSession
         });
-        return res.json(orderDetails);
+        return res.json({
+            orderDetails
+        });
     }
     catch (error) {
         return next(error);
@@ -89,11 +91,13 @@ const getTotalOrderDetails = async (req, res, next) => {
     try {
         const userSession = req.sessionWeb;
         const { folio } = orderValidations_1.getTotalOrderDetailsQuerrySchema.parse(req.query);
-        const orderDetails = await (0, orderServices_1.getTotalOrderDetailsService)({
+        const { total } = await (0, orderServices_1.getTotalOrderDetailsService)({
             folio,
             userSession
         });
-        return res.json(orderDetails);
+        return res.json({
+            total
+        });
     }
     catch (error) {
         return next(error);

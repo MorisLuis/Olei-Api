@@ -95,19 +95,20 @@ export const postBitacoraBodySchema = z.object({
         .optional()
         .refine(val => val ? val.length <= 5 : true, { message: "Hour no puede tener más de 5 caracteres." }),
 
-    Id_Almacen: z.number().int().positive().optional(), // Opcional
-    Id_Cliente: z.number().int().positive().optional(), // Opcional
+    Id_Almacen: z.number().int().positive().optional(),
+    Id_Cliente: z.number().int().positive().optional(),
     Comentarios: z.string().optional(),
 })
 
 export const updateBitacoraBodySchema = z.object({
     Fecha: z
         .preprocess((val) => (typeof val === "string" ? new Date(val) : val), z.date())
-        .refine((val) => !isNaN(val.getTime()), { message: "Fecha debe ser una fecha válida." }),
+        .refine((val) => !isNaN(val.getTime()), { message: "Fecha debe ser una fecha válida." })
+        .optional(),
 
     Titulo: z
         .string()
-        .nonempty("El título es obligatorio."),
+        .optional(),
 
     TipoContacto: z
         .union([z.string(), z.number()]) // Permite que sea string o number
@@ -115,7 +116,8 @@ export const updateBitacoraBodySchema = z.object({
         .refine(
             (val): val is MeetingInterface["TipoContacto"] => validTipoContacto.includes(val as MeetingInterface['TipoContacto']),
             { message: "TipoContacto debe ser 0, 1, 2, 3 o 4" }
-        ),
+        )
+        .optional(),
 
     Descripcion: z.string().optional(),
 
@@ -129,7 +131,7 @@ export const updateBitacoraBodySchema = z.object({
         .optional()
         .refine(val => val ? val.length <= 5 : true, { message: "Hour no puede tener más de 5 caracteres." }),
 
-    Id_Almacen: z.number().int().positive().optional(), // Opcional
-    Id_Cliente: z.number().int().positive().optional(), // Opcional
-    Comentarios: z.string().optional(),
+    Id_Almacen: z.number().int().positive().optional(),
+    Id_Cliente: z.number().int().positive().optional(),
+    Comentarios: z.string().optional()
 })

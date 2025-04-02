@@ -7,7 +7,7 @@ const getMeetings = async (req, res, next) => {
     try {
         const { PageNumber, meetingOrderCondition, FilterCliente, TipoContacto, Id_Cliente, FilterTipoContacto } = bitacoraValidations_1.getMeetingsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
-        const meeting = await (0, meetingsServices_1.getMeetingsService)({
+        const meetings = await (0, meetingsServices_1.getMeetingsService)({
             PageNumber,
             userSession,
             MeetingOrderCondition: meetingOrderCondition,
@@ -16,7 +16,9 @@ const getMeetings = async (req, res, next) => {
             Id_Cliente: Id_Cliente ?? 0,
             FilterCliente: FilterCliente
         });
-        return res.json(meeting);
+        return res.json({
+            meetings
+        });
     }
     catch (error) {
         return next(error);
@@ -35,7 +37,9 @@ const getTotalMeetings = async (req, res, next) => {
             FilterCliente,
             FilterTipoContacto
         });
-        return res.json(total);
+        return res.json({
+            total
+        });
     }
     catch (error) {
         return next(error);
@@ -47,7 +51,9 @@ const getMeetingById = async (req, res, next) => {
         const { id } = bitacoraValidations_1.getMeetingByIdParmsSchema.parse(req.params);
         const userSession = req.sessionWeb;
         const meeting = await (0, meetingsServices_1.getMeetingByIdService)(id, userSession);
-        return res.json(meeting);
+        return res.json({
+            meeting
+        });
     }
     catch (error) {
         return next(error);
@@ -64,7 +70,6 @@ const updateMeeting = async (req, res, next) => {
         return res.json(meeting);
     }
     catch (error) {
-        console.log({ error });
         return next(error);
     }
     ;

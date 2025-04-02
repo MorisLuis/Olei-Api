@@ -20,35 +20,28 @@ export interface SellsInterface {
 }
 
 export interface SellsDetailsInterface {
+    Impuesto?: number | null;
     Id_Almacen: number;
+    Id_ListaPrecios?: number | null;
+    Folio: number;
+    
+    Id_Marca: number;
+    Precio?: number | null;
+    Cantidad?: number | null;
+    Importe?: number | null;
+    Descripcion?: string | null;
+    Codigo: string;
+
+    Marca?: string;
+    Unidad?: string;
+
     TipoDoc: number;
     Serie: string;
-    Folio: number;
     Partida: number;
-    Codigo: string;
-    Id_Marca: number;
-    Id_ListaPrecios?: number | null;
-    Cantidad?: number | null;
-    Precio?: number | null;
-    Importe?: number | null;
-    Impuesto?: number | null;
-    Retencion?: number | null;
-    RetencionIVA?: number | null;
-    Descripcion?: string | null;
-    Descuento?: number | null;
-    PrecioOrg?: number | null;
     Costo?: number | null;
     Id_Unidad?: number | null;
-    NumsdeSerie?: string | null;
     SwNs?: boolean | null;
-    CodigoCupon?: string | null;
-    TasaImpuesto?: number | null; // Usando `money`, tratamos como `number`.
-    TasaRetencion?: number | null;
-    TasaRetencionIVA?: number | null;
     SKU?: string | null;
-    TipoDoc_org?: number | null;
-    Serie_org?: string | null;
-    Folio_org?: number | null;
 }
 
 

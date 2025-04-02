@@ -105,7 +105,8 @@ const getOrderDetailsSells = async ({ PageNumber, folio, userSession }) => {
         .input('PageSize', mssql_1.default.Int, pageSizeModified)
         .query(query);
     const orderDetails = request.recordset;
-    return orderDetails;
+    const response = { orderDetails };
+    return response;
 };
 exports.getOrderDetailsSells = getOrderDetailsSells;
 const getTotalAllOrdersService = async (userSession) => {

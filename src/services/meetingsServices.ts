@@ -124,7 +124,11 @@ const getMeetingByIdService = async (id: number, userSession: UserWebSessionInte
     return quotes
 }
 
-const updateMeetingService = async (id: number, userSession: UserWebSessionInterface, body: MeetingInterface): Promise<{ result: MeetingInterface }> => {
+const updateMeetingService = async (
+    id: number,
+    userSession: UserWebSessionInterface,
+    body: MeetingInterface
+): Promise<{ result: MeetingInterface }> => {
 
 
     if (!id) {
@@ -150,6 +154,7 @@ const updateMeetingService = async (id: number, userSession: UserWebSessionInter
         TipoContacto,
         Comentarios
     } = body;
+
     if (TipoContacto && !validTipoContacto.includes(TipoContacto)) {
         throw new ValidationError('No es valido el tipo de contacto');
     };
@@ -169,11 +174,12 @@ const updateMeetingService = async (id: number, userSession: UserWebSessionInter
     await transaction.commit();
     // END TRANSACTION
 
+    console.log("result", result.recordset[0])
     return { result: result.recordset[0] }
 
 };
 
-const postMeetingService = async (userSession: UserWebSessionInterface, body: MeetingInterface) : Promise<{ result: MeetingInterface }>=> {
+const postMeetingService = async (userSession: UserWebSessionInterface, body: MeetingInterface): Promise<{ result: MeetingInterface }> => {
 
 
     const { ServidorSQL, BaseSQL } = userSession;
@@ -227,7 +233,7 @@ const postMeetingService = async (userSession: UserWebSessionInterface, body: Me
     return { result: result.recordset[0] }
 };
 
-const deleteMeetingService = async (id: number, userSession: UserWebSessionInterface) : Promise<{ result: MeetingInterface }> => {
+const deleteMeetingService = async (id: number, userSession: UserWebSessionInterface): Promise<{ result: MeetingInterface }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);

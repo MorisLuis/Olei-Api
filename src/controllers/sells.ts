@@ -15,13 +15,11 @@ const getSells = async (req: Request, res: Response, next: NextFunction): Promis
             sellsOrderCondition
         );
 
-        return res.json(sells);
+        return res.json({
+            sells
+        });
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            return res.status(400).json({ message: "Validation error", errors: error.errors });
-        } else {
-            return next(error);
-        }
+        return next(error);
     };
 
 };
@@ -43,7 +41,9 @@ const getSellById = async (req: Request, res: Response, next: NextFunction): Pro
             TipoDoc
         );
 
-        return res.json(sell);
+        return res.json({
+            sell
+        });
     } catch (error) {
         if (error instanceof z.ZodError) {
             return res.status(400).json({ message: "Validation error", errors: error.errors });
@@ -75,7 +75,9 @@ const getSellsByClient = async (req: Request, res: Response, next: NextFunction)
             DateStart: DateStart || null,
         });
 
-        return res.json(sells);
+        return res.json({
+            sells
+        });
     } catch (error) {
         if (error instanceof z.ZodError) {
             return res.status(400).json({ message: "Validation error", errors: error.errors });
@@ -107,7 +109,9 @@ const getCobranza = async (req: Request, res: Response, next: NextFunction): Pro
             DateStart: DateStart || null
         });
 
-        return res.json(sells);
+        return res.json({
+            sells
+        });
     } catch (error) {
         return next(error)
     };
@@ -118,7 +122,7 @@ const getTotalSells = async (req: Request, res: Response, next: NextFunction): P
     try {
         const userSession = req.sessionWeb;
         const total = await getTotalSellsService(userSession)
-        return res.json(total);
+        return res.json({ total });
     } catch (error) {
         return next(error);
     }
@@ -150,13 +154,12 @@ const getTotalSellsByClient = async (req: Request, res: Response, next: NextFunc
             DateStart: DateStart || null,
         });
 
-        return res.json(total);
+        return res.json({
+            total
+        });
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            return res.status(400).json({ message: "Validation error", errors: error.errors });
-        } else {
-            return next(error);
-        }
+        return next(error);
+
     }
 };
 

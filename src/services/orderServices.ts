@@ -146,7 +146,7 @@ const getOrderDetailsSells = async ({
     PageNumber,
     folio,
     userSession
-}: getOrderDetailsSellsInterface): Promise<OrderInterface[]> => {
+}: getOrderDetailsSellsInterface): Promise<{orderDetails: SellsDetailsInterface[]}> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -167,8 +167,9 @@ const getOrderDetailsSells = async ({
         .query(query);
 
     const orderDetails = request.recordset
+    const response: { orderDetails: SellsDetailsInterface[] } = { orderDetails };
 
-    return orderDetails;
+    return response;
 };
 
 const getTotalAllOrdersService = async (userSession: UserWebSessionInterface): Promise<{ total: number }> => {
