@@ -24,7 +24,7 @@ const generateAccessTokenWeb = (sessionId) => {
 exports.generateAccessTokenWeb = generateAccessTokenWeb;
 /** Genera un Refresh Token con expiración larga (ej. 30 días) */
 const generateRefreshTokenWeb = (sessionId) => {
-    return jsonwebtoken_1.default.sign({ sessionId }, REFRESH_TOKEN_SECRET, { expiresIn: '30d' });
+    return jsonwebtoken_1.default.sign({ sessionId }, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 };
 exports.generateRefreshTokenWeb = generateRefreshTokenWeb;
 //# sourceMappingURL=generate-jwt.js.map
