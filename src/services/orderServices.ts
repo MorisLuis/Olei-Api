@@ -3,10 +3,10 @@ import { orderQuerys } from "../database/querys/orders";
 import sql from 'mssql';
 import { numeroALetra } from "../utils/numeroALetra";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
-import { SellsDetailsInterface, SellsInterface } from "../interface/sells";
+import type { SellsDetailsInterface, SellsInterface } from "../interface/sells";
 import { ValidationError } from "../errors/CustomError";
-import OrderInterface from "../interface/order";
-import { UserWebSessionInterface } from "../interface/user";
+import type OrderInterface from "../interface/order";
+import type { UserWebSessionInterface } from "../interface/user";
 
 interface postOrderServiceInterface {
     userSession: UserWebSessionInterface;
@@ -81,7 +81,7 @@ const getOrderService = async ({
     folio
 }: getOrderServiceInterface): Promise<{ order: OrderInterface }> => {
 
-    const { ServidorSQL, BaseSQL, Id_Cliente, TipoDocOO } = userSession;
+    const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');

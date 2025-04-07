@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { ClientOrderCondition, ClientOrderConditionType } from "../interface/client";
+import type { ClientOrderConditionType } from "../interface/client";
+import { ClientOrderCondition } from "../interface/client";
 
 
 export const getClientsQuerySchema = z.object({

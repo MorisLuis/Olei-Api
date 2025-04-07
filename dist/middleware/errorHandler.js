@@ -5,7 +5,7 @@ const errors_1 = require("../controllers/errors");
 const errorHandler = async (err, req, res, _next) => {
     const statusCode = err.statusCode || 500;
     const message = err.message || 'Internal Server Error';
-    const Id_Usuario = req.Id_mobile ?? req.IdUsuarioOLEI ?? req.Id_web ?? "Sin Usuario";
+    const Id_Usuario = "Sin Usuario";
     console.error(`[ERROR] ${req.method} ${req.path} - ${message}`);
     // Omitir errores de "Token expirado o inválido: TokenExpiredError: jwt expired" por que es el error de refresh token
     // Omitir errores de 'login'.

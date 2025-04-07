@@ -32,7 +32,9 @@ const getProducById = async (req, res, next) => {
             .input("baseSQL", BaseSQL)
             .query(query);
         const product = result?.recordset[0];
-        return res.json(product);
+        return res.json({
+            product
+        });
     }
     catch (error) {
         next(error);
@@ -51,7 +53,7 @@ const getProductsByStock = async (req, res, next) => {
             PageNumber,
             PageSize
         });
-        res.json(products);
+        res.json({ products });
     }
     catch (error) {
         next(error);
@@ -61,11 +63,11 @@ exports.getProductsByStock = getProductsByStock;
 const getTotalOfProductsByStock = async (req, res, next) => {
     try {
         const userSession = req.session;
-        const { products: TotalProductos } = await (0, productsServices_1.getProductsByStockService)({
+        const { products: total } = await (0, productsServices_1.getProductsByStockService)({
             userSession,
             getTotal: true
         });
-        res.json(TotalProductos);
+        res.json({ total: total });
     }
     catch (error) {
         next(error);
@@ -82,7 +84,7 @@ const getProductByStockAndCodeBar = async (req, res, next) => {
             SKU,
             userSession
         });
-        res.json(productByStockAndCodeBar);
+        res.json({ products: productByStockAndCodeBar });
     }
     catch (error) {
         next(error);
@@ -98,7 +100,7 @@ const searchProductInventory = async (req, res, next) => {
             searchTerm: searchTerm,
             withCodebar: true
         });
-        return res.json(products);
+        return res.json({ products });
     }
     catch (error) {
         return next(error);
@@ -114,7 +116,7 @@ const searchProductInventoryWithoutCodebar = async (req, res, next) => {
             searchTerm: searchTerm,
             withCodebar: false
         });
-        return res.json(products);
+        return res.json({ products });
     }
     catch (error) {
         return next(error);

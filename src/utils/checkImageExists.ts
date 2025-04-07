@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import ProductInterface from "../interface/product";
+import type ProductInterface from "../interface/product";
 
 interface getImageInterface {
     baseSQL: string,

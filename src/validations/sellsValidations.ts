@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { SellsInterface, SellsOrderByClientCondition, SellsOrderCondition, SellsOrderConditionByClientType, SellsOrderConditionType, TipoDoc, typeTipoDoc } from '../interface/sells';
+import type { SellsInterface, SellsOrderConditionByClientType, SellsOrderConditionType, typeTipoDoc } from '../interface/sells';
+import { SellsOrderByClientCondition, SellsOrderCondition, TipoDoc } from '../interface/sells';
 
 // getSells
 export const getSellsQuerySchema = z.object({

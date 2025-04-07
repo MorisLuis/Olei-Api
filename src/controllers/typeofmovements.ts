@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import { dbConnection } from '../database';
 import sql from "mssql";
 
@@ -13,7 +13,10 @@ const getTypeofmovements = async (req: Request, res: Response, next: NextFunctio
         request.input('Id_Usuario', sql.VarChar(50), userId);
         const resultData = await request.execute('fn_GetTypeOfMovement');
         const TiposMovimiento = resultData?.recordset;
-        return res.json(TiposMovimiento);
+
+        return res.json({
+            TiposMovimiento
+        });
 
     } catch (error) {
         return next(error)

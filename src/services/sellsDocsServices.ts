@@ -1,8 +1,8 @@
 import { dbConnectionWeb } from "../database";
 import { sellsQuery } from "../database/querys/sells";
 import { ValidationError } from "../errors/CustomError";
-import { SellsInterface, SellsOrderConditionType } from "../interface/sells";
-import { UserWebSessionInterface } from "../interface/user";
+import type { SellsInterface, SellsOrderConditionType } from "../interface/sells";
+import type { UserWebSessionInterface } from "../interface/user";
 
 
 const getSellsService = async (

@@ -4,7 +4,7 @@ import { costosQuerys } from "../database/querys/costos";
 import { v4 as uuidv4 } from 'uuid';
 import sql from 'mssql';
 import { ValidationError } from "../errors/CustomError";
-import { UserSessionInterface } from "../interface/user";
+import type { UserSessionInterface } from "../interface/user";
 
 type updateCodbar = {
     CodBar: string;

@@ -8,7 +8,7 @@ const database_1 = require("../database");
 const sells_1 = require("../database/querys/sells");
 const exceljs_1 = __importDefault(require("exceljs"));
 const CustomError_1 = require("../errors/CustomError");
-const getBanner = async (req, res) => {
+const getBanner = (req, res) => {
     const userSession = req.sessionWeb;
     const database = userSession?.BaseSQL;
     const databaseSplit = database?.split('_');

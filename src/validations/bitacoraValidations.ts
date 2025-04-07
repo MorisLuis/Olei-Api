@@ -1,5 +1,7 @@
 import { z } from "zod";
-import MeetingInterface, { MeetingOrderCondition, MeetingOrderConditionType, validTipoContacto } from "../interface/meeting";
+import type { MeetingOrderConditionType} from "../interface/meeting";
+import type MeetingInterface from "../interface/meeting";
+import { MeetingOrderCondition, validTipoContacto } from "../interface/meeting";
 
 
 export const getMeetingsQuerySchema = z.object({

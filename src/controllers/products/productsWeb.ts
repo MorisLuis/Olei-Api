@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import { getProducByIdWebService, getProductsService, getTotalProductsService, searchProductService } from '../../services/productsServices';
 import { getProducByIdWebQuerySchema, getProductsQuerySchema, getTotalProductsQuerySchema, serachProductQuerySchema } from '../../validations/productsValidations';
-import ProductInterface from '../../interface/product';
+import type ProductInterface from '../../interface/product';
 
 const getProducts = async (
     req: Request,

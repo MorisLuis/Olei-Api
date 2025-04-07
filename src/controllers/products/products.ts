@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import { dbConnection } from '../../database';
 import { productsWebQuerys } from '../../database/querys/productsWeb';
 import { getProductByStockAndCodeBarSchema, getProductsByStockQuerySchema } from '../../validations/productsValidations';
@@ -40,13 +40,15 @@ const getProducById = async (req: Request, res: Response, next: NextFunction): P
 
         const product = result?.recordset[0];
 
-        return res.json(product);
+        return res.json({
+            product
+        });
     } catch (error) {
         next(error)
     }
 }
 
-const getProductsByStock = async (req: Request, res: Response, next: NextFunction): Promise<Response | void>  => {
+const getProductsByStock = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const { PageNumber, PageSize } = getProductsByStockQuerySchema.parse(req.query);
@@ -62,7 +64,7 @@ const getProductsByStock = async (req: Request, res: Response, next: NextFunctio
             PageSize
         })
 
-        res.json(products);
+        res.json({ products });
 
     } catch (error) {
         next(error)
@@ -73,12 +75,12 @@ const getTotalOfProductsByStock = async (req: Request, res: Response, next: Next
     try {
         const userSession = req.session;
 
-        const { products: TotalProductos } = await getProductsByStockService({
+        const { products: total } = await getProductsByStockService({
             userSession,
             getTotal: true
         })
 
-        res.json(TotalProductos);
+        res.json({ total: total });
 
     } catch (error) {
         next(error);
@@ -98,7 +100,7 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
             userSession
         })
 
-        res.json(productByStockAndCodeBar)
+        res.json({ products: productByStockAndCodeBar })
 
     } catch (error) {
         next(error)
@@ -116,7 +118,7 @@ const searchProductInventory = async (req: Request, res: Response, next: NextFun
             withCodebar: true
         })
 
-        return res.json(products);
+        return res.json({ products });
 
     } catch (error) {
         return next(error);
@@ -135,7 +137,7 @@ const searchProductInventoryWithoutCodebar = async (req: Request, res: Response,
             withCodebar: false
         })
 
-        return res.json(products);
+        return res.json({ products });
 
     } catch (error) {
         return next(error);

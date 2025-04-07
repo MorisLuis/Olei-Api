@@ -50,7 +50,7 @@ class Server {
             reports: "/api/reports",
             almacenes: "/api/almacenes"
         };
-        this.connectDB();
+        void this.connectDB();
         this.middlewares();
         this.routes();
         this.errorHandler();

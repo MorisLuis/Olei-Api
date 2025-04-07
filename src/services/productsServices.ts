@@ -5,9 +5,9 @@ import { productsQuerys } from "../database/querys/products";
 
 import { getProductWithImages, getProductsWithImage } from "../utils/checkImageExists";
 import { ValidationError } from "../errors/CustomError";
-import ProductInterface from "../interface/product";
+import type ProductInterface from "../interface/product";
 import { guessBarcodeType } from '../utils/identifyBarcodeType';
-import { UserSessionInterface, UserWebSessionInterface } from '../interface/user';
+import type { UserSessionInterface, UserWebSessionInterface } from '../interface/user';
 
 
 // Web endpoints
@@ -211,7 +211,7 @@ const getProductsByStockService = async ({
     PageSize,
     PageNumber,
     getTotal = false
-}: getProductsByStockServiceInterface): Promise<{ products: ProductInterface[] }> => {
+}: getProductsByStockServiceInterface): Promise<{ products: ProductInterface[] | number }> => {
 
 
     const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userSession;
@@ -244,7 +244,13 @@ const getProductsByStockService = async ({
         .input('Almacen', Id_Almacen)
         .query(query);
 
-    const productsByStock = request.recordset;
+    let productsByStock
+
+    if (!getTotal) {
+        productsByStock = request.recordset;
+    } else {
+        productsByStock = request.recordset[0].TotalProductos;
+    };
 
     return {
         products: productsByStock

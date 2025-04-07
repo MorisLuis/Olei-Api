@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from 'express';
-import { UserWebSessionInterface } from '../../interface/user';
+import type { NextFunction, Request, Response } from 'express';
+import type { UserWebSessionInterface } from '../../interface/user';
 import { loginWebService } from '../../services/authServices';
 import { UnauthorizedError } from '../../errors/CustomError';
 import { generateAccessTokenWeb, generateRefreshTokenWeb } from '../../helpers/generate-jwt';

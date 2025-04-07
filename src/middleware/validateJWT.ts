@@ -1,8 +1,9 @@
-import { NextFunction, Request, Response } from 'express'
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import type { NextFunction, Request, Response } from 'express'
+import type { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { AppError, ForbiddenError, UnauthorizedError } from '../errors/CustomError';
 import redisClient from '../config/redisClient';
-import { UserSessionInterface, UserWebSessionInterface } from '../interface/user';
+import type { UserSessionInterface, UserWebSessionInterface } from '../interface/user';
 
 const validateJWTLogin = async (req: Request, _res: Response, next: NextFunction) : Promise<void> => {
     const authHeader = req.headers['authorization'];

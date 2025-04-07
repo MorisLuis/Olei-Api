@@ -1,4 +1,4 @@
-type LoggerServiceCallBack = (arg: string) => void;
+type LoggerServiceCallBack = (_arg: string) => void;
 
 export function toUpperCaseWithCb(arg: string, callBack:LoggerServiceCallBack) : string | null {
     if(!arg) {

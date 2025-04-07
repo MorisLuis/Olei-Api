@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { getAlmacenByIdService, getAlmacenesService } from "../services/almacenesService";
 import { getAlmacenByIdQuerySchema } from "../validations/almacenValidations";
-import { UserSessionInterface } from "../interface/user";
+import type { UserSessionInterface } from "../interface/user";
 import { NotFoundError, UnauthorizedError } from "../errors/CustomError";
 import { updateSession } from "../helpers/generate-redis";
 
@@ -48,7 +48,7 @@ const updateAlmacenInRedis = async (req: Request, res: Response, next: NextFunct
                 AlmacenNombre: almacen.Nombre ?? '',
             };
 
-            updateSession(sessionId, datosDelUsuario)
+            await updateSession(sessionId, datosDelUsuario)
         }
 
         return res.json(almacen);

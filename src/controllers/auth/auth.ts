@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from 'express';
-import { UserSessionInterface } from '../../interface/user';
+import type { NextFunction, Request, Response } from 'express';
+import type { UserSessionInterface } from '../../interface/user';
 import { loginAppService, loginDBAppService } from '../../services/authAppServices';
 import { UnauthorizedError } from '../../errors/CustomError';
 import { v4 } from 'uuid';
@@ -81,7 +81,7 @@ const login = async (req: Request, res: Response, next: NextFunction): Promise<R
             userConected: true,
         };
 
-        updateSession(sessionId, datosDelUsuario);
+        await updateSession(sessionId, datosDelUsuario);
 
         return res.json({
             user: datosDelUsuario
@@ -118,7 +118,7 @@ const logoutUser = async (req: Request, res: Response, next: NextFunction): Prom
             userConected: false
         };
 
-        updateSession(sessionId, datosDelUsuario);
+        await updateSession(sessionId, datosDelUsuario);
 
         return res.json({
             user: datosDelUsuario

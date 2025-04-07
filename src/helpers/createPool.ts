@@ -1,4 +1,4 @@
-import { ConnectionPool } from "mssql";
+import type { ConnectionPool } from "mssql";
 import { dbConnectionWeb } from "../database";
 import { ValidationError } from "../errors/CustomError";
 

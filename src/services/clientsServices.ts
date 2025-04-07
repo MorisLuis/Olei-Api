@@ -1,8 +1,8 @@
 import { dbConnectionWeb } from "../database";
 import { clientsQuerys } from "../database/querys/clients";
 import { ValidationError } from "../errors/CustomError";
-import { ClientInterface } from "../interface/client";
-import { UserWebSessionInterface } from "../interface/user";
+import type { ClientInterface } from "../interface/client";
+import type { UserWebSessionInterface } from "../interface/user";
 import sql from 'mssql';
 
 interface getClientsServiceInterface {

@@ -1,9 +1,9 @@
 import { dbConnectionWeb } from "../database";
 import { celendarQuerys } from "../database/querys/calendar";
 import { ValidationError } from "../errors/CustomError";
-import { CalendarInterface } from "../interface/calendar";
-import MeetingInterface from "../interface/meeting";
-import { UserWebSessionInterface } from "../interface/user";
+import type { CalendarInterface } from "../interface/calendar";
+import type MeetingInterface from "../interface/meeting";
+import type { UserWebSessionInterface } from "../interface/user";
 
 interface getCalendarServiceInterface {
     userSession: UserWebSessionInterface;

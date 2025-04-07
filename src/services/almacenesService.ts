@@ -1,6 +1,6 @@
 import { dbConnectionWeb } from "../database";
 import { AlamacenQuery } from "../database/querys/almacen";
-import { UserSessionInterface } from "../interface/user";
+import type { UserSessionInterface } from "../interface/user";
 
 interface AlmacenInterface {
     Id_Almacen: number;

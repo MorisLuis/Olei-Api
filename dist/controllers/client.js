@@ -69,7 +69,7 @@ const selectClient = async (req, res, next) => {
             ...userSession,
             ...client
         };
-        (0, generate_redis_1.updateWebSession)(sessionId, datosDelUsuario);
+        await (0, generate_redis_1.updateWebSession)(sessionId, datosDelUsuario);
         return res.json({
             ok: true
         });

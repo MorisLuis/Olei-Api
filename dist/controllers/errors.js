@@ -17,7 +17,7 @@ const handleErrors = async (req, res) => {
         const request = new mssql_1.default.Request(transaction);
         let query = database_1.querys.postError;
         const fechaActualCDMX = (0, moment_1.default)().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
-        const resp = await request
+        await request
             .input('From', mssql_1.default.VarChar, From || '')
             .input('Message', mssql_1.default.VarChar, Message || '')
             .input('Id_Usuario', mssql_1.default.VarChar, Id_Usuario || '')

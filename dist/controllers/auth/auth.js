@@ -68,7 +68,7 @@ const login = async (req, res, next) => {
             serverConected: session.serverConected,
             userConected: true,
         };
-        (0, generate_redis_1.updateSession)(sessionId, datosDelUsuario);
+        await (0, generate_redis_1.updateSession)(sessionId, datosDelUsuario);
         return res.json({
             user: datosDelUsuario
         });
@@ -103,7 +103,7 @@ const logoutUser = async (req, res, next) => {
             ...sessionUser,
             userConected: false
         };
-        (0, generate_redis_1.updateSession)(sessionId, datosDelUsuario);
+        await (0, generate_redis_1.updateSession)(sessionId, datosDelUsuario);
         return res.json({
             user: datosDelUsuario
         });

@@ -1,5 +1,5 @@
 import redisClient from "../config/redisClient";
-import { UserSessionInterface, UserWebSessionInterface } from "../interface/user";
+import type { UserSessionInterface, UserWebSessionInterface } from "../interface/user";
 import { AppError, NotFoundError } from "../errors/CustomError";
 
 

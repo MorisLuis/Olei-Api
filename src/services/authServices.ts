@@ -1,8 +1,8 @@
-import { ConnectionPool } from "mssql";
+import type { ConnectionPool } from "mssql";
 import { dbConnectionMain, querys } from "../database";
 import moment from "moment";
 import { NotFoundError, UnauthorizedError, ValidationError } from "../errors/CustomError";
-import { UserWebSessionInterface } from "../interface/user";
+import type { UserWebSessionInterface } from "../interface/user";
 
 const loginWebService = async (email: string, password: string): Promise<UserWebSessionInterface> => {
     if (email === "" || password === "") {

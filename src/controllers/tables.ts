@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import { dbConnectionWeb, querys } from '../database';
 
 const getTables = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void>  => {

@@ -1,12 +1,12 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { dbConnectionWeb } from '../database';
 import { sellsQuery } from '../database/querys/sells';
-import { ConnectionPool } from 'mssql';
+import type { ConnectionPool } from 'mssql';
 import ExcelJS from 'exceljs'
 import { NotFoundError } from '../errors/CustomError';
-import { SellsInterface } from '../interface/sells';
+import type { SellsInterface } from '../interface/sells';
 
-const getBanner = async (req: Request, res: Response) : Promise<Response | void> => {
+const getBanner = (req: Request, res: Response) : Response | void => {
 
     const userSession = req.sessionWeb;
 

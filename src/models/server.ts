@@ -1,7 +1,9 @@
 // server.ts
 
-import express, { Application } from "express";
-import cors, { CorsOptions } from 'cors';
+import type { Application } from "express";
+import express from "express";
+import type { CorsOptions } from 'cors';
+import cors from 'cors';
 import { dbConnectionMain } from "../database/connection";
 
 // Rutas
@@ -73,7 +75,7 @@ class Server {
             almacenes: "/api/almacenes"
         };
 
-        this.connectDB();
+        void this.connectDB();
         this.middlewares();
         this.routes();
 

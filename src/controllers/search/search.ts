@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import { searchCodigoService, searchFamiliaService, searchMarcaService } from '../../services/searchServices';
 import { simpleSearchQuerySchema } from '../../validations/searchValidations';
 

@@ -52,7 +52,7 @@ const postOrderService = async ({ userSession, Total, Subtotal, sellsDetails, se
 };
 exports.postOrderService = postOrderService;
 const getOrderService = async ({ userSession, folio }) => {
-    const { ServidorSQL, BaseSQL, Id_Cliente, TipoDocOO } = userSession;
+    const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');

@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import nodemailer from 'nodemailer';
 import { generatePDF } from '../utils/generatePDF';
 import { emailBodySchema, emailCobranzaBodySchema } from '../validations/emailValidations';

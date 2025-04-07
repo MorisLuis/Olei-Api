@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { dbConnectionMain, querys } from '../database';
 import sql from 'mssql';
 import moment from 'moment';
@@ -18,7 +18,7 @@ const handleErrors = async (req: Request, res: Response): Promise<Response | voi
         let query = querys.postError;
         const fechaActualCDMX = moment().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
 
-        const resp = await request
+        await request
             .input('From', sql.VarChar, From || '')
             .input('Message', sql.VarChar, Message || '')
             .input('Id_Usuario', sql.VarChar, Id_Usuario || '')

@@ -1,8 +1,10 @@
 import { dbConnectionWeb } from "../database";
 import { bitacoraQuerys } from "../database/querys/bitacora";
 import { ValidationError } from "../errors/CustomError";
-import MeetingInterface, { MeetingOrderConditionType, validTipoContacto } from "../interface/meeting";
-import { UserWebSessionInterface } from "../interface/user";
+import type { MeetingOrderConditionType} from "../interface/meeting";
+import type MeetingInterface from "../interface/meeting";
+import { validTipoContacto } from "../interface/meeting";
+import type { UserWebSessionInterface } from "../interface/user";
 import sql from 'mssql';
 
 interface getMeetingsServiceInterface {

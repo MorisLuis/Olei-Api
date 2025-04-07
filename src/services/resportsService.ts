@@ -1,12 +1,12 @@
-import { ConnectionPool } from "mssql";
+import type { ConnectionPool } from "mssql";
 import { sellsQuery } from "../database/querys/sells";
-import { SellsInterface, SellsOrderConditionType } from "../interface/sells";
+import type { SellsInterface, SellsOrderConditionType } from "../interface/sells";
 import ExcelJS from 'exceljs';
-import { Response } from "express";
+import type { Response } from "express";
 import excelColumnsConfig from "../utils/excelColumnsConfig";
 import { createPool } from "../helpers/createPool";
 import { NotFoundError, UnauthorizedError, ValidationError } from "../errors/CustomError";
-import { UserWebSessionInterface } from "../interface/user";
+import type { UserWebSessionInterface } from "../interface/user";
 
 interface reportsCobranzaServiceInterface {
     userSession?: UserWebSessionInterface,

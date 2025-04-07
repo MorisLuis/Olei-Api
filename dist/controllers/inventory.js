@@ -15,7 +15,6 @@ const postInventory = async (req, res, next) => {
         return res.json({ Folio });
     }
     catch (error) {
-        console.log({ error });
         return next(error);
     }
 };

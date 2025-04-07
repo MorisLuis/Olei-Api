@@ -40,7 +40,7 @@ const updateAlmacenInRedis = async (req, res, next) => {
                 Id_Almacen: almacen.Id_Almacen,
                 AlmacenNombre: almacen.Nombre ?? '',
             };
-            (0, generate_redis_1.updateSession)(sessionId, datosDelUsuario);
+            await (0, generate_redis_1.updateSession)(sessionId, datosDelUsuario);
         }
         return res.json(almacen);
     }

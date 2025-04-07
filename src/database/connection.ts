@@ -113,11 +113,11 @@ export const dbConnectionMain = async () : Promise<sql.ConnectionPool> => {
 
 
 // Función para cerrar todas las conexiones inactivas después de un tiempo
-setInterval(() => {
+setInterval(async () => {
     for (const [key, pool] of connectionPools.entries()) {
         if (!pool.connected) {
             console.log(`🔴 Cerrando conexión inactiva: ${key}`);
-            pool.close();
+            await pool.close();
             connectionPools.delete(key);
         }
     }

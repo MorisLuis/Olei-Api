@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { updateCodebarService } from '../services/codebarService';
 import { updateCodbarQuerySchema } from '../validations/costosValidations';
 

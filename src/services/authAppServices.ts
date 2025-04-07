@@ -1,6 +1,6 @@
 import { dbConnection, dbConnectionMain, querys } from "../database";
-import { NotFoundError, UnauthorizedError, ValidationError } from "../errors/CustomError";
-import { UserAuthenticateAndGetMovementResultInterface, UserSessionInterface, ValidationResult, authResultInterface } from "../interface/user";
+import { NotFoundError, ValidationError } from "../errors/CustomError";
+import type { UserAuthenticateAndGetMovementResultInterface, UserSessionInterface, ValidationResult, authResultInterface } from "../interface/user";
 import sql from "mssql";
 
 interface loginDBAppServiceInterface {

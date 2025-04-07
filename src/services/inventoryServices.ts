@@ -1,7 +1,7 @@
 import { dbConnection } from "../database";
 import { ValidationError } from "../errors/CustomError";
-import InventoryDetailsInterface from "../interface/inventoryDetails";
-import { UserSessionInterface } from "../interface/user";
+import type InventoryDetailsInterface from "../interface/inventoryDetails";
+import type { UserSessionInterface } from "../interface/user";
 import { convertArrayToXml } from "../utils/convertArrayToXml";
 import { currentTime } from "../utils/currentTime";
 import sql from 'mssql';

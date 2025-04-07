@@ -1,5 +1,6 @@
-import { PDFDocument, PDFFont, StandardFonts, rgb } from 'pdf-lib';
-import { SellsInterface } from '../interface/sells';
+import type { PDFFont} from 'pdf-lib';
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import type { SellsInterface } from '../interface/sells';
 import { formatCurrency } from './currency';
 import { formatTipoDoc } from './tipoDocFormat';
 

@@ -1,5 +1,5 @@
 import { dbConnectionWeb, querys } from "../database";
-import { UserWebSessionInterface } from "../interface/user";
+import type { UserWebSessionInterface } from "../interface/user";
 
 interface searchServiceInterface {
     userSession: UserWebSessionInterface;

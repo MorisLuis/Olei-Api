@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from 'express';
-import { UserWebSessionInterface } from '../interface/user';
+import type { NextFunction, Request, Response } from 'express';
+import type { UserWebSessionInterface } from '../interface/user';
 import { getClientIdService, getClientsService, getTotalClientsService, searchClientService } from '../services/clientsServices';
 import { getClientIdQuerySchema, getClientsQuerySchema, searchClientQuerySchema, selectClientBodySchema } from '../validations/clientValidations';
 import { updateWebSession } from '../helpers/generate-redis';
@@ -76,7 +76,7 @@ const selectClient = async (req: Request, res: Response, next: NextFunction): Pr
             ...client
         };
 
-        updateWebSession(sessionId, datosDelUsuario)
+        await updateWebSession(sessionId, datosDelUsuario)
 
         return res.json({
             ok: true

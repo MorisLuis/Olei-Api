@@ -1,6 +1,4 @@
-
-
-import { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { handleErrorsEndpoint } from "../controllers/errors";
 
 interface ErrorResponse extends Error {
@@ -10,7 +8,7 @@ interface ErrorResponse extends Error {
 const errorHandler = async (err: ErrorResponse, req: Request, res: Response, _next: NextFunction): Promise<void> => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
-  const Id_Usuario = req.Id_mobile ?? req.IdUsuarioOLEI ?? req.Id_web ?? "Sin Usuario";
+  const Id_Usuario = "Sin Usuario";
 
   console.error(`[ERROR] ${req.method} ${req.path} - ${message}`);
 
@@ -38,5 +36,5 @@ const errorHandler = async (err: ErrorResponse, req: Request, res: Response, _ne
   res.status(statusCode).json({ error: message });
 };
 
-
+// Deshabilitar ESLint para _next
 export { errorHandler };

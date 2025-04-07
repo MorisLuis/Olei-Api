@@ -138,7 +138,14 @@ const getProductsByStockService = async ({ userSession, PageSize, PageNumber, ge
         .input('Id_ListaPrecios', Id_ListPre)
         .input('Almacen', Id_Almacen)
         .query(query);
-    const productsByStock = request.recordset;
+    let productsByStock;
+    if (!getTotal) {
+        productsByStock = request.recordset;
+    }
+    else {
+        productsByStock = request.recordset[0].TotalProductos;
+    }
+    ;
     return {
         products: productsByStock
     };
