@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { handleErrorsEndpoint } from "../controllers/errors";
+import { getUserIdFromRequest } from "../utils/getUserIdFromRequest";
 
 interface ErrorResponse extends Error {
   statusCode?: number;
@@ -8,7 +9,8 @@ interface ErrorResponse extends Error {
 const errorHandler = async (err: ErrorResponse, req: Request, res: Response, _next: NextFunction): Promise<void> => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
-  const Id_Usuario = "Sin Usuario";
+
+  const Id_Usuario = (await getUserIdFromRequest(req)) ?? "Sin Usuario";
 
   console.error(`[ERROR] ${req.method} ${req.path} - ${message}`);
 
@@ -36,5 +38,4 @@ const errorHandler = async (err: ErrorResponse, req: Request, res: Response, _ne
   res.status(statusCode).json({ error: message });
 };
 
-// Deshabilitar ESLint para _next
 export { errorHandler };
