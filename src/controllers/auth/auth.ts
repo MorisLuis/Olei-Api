@@ -3,7 +3,7 @@ import type { UserSessionInterface } from '../../interface/user';
 import { loginAppService, loginDBAppService } from '../../services/authAppServices';
 import { UnauthorizedError } from '../../errors/CustomError';
 import { v4 } from 'uuid';
-import { generateAccessToken, generateRefreshToken } from '../../helpers/generate-jwt';
+import { generateAccessToken, generateAccessTokenServer, generateRefreshToken } from '../../helpers/generate-jwt';
 import { generateRedisSession, handleDeleteRedisSession, updateSession } from '../../helpers/generate-redis';
 
 const loginServer = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
@@ -37,17 +37,16 @@ const loginServer = async (req: Request, res: Response, next: NextFunction): Pro
         // Generar un ID de sesión único
         const sessionId = v4();
 
+        console.log({sessionId})
         // Guardar la sesión en Redis con expiración (1 hora)
         await generateRedisSession(sessionId, datosDelUsuario)
 
         // Generar el token JWT que incluye el sessionId
-        const token = generateAccessToken(sessionId)
-        const refreshToken = generateRefreshToken(sessionId);
+        const tokenServer = generateAccessTokenServer(sessionId);
 
         return res.json({
             user: datosDelUsuario,
-            token,
-            refreshToken
+            tokenServer
         })
 
     } catch (error) {
@@ -83,8 +82,14 @@ const login = async (req: Request, res: Response, next: NextFunction): Promise<R
 
         await updateSession(sessionId, datosDelUsuario);
 
+        // Generar el token JWT que incluye el sessionId
+        const token = generateAccessToken(sessionId)
+        const refreshToken = generateRefreshToken(sessionId);
+
         return res.json({
-            user: datosDelUsuario
+            token,
+            refreshToken,
+            user: datosDelUsuario,
         });
 
     } catch (error) {
@@ -115,6 +120,13 @@ const logoutUser = async (req: Request, res: Response, next: NextFunction): Prom
 
         const datosDelUsuario: UserSessionInterface = {
             ...sessionUser,
+            userId: '',
+            userRol: '',
+            TodosAlmacenes: 0,
+            SalidaSinExistencias: 0,
+            Id_Almacen: 0,
+            Id_ListPre: 0,
+            AlmacenNombre: '',
             userConected: false
         };
 
@@ -129,7 +141,21 @@ const logoutUser = async (req: Request, res: Response, next: NextFunction): Prom
     }
 };
 
-const refresh = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+const refreshServer = (req: Request, res: Response, next: NextFunction): void => {
+
+    try {
+        const session = req.session;
+
+        res.json({
+            user: session
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+const refresh =  (req: Request, res: Response, next: NextFunction): Response | void => {
 
     try {
         const session = req.session;
@@ -140,10 +166,6 @@ const refresh = async (req: Request, res: Response, next: NextFunction): Promise
             return res.status(401).json({ message: "No hay refresh token" });
         }
 
-        // Guardar la sesión en Redis con expiración (1 hora)
-        await generateRedisSession(sessionId, session)
-
-        // Generar el token JWT que incluye el sessionId
         const newToken = generateAccessToken(sessionId)
         const newRefreshToken = generateRefreshToken(sessionId);
 
@@ -163,5 +185,6 @@ export {
     login,
     logoutUser,
     logoutServer,
+    refreshServer,
     refresh
 }

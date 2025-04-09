@@ -51,7 +51,7 @@ const updateAlmacenInRedis = async (req: Request, res: Response, next: NextFunct
             await updateSession(sessionId, datosDelUsuario)
         }
 
-        return res.json(almacen);
+        return res.json({almacen});
 
     } catch (error) {
         return next(error)

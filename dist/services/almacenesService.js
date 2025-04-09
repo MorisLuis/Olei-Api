@@ -4,8 +4,8 @@ exports.getAlmacenByIdService = exports.getAlmacenesService = void 0;
 const database_1 = require("../database");
 const almacen_1 = require("../database/querys/almacen");
 const getAlmacenesService = async (userSession) => {
-    const { ServidorSQL, BaseSQL } = userSession;
-    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
+    const { ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL } = userSession;
+    const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     const result = await pool.request().query(almacen_1.AlamacenQuery.getAlmacenes);
     const almacenes = result?.recordset;
     return {
@@ -14,8 +14,8 @@ const getAlmacenesService = async (userSession) => {
 };
 exports.getAlmacenesService = getAlmacenesService;
 const getAlmacenByIdService = async ({ userSession, Id_Almacen }) => {
-    const { ServidorSQL, BaseSQL } = userSession;
-    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
+    const { ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL } = userSession;
+    const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     const result = await pool.request()
         .input('Id_Almacen', Id_Almacen)
         .query(almacen_1.AlamacenQuery.getAlmacenById);
