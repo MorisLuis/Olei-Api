@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.refresh = exports.logoutServer = exports.logoutUser = exports.login = exports.loginServer = void 0;
+exports.refresh = exports.refreshServer = exports.logoutServer = exports.logoutUser = exports.login = exports.loginServer = void 0;
 const authAppServices_1 = require("../../services/authAppServices");
 const CustomError_1 = require("../../errors/CustomError");
 const uuid_1 = require("uuid");
@@ -30,15 +30,14 @@ const loginServer = async (req, res, next) => {
         };
         // Generar un ID de sesión único
         const sessionId = (0, uuid_1.v4)();
+        console.log({ sessionId });
         // Guardar la sesión en Redis con expiración (1 hora)
         await (0, generate_redis_1.generateRedisSession)(sessionId, datosDelUsuario);
         // Generar el token JWT que incluye el sessionId
-        const token = (0, generate_jwt_1.generateAccessToken)(sessionId);
-        const refreshToken = (0, generate_jwt_1.generateRefreshToken)(sessionId);
+        const tokenServer = (0, generate_jwt_1.generateAccessTokenServer)(sessionId);
         return res.json({
             user: datosDelUsuario,
-            token,
-            refreshToken
+            tokenServer
         });
     }
     catch (error) {
@@ -69,8 +68,13 @@ const login = async (req, res, next) => {
             userConected: true,
         };
         await (0, generate_redis_1.updateSession)(sessionId, datosDelUsuario);
+        // Generar el token JWT que incluye el sessionId
+        const token = (0, generate_jwt_1.generateAccessToken)(sessionId);
+        const refreshToken = (0, generate_jwt_1.generateRefreshToken)(sessionId);
         return res.json({
-            user: datosDelUsuario
+            token,
+            refreshToken,
+            user: datosDelUsuario,
         });
     }
     catch (error) {
@@ -101,6 +105,13 @@ const logoutUser = async (req, res, next) => {
         }
         const datosDelUsuario = {
             ...sessionUser,
+            userId: '',
+            userRol: '',
+            TodosAlmacenes: 0,
+            SalidaSinExistencias: 0,
+            Id_Almacen: 0,
+            Id_ListPre: 0,
+            AlmacenNombre: '',
             userConected: false
         };
         await (0, generate_redis_1.updateSession)(sessionId, datosDelUsuario);
@@ -113,7 +124,19 @@ const logoutUser = async (req, res, next) => {
     }
 };
 exports.logoutUser = logoutUser;
-const refresh = async (req, res, next) => {
+const refreshServer = (req, res, next) => {
+    try {
+        const session = req.session;
+        res.json({
+            user: session
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.refreshServer = refreshServer;
+const refresh = (req, res, next) => {
     try {
         const session = req.session;
         const sessionId = req.sessionId;
@@ -121,9 +144,6 @@ const refresh = async (req, res, next) => {
         if (!refreshToken) {
             return res.status(401).json({ message: "No hay refresh token" });
         }
-        // Guardar la sesión en Redis con expiración (1 hora)
-        await (0, generate_redis_1.generateRedisSession)(sessionId, session);
-        // Generar el token JWT que incluye el sessionId
         const newToken = (0, generate_jwt_1.generateAccessToken)(sessionId);
         const newRefreshToken = (0, generate_jwt_1.generateRefreshToken)(sessionId);
         res.json({

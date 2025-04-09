@@ -42,7 +42,7 @@ const updateAlmacenInRedis = async (req, res, next) => {
             };
             await (0, generate_redis_1.updateSession)(sessionId, datosDelUsuario);
         }
-        return res.json(almacen);
+        return res.json({ almacen });
     }
     catch (error) {
         return next(error);

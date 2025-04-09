@@ -7,7 +7,9 @@ import { AppError, NotFoundError } from "../errors/CustomError";
 // Generar sesion de redis.
 export const generateRedisSession = async (sessionId: string, datosDelUsuario: UserSessionInterface): Promise<string | null> => {
     try {
-        const result = await redisClient.set(`session:${sessionId}`, JSON.stringify(datosDelUsuario), 'EX', 3600);
+        const ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365; // 31,536,000
+
+        const result = await redisClient.set(`session:${sessionId}`, JSON.stringify(datosDelUsuario), 'EX', ONE_YEAR_IN_SECONDS);
         if (!result) {
             throw new AppError('Error al generar la sesión en Redis', 500);
         }

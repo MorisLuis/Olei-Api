@@ -1,4 +1,4 @@
-import { dbConnectionWeb } from "../database";
+import { dbConnection } from "../database";
 import { AlamacenQuery } from "../database/querys/almacen";
 import type { UserSessionInterface } from "../interface/user";
 
@@ -10,8 +10,8 @@ interface AlmacenInterface {
 
 const getAlmacenesService = async (userSession: UserSessionInterface): Promise<{ almacenes: AlmacenInterface[] }> => {
 
-    const { ServidorSQL, BaseSQL } = userSession;
-    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
+    const { ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL } = userSession;
+    const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     const result = await pool.request().query(AlamacenQuery.getAlmacenes);
     const almacenes = result?.recordset;
 
@@ -28,8 +28,8 @@ interface getAlmacenByIdServiceInterface {
 const getAlmacenByIdService = async ({ userSession, Id_Almacen }: getAlmacenByIdServiceInterface): Promise<{ almacen: AlmacenInterface }> => {
 
 
-    const { ServidorSQL, BaseSQL } = userSession;
-    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
+    const { ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL } = userSession;
+    const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
     const result = await pool.request()
         .input('Id_Almacen', Id_Almacen)
