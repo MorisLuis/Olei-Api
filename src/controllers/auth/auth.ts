@@ -157,6 +157,7 @@ const refreshServer = (req: Request, res: Response, next: NextFunction): void =>
 
 const refresh =  (req: Request, res: Response, next: NextFunction): Response | void => {
 
+    console.log("Refresh")
     try {
         const session = req.session;
         const sessionId = req.sessionId;
