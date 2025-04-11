@@ -14,7 +14,7 @@ const generateAccessTokenServer = (sessionId) => {
 };
 exports.generateAccessTokenServer = generateAccessTokenServer;
 const generateAccessToken = (sessionId) => {
-    return jsonwebtoken_1.default.sign({ sessionId }, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+    return jsonwebtoken_1.default.sign({ sessionId }, ACCESS_TOKEN_SECRET, { expiresIn: '1m' });
 };
 exports.generateAccessToken = generateAccessToken;
 const generateRefreshToken = (sessionId) => {

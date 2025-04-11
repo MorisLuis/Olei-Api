@@ -4,7 +4,7 @@ import { generatePDF } from '../utils/generatePDF';
 import { emailBodySchema, emailCobranzaBodySchema } from '../validations/emailValidations';
 import { Buffer } from 'buffer';  // Importa Buffer si es necesario
 import { getClientParamsSchema, getCobranzaQuerySchema } from '../validations/sellsValidations';
-import { getAllCobranzaService } from '../services/sellsDocsServices';
+import { getAllCobranzaService } from '../services/cobranzaService';
 
 // Configurar el transporte SMTP
 const transporter = nodemailer.createTransport({

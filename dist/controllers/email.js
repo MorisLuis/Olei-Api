@@ -9,7 +9,7 @@ const generatePDF_1 = require("../utils/generatePDF");
 const emailValidations_1 = require("../validations/emailValidations");
 const buffer_1 = require("buffer"); // Importa Buffer si es necesario
 const sellsValidations_1 = require("../validations/sellsValidations");
-const sellsDocsServices_1 = require("../services/sellsDocsServices");
+const cobranzaService_1 = require("../services/cobranzaService");
 // Configurar el transporte SMTP
 const transporter = nodemailer_1.default.createTransport({
     host: 'smtp.gmail.com',
@@ -46,7 +46,7 @@ const sendEmailWithPDF = async (req, res, next) => {
     const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaQuerySchema.parse(req.query);
     const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
     const userSession = req.sessionWeb;
-    const sells = await (0, sellsDocsServices_1.getAllCobranzaService)({
+    const sells = await (0, cobranzaService_1.getAllCobranzaService)({
         userSession,
         Id_Cliente: client,
         PageNumber: PageNumber || 1,

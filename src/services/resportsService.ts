@@ -1,5 +1,4 @@
 import type { ConnectionPool } from "mssql";
-import { sellsQuery } from "../database/querys/sells";
 import type { SellsInterface, SellsOrderConditionType } from "../interface/sells";
 import ExcelJS from 'exceljs';
 import type { Response } from "express";
@@ -7,6 +6,7 @@ import excelColumnsConfig from "../utils/excelColumnsConfig";
 import { createPool } from "../helpers/createPool";
 import { NotFoundError, UnauthorizedError, ValidationError } from "../errors/CustomError";
 import type { UserWebSessionInterface } from "../interface/user";
+import { cobranzaQuery } from "../database/querys/cobranza";
 
 interface reportsCobranzaServiceInterface {
     userSession?: UserWebSessionInterface,
@@ -94,7 +94,7 @@ const fetchDataInBatches = async ({
     while (moreData) {
 
         try {
-            let query = sellsQuery.getCobranza;
+            let query = cobranzaQuery.getCobranza;
             const res = await pool.request()
                 .input('PageNumber', offset)
                 .input('PageSize', batchSize)

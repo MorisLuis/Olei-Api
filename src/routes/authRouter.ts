@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { loginServer, login, logoutUser, logoutServer, refresh, refreshServer } from "../controllers/auth/auth";
-import { validateJWTLogin, validateJWTWeb, validateRefreshJWT } from "../middleware/validateJWT";
+import { validateJWTServer, validateJWTWeb, validateJWTRefresh } from "../middleware/validateJWT";
 import { loginWeb, logout, renewWeb } from "../controllers/auth/authWeb";
 import { errorTest } from "../controllers/products/products";
 
@@ -13,13 +13,13 @@ router.get("/logout", validateJWTWeb, logout);
 
 // App
 router.post("/loginServer", loginServer);
-router.post("/login", validateJWTLogin, login);
+router.post("/login", validateJWTServer, login);
 
-router.get('/logoutServer', validateJWTLogin, logoutServer);
-router.get('/logoutUser', validateJWTLogin, logoutUser);
+router.get('/logoutServer', validateJWTServer, logoutServer);
+router.get('/logoutUser', validateJWTServer, logoutUser);
 
-router.post('/refreshServer', validateJWTLogin, refreshServer);
-router.post('/refresh', validateRefreshJWT, refresh);
+router.post('/refreshServer', validateJWTServer, refreshServer);
+router.post('/refresh', validateJWTRefresh, refresh);
 
 router.get('/error-test', errorTest)
 

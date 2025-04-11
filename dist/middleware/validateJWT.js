@@ -3,17 +3,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateJWTWeb = exports.validateRefreshJWT = exports.validateJWT = exports.validateJWTLogin = void 0;
+exports.validateJWTWeb = exports.validateJWTRefresh = exports.validateJWT = exports.validateJWTServer = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const CustomError_1 = require("../errors/CustomError");
 const redisClient_1 = __importDefault(require("../config/redisClient"));
-const validateJWTLogin = async (req, _res, next) => {
+const validateJWTServer = async (req, _res, next) => {
     const authHeader = req.headers['x-server-token'];
     const tokenServer = authHeader?.split(' ')[1];
     if (!tokenServer) {
         next(new CustomError_1.UnauthorizedError('Acceso denegado. Falta token o es invalido'));
         return;
     }
+    ;
     try {
         const decoded = jsonwebtoken_1.default.verify(tokenServer, process.env.ACCESS_TOKEN_SEVER_SECRET);
         const sessionId = decoded.sessionId;
@@ -47,41 +48,8 @@ const validateJWTLogin = async (req, _res, next) => {
         next(new CustomError_1.ForbiddenError(`Token expirado o inválido: ${error}`));
     }
 };
-exports.validateJWTLogin = validateJWTLogin;
-const validateJWT = async (req, _res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader?.split(' ')[1];
-    if (!token) {
-        return next(new CustomError_1.UnauthorizedError('Acceso denegado. Falta token o es invalido'));
-    }
-    try {
-        const decoded = jsonwebtoken_1.default.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        const sessionId = decoded.sessionId;
-        req.sessionId = sessionId;
-        const sessionDataRaw = await redisClient_1.default.get(`session:${sessionId}`);
-        const sessionData = sessionDataRaw ?? null;
-        if (!sessionData) {
-            return next(new CustomError_1.UnauthorizedError('Sesión no válida'));
-        }
-        try {
-            const session = JSON.parse(sessionData);
-            // Verificar si las conexiones requeridas están activas
-            if (!session.serverConected || !session.userConected) {
-                return next(new CustomError_1.ForbiddenError('Server and user connection required'));
-            }
-            req.session = session;
-            return next();
-        }
-        catch (error) {
-            return next(new CustomError_1.AppError(`Error parsing session data ${error}`));
-        }
-    }
-    catch (error) {
-        next(new CustomError_1.ForbiddenError(`Token expirado o inválido: ${error}`));
-    }
-};
-exports.validateJWT = validateJWT;
-const validateRefreshJWT = async (req, _res, next) => {
+exports.validateJWTServer = validateJWTServer;
+const validateJWTRefresh = async (req, _res, next) => {
     // Obtener el refreshToken del body
     const refreshToken = req.body.refreshToken;
     if (!refreshToken) {
@@ -119,7 +87,42 @@ const validateRefreshJWT = async (req, _res, next) => {
         next(new CustomError_1.ForbiddenError(`Token expirado o inválido: ${error}`));
     }
 };
-exports.validateRefreshJWT = validateRefreshJWT;
+exports.validateJWTRefresh = validateJWTRefresh;
+/* mobile */
+const validateJWT = async (req, _res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader?.split(' ')[1];
+    if (!token) {
+        return next(new CustomError_1.UnauthorizedError('Acceso denegado. Falta token o es invalido'));
+    }
+    try {
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        const sessionId = decoded.sessionId;
+        req.sessionId = sessionId;
+        const sessionDataRaw = await redisClient_1.default.get(`session:${sessionId}`);
+        const sessionData = sessionDataRaw ?? null;
+        if (!sessionData) {
+            return next(new CustomError_1.UnauthorizedError('Sesión no válida'));
+        }
+        try {
+            const session = JSON.parse(sessionData);
+            // Verificar si las conexiones requeridas están activas
+            if (!session.serverConected || !session.userConected) {
+                return next(new CustomError_1.ForbiddenError('Server and user connection required'));
+            }
+            req.session = session;
+            return next();
+        }
+        catch (error) {
+            return next(new CustomError_1.AppError(`Error parsing session data ${error}`));
+        }
+    }
+    catch (error) {
+        next(new CustomError_1.ForbiddenError(`Token expirado o inválido: ${error}`));
+    }
+};
+exports.validateJWT = validateJWT;
+/* web */
 const validateJWTWeb = async (req, _res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader?.split(' ')[1];

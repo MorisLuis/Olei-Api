@@ -4,11 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.reportsCobranzaService = void 0;
-const sells_1 = require("../database/querys/sells");
 const exceljs_1 = __importDefault(require("exceljs"));
 const excelColumnsConfig_1 = __importDefault(require("../utils/excelColumnsConfig"));
 const createPool_1 = require("../helpers/createPool");
 const CustomError_1 = require("../errors/CustomError");
+const cobranza_1 = require("../database/querys/cobranza");
 ;
 const reportsCobranzaService = async ({ userSession, PageNumber, Id_Cliente, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, res }) => {
     if (!userSession) {
@@ -43,7 +43,7 @@ const fetchDataInBatches = async ({ pool, Id_Cliente, SellsOrderCondition, Filte
     let moreData = true;
     while (moreData) {
         try {
-            let query = sells_1.sellsQuery.getCobranza;
+            let query = cobranza_1.cobranzaQuery.getCobranza;
             const res = await pool.request()
                 .input('PageNumber', offset)
                 .input('PageSize', batchSize)

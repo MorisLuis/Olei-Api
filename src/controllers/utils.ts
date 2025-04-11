@@ -5,6 +5,7 @@ import type { ConnectionPool } from 'mssql';
 import ExcelJS from 'exceljs'
 import { NotFoundError } from '../errors/CustomError';
 import type { SellsInterface } from '../interface/sells';
+import { cobranzaQuery } from '../database/querys/cobranza';
 
 const getBanner = (req: Request, res: Response) : Response | void => {
 
@@ -61,7 +62,7 @@ const fetchDataInBatches = async (pool: ConnectionPool): Promise<SellsInterface[
 
 
         try {
-            let query = sellsQuery.getCobranza;
+            let query = cobranzaQuery.getCobranza;
             const res = await pool.request()
                 .input('PageNumber', offset)
                 .input('PageSize', batchSize)

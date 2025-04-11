@@ -5,9 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getExcellTest = exports.getBanner = void 0;
 const database_1 = require("../database");
-const sells_1 = require("../database/querys/sells");
 const exceljs_1 = __importDefault(require("exceljs"));
 const CustomError_1 = require("../errors/CustomError");
+const cobranza_1 = require("../database/querys/cobranza");
 const getBanner = (req, res) => {
     const userSession = req.sessionWeb;
     const database = userSession?.BaseSQL;
@@ -50,7 +50,7 @@ const fetchDataInBatches = async (pool) => {
         const DateExactly = undefined;
         const TipoDoc = 0;
         try {
-            let query = sells_1.sellsQuery.getCobranza;
+            let query = cobranza_1.cobranzaQuery.getCobranza;
             const res = await pool.request()
                 .input('PageNumber', offset)
                 .input('PageSize', batchSize)
