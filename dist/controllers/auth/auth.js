@@ -137,6 +137,7 @@ const refreshServer = (req, res, next) => {
 };
 exports.refreshServer = refreshServer;
 const refresh = (req, res, next) => {
+    console.log("Refresh");
     try {
         const session = req.session;
         const sessionId = req.sessionId;
