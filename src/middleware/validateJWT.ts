@@ -60,7 +60,6 @@ const validateJWT = async (req: Request, _res: Response, next: NextFunction): Pr
 
     const authHeader = req.headers['authorization'];
     const token = authHeader?.split(' ')[1];
-
     if (!token) {
         return next(new UnauthorizedError('Acceso denegado. Falta token o es invalido'));
     }
