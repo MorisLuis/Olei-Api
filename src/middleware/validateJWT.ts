@@ -175,7 +175,6 @@ const validateJWTWeb = async (req: Request, _res: Response, next: NextFunction):
         }
 
     } catch (error) {
-        console.log({ error })
         next(new ForbiddenError(`Token expirado o inválido: ${error}`));
     }
 };

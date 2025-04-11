@@ -4,6 +4,7 @@ const express_1 = require("express");
 const auth_1 = require("../controllers/auth/auth");
 const validateJWT_1 = require("../middleware/validateJWT");
 const authWeb_1 = require("../controllers/auth/authWeb");
+const products_1 = require("../controllers/products/products");
 const router = (0, express_1.Router)();
 // Web
 router.post("/loginWeb", authWeb_1.loginWeb);
@@ -16,5 +17,6 @@ router.get('/logoutServer', validateJWT_1.validateJWTLogin, auth_1.logoutServer)
 router.get('/logoutUser', validateJWT_1.validateJWT, auth_1.logoutUser);
 router.post('/refreshServer', validateJWT_1.validateJWTLogin, auth_1.refreshServer);
 router.post('/refresh', validateJWT_1.validateRefreshJWT, auth_1.refresh);
+router.get('/error-test', products_1.errorTest);
 exports.default = router;
 //# sourceMappingURL=authRouter.js.map

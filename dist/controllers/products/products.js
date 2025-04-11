@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchProductInventoryWithoutCodebar = exports.searchProductInventory = exports.getProductByStockAndCodeBar = exports.getTotalOfProductsByStock = exports.getProductsByStock = exports.getProducById = void 0;
+exports.errorTest = exports.searchProductInventoryWithoutCodebar = exports.searchProductInventory = exports.getProductByStockAndCodeBar = exports.getTotalOfProductsByStock = exports.getProductsByStock = exports.getProducById = void 0;
 const database_1 = require("../../database");
 const productsWeb_1 = require("../../database/querys/productsWeb");
 const productsValidations_1 = require("../../validations/productsValidations");
@@ -123,4 +123,17 @@ const searchProductInventoryWithoutCodebar = async (req, res, next) => {
     }
 };
 exports.searchProductInventoryWithoutCodebar = searchProductInventoryWithoutCodebar;
+const errorTest = (_req, _res, next) => {
+    try {
+        // Se genera un error intencional para probar el manejo de errores
+        const error = new Error('Error intencional del servidor');
+        error.status = 500;
+        // Se pasa al siguiente middleware de manejo de errores
+        next(error);
+    }
+    catch (err) {
+        next(err);
+    }
+};
+exports.errorTest = errorTest;
 //# sourceMappingURL=products.js.map

@@ -146,6 +146,7 @@ const refreshServer = (req: Request, res: Response, next: NextFunction): void =>
     try {
         const session = req.session;
 
+
         res.json({
             user: session
         });
@@ -160,7 +161,6 @@ const refresh =  (req: Request, res: Response, next: NextFunction): Response | v
     try {
         const session = req.session;
         const sessionId = req.sessionId;
-
         const refreshToken = req.body.refreshToken;
         if (!refreshToken) {
             return res.status(401).json({ message: "No hay refresh token" });

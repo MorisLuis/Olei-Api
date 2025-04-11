@@ -2,6 +2,7 @@ import { Router } from "express";
 import { loginServer, login, logoutUser, logoutServer, refresh, refreshServer } from "../controllers/auth/auth";
 import { validateJWT, validateJWTLogin, validateJWTWeb, validateRefreshJWT } from "../middleware/validateJWT";
 import { loginWeb, logout, renewWeb } from "../controllers/auth/authWeb";
+import { errorTest } from "../controllers/products/products";
 
 const router = Router();
 
@@ -19,5 +20,7 @@ router.get('/logoutUser', validateJWT, logoutUser);
 
 router.post('/refreshServer', validateJWTLogin, refreshServer);
 router.post('/refresh', validateRefreshJWT, refresh);
+
+router.get('/error-test', errorTest)
 
 export default router;
