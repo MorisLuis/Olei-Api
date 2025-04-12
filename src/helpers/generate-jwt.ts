@@ -10,11 +10,11 @@ export const generateAccessTokenServer = (sessionId: string): string => {
 };
 
 export const generateAccessToken = (sessionId: string): string => {
-    return jwt.sign({ sessionId }, ACCESS_TOKEN_SECRET, { expiresIn: '20s' });
+    return jwt.sign({ sessionId }, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
 };
 
 export const generateRefreshToken = (sessionId: string): string => {
-    return jwt.sign({ sessionId }, REFRESH_TOKEN_SECRET, { expiresIn: '40s' });
+    return jwt.sign({ sessionId }, REFRESH_TOKEN_SECRET, { expiresIn: '1d' });
 };
 
 

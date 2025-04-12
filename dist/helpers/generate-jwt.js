@@ -14,11 +14,11 @@ const generateAccessTokenServer = (sessionId) => {
 };
 exports.generateAccessTokenServer = generateAccessTokenServer;
 const generateAccessToken = (sessionId) => {
-    return jsonwebtoken_1.default.sign({ sessionId }, ACCESS_TOKEN_SECRET, { expiresIn: '20s' });
+    return jsonwebtoken_1.default.sign({ sessionId }, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
 };
 exports.generateAccessToken = generateAccessToken;
 const generateRefreshToken = (sessionId) => {
-    return jsonwebtoken_1.default.sign({ sessionId }, REFRESH_TOKEN_SECRET, { expiresIn: '40s' });
+    return jsonwebtoken_1.default.sign({ sessionId }, REFRESH_TOKEN_SECRET, { expiresIn: '1d' });
 };
 exports.generateRefreshToken = generateRefreshToken;
 /* WEB */
