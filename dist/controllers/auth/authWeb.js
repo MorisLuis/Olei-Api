@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logout = exports.renewWeb = exports.loginWeb = void 0;
 const authServices_1 = require("../../services/authServices");
-const CustomError_1 = require("../../errors/CustomError");
 const generate_jwt_1 = require("../../helpers/generate-jwt");
 const uuid_1 = require("uuid");
 const generate_redis_1 = require("../../helpers/generate-redis");
@@ -71,8 +70,6 @@ exports.renewWeb = renewWeb;
 const logout = async (req, res, next) => {
     try {
         const sessionId = req.sessionId;
-        if (!sessionId)
-            throw new CustomError_1.UnauthorizedError('Sesion terminada');
         await (0, generate_redis_1.handleDeleteRedisSession)(sessionId);
         return res.json({ ok: true });
     }

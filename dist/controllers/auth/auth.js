@@ -85,8 +85,6 @@ exports.login = login;
 const logoutServer = async (req, res, next) => {
     try {
         const sessionId = req.sessionId;
-        if (!sessionId)
-            throw new CustomError_1.UnauthorizedError('Sesion terminada');
         await (0, generate_redis_1.handleDeleteRedisSession)(sessionId);
         res.json({ ok: true });
     }
@@ -137,13 +135,12 @@ const refreshServer = (req, res, next) => {
 };
 exports.refreshServer = refreshServer;
 const refresh = (req, res, next) => {
-    console.log("Refresh");
     try {
         const session = req.session;
         const sessionId = req.sessionId;
         const refreshToken = req.body.refreshToken;
         if (!refreshToken) {
-            return res.status(401).json({ message: "No hay refresh token" });
+            throw new CustomError_1.ForbiddenError('No hay refresh token');
         }
         const newToken = (0, generate_jwt_1.generateAccessToken)(sessionId);
         const newRefreshToken = (0, generate_jwt_1.generateRefreshToken)(sessionId);

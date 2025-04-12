@@ -52,6 +52,7 @@ exports.validateJWTServer = validateJWTServer;
 const validateJWTRefresh = async (req, _res, next) => {
     // Obtener el refreshToken del body
     const refreshToken = req.body.refreshToken;
+    console.log({ refreshToken });
     if (!refreshToken) {
         return next(new CustomError_1.ForbiddenError('Token inválido o expirado'));
     }

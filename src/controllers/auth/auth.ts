@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import type { UserSessionInterface } from '../../interface/user';
 import { loginAppService, loginDBAppService } from '../../services/authAppServices';
-import { UnauthorizedError } from '../../errors/CustomError';
+import { ForbiddenError, UnauthorizedError } from '../../errors/CustomError';
 import { v4 } from 'uuid';
 import { generateAccessToken, generateAccessTokenServer, generateRefreshToken } from '../../helpers/generate-jwt';
 import { generateRedisSession, handleDeleteRedisSession, updateSession } from '../../helpers/generate-redis';
@@ -100,7 +100,6 @@ const login = async (req: Request, res: Response, next: NextFunction): Promise<R
 const logoutServer = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const sessionId = req.sessionId;
-        if (!sessionId) throw new UnauthorizedError('Sesion terminada')
         await handleDeleteRedisSession(sessionId)
         res.json({ ok: true })
     } catch (error) {
@@ -146,7 +145,6 @@ const refreshServer = (req: Request, res: Response, next: NextFunction): void =>
     try {
         const session = req.session;
 
-
         res.json({
             user: session
         });
@@ -158,13 +156,13 @@ const refreshServer = (req: Request, res: Response, next: NextFunction): void =>
 
 const refresh =  (req: Request, res: Response, next: NextFunction): Response | void => {
 
-    console.log("Refresh")
     try {
         const session = req.session;
         const sessionId = req.sessionId;
         const refreshToken = req.body.refreshToken;
+
         if (!refreshToken) {
-            return res.status(401).json({ message: "No hay refresh token" });
+            throw new ForbiddenError('No hay refresh token');
         }
 
         const newToken = generateAccessToken(sessionId)

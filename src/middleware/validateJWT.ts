@@ -60,6 +60,7 @@ const validateJWTRefresh = async (req: Request, _res: Response, next: NextFuncti
 
     // Obtener el refreshToken del body
     const refreshToken = req.body.refreshToken;
+    console.log({refreshToken})
 
     if (!refreshToken) {
         return next(new ForbiddenError('Token inválido o expirado'));
@@ -110,6 +111,7 @@ const validateJWT = async (req: Request, _res: Response, next: NextFunction): Pr
 
     const authHeader = req.headers['authorization'];
     const token = authHeader?.split(' ')[1];
+
     if (!token) {
         return next(new UnauthorizedError('validateJWT - Acceso denegado. Falta token o es invalido'));
     }

@@ -85,7 +85,6 @@ const logout = async (req: Request, res: Response, next: NextFunction): Promise<
 
     try {
         const sessionId = req.sessionId;
-        if (!sessionId) throw new UnauthorizedError('Sesion terminada')
         await handleDeleteRedisSession(sessionId);
         return res.json({ ok: true })
     } catch (error) {
