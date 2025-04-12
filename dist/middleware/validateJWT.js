@@ -11,7 +11,7 @@ const validateJWTServer = async (req, _res, next) => {
     const authHeader = req.headers['x-server-token'];
     const tokenServer = authHeader?.split(' ')[1];
     if (!tokenServer) {
-        next(new CustomError_1.UnauthorizedError('Acceso denegado. Falta token o es invalido'));
+        next(new CustomError_1.UnauthorizedError('validateJWTServer - Acceso denegado. Falta token o es invalido'));
         return;
     }
     ;
@@ -19,14 +19,13 @@ const validateJWTServer = async (req, _res, next) => {
         const decoded = jsonwebtoken_1.default.verify(tokenServer, process.env.ACCESS_TOKEN_SEVER_SECRET);
         const sessionId = decoded.sessionId;
         if (!sessionId) {
-            next(new CustomError_1.UnauthorizedError('Acceso denegado. Falta token o es invalido'));
+            next(new CustomError_1.UnauthorizedError('validateJWTServer - Acceso denegado. Falta token o es invalido'));
             return;
         }
-        req.sessionId = sessionId;
         const sessionDataRaw = await redisClient_1.default.get(`session:${sessionId}`);
         const sessionData = sessionDataRaw ?? null;
         if (!sessionData) {
-            next(new CustomError_1.UnauthorizedError('Sesión no válida'));
+            next(new CustomError_1.UnauthorizedError('validateJWTServer - Sesión no válida'));
             return;
         }
         try {
@@ -36,6 +35,7 @@ const validateJWTServer = async (req, _res, next) => {
                 next(new CustomError_1.ForbiddenError('Server connection required'));
                 return;
             }
+            req.sessionId = sessionId;
             req.session = session;
             return next();
         }
@@ -59,7 +59,6 @@ const validateJWTRefresh = async (req, _res, next) => {
         // Verificar el refreshToken usando la clave secreta específica para el refreshToken
         const decoded = jsonwebtoken_1.default.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
         const sessionId = decoded.sessionId;
-        req.sessionId = sessionId;
         // Buscar la sesión en Redis usando el sessionId
         const sessionDataRaw = await redisClient_1.default.get(`session:${sessionId}`);
         const sessionData = sessionDataRaw ?? null;
@@ -74,6 +73,7 @@ const validateJWTRefresh = async (req, _res, next) => {
                 return next(new CustomError_1.ForbiddenError('Server and user connection required'));
             }
             // Guardar la sesión en la solicitud para el uso posterior
+            req.sessionId = sessionId;
             req.session = session;
             // Pasar al siguiente middleware
             return next();
@@ -93,16 +93,15 @@ const validateJWT = async (req, _res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader?.split(' ')[1];
     if (!token) {
-        return next(new CustomError_1.UnauthorizedError('Acceso denegado. Falta token o es invalido'));
+        return next(new CustomError_1.UnauthorizedError('validateJWT - Acceso denegado. Falta token o es invalido'));
     }
     try {
         const decoded = jsonwebtoken_1.default.verify(token, process.env.ACCESS_TOKEN_SECRET);
         const sessionId = decoded.sessionId;
-        req.sessionId = sessionId;
         const sessionDataRaw = await redisClient_1.default.get(`session:${sessionId}`);
         const sessionData = sessionDataRaw ?? null;
         if (!sessionData) {
-            return next(new CustomError_1.UnauthorizedError('Sesión no válida'));
+            return next(new CustomError_1.UnauthorizedError('validateJWT - Sesión no válida'));
         }
         try {
             const session = JSON.parse(sessionData);
@@ -110,6 +109,7 @@ const validateJWT = async (req, _res, next) => {
             if (!session.serverConected || !session.userConected) {
                 return next(new CustomError_1.ForbiddenError('Server and user connection required'));
             }
+            req.sessionId = sessionId;
             req.session = session;
             return next();
         }
