@@ -1,8 +1,8 @@
 import { dbConnectionWeb } from "../database";
 import { cobranzaQuery } from "../database/querys/cobranza";
 import { ValidationError } from "../errors/CustomError";
-import { BriefSellsInterface, SellsInterface, SellsOrderConditionType } from "../interface/sells";
-import { UserWebSessionInterface } from "../interface/user";
+import type { BriefSellsInterface, SellsInterface, SellsOrderConditionType } from "../interface/sells";
+import type { UserWebSessionInterface } from "../interface/user";
 
 interface getCobranzaInterface {
     userSession: UserWebSessionInterface,

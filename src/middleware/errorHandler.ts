@@ -1,6 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
 import { handleErrorsEndpoint } from "../controllers/errors";
-import { getUserIdFromRequest } from "../utils/getUserIdFromRequest";
 
 interface ErrorResponse extends Error {
   statusCode?: number;

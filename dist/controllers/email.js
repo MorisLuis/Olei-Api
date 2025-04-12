@@ -5,11 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendEmailWithPDF = exports.sendEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
-const generatePDF_1 = require("../utils/generatePDF");
 const emailValidations_1 = require("../validations/emailValidations");
 const buffer_1 = require("buffer"); // Importa Buffer si es necesario
 const sellsValidations_1 = require("../validations/sellsValidations");
 const cobranzaService_1 = require("../services/cobranzaService");
+const generatePDF_1 = __importDefault(require("../utils/generatePDF"));
 // Configurar el transporte SMTP
 const transporter = nodemailer_1.default.createTransport({
     host: 'smtp.gmail.com',
@@ -60,8 +60,7 @@ const sendEmailWithPDF = async (req, res, next) => {
         DateStart: DateStart || null,
         PageSize: 100
     });
-    console.log({ brief });
-    const pdfBuffer = await (0, generatePDF_1.generatePDF)(sells);
+    const pdfBuffer = await (0, generatePDF_1.default)(sells, brief);
     // Opciones del correo
     const mailOptions = {
         from: '"Olei Software" <moradoluisenrique@gmail.com>',

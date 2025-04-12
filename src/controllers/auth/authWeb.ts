@@ -1,7 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import type { UserWebSessionInterface } from '../../interface/user';
 import { loginWebService } from '../../services/authServices';
-import { UnauthorizedError } from '../../errors/CustomError';
 import { generateAccessTokenWeb, generateRefreshTokenWeb } from '../../helpers/generate-jwt';
 import { v4 } from 'uuid';
 import { generateRedisSessionWeb, handleDeleteRedisSession } from '../../helpers/generate-redis';

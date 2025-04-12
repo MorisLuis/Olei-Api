@@ -1,6 +1,5 @@
 import type { Request, Response } from 'express';
 import { dbConnectionWeb } from '../database';
-import { sellsQuery } from '../database/querys/sells';
 import type { ConnectionPool } from 'mssql';
 import ExcelJS from 'exceljs'
 import { NotFoundError } from '../errors/CustomError';

@@ -1,10 +1,10 @@
 import type { NextFunction, Request, Response } from 'express';
 import nodemailer from 'nodemailer';
-import { generatePDF } from '../utils/generatePDF';
 import { emailBodySchema, emailCobranzaBodySchema } from '../validations/emailValidations';
 import { Buffer } from 'buffer';  // Importa Buffer si es necesario
 import { getClientParamsSchema, getCobranzaQuerySchema } from '../validations/sellsValidations';
 import { getAllCobranzaService } from '../services/cobranzaService';
+import generatePDF from '../utils/generatePDF';
 
 // Configurar el transporte SMTP
 const transporter = nodemailer.createTransport({
@@ -64,7 +64,7 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
         DateExactly,
         DateStart
     } = getCobranzaQuerySchema.parse(req.query);
-    
+
 
     const { client } = getClientParamsSchema.parse(req.params);
 
@@ -85,9 +85,7 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
         PageSize: 100
     });
 
-    console.log({brief})
-
-    const pdfBuffer = await generatePDF(sells);
+    const pdfBuffer = await generatePDF(sells, brief);
 
     // Opciones del correo
     const mailOptions = {
@@ -113,7 +111,7 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
         });
 
     } catch (error) {
-        console.log({error})
+        console.log({ error })
         return next(error)
     }
 };

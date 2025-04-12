@@ -1,5 +1,4 @@
 import { dbConnectionWeb } from "../database";
-import { cobranzaQuery } from "../database/querys/cobranza";
 import { sellsQuery } from "../database/querys/sells";
 import { ValidationError } from "../errors/CustomError";
 import type { SellsInterface, SellsOrderConditionType } from "../interface/sells";

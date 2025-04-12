@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from "express"
 import { getSellsService, getSellsByClientService, getSellByIdService, getTotalSellsService, getTotalSellsByClientService } from "../services/sellsDocsServices";
 import { getTotalSellsByClientQuerySchema, getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getSellByIdParamsSchema, getSellsByClientQuerySchema, getCobranzaQuerySchema, getTotalCobranzaQuerySchema } from '../validations/sellsValidations'
 import { z } from "zod";
-import { getAllCobranzaService, getCobranzaService, getCobranzaWithTotalsService, getTotalCobranzaService } from "../services/cobranzaService";
+import { getCobranzaService, getCobranzaWithTotalsService, getTotalCobranzaService } from "../services/cobranzaService";
 
 const getSells = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 

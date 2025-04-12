@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generatePDF = void 0;
 const pdf_lib_1 = require("pdf-lib");
 const currency_1 = require("./currency");
 const tipoDocFormat_1 = require("./tipoDocFormat");
@@ -15,7 +14,7 @@ const truncateText = (text, maxWidth, font, fontSize) => {
     }
     return truncated;
 };
-const generatePDF = async (sells) => {
+const generatePDF = async (sells, briefSells) => {
     const pdfDoc = await pdf_lib_1.PDFDocument.create();
     const helveticaFont = await pdfDoc.embedFont(pdf_lib_1.StandardFonts.Helvetica);
     const helveticaBoldFont = await pdfDoc.embedFont(pdf_lib_1.StandardFonts.HelveticaBold);
@@ -24,30 +23,39 @@ const generatePDF = async (sells) => {
     const pageHeight = 800;
     const marginLeft = 50;
     let y = pageHeight - 50;
-    const headerFontSize = 10; // Reducido para que quepa mejor
+    const headerFontSize = 10;
     const rowFontSize = 10;
     const rowHeight = 20;
     // Definir anchos máximos para cada columna
     const maxWidths = {
-        fecha: 70, // Reducido un poco
-        folio: 40, // Folio debe ser pequeño
-        tipoDoc: 80, // Mantenerlo legible
-        fechaEntrega: 110, // Se amplió
-        expiredDays: 100, // Reducido un poco
-        saldo: 90, // Ajustado para que no salga
+        fecha: 70,
+        folio: 40,
+        tipoDoc: 80,
+        fechaEntrega: 110,
+        expiredDays: 100,
+        saldo: 90,
     };
     // Definir posiciones fijas para cada columna en base a los anchos
     const columns = {
-        fecha: marginLeft, // 50
-        folio: marginLeft + maxWidths.fecha, // 50 + 80 = 130
-        tipoDoc: marginLeft + maxWidths.fecha + maxWidths.folio, // 50 + 80 + 50 = 180
-        fechaEntrega: marginLeft + maxWidths.fecha + maxWidths.folio + maxWidths.tipoDoc, // 50+80+50+70 = 250
-        expiredDays: marginLeft + maxWidths.fecha + maxWidths.folio + maxWidths.tipoDoc + maxWidths.fechaEntrega, // 50+80+50+70+100 = 350
-        saldo: marginLeft + maxWidths.fecha + maxWidths.folio + maxWidths.tipoDoc + maxWidths.fechaEntrega + maxWidths.expiredDays, // 50+80+50+70+100+60 = 410
+        fecha: marginLeft,
+        folio: marginLeft + maxWidths.fecha,
+        tipoDoc: marginLeft + maxWidths.fecha + maxWidths.folio,
+        fechaEntrega: marginLeft + maxWidths.fecha + maxWidths.folio + maxWidths.tipoDoc,
+        expiredDays: marginLeft +
+            maxWidths.fecha +
+            maxWidths.folio +
+            maxWidths.tipoDoc +
+            maxWidths.fechaEntrega,
+        saldo: marginLeft +
+            maxWidths.fecha +
+            maxWidths.folio +
+            maxWidths.tipoDoc +
+            maxWidths.fechaEntrega +
+            maxWidths.expiredDays,
     };
     // Agregar la primera página
     let page = pdfDoc.addPage([pageWidth, pageHeight]);
-    // Cabecera de la tabla: definir textos y sus posiciones
+    // Cabecera de la tabla
     const headerTexts = [
         { text: 'Fecha', x: columns.fecha },
         { text: 'Folio', x: columns.folio },
@@ -82,7 +90,7 @@ const generatePDF = async (sells) => {
             y: y,
             size: headerFontSize,
             font: helveticaBoldFont,
-            color: (0, pdf_lib_1.rgb)(0, 0, 0)
+            color: (0, pdf_lib_1.rgb)(0, 0, 0),
         });
     });
     y -= rowHeight + 5;
@@ -115,7 +123,7 @@ const generatePDF = async (sells) => {
                 y: y,
                 size: headerFontSize,
                 font: helveticaBoldFont,
-                color: (0, pdf_lib_1.rgb)(0, 0, 0)
+                color: (0, pdf_lib_1.rgb)(0, 0, 0),
             });
         });
         y -= rowHeight + 5;
@@ -159,7 +167,7 @@ const generatePDF = async (sells) => {
             y: y,
             size: rowFontSize,
             font: helveticaFont,
-            color: (0, pdf_lib_1.rgb)(0, 0, 0)
+            color: (0, pdf_lib_1.rgb)(0, 0, 0),
         });
         const folioText = truncateText(sell.Folio.toString(), maxWidths.folio, helveticaFont, rowFontSize);
         page.drawText(folioText, {
@@ -167,7 +175,7 @@ const generatePDF = async (sells) => {
             y: y,
             size: rowFontSize,
             font: helveticaFont,
-            color: (0, pdf_lib_1.rgb)(0, 0, 0)
+            color: (0, pdf_lib_1.rgb)(0, 0, 0),
         });
         const tipoDocText = truncateText(tipoDoc, maxWidths.tipoDoc, helveticaFont, rowFontSize);
         page.drawText(tipoDocText, {
@@ -175,7 +183,7 @@ const generatePDF = async (sells) => {
             y: y,
             size: rowFontSize,
             font: helveticaFont,
-            color: (0, pdf_lib_1.rgb)(0, 0, 0)
+            color: (0, pdf_lib_1.rgb)(0, 0, 0),
         });
         const fechaEntregaText = truncateText(fechaEntrega, maxWidths.fechaEntrega, helveticaFont, rowFontSize);
         page.drawText(fechaEntregaText, {
@@ -183,15 +191,15 @@ const generatePDF = async (sells) => {
             y: y,
             size: rowFontSize,
             font: helveticaFont,
-            color: (0, pdf_lib_1.rgb)(0, 0, 0)
+            color: (0, pdf_lib_1.rgb)(0, 0, 0),
         });
-        const expiredText = truncateText(diasVencidos ? diasVencidos.toString() : '', maxWidths.expiredDays, helveticaFont, rowFontSize);
+        const expiredText = truncateText(diasVencidos.toString(), maxWidths.expiredDays, helveticaFont, rowFontSize);
         page.drawText(expiredText, {
             x: columns.expiredDays,
             y: y,
             size: rowFontSize,
             font: helveticaFont,
-            color: (0, pdf_lib_1.rgb)(0, 0, 0)
+            color: (0, pdf_lib_1.rgb)(0, 0, 0),
         });
         const saldoText = truncateText(saldo, maxWidths.saldo, helveticaFont, rowFontSize);
         page.drawText(saldoText, {
@@ -199,11 +207,96 @@ const generatePDF = async (sells) => {
             y: y,
             size: rowFontSize,
             font: helveticaFont,
-            color: (0, pdf_lib_1.rgb)(0, 0, 0)
+            color: (0, pdf_lib_1.rgb)(0, 0, 0),
         });
         y -= rowHeight;
     }
+    // Agregar la fila de totales al final; si no hay espacio, se añade una nueva página
+    if (y < 50)
+        addNewPage();
+    const totalRowY = y;
+    const saldoVencido = `${(0, currency_1.formatCurrency)(briefSells.SaldoVencido)}`;
+    const saldoNoVencido = `${(0, currency_1.formatCurrency)(briefSells.SaldoNoVencido)}`;
+    const totalSaldo = `${(0, currency_1.formatCurrency)(briefSells.TotalSaldo)}`;
+    // Dibujar "Totales" a la izquierda
+    page.drawText('Totales', {
+        x: marginLeft,
+        y: totalRowY,
+        size: rowFontSize,
+        font: helveticaBoldFont,
+        color: (0, pdf_lib_1.rgb)(0, 0, 0),
+    });
+    // Separar los grupos y calcular sus anchos:
+    const gapBetweenGroups = 20; // espacio entre cada grupo
+    const group1Label = 'Saldo Vencido: ';
+    const group1Value = saldoVencido;
+    const group2Label = 'Saldo No Vencido: ';
+    const group2Value = saldoNoVencido;
+    const group3Label = 'Total Saldo: ';
+    const group3Value = totalSaldo;
+    const group1Width = helveticaBoldFont.widthOfTextAtSize(group1Label, rowFontSize) +
+        helveticaFont.widthOfTextAtSize(group1Value, rowFontSize);
+    const group2Width = helveticaBoldFont.widthOfTextAtSize(group2Label, rowFontSize) +
+        helveticaFont.widthOfTextAtSize(group2Value, rowFontSize);
+    const group3Width = helveticaBoldFont.widthOfTextAtSize(group3Label, rowFontSize) +
+        helveticaFont.widthOfTextAtSize(group3Value, rowFontSize);
+    // Sumar anchos y gaps para posicionar desde la derecha
+    const totalGroupsWidth = group1Width + gapBetweenGroups + group2Width + gapBetweenGroups + group3Width;
+    const rightXBase = pageWidth - marginLeft - totalGroupsWidth;
+    // Empezar a dibujar desde la posición calculada
+    let currentX = rightXBase;
+    // Grupo 1: Saldo Vencido
+    page.drawText(group1Label, {
+        x: currentX,
+        y: totalRowY,
+        size: rowFontSize,
+        font: helveticaBoldFont,
+        color: (0, pdf_lib_1.rgb)(0, 0, 0),
+    });
+    currentX += helveticaBoldFont.widthOfTextAtSize(group1Label, rowFontSize);
+    page.drawText(group1Value, {
+        x: currentX,
+        y: totalRowY,
+        size: rowFontSize,
+        font: helveticaFont,
+        color: (0, pdf_lib_1.rgb)(0, 0, 0),
+    });
+    currentX += helveticaFont.widthOfTextAtSize(group1Value, rowFontSize) + gapBetweenGroups;
+    // Grupo 2: Saldo No Vencido
+    page.drawText(group2Label, {
+        x: currentX,
+        y: totalRowY,
+        size: rowFontSize,
+        font: helveticaBoldFont,
+        color: (0, pdf_lib_1.rgb)(0, 0, 0),
+    });
+    currentX += helveticaBoldFont.widthOfTextAtSize(group2Label, rowFontSize);
+    page.drawText(group2Value, {
+        x: currentX,
+        y: totalRowY,
+        size: rowFontSize,
+        font: helveticaFont,
+        color: (0, pdf_lib_1.rgb)(0, 0, 0),
+    });
+    currentX += helveticaFont.widthOfTextAtSize(group2Value, rowFontSize) + gapBetweenGroups;
+    // Grupo 3: Total Saldo
+    page.drawText(group3Label, {
+        x: currentX,
+        y: totalRowY,
+        size: rowFontSize,
+        font: helveticaBoldFont,
+        color: (0, pdf_lib_1.rgb)(0, 0, 0),
+    });
+    currentX += helveticaBoldFont.widthOfTextAtSize(group3Label, rowFontSize);
+    page.drawText(group3Value, {
+        x: currentX,
+        y: totalRowY,
+        size: rowFontSize,
+        font: helveticaFont,
+        color: (0, pdf_lib_1.rgb)(0, 0, 0),
+    });
+    // Finalizar y retornar el PDF
     return await pdfDoc.save();
 };
-exports.generatePDF = generatePDF;
+exports.default = generatePDF;
 //# sourceMappingURL=generatePDF.js.map
