@@ -14,6 +14,8 @@ export const getUserIdFromRequest = async (req: Request): Promise<string | null>
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
         const sessionId = decoded.sessionId;
 
+        if(!sessionId) return null;
+
         const sessionDataRaw = await redisClient.get(`session:${sessionId}`);
         const session = sessionDataRaw ? JSON.parse(sessionDataRaw) : null;
 

@@ -14,6 +14,8 @@ const getUserIdFromRequest = async (req) => {
             return null;
         const decoded = jsonwebtoken_1.default.verify(token, process.env.ACCESS_TOKEN_SECRET);
         const sessionId = decoded.sessionId;
+        if (!sessionId)
+            return null;
         const sessionDataRaw = await redisClient_1.default.get(`session:${sessionId}`);
         const session = sessionDataRaw ? JSON.parse(sessionDataRaw) : null;
         const user = session?.userId

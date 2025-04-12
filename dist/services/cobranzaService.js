@@ -71,7 +71,6 @@ const getCobranzaWithTotalsService = async ({ userSession, Id_Cliente, FilterTip
         .input('DateExactly', DateExactly)
         .input('TipoDoc', TipoDoc)
         .query(query);
-    console.log({ request });
     const recordsets = Array.isArray(request.recordsets) ? request.recordsets : Object.values(request.recordsets);
     const brief = recordsets[0][0];
     return {
@@ -85,10 +84,9 @@ const getAllCobranzaService = async (params) => {
     let pageNumber = params.PageNumber || 1;
     const pageSize = params.PageSize || 100;
     let hasMore = true;
-    const sells = await getCobranzaService({ ...params, PageNumber: pageNumber, PageSize: pageSize });
     const { brief } = await getCobranzaWithTotalsService({ ...params, PageNumber: pageNumber, PageSize: pageSize });
-    console.log({ brief });
     while (hasMore) {
+        const sells = await getCobranzaService({ ...params, PageNumber: pageNumber, PageSize: pageSize });
         if (sells.length > 0) {
             allSells = allSells.concat(sells);
             pageNumber++;
@@ -98,7 +96,10 @@ const getAllCobranzaService = async (params) => {
         }
         ;
     }
-    return allSells;
+    return {
+        sells: allSells,
+        brief
+    };
 };
 exports.getAllCobranzaService = getAllCobranzaService;
 //# sourceMappingURL=cobranzaService.js.map

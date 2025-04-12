@@ -10,7 +10,7 @@ const errorHandler = async (err: ErrorResponse, req: Request, res: Response, _ne
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
 
-  const Id_Usuario = (await getUserIdFromRequest(req)) ?? "Sin Usuario";
+  //const Id_Usuario = (await getUserIdFromRequest(req)) ?? "Sin Usuario";
 
   console.error(`[ERROR] ${req.method} ${req.path} - ${message}`);
 
@@ -26,7 +26,7 @@ const errorHandler = async (err: ErrorResponse, req: Request, res: Response, _ne
       await handleErrorsEndpoint({
         From: req.path,                    // Endpoint donde ocurrió el error
         Message: message,                  // Mensaje de error
-        Id_Usuario: Id_Usuario,            // ID del usuario
+        Id_Usuario: "",            // ID del usuario
         Metodo: req.method,                // Método HTTP
         code: statusCode.toString()        // Código de error convertido a string
       });

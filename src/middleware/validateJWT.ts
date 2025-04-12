@@ -16,7 +16,12 @@ const validateJWTServer = async (req: Request, _res: Response, next: NextFunctio
     };
 
     try {
-        const decoded = jwt.verify(tokenServer, process.env.ACCESS_TOKEN_SEVER_SECRET as string) as JwtPayload;
+
+        if (!process.env.ACCESS_TOKEN_SEVER_SECRET) {
+            return next(new ForbiddenError('variable ACCESS_TOKEN_SEVER_SECRET perdida!'));
+        };
+
+        const decoded = jwt.verify(tokenServer, process.env.ACCESS_TOKEN_SEVER_SECRET) as JwtPayload;
         const sessionId = decoded.sessionId;
 
         if (!sessionId) {
@@ -60,7 +65,7 @@ const validateJWTRefresh = async (req: Request, _res: Response, next: NextFuncti
 
     // Obtener el refreshToken del body
     const refreshToken = req.body.refreshToken;
-    console.log({refreshToken})
+    console.log({ refreshToken })
 
     if (!refreshToken) {
         return next(new ForbiddenError('Token inválido o expirado'));

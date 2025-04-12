@@ -64,11 +64,13 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
         DateExactly,
         DateStart
     } = getCobranzaQuerySchema.parse(req.query);
+    
 
     const { client } = getClientParamsSchema.parse(req.params);
+
     const userSession = req.sessionWeb;
 
-    const sells = await getAllCobranzaService({
+    const { sells, brief } = await getAllCobranzaService({
         userSession,
         Id_Cliente: client,
         PageNumber: PageNumber || 1,
@@ -82,6 +84,8 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
         DateStart: DateStart || null,
         PageSize: 100
     });
+
+    console.log({brief})
 
     const pdfBuffer = await generatePDF(sells);
 
@@ -109,6 +113,7 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
         });
 
     } catch (error) {
+        console.log({error})
         return next(error)
     }
 };

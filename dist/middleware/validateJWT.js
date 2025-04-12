@@ -16,6 +16,10 @@ const validateJWTServer = async (req, _res, next) => {
     }
     ;
     try {
+        if (!process.env.ACCESS_TOKEN_SEVER_SECRET) {
+            return next(new CustomError_1.ForbiddenError('variable ACCESS_TOKEN_SEVER_SECRET perdida!'));
+        }
+        ;
         const decoded = jsonwebtoken_1.default.verify(tokenServer, process.env.ACCESS_TOKEN_SEVER_SECRET);
         const sessionId = decoded.sessionId;
         if (!sessionId) {

@@ -46,7 +46,7 @@ const sendEmailWithPDF = async (req, res, next) => {
     const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaQuerySchema.parse(req.query);
     const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
     const userSession = req.sessionWeb;
-    const sells = await (0, cobranzaService_1.getAllCobranzaService)({
+    const { sells, brief } = await (0, cobranzaService_1.getAllCobranzaService)({
         userSession,
         Id_Cliente: client,
         PageNumber: PageNumber || 1,
@@ -60,6 +60,7 @@ const sendEmailWithPDF = async (req, res, next) => {
         DateStart: DateStart || null,
         PageSize: 100
     });
+    console.log({ brief });
     const pdfBuffer = await (0, generatePDF_1.generatePDF)(sells);
     // Opciones del correo
     const mailOptions = {
@@ -83,6 +84,7 @@ const sendEmailWithPDF = async (req, res, next) => {
         });
     }
     catch (error) {
+        console.log({ error });
         return next(error);
     }
 };

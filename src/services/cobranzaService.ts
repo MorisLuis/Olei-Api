@@ -127,8 +127,6 @@ const getCobranzaWithTotalsService = async ({
         .input('TipoDoc', TipoDoc)
         .query(query);
 
-        console.log({request})
-
     const recordsets = Array.isArray(request.recordsets) ? request.recordsets : Object.values(request.recordsets);
     const brief = recordsets[0][0] as BriefSellsInterface;
 
@@ -139,17 +137,16 @@ const getCobranzaWithTotalsService = async ({
 
 
 /* UTILS */
-const getAllCobranzaService = async (params: getCobranzaInterface): Promise<SellsInterface[]> => {
+const getAllCobranzaService = async (params: getCobranzaInterface): Promise<{ sells: SellsInterface[], brief: BriefSellsInterface }> => {
     let allSells: SellsInterface[] = [];
     let pageNumber = params.PageNumber || 1;
     const pageSize = params.PageSize || 100;
     let hasMore = true;
 
-    const sells = await getCobranzaService({ ...params, PageNumber: pageNumber, PageSize: pageSize });
     const { brief } = await getCobranzaWithTotalsService({ ...params, PageNumber: pageNumber, PageSize: pageSize });
-    console.log({brief})
-
+    
     while (hasMore) {
+        const sells = await getCobranzaService({ ...params, PageNumber: pageNumber, PageSize: pageSize });
 
         if (sells.length > 0) {
             allSells = allSells.concat(sells);
@@ -159,7 +156,10 @@ const getAllCobranzaService = async (params: getCobranzaInterface): Promise<Sell
         };
 
     }
-    return allSells;
+    return {
+        sells: allSells,
+        brief
+    };
 };
 
 

@@ -2,11 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.errorHandler = void 0;
 const errors_1 = require("../controllers/errors");
-const getUserIdFromRequest_1 = require("../utils/getUserIdFromRequest");
 const errorHandler = async (err, req, res, _next) => {
     const statusCode = err.statusCode || 500;
     const message = err.message || 'Internal Server Error';
-    const Id_Usuario = (await (0, getUserIdFromRequest_1.getUserIdFromRequest)(req)) ?? "Sin Usuario";
+    //const Id_Usuario = (await getUserIdFromRequest(req)) ?? "Sin Usuario";
     console.error(`[ERROR] ${req.method} ${req.path} - ${message}`);
     // Omitir errores de "Token expirado o inválido: TokenExpiredError: jwt expired" por que es el error de refresh token
     // Omitir errores de 'login'.
@@ -18,7 +17,7 @@ const errorHandler = async (err, req, res, _next) => {
             await (0, errors_1.handleErrorsEndpoint)({
                 From: req.path, // Endpoint donde ocurrió el error
                 Message: message, // Mensaje de error
-                Id_Usuario: Id_Usuario, // ID del usuario
+                Id_Usuario: "", // ID del usuario
                 Metodo: req.method, // Método HTTP
                 code: statusCode.toString() // Código de error convertido a string
             });
