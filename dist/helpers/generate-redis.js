@@ -38,12 +38,24 @@ exports.getRedisSession = getRedisSession;
 // Actualizar la sesión en Redis
 const updateSession = async (sessionId, newData) => {
     try {
+        const redisKey = `session:${sessionId}`;
+        // Get current session
         let session = await (0, exports.getRedisSession)(sessionId);
         if (!session) {
             throw new CustomError_1.NotFoundError('Sesión no encontrada en Redis');
         }
+        // Merge data
         session = { ...session, ...newData };
-        const result = await redisClient_1.default.set(`session:${sessionId}`, JSON.stringify(session), 'EX', 3600);
+        // Get current TTL
+        const ttl = await redisClient_1.default.ttl(redisKey); // TTL in seconds
+        if (ttl === -2) {
+            throw new CustomError_1.NotFoundError('Sesión ya expiró');
+        }
+        if (ttl === -1) {
+            throw new CustomError_1.AppError('La sesión no tiene TTL y no se puede conservar', 500);
+        }
+        // Save updated session with original TTL
+        const result = await redisClient_1.default.set(redisKey, JSON.stringify(session), 'EX', ttl);
         if (!result) {
             throw new CustomError_1.AppError('Error al actualizar la sesión en Redis', 500);
         }
