@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
-import { ErrorLogData, errorsService } from '../services/errorService';
+import type { ErrorLogData} from '../services/errorService';
+import { errorsService } from '../services/errorService';
 import { AppError } from '../errors/CustomError';
 
 const handleErrors = async (req: Request, res: Response): Promise<Response | void> => {

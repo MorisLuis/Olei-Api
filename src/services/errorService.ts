@@ -11,7 +11,7 @@ export interface ErrorLogData {
     code?: number | string;
 }
 
-const errorsService = async (data: ErrorLogData) => {
+const errorsService = async (data: ErrorLogData) : Promise<void> => {
     const pool = await dbConnectionMain();
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');

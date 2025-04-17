@@ -145,28 +145,11 @@ const searchProductInventoryWithoutCodebar = async (req: Request, res: Response,
 };
 
 
-const errorTest = (
-    _req: Request,
-    _res: Response,
-    next: NextFunction
-): Response | void => {
-    try {
-        // Se genera un error intencional para probar el manejo de errores
-        const error = new Error('Error intencional del servidor') as any;
-        error.status = 500;
-        // Se pasa al siguiente middleware de manejo de errores
-        next(error);
-    } catch (err) {
-        next(err);
-    }
-};
 export {
     getProducById,
     getProductsByStock,
     getTotalOfProductsByStock,
     getProductByStockAndCodeBar,
     searchProductInventory,
-    searchProductInventoryWithoutCodebar,
-
-    errorTest
+    searchProductInventoryWithoutCodebar
 }
