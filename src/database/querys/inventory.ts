@@ -1,15 +1,5 @@
 export const inventoryQuerys = {
 
-    insertInventory: ` 
-        INSERT INTO [dbo].[INVENTARIOS]  (
-            Id_Almacen, Folio, Id_TipoMovInv, Estado, Fecha, Id_AlmacenDest, SwPendiente, Descripcion, Id_Usuario, SwTr, FechaRecepcion, FolioReq, AlmReq
-        ) 
-        OUTPUT 'Inventory' as 'result', Inserted.Id_Almacen, Inserted.Folio, Inserted.Fecha, Inserted.Id_TipoMovInv 
-        VALUES (
-            @Id_Almacen, @Folio, @Id_TipoMovInv, @Estado, @Fecha, @Id_AlmacenDest, @SwPendiente, @Descripcion, @Id_Usuario, @SwTr, @FechaRecepcion, @FolioReq, @AlmReq
-        )
-    `,
-
     getInventory: `
         SELECT 
         I.Folio, 

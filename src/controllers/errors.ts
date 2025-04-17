@@ -1,40 +1,15 @@
 import type { Request, Response } from 'express';
-import { dbConnectionMain, querys } from '../database';
-import sql from 'mssql';
-import moment from 'moment';
-import { NotFoundError } from '../errors/CustomError';
+import { ErrorLogData, errorsService } from '../services/errorService';
+import { AppError } from '../errors/CustomError';
 
 const handleErrors = async (req: Request, res: Response): Promise<Response | void> => {
 
     try {
-        const pool = await dbConnectionMain();
-        const { From, Message, Id_Usuario, Metodo, code } = req.body;
-
-        const transaction = new sql.Transaction(pool);
-        await transaction.begin();
-        const request = new sql.Request(transaction);
-
-
-        let query = querys.postError;
-        const fechaActualCDMX = moment().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
-
-        await request
-            .input('From', sql.VarChar, From || '')
-            .input('Message', sql.VarChar, Message || '')
-            .input('Id_Usuario', sql.VarChar, Id_Usuario || '')
-            .input('Fecha', sql.VarChar, fechaActualCDMX)
-            .input('Metodo', sql.VarChar, Metodo || '')
-            .input('code', sql.Int, code || '')
-            .query(query);
-
-        await transaction.commit();
-
-        return res.json({
-            ok: true
-        })
-
+        await errorsService(req.body);
+        return res.json({ ok: true });
     } catch (error) {
-        return res.status(500).send(error);
+        new AppError(`[ErrorController] - ${error}`)
+        return res.status(500).json({ ok: false, msg: 'Error interno del servidor' });
     }
 
 };
@@ -56,29 +31,18 @@ const handleErrorsEndpoint = async ({
 }: handleErrorsEndpointInterface): Promise<Response | void> => {
 
 
+    const body: ErrorLogData = {
+        From,
+        Message,
+        Id_Usuario,
+        Metodo,
+        code
+    }
+
     try {
-        const pool = await dbConnectionMain();
-
-        const transaction = new sql.Transaction(pool);
-        await transaction.begin();
-        const request = new sql.Request(transaction);
-
-        let query = querys.postError;
-        const fechaActualCDMX = moment().tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss.SSS');
-
-        await request
-            .input('From', sql.VarChar, From || '')
-            .input('Message', sql.VarChar, Message || '')
-            .input('Id_Usuario', sql.VarChar, Id_Usuario || '')
-            .input('Fecha', sql.VarChar, fechaActualCDMX)
-            .input('Metodo', sql.VarChar, Metodo || '')
-            .input('code', sql.VarChar, code || '')
-            .query(query);
-
-        await transaction.commit();
-
+        await errorsService(body);
     } catch (error) {
-        throw new NotFoundError(`Error al conectarse a base de datos principal: ${error}`);
+        throw new AppError(`[ErrorController] - ${error}`)
     }
 
 }
