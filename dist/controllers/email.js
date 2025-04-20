@@ -83,7 +83,6 @@ const sendEmailWithPDF = async (req, res, next) => {
         });
     }
     catch (error) {
-        console.log({ error });
         return next(error);
     }
 };

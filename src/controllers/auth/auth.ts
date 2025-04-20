@@ -37,7 +37,6 @@ const loginServer = async (req: Request, res: Response, next: NextFunction): Pro
         // Generar un ID de sesión único
         const sessionId = v4();
 
-        console.log({sessionId})
         // Guardar la sesión en Redis con expiración (1 hora)
         await generateRedisSession(sessionId, datosDelUsuario)
 

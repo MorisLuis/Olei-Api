@@ -1,0 +1,281 @@
+import type { NextFunction, Request, Response } from 'express'
+import type { JwtPayload } from 'jsonwebtoken';
+import jwt, { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
+import { AppError, ForbiddenError, UnauthorizedError } from '../errors/CustomError';
+import redisClient from '../config/redisClient';
+import type { UserSessionInterface, UserWebSessionInterface } from '../interface/user';
+
+/* mobile */
+
+const validateJWTServer = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
+
+    console.log("validateJWTServer!X!X!X")
+    const authHeader = req.headers['x-server-token'] as string;
+    const tokenServer = authHeader?.split(' ')[1];
+
+
+    if (!tokenServer) {
+        return next(new UnauthorizedError('TOKEN_EXPIRADO'));
+    };
+
+    try {
+
+        if (!process.env.ACCESS_TOKEN_SEVER_SECRET) {
+            return next(new UnauthorizedError('TOKEN_EXPIRADO'));
+        };
+
+        const decoded = jwt.verify(tokenServer, process.env.ACCESS_TOKEN_SEVER_SECRET) as JwtPayload;
+        const sessionId = decoded.sessionId;
+
+        if (!sessionId) {
+            return next(new UnauthorizedError('SESSION_EXPIRADO'));
+        }
+
+        const sessionDataRaw = await redisClient.get(`session:${sessionId}`);
+        const sessionData = sessionDataRaw ?? null;
+
+        if (!sessionData) {
+            return next(new UnauthorizedError('SESSION_EXPIRADO'));
+        }
+
+        try {
+            const session: UserSessionInterface = JSON.parse(sessionData);
+
+            // Verificar si las conexiones requeridas están activas
+            if (!session.serverConected) {
+                next(new ForbiddenError('Server connection required'));
+                return
+            }
+
+            req.sessionId = sessionId;
+            req.session = session;
+            return next();
+        } catch (error) {
+            next(new AppError(`Error parsing session data: ${error}`));
+            return
+        }
+
+    } catch (error) {
+        console.log({error})
+        switch (true) {
+            case error instanceof TokenExpiredError:
+                return next(new UnauthorizedError('TOKEN_EXPIRADO'));
+
+            case error instanceof JsonWebTokenError:
+                return next(new UnauthorizedError('TOKEN_EXPIRADO'));
+
+            case error instanceof Error:
+                return next(new UnauthorizedError(`TOKEN_EXPIRADO`));
+
+            default:
+                return next(new UnauthorizedError(`TOKEN_EXPIRADO`));
+        }
+    }
+};
+
+const validateJWTRefresh = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
+
+    console.log("validateJWTRefresh!!1")
+    // Obtener el refreshToken del body
+    const refreshToken = req.body.refreshToken;
+
+    if (!refreshToken) {
+        return next(new UnauthorizedError('REFRESH_TOKEN_EXPIRADO'));
+    }
+
+    try {
+        // Verificar el refreshToken usando la clave secreta específica para el refreshToken
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as JwtPayload;
+        const sessionId = decoded.sessionId;
+
+
+        // Buscar la sesión en Redis usando el sessionId
+        const sessionDataRaw = await redisClient.get(`session:${sessionId}`);
+        const sessionData = sessionDataRaw ?? null;
+
+        if (!sessionData) {
+            return next(new UnauthorizedError('SESSION_EXPIRADO'));
+        }
+
+        try {
+            // Parsear los datos de la sesión obtenida de Redis
+            const session: UserSessionInterface = JSON.parse(sessionData);
+
+            // Verificar si las conexiones requeridas están activas
+            if (!session.serverConected || !session.userConected) {
+                return next(new UnauthorizedError('REFRESH_TOKEN_EXPIRADO'));
+            }
+
+            // Guardar la sesión en la solicitud para el uso posterior
+            req.sessionId = sessionId;
+            req.session = session;
+
+            // Pasar al siguiente middleware
+            return next();
+        } catch (error) {
+            return next(new AppError('Error al procesar la sesión. Intenta de nuevo más tarde.'));
+        }
+
+    } catch (error) {
+        console.log({error})
+        switch (true) {
+            case error instanceof TokenExpiredError:
+                return next(new UnauthorizedError('REFRESH_TOKEN_EXPIRADO'));
+
+            case error instanceof JsonWebTokenError:
+                return next(new UnauthorizedError('REFRESH_TOKEN_EXPIRADO'));
+
+            case error instanceof Error:
+                return next(new ForbiddenError(`Fallo al autenticar el token: ${error.message}`));
+
+            default:
+                return next(new ForbiddenError('Fallo desconocido al autenticar el token'));
+        } 
+    }
+};
+
+
+const validateJWT = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader?.split(' ')[1];
+
+    if (!token) {
+        return next(new ForbiddenError('No se proporcionó un token válido.'));
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
+        const sessionId = decoded.sessionId;
+
+        const sessionDataRaw = await redisClient.get(`session:${sessionId}`);
+        const sessionData = sessionDataRaw ?? null;
+
+        if (!sessionData) {
+            return next(new UnauthorizedError('SESSION_EXPIRADO'));
+        }
+
+        try {
+            const session: UserSessionInterface = JSON.parse(sessionData);
+
+            if (!session.serverConected || !session.userConected) {
+                return next(new ForbiddenError('No hay conexión activa. Inicia sesión otra vez.'));
+            }
+
+            req.sessionId = sessionId;
+            req.session = session;
+            return next();
+        } catch (error) {
+            return next(new AppError('Error al procesar la sesión. Intenta de nuevo más tarde.'));
+        }
+
+    } catch (error) {
+        return next(new ForbiddenError('Fallo desconocido al autenticar el token'));
+    }
+};
+
+const validateJWTServerSoft = async (req: Request, res: Response, next: NextFunction) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader?.split(' ')[1];
+
+    if (!token) return next();
+
+    try {
+        // 1. Intentar verificar normalmente
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
+        const sessionId = decoded.sessionId;
+
+        const sessionDataRaw = await redisClient.get(`session:${sessionId}`);
+        const sessionData = sessionDataRaw ?? null;
+
+        if (!sessionData) {
+            return next();
+        }
+
+        const session: UserSessionInterface = JSON.parse(sessionData);
+
+        if (!session.serverConected || !session.userConected) {
+            return next();
+        }
+
+        req.sessionId = sessionId;
+
+    } catch (err) {
+        // 2. Si falla por expirado, decodificar sin validar para rescatar la sesión
+        const decoded = jwt.decode(token);
+        if (decoded && typeof decoded === 'object') {
+            const sessionId = decoded.sessionId;
+
+            if (!sessionId) {
+                return next();            }
+
+            const sessionDataRaw = await redisClient.get(`session:${sessionId}`);
+            const sessionData = sessionDataRaw ?? null;
+
+            if (!sessionData) {
+                return next();
+            }
+
+            const session: UserSessionInterface = JSON.parse(sessionData);
+
+            req.session = session;
+            req.sessionId = sessionId;
+        }
+    }
+
+    next();
+};
+
+/* web */
+const validateJWTWeb = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader?.split(' ')[1];
+
+    if (!token) {
+        return next(new UnauthorizedError('Acceso denegado. Falta token o es invalido'));
+    }
+
+    try {
+        const decoded = jwt.verify(token, 'access_secret') as JwtPayload;
+        const sessionId = decoded.sessionId;
+
+        req.sessionId = sessionId;
+
+        const sessionDataRaw = await redisClient.get(`session:${sessionId}`);
+        const sessionData = sessionDataRaw ?? null;
+
+        if (!sessionData) {
+            return next(new UnauthorizedError('Sesión no válida'));
+        }
+
+        try {
+            const session: UserWebSessionInterface = JSON.parse(sessionData);
+            req.sessionWeb = session;
+            return next();
+        } catch (error) {
+            return next(new AppError(`Error parsing session data: ${error}`));
+        }
+
+    } catch (error) {
+        switch (true) {
+            case error instanceof TokenExpiredError:
+                return next(new UnauthorizedError('El token ha expirado, por favor, inicia sesión nuevamente'));
+
+            case error instanceof JsonWebTokenError:
+                return next(new UnauthorizedError('Token inválido, por favor verifica tus credenciales'));
+
+            case error instanceof Error:
+                return next(new UnauthorizedError(`Fallo al autenticar el token: ${error.message}`));
+
+            default:
+                return next(new UnauthorizedError('Fallo desconocido al autenticar el token'));
+        }
+    }
+};
+
+export {
+    validateJWTServer,
+    validateJWTServerSoft,
+    validateJWT,
+    validateJWTRefresh,
+    validateJWTWeb
+};

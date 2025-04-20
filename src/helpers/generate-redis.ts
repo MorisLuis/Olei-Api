@@ -3,7 +3,6 @@ import type { UserSessionInterface, UserWebSessionInterface } from "../interface
 import { AppError, NotFoundError } from "../errors/CustomError";
 
 
-
 // Generar sesion de redis.
 export const generateRedisSession = async (sessionId: string, datosDelUsuario: UserSessionInterface): Promise<string | null> => {
     try {
@@ -20,7 +19,6 @@ export const generateRedisSession = async (sessionId: string, datosDelUsuario: U
 };
 
 
-
 // Obtener la sesión desde Redis
 export const getRedisSession = async (sessionId: string): Promise<UserSessionInterface | null> => {
     try {
@@ -33,7 +31,6 @@ export const getRedisSession = async (sessionId: string): Promise<UserSessionInt
         throw new AppError(`Error en generateRedisSession: ${error}`, 500);
     }
 };
-
 
 
 // Actualizar la sesión en Redis
@@ -52,7 +49,6 @@ export const updateSession = async (
 
         // Get current TTL
         const ttl = await redisClient.ttl(`session:${sessionId}`); // TTL in seconds
-        console.log({ttl})
 
         if (ttl === -2) {
             throw new NotFoundError('Sesión ya expiró');
@@ -85,8 +81,6 @@ export const handleDeleteRedisSession = async (sessionId: string): Promise<void>
         if (response === 0) {
             throw new NotFoundError('Sesión no encontrada en Redis');
         }
-
-        console.log(`✅ Sesión ${sessionId} eliminada exitosamente`);
     } catch (error) {
         throw new AppError(`Error en handleDeleteRedisSession: ${error}`, 500);
     }

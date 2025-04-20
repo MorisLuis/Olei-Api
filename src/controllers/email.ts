@@ -111,7 +111,6 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
         });
 
     } catch (error) {
-        console.log({ error })
         return next(error)
     }
 };

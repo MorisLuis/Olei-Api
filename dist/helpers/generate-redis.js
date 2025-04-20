@@ -45,7 +45,6 @@ const updateSession = async (sessionId, newData) => {
         session = { ...session, ...newData };
         // Get current TTL
         const ttl = await redisClient_1.default.ttl(`session:${sessionId}`); // TTL in seconds
-        console.log({ ttl });
         if (ttl === -2) {
             throw new CustomError_1.NotFoundError('Sesión ya expiró');
         }
@@ -70,7 +69,6 @@ const handleDeleteRedisSession = async (sessionId) => {
         if (response === 0) {
             throw new CustomError_1.NotFoundError('Sesión no encontrada en Redis');
         }
-        console.log(`✅ Sesión ${sessionId} eliminada exitosamente`);
     }
     catch (error) {
         throw new CustomError_1.AppError(`Error en handleDeleteRedisSession: ${error}`, 500);
