@@ -2,119 +2,55 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.statisticsQuery = void 0;
 exports.statisticsQuery = {
-    getProductsStatistics: `
-        WITH
-        ProductosConEstatus
-        AS
-            (
-                SELECT
-                    [Id_Almacen],
-                    [Codigo],
-                    [Id_Marca],
-                    [Existencia],
-                    CASE
-                    WHEN [Existencia] < 1 THEN 'No tienes productos'
-                    WHEN [Existencia] = 1 THEN 'Estás casi sin productos'
-                    WHEN [Existencia] BETWEEN 2 AND 5 THEN 'Tienes menos de 5 productos'
-                    WHEN [Existencia] BETWEEN 6 AND 15 THEN 'Aun tienes productos, pero no muchos'
-                    ELSE 'Tienes buena cantidad de productos'
-                END AS Estatus,
-                    CASE
-                    WHEN [Existencia] < 1 THEN 'WithoutStock'
-                    WHEN [Existencia] = 1 THEN 'AlmostWithoutStock'
-                    WHEN [Existencia] BETWEEN 2 AND 5 THEN 'WithLessThan5'
-                    WHEN [Existencia] BETWEEN 6 AND 15 THEN 'Between5And16'
-                    ELSE 'MoreThan16'
-                END AS Path
-                FROM [dbo].[EXISTENCIAS]
-            )
+    getCRMBrief: `
+        DECLARE @FechaEspecifica DATE = '2024-02-14'
 
-        SELECT
-            Estatus,
-            Path,
-            COUNT(*) AS CantidadProductos
-        FROM ProductosConEstatus
-        GROUP BY Estatus, Path;
-    `,
-    getProductsWithoutStock: `
-        SELECT
-            E.Id_Almacen,
-            E.Codigo,
-            E.Id_Marca,
-            E.Existencia,
-            M.Nombre AS Marca,
-            P.Descripcion
-        FROM [dbo].[EXISTENCIAS] E
-        JOIN [dbo].[MARCAS] M ON M.Id_Marca = E.Id_Marca
-        JOIN [dbo].[PRODUCTOS] P ON P.Codigo = E.Codigo
-        WHERE Existencia < 1
-        ORDER BY Existencia ASC
-        OFFSET (@PageNumber - 1) * @PageSize ROWS
-        FETCH NEXT @PageSize ROWS ONLY
-    `,
-    getProductsAlmostWithoutStock: `
-        SELECT
-            E.Id_Almacen,
-            E.Codigo,
-            E.Id_Marca,
-            E.Existencia,
-            M.Nombre AS Marca,
-            P.Descripcion
-        FROM [dbo].[EXISTENCIAS] E
-        JOIN [dbo].[MARCAS] M ON M.Id_Marca = E.Id_Marca
-        JOIN [dbo].[PRODUCTOS] P ON P.Codigo = E.Codigo
-        WHERE Existencia = 1
-        ORDER BY Existencia ASC
-        OFFSET (@PageNumber - 1) * @PageSize ROWS
-        FETCH NEXT @PageSize ROWS ONLY
-    `,
-    getProductsWithLessThan5: `
-        SELECT
-            E.Id_Almacen,
-            E.Codigo,
-            E.Id_Marca,
-            E.Existencia,
-            M.Nombre AS Marca,
-            P.Descripcion
-        FROM [dbo].[EXISTENCIAS] E
-        JOIN [dbo].[MARCAS] M ON M.Id_Marca = E.Id_Marca
-        JOIN [dbo].[PRODUCTOS] P ON P.Codigo = E.Codigo
-        WHERE Existencia BETWEEN 2 AND 5
-        ORDER BY Existencia ASC
-        OFFSET (@PageNumber - 1) * @PageSize ROWS
-        FETCH NEXT @PageSize ROWS ONLY
-    `,
-    getProductsBetween5And16: `
-        SELECT
-            E.Id_Almacen,
-            E.Codigo,
-            E.Id_Marca,
-            E.Existencia,
-            M.Nombre AS Marca,
-            P.Descripcion
-        FROM [dbo].[EXISTENCIAS] E
-        JOIN [dbo].[MARCAS] M ON M.Id_Marca = E.Id_Marca
-        JOIN [dbo].[PRODUCTOS] P ON P.Codigo = E.Codigo
-        WHERE Existencia BETWEEN 6 AND 15
-        ORDER BY Existencia ASC
-        OFFSET (@PageNumber - 1) * @PageSize ROWS
-        FETCH NEXT @PageSize ROWS ONLY
-    `,
-    getProductsWithMoreThan16: `
-        SELECT
-            E.Id_Almacen,
-            E.Codigo,
-            E.Id_Marca,
-            E.Existencia,
-            M.Nombre AS Marca,
-            P.Descripcion
-        FROM [dbo].[EXISTENCIAS] E
-        JOIN [dbo].[MARCAS] M ON M.Id_Marca = E.Id_Marca
-        JOIN [dbo].[PRODUCTOS] P ON P.Codigo = E.Codigo
-        WHERE Existencia > 15
-        ORDER BY Existencia ASC
-        OFFSET (@PageNumber - 1) * @PageSize ROWS
-        FETCH NEXT @PageSize ROWS ONLY
+        -- Conteo por tabla
+        SELECT 
+            ISNULL(BitacoraCount, 0) AS BitacoraCount,
+            ISNULL(VentasCount, 0) AS VentasCount
+        FROM (
+            SELECT 
+                (SELECT COUNT(*) 
+                FROM dbo.BITACORACRM 
+                WHERE Fecha >= @FechaEspecifica AND Fecha < DATEADD(DAY, 1, @FechaEspecifica)) AS BitacoraCount,
+
+                (SELECT COUNT(*) 
+                FROM dbo.VENTAS 
+                WHERE Fecha >= @FechaEspecifica AND Fecha < DATEADD(DAY, 1, @FechaEspecifica)) AS VentasCount
+        ) AS Counts;
+
+        DECLARE @Hoy DATE = CAST(GETDATE() AS DATE);
+        DECLARE @DiaSemana INT = DATEPART(WEEKDAY, @Hoy); -- 1 = domingo (por default, depende de @@DATEFIRST)
+        DECLARE @FinDeSemana DATE;
+
+        -- Ajustamos el fin de semana según el valor de @DATEFIRST
+        -- Asumiendo @@DATEFIRST = 7 (domingo es 7, lunes es 1)
+        -- Normalizamos a que el domingo sea 7
+        SET @DiaSemana = DATEPART(WEEKDAY, @Hoy);
+        SET @DiaSemana = CASE WHEN @@DATEFIRST = 7 THEN 
+                                CASE WHEN @DiaSemana = 1 THEN 7 ELSE @DiaSemana - 1 END 
+                            ELSE @DiaSemana END;
+
+        -- Calculamos fecha del domingo de esta semana
+        SET @FinDeSemana = DATEADD(DAY, (7 - @DiaSemana), @Hoy);
+
+        -- Query de conteo total y por tabla
+        SELECT 
+            ISNULL(BitacoraCount, 0) AS BitacoraCount,
+            ISNULL(VentasCount, 0) AS VentasCount,
+            @Hoy AS FechaInicio,
+            @FinDeSemana AS FechaFin
+        FROM (
+            SELECT 
+                (SELECT COUNT(*) 
+                FROM dbo.BITACORACRM 
+                WHERE Fecha >= @Hoy AND Fecha < DATEADD(DAY, 1, @FinDeSemana)) AS BitacoraCount,
+
+                (SELECT COUNT(*) 
+                FROM dbo.VENTAS 
+                WHERE Fecha >= @Hoy AND Fecha < DATEADD(DAY, 1, @FinDeSemana)) AS VentasCount
+        ) AS Counts;
     `
 };
 //# sourceMappingURL=statistics.js.map

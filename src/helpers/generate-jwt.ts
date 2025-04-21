@@ -21,7 +21,7 @@ export const generateRefreshToken = (sessionId: string): string => {
 
 /* WEB */
 export const generateAccessTokenWeb = (sessionId: string): string => {
-    return jwt.sign({ sessionId }, 'access_secret', { expiresIn: '15m' });
+    return jwt.sign({ sessionId }, 'access_secret', { expiresIn: '1d' });
 };
 
 export const generateRefreshTokenWeb = (sessionId: string): string => {

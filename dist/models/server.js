@@ -25,6 +25,7 @@ const calendarRouter_1 = __importDefault(require("../routes/calendarRouter"));
 const emailRouter_1 = __importDefault(require("../routes/emailRouter"));
 const reportsRouter_1 = __importDefault(require("../routes/reportsRouter"));
 const almacenesRouter_1 = __importDefault(require("../routes/almacenesRouter"));
+const statisticsRouter_1 = __importDefault(require("../routes/statisticsRouter"));
 const errorHandler_1 = require("../middleware/errorHandler");
 const cookie_parser_1 = __importDefault(require("cookie-parser")); // Asegúrate de importar cookie-parser
 class Server {
@@ -48,7 +49,8 @@ class Server {
             calendar: "/api/calendar",
             email: "/api/email",
             reports: "/api/reports",
-            almacenes: "/api/almacenes"
+            almacenes: "/api/almacenes",
+            statistics: "/api/statistics"
         };
         void this.connectDB();
         this.middlewares();
@@ -101,6 +103,7 @@ class Server {
         this.app.use(this.paths.email, emailRouter_1.default);
         this.app.use(this.paths.reports, reportsRouter_1.default);
         this.app.use(this.paths.almacenes, almacenesRouter_1.default);
+        this.app.use(this.paths.statistics, statisticsRouter_1.default);
     }
     async closeConnections() {
         await (0, connection_1.dbConnectionMain)().then(pool => pool.close()).catch(() => { });
