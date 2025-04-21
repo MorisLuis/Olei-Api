@@ -151,5 +151,6 @@ export {
     getTotalOfProductsByStock,
     getProductByStockAndCodeBar,
     searchProductInventory,
-    searchProductInventoryWithoutCodebar
+    searchProductInventoryWithoutCodebar,
+
 }
