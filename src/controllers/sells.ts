@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from "express"
 import { getSellsService, getSellsByClientService, getSellByIdService, getTotalSellsService, getTotalSellsByClientService } from "../services/sellsDocsServices";
 import { getTotalSellsByClientQuerySchema, getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getSellByIdParamsSchema, getSellsByClientQuerySchema, getCobranzaQuerySchema, getTotalCobranzaQuerySchema } from '../validations/sellsValidations'
 import { z } from "zod";
-import { getCobranzaService, getCobranzaWithTotalsService, getTotalCobranzaService } from "../services/cobranzaService";
+import { getCobranzaByClientService, getCobranzaService, getCobranzaWithTotalsService, getTotalCobranzaService } from "../services/cobranza/cobranzaService";
 
 const getSells = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
@@ -137,6 +137,36 @@ const getTotalSellsByClient = async (req: Request, res: Response, next: NextFunc
 
 /* Cobranza */
 
+const getCobranzaByClient = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+    console.log("getCobranzaByClient")
+    try {
+        // Get session from REDIS.
+        const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaQuerySchema.parse(req.query);
+        const userSession = req.sessionWeb;
+
+
+        const { cobranza } = await getCobranzaByClientService({
+            userSession,
+            PageNumber,
+            SellsOrderCondition: sellsOrderCondition,
+            TipoDoc,
+            FilterTipoDoc,
+            FilterNotExpired,
+            FilterExpired,
+            DateEnd: DateEnd || null,
+            DateExactly: DateExactly || null,
+            DateStart: DateStart || null
+        });
+
+        return res.json({
+            cobranza
+        });
+
+    } catch (error) {
+        return next(error)
+    }
+};
+
 const getCobranza = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -185,7 +215,7 @@ const getTotalCobranza = async (req: Request, res: Response, next: NextFunction)
             DateExactly: DateExactly || null,
             DateStart: DateStart || null,
         })
-        return res.json({total});
+        return res.json({ total });
 
     } catch (error) {
         if (error instanceof z.ZodError) {
@@ -200,14 +230,13 @@ const getCobranzaWithTotals = async (req: Request, res: Response, next: NextFunc
 
     try {
         // Get session from REDIS.
-        const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaQuerySchema.parse(req.query);
+        const { sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaQuerySchema.parse(req.query);
         const { client } = getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
 
         const { brief } = await getCobranzaWithTotalsService({
             userSession,
             Id_Cliente: client,
-            PageNumber,
             SellsOrderCondition: sellsOrderCondition,
             TipoDoc,
             FilterTipoDoc,
@@ -235,6 +264,7 @@ export {
     getTotalSellsByClient,
 
     /* cobranza */
+    getCobranzaByClient,
     getCobranza,
     getTotalCobranza,
     getCobranzaWithTotals

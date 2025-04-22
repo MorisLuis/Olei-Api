@@ -2,6 +2,59 @@
 
 export const cobranzaQuery = {
 
+    getCobranzaByClient: `
+        -- Tabla temporal con nombre y campos amplios
+        DECLARE @Ventas TABLE (
+            Id_Cliente INT,
+            Nombre NVARCHAR(200),
+            ExpiredDays INT,
+            Saldo DECIMAL(18,2)
+        );
+        
+        -- Insertar datos filtrados
+        INSERT INTO @Ventas (Id_Cliente, Nombre, ExpiredDays, Saldo)
+        SELECT
+            V.Id_Cliente,
+            C.RazonSocial AS Nombre,
+            DATEDIFF(DAY, GETDATE(), V.FechaEntrega),
+            V.Saldo
+        FROM [dbo].[VENTAS] V
+        JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = V.Id_Cliente
+        WHERE V.Saldo > 0
+        AND V.FechaLiq >= CAST(GETDATE() AS DATE)
+        AND (@FilterTipoDoc = 0 OR (V.TipoDoc = @TipoDoc AND @FilterTipoDoc = 1))
+        AND (@FilterExpired = 0 OR (DATEDIFF(DAY, GETDATE(), V.FechaEntrega) < 0 AND @FilterExpired = 1))
+        AND (@FilterNotExpired = 0 OR (DATEDIFF(DAY, GETDATE(), V.FechaEntrega) > 0 AND @FilterNotExpired = 1))
+        AND (@DateExactly IS NULL OR CAST(V.Fecha AS DATE) = @DateExactly)
+        AND (@DateStart IS NULL OR CAST(V.Fecha AS DATE) >= @DateStart)
+        AND (@DateEnd IS NULL OR CAST(V.Fecha AS DATE) <= @DateEnd);
+        
+        -- Totales por cliente con valores pre-calculados
+        WITH Totales AS (
+            SELECT 
+                Id_Cliente,
+                Nombre,
+                SUM(CASE WHEN ExpiredDays < 0 THEN Saldo ELSE 0 END) AS SaldoVencido,
+                SUM(CASE WHEN ExpiredDays >= 0 OR ExpiredDays IS NULL THEN Saldo ELSE 0 END) AS SaldoNoVencido,
+                SUM(Saldo) AS TotalSaldo
+            FROM @Ventas
+            GROUP BY Id_Cliente, Nombre
+        )
+        
+        -- Selección final con orden y paginación
+        SELECT *
+        FROM Totales
+        ORDER BY
+            CASE WHEN @OrderCondition = 'Nombre' THEN Nombre END ASC,
+            CASE WHEN @OrderCondition = 'ExpiredDays' THEN SaldoVencido END DESC,
+            CASE WHEN @OrderCondition = 'SaldoVencido' THEN SaldoVencido END DESC,
+            CASE WHEN @OrderCondition = 'SaldoNoVencido' THEN SaldoNoVencido END DESC,
+            CASE WHEN @OrderCondition = 'TotalSaldo' THEN TotalSaldo END DESC,
+            Id_Cliente
+        OFFSET (@PageNumber - 1) * @PageSize ROWS
+        FETCH NEXT @PageSize ROWS ONLY;
+    `,
+
     getCobranza: `
         WITH
             VENTAS_CTE

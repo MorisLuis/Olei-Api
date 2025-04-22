@@ -3,8 +3,8 @@ import nodemailer from 'nodemailer';
 import { emailBodySchema, emailCobranzaBodySchema } from '../validations/emailValidations';
 import { Buffer } from 'buffer';  // Importa Buffer si es necesario
 import { getClientParamsSchema, getCobranzaQuerySchema } from '../validations/sellsValidations';
-import { getAllCobranzaService } from '../services/cobranzaService';
 import generatePDF from '../utils/generatePDF';
+import { getAllCobranzaService } from '../services/cobranza/cobranza.utils';
 
 // Configurar el transporte SMTP
 const transporter = nodemailer.createTransport({

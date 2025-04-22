@@ -56,10 +56,3 @@ export const SellsOrderByClientCondition: SellsOrderConditionByClientType[] = ['
 
 export type SellsFilterConditionByClientType = 'TipoDoc' | 'Expired' | "Not Expired"
 export const SellsFilterCondition: SellsFilterConditionByClientType[] = ['TipoDoc', 'Expired', "Not Expired"]
-
-
-export interface BriefSellsInterface {
-    SaldoVencido: number;
-    SaldoNoVencido: number;
-    TotalSaldo: number;
-}
