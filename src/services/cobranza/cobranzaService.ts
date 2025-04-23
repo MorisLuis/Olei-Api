@@ -2,42 +2,27 @@ import { dbConnectionWeb } from "../../database";
 import { cobranzaQuery } from "../../database/querys/cobranza";
 import { ValidationError } from "../../errors/CustomError";
 import type { SellsInterface } from "../../interface/sells";
-import type { CobranzaInterface, CobranzaInterfaceByClient, GetCobranzaInterface, GetCobranzaParamsWithPagination } from "./cobranza.interface";
+import type { CobranzaInterface, CobranzaInterfaceByClient, GetCobranzaByClientParamsWithPagination, GetCobranzaByClientInterface, GetCobranzaInterface } from "./cobranza.interface";
 
 
-const getCobranzaByClientService = async ({
+const getCobranzaService = async ({
     userSession,
-    FilterTipoDoc,
-    FilterExpired,
-    FilterNotExpired,
     SellsOrderCondition,
-    TipoDoc,
-    DateEnd,
-    DateExactly,
-    DateStart,
     PageSize = 10,
     PageNumber
-}: GetCobranzaParamsWithPagination): Promise<{ cobranza: CobranzaInterfaceByClient[] }> => {
-
+}: GetCobranzaInterface ): Promise<{ cobranza: CobranzaInterfaceByClient[] }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
-    let query = cobranzaQuery.getCobranzaByClient;
+    let query = cobranzaQuery.getCobranza;
 
     const request = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
-        .input('FilterTipoDoc', FilterTipoDoc)
-        .input('FilterExpired', FilterExpired)
-        .input('FilterNotExpired', FilterNotExpired)
         .input('OrderCondition', SellsOrderCondition)
-        .input('DateStart', DateStart)
-        .input('DateEnd', DateEnd)
-        .input('DateExactly', DateExactly)
-        .input('TipoDoc', TipoDoc)
         .query(query);
 
     const recordsets = Array.isArray(request.recordsets) ? request.recordsets : Object.values(request.recordsets);
@@ -49,11 +34,10 @@ const getCobranzaByClientService = async ({
 
 };
 
-const getCobranzaService = async ({
+const getCobranzaByClientService = async ({
     userSession,
     PageNumber,
     PageSize = 10,
-    Id_Cliente,
     SellsOrderCondition,
     FilterTipoDoc,
     FilterExpired,
@@ -61,8 +45,10 @@ const getCobranzaService = async ({
     TipoDoc,
     DateEnd,
     DateExactly,
-    DateStart
-}: GetCobranzaParamsWithPagination): Promise<SellsInterface[]> => {
+    DateStart,
+    Id_Cliente,
+    Id_Almacen
+}: GetCobranzaByClientParamsWithPagination ): Promise<{cobranza : SellsInterface[]}> => {
 
 
     const { ServidorSQL, BaseSQL } = userSession;
@@ -71,11 +57,10 @@ const getCobranzaService = async ({
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
-    let query = cobranzaQuery.getCobranza;
+    let query = cobranzaQuery.getCobranzaByClient;
     const request = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
-        .input('Id_Cliente', Id_Cliente)
         .input('OrderCondition', SellsOrderCondition)
         .input('FilterTipoDoc', FilterTipoDoc)
         .input('FilterExpired', FilterExpired)
@@ -84,10 +69,12 @@ const getCobranzaService = async ({
         .input('DateEnd', DateEnd)
         .input('DateExactly', DateExactly)
         .input('TipoDoc', TipoDoc)
+        .input('Id_Cliente', Id_Cliente)
+        .input('Id_Almacen', Id_Almacen)
         .query(query);
 
-    const sells = request.recordset
-    return sells
+    const cobranza = request.recordset
+    return { cobranza }
 };
 
 const getTotalCobranzaService = async ({
@@ -100,7 +87,7 @@ const getTotalCobranzaService = async ({
     DateEnd,
     DateExactly,
     DateStart
-}: GetCobranzaInterface): Promise<number> => {
+}: GetCobranzaByClientInterface ): Promise<number> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -135,7 +122,7 @@ const getCobranzaWithTotalsService = async ({
     DateEnd,
     DateExactly,
     DateStart
-}: GetCobranzaInterface): Promise<{ brief: CobranzaInterface }> => {
+}: GetCobranzaByClientInterface ): Promise<{ brief: CobranzaInterface }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);

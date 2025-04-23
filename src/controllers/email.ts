@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import nodemailer from 'nodemailer';
 import { emailBodySchema, emailCobranzaBodySchema } from '../validations/emailValidations';
 import { Buffer } from 'buffer';  // Importa Buffer si es necesario
-import { getClientParamsSchema, getCobranzaQuerySchema } from '../validations/sellsValidations';
+import { getClientParamsSchema, getCobranzaByClientQuerySchema } from '../validations/sellsValidations';
 import generatePDF from '../utils/generatePDF';
 import { getAllCobranzaService } from '../services/cobranza/cobranza.utils';
 
@@ -55,7 +55,7 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
 
     const {
         PageNumber,
-        sellsOrderCondition,
+        cobranzaOrderCondition,
         FilterTipoDoc,
         TipoDoc,
         FilterExpired,
@@ -63,7 +63,7 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
         DateEnd,
         DateExactly,
         DateStart
-    } = getCobranzaQuerySchema.parse(req.query);
+    } = getCobranzaByClientQuerySchema.parse(req.query);
 
 
     const { client } = getClientParamsSchema.parse(req.params);
@@ -74,7 +74,7 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
         userSession,
         Id_Cliente: client,
         PageNumber: PageNumber || 1,
-        SellsOrderCondition: sellsOrderCondition,
+        SellsOrderCondition: cobranzaOrderCondition,
         TipoDoc,
         FilterTipoDoc,
         FilterNotExpired,

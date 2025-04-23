@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express"
 import { getSellsService, getSellsByClientService, getSellByIdService, getTotalSellsService, getTotalSellsByClientService } from "../services/sellsDocsServices";
-import { getTotalSellsByClientQuerySchema, getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getSellByIdParamsSchema, getSellsByClientQuerySchema, getCobranzaQuerySchema, getTotalCobranzaQuerySchema } from '../validations/sellsValidations'
+import { getTotalSellsByClientQuerySchema, getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getSellByIdParamsSchema, getSellsByClientQuerySchema, getCobranzaQuerySchema, getTotalCobranzaQuerySchema, getCobranzaByClientQuerySchema } from '../validations/sellsValidations'
 import { z } from "zod";
 import { getCobranzaByClientService, getCobranzaService, getCobranzaWithTotalsService, getTotalCobranzaService } from "../services/cobranza/cobranzaService";
 
@@ -136,26 +136,16 @@ const getTotalSellsByClient = async (req: Request, res: Response, next: NextFunc
 
 
 /* Cobranza */
-
-const getCobranzaByClient = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-    console.log("getCobranzaByClient")
+const getCobranza = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         // Get session from REDIS.
-        const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaQuerySchema.parse(req.query);
+        const { PageNumber, cobranzaOrderCondition } = getCobranzaQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
-
-        const { cobranza } = await getCobranzaByClientService({
+        const { cobranza } = await getCobranzaService({
             userSession,
             PageNumber,
-            SellsOrderCondition: sellsOrderCondition,
-            TipoDoc,
-            FilterTipoDoc,
-            FilterNotExpired,
-            FilterExpired,
-            DateEnd: DateEnd || null,
-            DateExactly: DateExactly || null,
-            DateStart: DateStart || null
+            SellsOrderCondition: cobranzaOrderCondition
         });
 
         return res.json({
@@ -167,19 +157,20 @@ const getCobranzaByClient = async (req: Request, res: Response, next: NextFuncti
     }
 };
 
-const getCobranza = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+const getCobranzaByClient = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         // Get session from REDIS.
-        const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaQuerySchema.parse(req.query);
+        const { Id_Almacen, PageNumber, cobranzaOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaByClientQuerySchema.parse(req.query);
         const { client } = getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
 
-        const sells = await getCobranzaService({
+        const { cobranza } = await getCobranzaByClientService({
+            Id_Almacen,
             userSession,
             Id_Cliente: client,
             PageNumber,
-            SellsOrderCondition: sellsOrderCondition,
+            SellsOrderCondition: cobranzaOrderCondition,
             TipoDoc,
             FilterTipoDoc,
             FilterNotExpired,
@@ -190,7 +181,7 @@ const getCobranza = async (req: Request, res: Response, next: NextFunction): Pro
         });
 
         return res.json({
-            sells
+            cobranza
         });
     } catch (error) {
         return next(error)
@@ -230,14 +221,14 @@ const getCobranzaWithTotals = async (req: Request, res: Response, next: NextFunc
 
     try {
         // Get session from REDIS.
-        const { sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaQuerySchema.parse(req.query);
+        const { cobranzaOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaByClientQuerySchema.parse(req.query);
         const { client } = getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
 
         const { brief } = await getCobranzaWithTotalsService({
             userSession,
             Id_Cliente: client,
-            SellsOrderCondition: sellsOrderCondition,
+            SellsOrderCondition: cobranzaOrderCondition,
             TipoDoc,
             FilterTipoDoc,
             FilterNotExpired,
@@ -254,7 +245,6 @@ const getCobranzaWithTotals = async (req: Request, res: Response, next: NextFunc
         return next(error)
     };
 };
-
 
 export {
     getSells,

@@ -115,6 +115,7 @@ const validateJWTokenServer = async (req, _res, next) => {
     catch (error) {
         return next(new CustomError_1.UnauthorizedError('TOKEN_EXPIRADO', `JWT verification failed: ${error instanceof Error ? error.message : String(error)}`));
     }
+    ;
     // ✅ Todo fine, pasar al siguiente middleware
     return next();
 };

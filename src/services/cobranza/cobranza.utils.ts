@@ -1,9 +1,9 @@
 import type { SellsInterface } from "../../interface/sells";
-import type { CobranzaInterface, GetCobranzaParamsWithPagination } from "./cobranza.interface";
+import type { CobranzaInterface, GetCobranzaByClientParamsWithPagination } from "./cobranza.interface";
 import { getCobranzaService, getCobranzaWithTotalsService } from "./cobranzaService";
 
 
-const getAllCobranzaService = async (params: GetCobranzaParamsWithPagination): Promise<{ sells: SellsInterface[], brief: CobranzaInterface }> => {
+const getAllCobranzaService = async (params: GetCobranzaByClientParamsWithPagination): Promise<{ sells: SellsInterface[], brief: CobranzaInterface }> => {
 
     let allSells: SellsInterface[] = [];
     let pageNumber = params.PageNumber || 1;
@@ -13,10 +13,10 @@ const getAllCobranzaService = async (params: GetCobranzaParamsWithPagination): P
     const { brief } = await getCobranzaWithTotalsService({ ...params });
 
     while (hasMore) {
-        const sells = await getCobranzaService({ ...params, PageNumber: pageNumber, PageSize: pageSize });
+        const { cobranza } = await getCobranzaService({ ...params, PageNumber: pageNumber, PageSize: pageSize });
 
-        if (sells.length > 0) {
-            allSells = allSells.concat(sells);
+        if (cobranza.length > 0) {
+            //allSells = allSells.concat(cobranza);
             pageNumber++;
         } else {
             hasMore = false;

@@ -9,9 +9,9 @@ const getAllCobranzaService = async (params) => {
     let hasMore = true;
     const { brief } = await (0, cobranzaService_1.getCobranzaWithTotalsService)({ ...params });
     while (hasMore) {
-        const sells = await (0, cobranzaService_1.getCobranzaService)({ ...params, PageNumber: pageNumber, PageSize: pageSize });
-        if (sells.length > 0) {
-            allSells = allSells.concat(sells);
+        const { cobranza } = await (0, cobranzaService_1.getCobranzaService)({ ...params, PageNumber: pageNumber, PageSize: pageSize });
+        if (cobranza.length > 0) {
+            //allSells = allSells.concat(cobranza);
             pageNumber++;
         }
         else {

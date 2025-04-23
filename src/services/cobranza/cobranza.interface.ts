@@ -1,4 +1,4 @@
-import type { SellsInterface, SellsOrderConditionType } from "../../interface/sells";
+import type { CobranzaOrderConditionType, SellsInterface, SellsOrderConditionType } from "../../interface/sells";
 import type { UserWebSessionInterface } from "../../interface/user";
 
 type FilterType = 0 | 1;
@@ -7,11 +7,23 @@ interface CobranzaInterface {
     SaldoVencido: number;
     SaldoNoVencido: number;
     TotalSaldo: number;
-}
+};
 
 interface GetCobranzaInterface {
-    userSession: UserWebSessionInterface,
     Id_Cliente?: number,
+    Id_Almacen?: number,
+    
+    userSession: UserWebSessionInterface,
+    SellsOrderCondition?: CobranzaOrderConditionType | string,
+    PageNumber: number;
+    PageSize?: number;  // Hacer PageSize opcional
+};
+
+interface GetCobranzaByClientInterface {
+    Id_Cliente?: number,
+    Id_Almacen?: number,
+    
+    userSession: UserWebSessionInterface,
     TipoDoc: SellsInterface['TipoDoc']
     FilterTipoDoc: FilterType,
     FilterExpired: FilterType,
@@ -23,20 +35,20 @@ interface GetCobranzaInterface {
 };
 
 
-interface GetCobranzaParamsWithPagination extends GetCobranzaInterface {
+interface GetCobranzaByClientParamsWithPagination extends GetCobranzaByClientInterface {
     PageNumber: number;
     PageSize?: number;  // Hacer PageSize opcional
 };
 
 interface CobranzaInterfaceByClient extends CobranzaInterface {
-    PageNumber: number;
-    PageSize?: number;  // Hacer PageSize opcional
+    Nombre: string
 }
 
 
 export {
     CobranzaInterface,
     GetCobranzaInterface,
-    GetCobranzaParamsWithPagination,
+    GetCobranzaByClientInterface,
+    GetCobranzaByClientParamsWithPagination,
     CobranzaInterfaceByClient
 }

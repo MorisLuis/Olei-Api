@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getClientParamsSchema = exports.getTotalSellsByClientQuerySchema = exports.getTotalCobranzaQuerySchema = exports.getCobranzaQuerySchema = exports.getSellsByClientQuerySchema = exports.getSellByIdParamsSchema = exports.getSellByIdQuerySchema = exports.getSellsQuerySchema = void 0;
+exports.getClientParamsSchema = exports.getTotalSellsByClientQuerySchema = exports.getTotalCobranzaQuerySchema = exports.getCobranzaByClientQuerySchema = exports.getCobranzaQuerySchema = exports.getSellsByClientQuerySchema = exports.getSellByIdParamsSchema = exports.getSellByIdQuerySchema = exports.getSellsQuerySchema = void 0;
 const zod_1 = require("zod");
 const sells_1 = require("../interface/sells");
 // getSells
@@ -51,10 +51,19 @@ exports.getSellsByClientQuerySchema = zod_1.z.object({
 exports.getCobranzaQuerySchema = zod_1.z.object({
     PageNumber: zod_1.z.
         preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
-    sellsOrderCondition: zod_1.z
+    cobranzaOrderCondition: zod_1.z
         .string()
         .optional()
-        .refine((val) => val === undefined || sells_1.SellsOrderByClientCondition.includes(val), { message: "sellsOrderCondition debe ser 'TipoDoc', 'Folio', 'Fecha', 'FechaEntrega' o 'ExpiredDays'" }),
+        .refine((val) => val === undefined || sells_1.CobranzaOrderCondition.includes(val), { message: "cobranzaOrderCondition debe ser 'Nombre', 'ExpiredDays', 'SaldoVencido', 'SaldoNoVencido', 'TotalSaldo'" })
+});
+exports.getCobranzaByClientQuerySchema = zod_1.z.object({
+    Id_Almacen: zod_1.z.string().nonempty().transform((val) => (val ? parseInt(val, 10) : 0)),
+    PageNumber: zod_1.z.
+        preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
+    cobranzaOrderCondition: zod_1.z
+        .string()
+        .optional()
+        .refine((val) => val === undefined || sells_1.SellsOrderByClientCondition.includes(val), { message: "cobranzaOrderCondition debe ser 'TipoDoc', 'Folio', 'Fecha', 'FechaEntrega' o 'ExpiredDays'" }),
     TipoDoc: zod_1.z
         .string()
         .optional()
