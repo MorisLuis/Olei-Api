@@ -24,7 +24,7 @@ const getCobranzaService = async ({ userSession, SellsOrderCondition, PageSize =
     };
 };
 exports.getCobranzaService = getCobranzaService;
-const getCobranzaByClientService = async ({ userSession, PageNumber, PageSize = 10, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, Id_Cliente, Id_Almacen }) => {
+const getCobranzaByClientService = async ({ userSession, PageNumber, PageSize = 10, SellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, Id_Cliente, Id_Almacen }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -36,7 +36,7 @@ const getCobranzaByClientService = async ({ userSession, PageNumber, PageSize = 
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
         .input('OrderCondition', SellsOrderCondition)
-        .input('FilterTipoDoc', FilterTipoDoc)
+        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
         .input('FilterExpired', FilterExpired)
         .input('FilterNotExpired', FilterNotExpired)
         .input('DateStart', DateStart)
@@ -50,7 +50,7 @@ const getCobranzaByClientService = async ({ userSession, PageNumber, PageSize = 
     return { cobranza };
 };
 exports.getCobranzaByClientService = getCobranzaByClientService;
-const getTotalCobranzaService = async ({ userSession, Id_Cliente, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
+const getTotalCobranzaService = async ({ userSession, Id_Cliente, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -60,7 +60,7 @@ const getTotalCobranzaService = async ({ userSession, Id_Cliente, FilterTipoDoc,
     let query = cobranza_1.cobranzaQuery.getTotalCobranza;
     const request = await pool.request()
         .input('Id_Cliente', Id_Cliente)
-        .input('FilterTipoDoc', FilterTipoDoc)
+        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
         .input('FilterExpired', FilterExpired)
         .input('FilterNotExpired', FilterNotExpired)
         .input('DateStart', DateStart)
@@ -72,7 +72,7 @@ const getTotalCobranzaService = async ({ userSession, Id_Cliente, FilterTipoDoc,
     return total;
 };
 exports.getTotalCobranzaService = getTotalCobranzaService;
-const getCobranzaWithTotalsService = async ({ userSession, Id_Cliente, FilterTipoDoc, FilterExpired, FilterNotExpired, SellsOrderCondition, TipoDoc, DateEnd, DateExactly, DateStart }) => {
+const getCobranzaWithTotalsService = async ({ userSession, Id_Cliente, FilterExpired, FilterNotExpired, SellsOrderCondition, TipoDoc, DateEnd, DateExactly, DateStart }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -82,7 +82,7 @@ const getCobranzaWithTotalsService = async ({ userSession, Id_Cliente, FilterTip
     let query = cobranza_1.cobranzaQuery.getCobranzaWithTotals;
     const request = await pool.request()
         .input('Id_Cliente', Id_Cliente)
-        .input('FilterTipoDoc', FilterTipoDoc)
+        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
         .input('FilterExpired', FilterExpired)
         .input('FilterNotExpired', FilterNotExpired)
         .input('OrderCondition', SellsOrderCondition)

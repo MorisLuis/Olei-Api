@@ -25,7 +25,6 @@ interface GetCobranzaByClientInterface {
     
     userSession: UserWebSessionInterface,
     TipoDoc: SellsInterface['TipoDoc']
-    FilterTipoDoc: FilterType,
     FilterExpired: FilterType,
     FilterNotExpired: FilterType,
     DateEnd: string | null,

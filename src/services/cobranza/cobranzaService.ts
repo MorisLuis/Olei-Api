@@ -10,7 +10,7 @@ const getCobranzaService = async ({
     SellsOrderCondition,
     PageSize = 10,
     PageNumber
-}: GetCobranzaInterface ): Promise<{ cobranza: CobranzaInterfaceByClient[] }> => {
+}: GetCobranzaInterface): Promise<{ cobranza: CobranzaInterfaceByClient[] }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -39,7 +39,6 @@ const getCobranzaByClientService = async ({
     PageNumber,
     PageSize = 10,
     SellsOrderCondition,
-    FilterTipoDoc,
     FilterExpired,
     FilterNotExpired,
     TipoDoc,
@@ -48,7 +47,7 @@ const getCobranzaByClientService = async ({
     DateStart,
     Id_Cliente,
     Id_Almacen
-}: GetCobranzaByClientParamsWithPagination ): Promise<{cobranza : SellsInterface[]}> => {
+}: GetCobranzaByClientParamsWithPagination): Promise<{ cobranza: SellsInterface[] }> => {
 
 
     const { ServidorSQL, BaseSQL } = userSession;
@@ -62,7 +61,7 @@ const getCobranzaByClientService = async ({
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
         .input('OrderCondition', SellsOrderCondition)
-        .input('FilterTipoDoc', FilterTipoDoc)
+        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
         .input('FilterExpired', FilterExpired)
         .input('FilterNotExpired', FilterNotExpired)
         .input('DateStart', DateStart)
@@ -80,14 +79,13 @@ const getCobranzaByClientService = async ({
 const getTotalCobranzaService = async ({
     userSession,
     Id_Cliente,
-    FilterTipoDoc,
     FilterExpired,
     FilterNotExpired,
     TipoDoc,
     DateEnd,
     DateExactly,
     DateStart
-}: GetCobranzaByClientInterface ): Promise<number> => {
+}: GetCobranzaByClientInterface): Promise<number> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -98,7 +96,7 @@ const getTotalCobranzaService = async ({
     let query = cobranzaQuery.getTotalCobranza;
     const request = await pool.request()
         .input('Id_Cliente', Id_Cliente)
-        .input('FilterTipoDoc', FilterTipoDoc)
+        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
         .input('FilterExpired', FilterExpired)
         .input('FilterNotExpired', FilterNotExpired)
         .input('DateStart', DateStart)
@@ -114,7 +112,6 @@ const getTotalCobranzaService = async ({
 const getCobranzaWithTotalsService = async ({
     userSession,
     Id_Cliente,
-    FilterTipoDoc,
     FilterExpired,
     FilterNotExpired,
     SellsOrderCondition,
@@ -122,7 +119,7 @@ const getCobranzaWithTotalsService = async ({
     DateEnd,
     DateExactly,
     DateStart
-}: GetCobranzaByClientInterface ): Promise<{ brief: CobranzaInterface }> => {
+}: GetCobranzaByClientInterface): Promise<{ brief: CobranzaInterface }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -133,7 +130,7 @@ const getCobranzaWithTotalsService = async ({
 
     const request = await pool.request()
         .input('Id_Cliente', Id_Cliente)
-        .input('FilterTipoDoc', FilterTipoDoc)
+        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
         .input('FilterExpired', FilterExpired)
         .input('FilterNotExpired', FilterNotExpired)
         .input('OrderCondition', SellsOrderCondition)

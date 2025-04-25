@@ -58,7 +58,7 @@ const getSellById = async (req: Request, res: Response, next: NextFunction): Pro
 const getSellsByClient = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const { PageNumber, sellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart } = getSellsByClientQuerySchema.parse(req.query);
+        const { PageNumber, sellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart } = getSellsByClientQuerySchema.parse(req.query);
         const { client } = getClientParamsSchema.parse(req.params);
 
         const userSession = req.sessionWeb;
@@ -68,7 +68,6 @@ const getSellsByClient = async (req: Request, res: Response, next: NextFunction)
             PageNumber,
             SellsOrderCondition: sellsOrderCondition,
             TipoDoc,
-            FilterTipoDoc,
             FilterNotExpired,
             FilterExpired,
             DateEnd: DateEnd || null,
@@ -104,7 +103,6 @@ const getTotalSellsByClient = async (req: Request, res: Response, next: NextFunc
     try {
         const params = getClientParamsSchema.parse(req.params);
         const {
-            FilterTipoDoc,
             FilterExpired,
             FilterNotExpired,
             TipoDoc,
@@ -117,7 +115,6 @@ const getTotalSellsByClient = async (req: Request, res: Response, next: NextFunc
             userSession: req.sessionWeb,
             Id_Cliente: params.client,
             TipoDoc,
-            FilterTipoDoc,
             FilterNotExpired,
             FilterExpired,
             DateEnd: DateEnd || null,
@@ -161,7 +158,7 @@ const getCobranzaByClient = async (req: Request, res: Response, next: NextFuncti
 
     try {
         // Get session from REDIS.
-        const { Id_Almacen, PageNumber, cobranzaOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaByClientQuerySchema.parse(req.query);
+        const { Id_Almacen, PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaByClientQuerySchema.parse(req.query);
         const { client } = getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
 
@@ -172,7 +169,6 @@ const getCobranzaByClient = async (req: Request, res: Response, next: NextFuncti
             PageNumber,
             SellsOrderCondition: cobranzaOrderCondition,
             TipoDoc,
-            FilterTipoDoc,
             FilterNotExpired,
             FilterExpired,
             DateEnd: DateEnd || null,
@@ -191,7 +187,7 @@ const getCobranzaByClient = async (req: Request, res: Response, next: NextFuncti
 const getTotalCobranza = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const { FilterTipoDoc, TipoDoc, FilterNotExpired, FilterExpired, DateEnd, DateExactly, DateStart } = getTotalCobranzaQuerySchema.parse(req.query);
+        const { TipoDoc, FilterNotExpired, FilterExpired, DateEnd, DateExactly, DateStart } = getTotalCobranzaQuerySchema.parse(req.query);
         const { client } = getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
 
@@ -199,7 +195,6 @@ const getTotalCobranza = async (req: Request, res: Response, next: NextFunction)
             Id_Cliente: client,
             userSession,
             TipoDoc,
-            FilterTipoDoc,
             FilterNotExpired,
             FilterExpired,
             DateEnd: DateEnd || null,
@@ -221,7 +216,7 @@ const getCobranzaWithTotals = async (req: Request, res: Response, next: NextFunc
 
     try {
         // Get session from REDIS.
-        const { cobranzaOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaByClientQuerySchema.parse(req.query);
+        const { cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaByClientQuerySchema.parse(req.query);
         const { client } = getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
 
@@ -230,7 +225,6 @@ const getCobranzaWithTotals = async (req: Request, res: Response, next: NextFunc
             Id_Cliente: client,
             SellsOrderCondition: cobranzaOrderCondition,
             TipoDoc,
-            FilterTipoDoc,
             FilterNotExpired,
             FilterExpired,
             DateEnd: DateEnd || null,

@@ -37,7 +37,6 @@ export interface getSellsByClientServiceInterface {
     Id_Cliente: number,
     SellsOrderCondition: SellsOrderConditionType | string,
     TipoDoc?: SellsInterface['TipoDoc']
-    FilterTipoDoc: 0 | 1,
     FilterExpired: 0 | 1,
     FilterNotExpired: 0 | 1,
     DateEnd: string | null,
@@ -50,7 +49,6 @@ const getSellsByClientService = async ({
     PageNumber,
     Id_Cliente,
     SellsOrderCondition,
-    FilterTipoDoc,
     FilterExpired,
     FilterNotExpired,
     TipoDoc,
@@ -71,7 +69,7 @@ const getSellsByClientService = async ({
         .input('PageSize', 10)
         .input('Id_Cliente', Id_Cliente)
         .input('OrderCondition', SellsOrderCondition)
-        .input('FilterTipoDoc', FilterTipoDoc)
+        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
         .input('FilterExpired', FilterExpired)
         .input('FilterNotExpired', FilterNotExpired)
         .input('DateStart', DateStart)
@@ -133,7 +131,6 @@ interface getTotalSellsByClientServiceInterface {
     userSession: UserWebSessionInterface,
     Id_Cliente: number,
     TipoDoc?: SellsInterface['TipoDoc']
-    FilterTipoDoc: 0 | 1,
     FilterExpired: 0 | 1,
     FilterNotExpired: 0 | 1,
     DateEnd: string | null,
@@ -144,7 +141,6 @@ interface getTotalSellsByClientServiceInterface {
 const getTotalSellsByClientService = async ({
     userSession,
     Id_Cliente,
-    FilterTipoDoc,
     FilterExpired,
     FilterNotExpired,
     TipoDoc,
@@ -162,7 +158,7 @@ const getTotalSellsByClientService = async ({
     let query = sellsQuery.getTotalSellsByClient;
     const request = await pool.request()
         .input('Id_Cliente', Id_Cliente)
-        .input('FilterTipoDoc', FilterTipoDoc)
+        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
         .input('FilterExpired', FilterExpired)
         .input('FilterNotExpired', FilterNotExpired)
         .input('DateStart', DateStart)

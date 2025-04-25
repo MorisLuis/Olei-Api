@@ -72,7 +72,7 @@ exports.cobranzaQuery = {
                 WHERE Id_Cliente = @Id_Cliente
                     AND Saldo > 0
                     AND FechaLiq >= CAST(GETDATE() AS DATE) -- Condición para FechaLiq
-                    AND ( @FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1) )
+                    AND (@FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1))
                     AND (@FilterExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) < 0 AND @FilterExpired = 1))
                     AND (@FilterNotExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) > 0 AND @FilterNotExpired = 1))
                     AND (@DateExactly IS NULL OR CAST(Fecha AS DATE) = @DateExactly)

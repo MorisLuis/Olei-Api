@@ -35,7 +35,6 @@ exports.getSellsByClientQuerySchema = zod_1.z.object({
     sellsOrderCondition: zod_1.z
         .string()
         .refine((val) => val === undefined || sells_1.SellsOrderByClientCondition.includes(val), { message: "sellsOrderCondition debe ser 'TipoDoc', 'Folio', 'Fecha', 'FechaEntrega' o 'ExpiredDays'" }),
-    FilterTipoDoc: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterExpired: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterNotExpired: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     TipoDoc: zod_1.z
@@ -69,7 +68,6 @@ exports.getCobranzaByClientQuerySchema = zod_1.z.object({
         .optional()
         .transform((val) => (val ? parseInt(val, 10) : 0)) // Convierte a número
         .refine((val) => sells_1.TipoDoc.includes(val), { message: "TipoDoc debe ser 0, 1 o 2" }),
-    FilterTipoDoc: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterExpired: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterNotExpired: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     DateEnd: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
@@ -77,7 +75,6 @@ exports.getCobranzaByClientQuerySchema = zod_1.z.object({
     DateStart: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional())
 });
 exports.getTotalCobranzaQuerySchema = zod_1.z.object({
-    FilterTipoDoc: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterExpired: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterNotExpired: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     TipoDoc: zod_1.z
@@ -91,7 +88,6 @@ exports.getTotalCobranzaQuerySchema = zod_1.z.object({
 });
 // getTotalSellsByClient
 exports.getTotalSellsByClientQuerySchema = zod_1.z.object({
-    FilterTipoDoc: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterExpired: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterNotExpired: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     TipoDoc: zod_1.z

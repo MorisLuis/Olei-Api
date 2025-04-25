@@ -43,7 +43,7 @@ const sendEmail = async (req, res, next) => {
 exports.sendEmail = sendEmail;
 const sendEmailWithPDF = async (req, res, next) => {
     const { destinatario, remitente, subject, text, nombreRemitente } = emailValidations_1.emailCobranzaBodySchema.parse(req.body);
-    const { PageNumber, cobranzaOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaByClientQuerySchema.parse(req.query);
+    const { PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaByClientQuerySchema.parse(req.query);
     const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
     const userSession = req.sessionWeb;
     const { sells, brief } = await (0, cobranza_utils_1.getAllCobranzaService)({
@@ -52,7 +52,6 @@ const sendEmailWithPDF = async (req, res, next) => {
         PageNumber: PageNumber || 1,
         SellsOrderCondition: cobranzaOrderCondition,
         TipoDoc,
-        FilterTipoDoc,
         FilterNotExpired,
         FilterExpired,
         DateEnd: DateEnd || null,

@@ -49,7 +49,6 @@ export const getSellsByClientQuerySchema = z.object({
                 val === undefined || SellsOrderByClientCondition.includes(val as SellsOrderConditionByClientType),
             { message: "sellsOrderCondition debe ser 'TipoDoc', 'Folio', 'Fecha', 'FechaEntrega' o 'ExpiredDays'" }
         ),
-    FilterTipoDoc: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterNotExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     TipoDoc: z
@@ -109,7 +108,6 @@ export const getCobranzaByClientQuerySchema = z.object({
             (val): val is SellsInterface["TipoDoc"] => TipoDoc.includes(val as typeTipoDoc),
             { message: "TipoDoc debe ser 0, 1 o 2" }
         ),
-    FilterTipoDoc: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterNotExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     DateEnd: z.preprocess(
@@ -128,7 +126,6 @@ export const getCobranzaByClientQuerySchema = z.object({
 
 
 export const getTotalCobranzaQuerySchema = z.object({
-    FilterTipoDoc: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterNotExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     TipoDoc: z
@@ -155,7 +152,6 @@ export const getTotalCobranzaQuerySchema = z.object({
 
 // getTotalSellsByClient
 export const getTotalSellsByClientQuerySchema = z.object({
-    FilterTipoDoc: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterNotExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     TipoDoc: z

@@ -56,7 +56,6 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
     const {
         PageNumber,
         cobranzaOrderCondition,
-        FilterTipoDoc,
         TipoDoc,
         FilterExpired,
         FilterNotExpired,
@@ -76,7 +75,6 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
         PageNumber: PageNumber || 1,
         SellsOrderCondition: cobranzaOrderCondition,
         TipoDoc,
-        FilterTipoDoc,
         FilterNotExpired,
         FilterExpired,
         DateEnd: DateEnd || null,
