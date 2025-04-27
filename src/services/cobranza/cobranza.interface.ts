@@ -14,6 +14,8 @@ interface GetCobranzaInterface {
     Id_Almacen?: number,
     
     userSession: UserWebSessionInterface,
+    termSearch: string;
+
     SellsOrderCondition?: CobranzaOrderConditionType | string,
     PageNumber: number;
     PageSize?: number;  // Hacer PageSize opcional

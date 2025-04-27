@@ -136,13 +136,14 @@ const getTotalSellsByClient = async (req: Request, res: Response, next: NextFunc
 const getCobranza = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         // Get session from REDIS.
-        const { PageNumber, cobranzaOrderCondition } = getCobranzaQuerySchema.parse(req.query);
+        const { PageNumber, cobranzaOrderCondition, termSearch } = getCobranzaQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
         const { cobranza } = await getCobranzaService({
             userSession,
             PageNumber,
-            SellsOrderCondition: cobranzaOrderCondition
+            SellsOrderCondition: cobranzaOrderCondition,
+            termSearch
         });
 
         return res.json({

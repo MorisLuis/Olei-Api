@@ -53,7 +53,8 @@ exports.getCobranzaQuerySchema = zod_1.z.object({
     cobranzaOrderCondition: zod_1.z
         .string()
         .optional()
-        .refine((val) => val === undefined || sells_1.CobranzaOrderCondition.includes(val), { message: "cobranzaOrderCondition debe ser 'Nombre', 'ExpiredDays', 'SaldoVencido', 'SaldoNoVencido', 'TotalSaldo'" })
+        .refine((val) => val === undefined || sells_1.CobranzaOrderCondition.includes(val), { message: "cobranzaOrderCondition debe ser 'Nombre', 'ExpiredDays', 'SaldoVencido', 'SaldoNoVencido', 'TotalSaldo'" }),
+    termSearch: zod_1.z.string().optional().transform(val => val ?? '')
 });
 exports.getCobranzaByClientQuerySchema = zod_1.z.object({
     Id_Almacen: zod_1.z.string().nonempty().transform((val) => (val ? parseInt(val, 10) : 0)),

@@ -3,50 +3,58 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.cobranzaQuery = void 0;
 exports.cobranzaQuery = {
     getCobranza: `
-        DECLARE @Ventas TABLE (
-            Id_Cliente INT,
-            Nombre NVARCHAR(200),
-            Id_Almacen INT,
-            ExpiredDays INT,
-            Saldo DECIMAL(18,2)
-        );
-        
-        -- Insertar datos filtrados
-        INSERT INTO @Ventas (Id_Cliente, Nombre, Id_Almacen, ExpiredDays, Saldo)
-        SELECT
-            V.Id_Cliente,
-            C.RazonSocial AS Nombre,
-            V.Id_Almacen,
-            DATEDIFF(DAY, GETDATE(), V.FechaEntrega),
-            V.Saldo
-        FROM [dbo].[VENTAS] V
-        JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = V.Id_Cliente
-        WHERE V.Saldo > 0
-        AND V.FechaLiq >= CAST(GETDATE() AS DATE);
-        
-        -- Totales por cliente y almacén
-        WITH Totales AS (
-            SELECT 
-                Id_Cliente,
-                Nombre,
-                Id_Almacen,
-                SUM(CASE WHEN ExpiredDays < 0 THEN Saldo ELSE 0 END) AS SaldoVencido,
-                SUM(CASE WHEN ExpiredDays >= 0 OR ExpiredDays IS NULL THEN Saldo ELSE 0 END) AS SaldoNoVencido,
-                SUM(Saldo) AS TotalSaldo
-            FROM @Ventas
-            GROUP BY Id_Cliente, Nombre, Id_Almacen
-        )
-        
-        -- Selección final con orden y paginación
+            DECLARE @Ventas TABLE (
+                Id_Cliente INT,
+                Nombre NVARCHAR(200),
+                Id_Almacen INT,
+                ExpiredDays INT,
+                Saldo DECIMAL(18,2)
+            );
+            
+            -- Insertar datos filtrados
+            INSERT INTO @Ventas (Id_Cliente, Nombre, Id_Almacen, ExpiredDays, Saldo)
+            SELECT
+                V.Id_Cliente,
+                C.RazonSocial AS Nombre,
+                V.Id_Almacen,
+                DATEDIFF(DAY, GETDATE(), V.FechaEntrega),
+                V.Saldo
+            FROM [dbo].[VENTAS] V
+            JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = V.Id_Cliente
+            WHERE V.Saldo > 0
+            AND V.FechaLiq >= CAST(GETDATE() AS DATE)
+            AND LOWER(NOMBRE) LIKE '%' + LOWER(@nombre) + '%';
+            
+            -- Totales por cliente y almacén
+            WITH Totales AS (
+                SELECT 
+                    Id_Cliente,
+                    Nombre,
+                    Id_Almacen,
+                    SUM(CASE WHEN ExpiredDays < 0 THEN Saldo ELSE 0 END) AS SaldoVencido,
+                    SUM(CASE WHEN ExpiredDays >= 0 OR ExpiredDays IS NULL THEN Saldo ELSE 0 END) AS SaldoNoVencido,
+                    SUM(Saldo) AS TotalSaldo
+                FROM @Ventas
+                GROUP BY Id_Cliente, Nombre, Id_Almacen
+            )
+            
+            -- Selección final con orden y paginación
         SELECT *
         FROM Totales
         ORDER BY
-            CASE WHEN @OrderCondition = 'Nombre' THEN Nombre END ASC,
-            CASE WHEN @OrderCondition = 'ExpiredDays' THEN SaldoVencido END DESC,
-            CASE WHEN @OrderCondition = 'SaldoVencido' THEN SaldoVencido END DESC,
-            CASE WHEN @OrderCondition = 'SaldoNoVencido' THEN SaldoNoVencido END DESC,
-            CASE WHEN @OrderCondition = 'TotalSaldo' THEN TotalSaldo END DESC,
-            Id_Cliente
+        -- 👇 Solo prioriza los que empiecen con @nombre si @nombre no es vacío
+        CASE 
+            WHEN @nombre <> '' AND LOWER(Nombre) LIKE LOWER(@nombre) + '%' THEN 0
+            WHEN @nombre <> '' THEN 1
+            ELSE 0
+        END,
+        CASE WHEN @OrderCondition = 'Nombre' THEN Nombre END ASC,
+        CASE WHEN @OrderCondition = 'ExpiredDays' THEN SaldoVencido END DESC,
+        CASE WHEN @OrderCondition = 'SaldoVencido' THEN SaldoVencido END DESC,
+        CASE WHEN @OrderCondition = 'SaldoNoVencido' THEN SaldoNoVencido END DESC,
+        CASE WHEN @OrderCondition = 'TotalSaldo' THEN TotalSaldo END DESC,
+        Id_Cliente,
+        Nombre
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY;
     `,

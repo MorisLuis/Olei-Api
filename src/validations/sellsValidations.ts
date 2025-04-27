@@ -84,7 +84,8 @@ export const getCobranzaQuerySchema = z.object({
             (val): val is CobranzaOrderConditionType =>
                 val === undefined || CobranzaOrderCondition.includes(val as CobranzaOrderConditionType),
             { message: "cobranzaOrderCondition debe ser 'Nombre', 'ExpiredDays', 'SaldoVencido', 'SaldoNoVencido', 'TotalSaldo'" }
-        )
+        ),
+    termSearch: z.string().optional().transform(val => val ?? '')
 });
 
 

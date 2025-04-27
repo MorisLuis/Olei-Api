@@ -4,7 +4,7 @@ exports.getTotalCobranzaService = exports.getCobranzaWithTotalsService = exports
 const database_1 = require("../../database");
 const cobranza_1 = require("../../database/querys/cobranza");
 const CustomError_1 = require("../../errors/CustomError");
-const getCobranzaService = async ({ userSession, SellsOrderCondition, PageSize = 10, PageNumber }) => {
+const getCobranzaService = async ({ userSession, SellsOrderCondition, termSearch, PageSize = 10, PageNumber }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -15,6 +15,7 @@ const getCobranzaService = async ({ userSession, SellsOrderCondition, PageSize =
     const request = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
+        .input('nombre', termSearch)
         .input('OrderCondition', SellsOrderCondition)
         .query(query);
     const recordsets = Array.isArray(request.recordsets) ? request.recordsets : Object.values(request.recordsets);

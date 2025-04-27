@@ -8,6 +8,7 @@ import type { CobranzaInterface, CobranzaInterfaceByClient, GetCobranzaByClientP
 const getCobranzaService = async ({
     userSession,
     SellsOrderCondition,
+    termSearch,
     PageSize = 10,
     PageNumber
 }: GetCobranzaInterface): Promise<{ cobranza: CobranzaInterfaceByClient[] }> => {
@@ -22,6 +23,7 @@ const getCobranzaService = async ({
     const request = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
+        .input('nombre', termSearch)
         .input('OrderCondition', SellsOrderCondition)
         .query(query);
 

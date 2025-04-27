@@ -7,13 +7,14 @@ const getAllCobranzaService = async (params: GetCobranzaByClientParamsWithPagina
 
     let allSells: SellsInterface[] = [];
     let pageNumber = params.PageNumber || 1;
-    const pageSize = params.PageSize || 100;
+    let pageSize = params.PageSize || 100;
+    let termSearch = ''
     let hasMore = true;
 
     const { brief } = await getCobranzaWithTotalsService({ ...params });
 
     while (hasMore) {
-        const { cobranza } = await getCobranzaService({ ...params, PageNumber: pageNumber, PageSize: pageSize });
+        const { cobranza } = await getCobranzaService({ ...params, PageNumber: pageNumber, PageSize: pageSize, termSearch });
 
         if (cobranza.length > 0) {
             //allSells = allSells.concat(cobranza);
