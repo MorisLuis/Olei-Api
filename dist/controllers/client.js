@@ -1,21 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTotalClients = exports.searchClient = exports.selectClient = exports.getClientId = exports.getClients = void 0;
-const clientsServices_1 = require("../services/clientsServices");
+const clientsServices_1 = require("../services/clients/clientsServices");
 const clientValidations_1 = require("../validations/clientValidations");
 const generate_redis_1 = require("../helpers/generate-redis");
 const getClients = async (req, res, next) => {
     try {
-        const { PageNumber, clientOrderCondition } = clientValidations_1.getClientsQuerySchema.parse(req.query);
+        const { PageNumber, clientOrderCondition, searchTerm } = clientValidations_1.getClientsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
-        const clients = await (0, clientsServices_1.getClientsService)({
+        const { clients, total } = await (0, clientsServices_1.getClientsService)({
             userSession,
             PageNumber: PageNumber,
-            OrderCondition: clientOrderCondition
+            OrderCondition: clientOrderCondition,
+            searchTerm
         });
         return res.json({
             ok: true,
-            clients
+            clients,
+            total
         });
     }
     catch (error) {
@@ -26,8 +28,9 @@ const getClients = async (req, res, next) => {
 exports.getClients = getClients;
 const getTotalClients = async (req, res, next) => {
     try {
+        const { searchTerm } = clientValidations_1.getClientsTotalQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
-        const total = await (0, clientsServices_1.getTotalClientsService)(userSession);
+        const total = await (0, clientsServices_1.getTotalClientsService)({ userSession, searchTerm });
         return res.json({ total });
     }
     catch (error) {

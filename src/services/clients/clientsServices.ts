@@ -1,53 +1,56 @@
-import { dbConnectionWeb } from "../database";
-import { clientsQuerys } from "../database/querys/clients";
-import { ValidationError } from "../errors/CustomError";
-import type { ClientInterface } from "../interface/client";
-import type { UserWebSessionInterface } from "../interface/user";
+import { dbConnectionWeb } from "../../database";
+import { clientsQuerys } from "../../database/querys/clients";
+import { ValidationError } from "../../errors/CustomError";
+import type { ClientInterface } from "../../interface/client";
 import sql from 'mssql';
+import type { GetClientsServiceResult, getClientIdInterface, getClientsServiceInterface, getTotalClientsServiceInterface, searchClientServiceInterface } from "./clientsServices.interface";
 
-interface getClientsServiceInterface {
-    PageNumber: number,
-    userSession: UserWebSessionInterface,
-    OrderCondition: string
-};
+
 
 const getClientsService = async ({
     PageNumber,
     userSession,
-    OrderCondition
-}: getClientsServiceInterface): Promise<ClientInterface[]> => {
+    OrderCondition,
+    searchTerm
+}: getClientsServiceInterface): Promise<GetClientsServiceResult> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
-    };
+    }
 
-    let query = clientsQuerys.getClients;
-    const request = await pool.request()
+    const clientsQuery = clientsQuerys.getClients;
+    const totalClientsQuery = clientsQuerys.getTotalClients;
+
+    const requestClients = pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
         .input('OrderCondition', OrderCondition)
-        .query(query);
+        .input('searchTerm', searchTerm)
+        .query(clientsQuery);
 
-    const quotes = request.recordset
+    const requestTotal = pool.request()
+        .input('searchTerm', searchTerm)
+        .query(totalClientsQuery);
 
-    return quotes
-};
+    const [clientsResult, totalResult] = await Promise.all([
+        requestClients,
+        requestTotal
+    ]);
 
-interface getClientIdInterface {
-    userSession: UserWebSessionInterface,
-    Id_Cliente: number,
-    Id_Almacen: number
+    return {
+        clients: clientsResult.recordset,
+        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
+    };
 };
 
 const getClientIdService = async ({
     userSession,
     Id_Cliente,
-    Id_Almacen
+    Id_Almacen,
 }: getClientIdInterface): Promise<ClientInterface> => {
-
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -64,7 +67,10 @@ const getClientIdService = async ({
     return client
 };
 
-const getTotalClientsService = async (userSession: UserWebSessionInterface): Promise<number> => {
+const getTotalClientsService = async ({
+    userSession,
+    searchTerm
+}: getTotalClientsServiceInterface): Promise<number> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -74,22 +80,17 @@ const getTotalClientsService = async (userSession: UserWebSessionInterface): Pro
 
     let query = clientsQuerys.getTotalClients;
     const request = await pool.request()
+        .input('searchTerm', searchTerm)
         .query(query);
 
     const total = request.recordset[0].TotalCount
     return total
 };
 
-interface searchClientServiceInterface {
-    userSession: UserWebSessionInterface;
-    term: string
-};
-
 const searchClientService = async ({
     userSession,
     term
 }: searchClientServiceInterface): Promise<{ clients: ClientInterface[] }> => {
-
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);

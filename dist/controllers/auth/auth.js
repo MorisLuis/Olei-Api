@@ -30,7 +30,6 @@ const loginServer = async (req, res, next) => {
         };
         // Generar un ID de sesión único
         const sessionId = (0, uuid_1.v4)();
-        console.log({ sessionId });
         // Guardar la sesión en Redis con expiración (1 hora)
         await (0, generate_redis_1.generateRedisSession)(sessionId, datosDelUsuario);
         // Generar el token JWT que incluye el sessionId

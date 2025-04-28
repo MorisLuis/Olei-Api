@@ -17,7 +17,6 @@ export const getMeetingsQuerySchema = z.object({
             { message: "meetingOrderCondition debe ser 'Nombre', 'Saldo', 'Total'" }
         ),
 
-    FilterTipoContacto: z.union([z.string(), z.number()]).optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     FilterCliente: z.union([z.string(), z.number()]).optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
 
     TipoContacto: z

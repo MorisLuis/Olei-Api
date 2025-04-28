@@ -10,7 +10,7 @@ const createPool_1 = require("../helpers/createPool");
 const CustomError_1 = require("../errors/CustomError");
 const cobranza_1 = require("../database/querys/cobranza");
 ;
-const reportsCobranzaService = async ({ userSession, PageNumber, Id_Cliente, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, res }) => {
+const reportsCobranzaService = async ({ userSession, PageNumber, Id_Cliente, SellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, res }) => {
     if (!userSession) {
         throw new CustomError_1.UnauthorizedError('Sesion terminada');
     }
@@ -24,7 +24,6 @@ const reportsCobranzaService = async ({ userSession, PageNumber, Id_Cliente, Sel
         PageNumber,
         Id_Cliente,
         SellsOrderCondition,
-        FilterTipoDoc,
         FilterExpired,
         FilterNotExpired,
         TipoDoc,
@@ -36,7 +35,7 @@ const reportsCobranzaService = async ({ userSession, PageNumber, Id_Cliente, Sel
     await generateExcelStream(res, data);
 };
 exports.reportsCobranzaService = reportsCobranzaService;
-const fetchDataInBatches = async ({ pool, Id_Cliente, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
+const fetchDataInBatches = async ({ pool, Id_Cliente, SellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
     let offset = 1;
     let results = [];
     const batchSize = 1000;
@@ -49,7 +48,7 @@ const fetchDataInBatches = async ({ pool, Id_Cliente, SellsOrderCondition, Filte
                 .input('PageSize', batchSize)
                 .input('Id_Cliente', Id_Cliente)
                 .input('OrderCondition', SellsOrderCondition)
-                .input('FilterTipoDoc', FilterTipoDoc)
+                .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
                 .input('FilterExpired', FilterExpired)
                 .input('FilterNotExpired', FilterNotExpired)
                 .input('DateStart', DateStart)

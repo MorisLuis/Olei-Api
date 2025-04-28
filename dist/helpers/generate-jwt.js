@@ -23,7 +23,7 @@ const generateRefreshToken = (sessionId) => {
 exports.generateRefreshToken = generateRefreshToken;
 /* WEB */
 const generateAccessTokenWeb = (sessionId) => {
-    return jsonwebtoken_1.default.sign({ sessionId }, 'access_secret', { expiresIn: '15m' });
+    return jsonwebtoken_1.default.sign({ sessionId }, 'access_secret', { expiresIn: '1d' });
 };
 exports.generateAccessTokenWeb = generateAccessTokenWeb;
 const generateRefreshTokenWeb = (sessionId) => {

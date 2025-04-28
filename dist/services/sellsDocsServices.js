@@ -22,7 +22,7 @@ const getSellsService = async (userSession, PageNumber, SellsOrderCondition) => 
 };
 exports.getSellsService = getSellsService;
 ;
-const getSellsByClientService = async ({ userSession, PageNumber, Id_Cliente, SellsOrderCondition, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
+const getSellsByClientService = async ({ userSession, PageNumber, Id_Cliente, SellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -35,7 +35,7 @@ const getSellsByClientService = async ({ userSession, PageNumber, Id_Cliente, Se
         .input('PageSize', 10)
         .input('Id_Cliente', Id_Cliente)
         .input('OrderCondition', SellsOrderCondition)
-        .input('FilterTipoDoc', FilterTipoDoc)
+        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
         .input('FilterExpired', FilterExpired)
         .input('FilterNotExpired', FilterNotExpired)
         .input('DateStart', DateStart)
@@ -81,7 +81,7 @@ const getTotalSellsService = async (userSession) => {
 };
 exports.getTotalSellsService = getTotalSellsService;
 ;
-const getTotalSellsByClientService = async ({ userSession, Id_Cliente, FilterTipoDoc, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
+const getTotalSellsByClientService = async ({ userSession, Id_Cliente, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -91,7 +91,7 @@ const getTotalSellsByClientService = async ({ userSession, Id_Cliente, FilterTip
     let query = sells_1.sellsQuery.getTotalSellsByClient;
     const request = await pool.request()
         .input('Id_Cliente', Id_Cliente)
-        .input('FilterTipoDoc', FilterTipoDoc)
+        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
         .input('FilterExpired', FilterExpired)
         .input('FilterNotExpired', FilterNotExpired)
         .input('DateStart', DateStart)

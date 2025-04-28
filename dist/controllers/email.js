@@ -8,8 +8,8 @@ const nodemailer_1 = __importDefault(require("nodemailer"));
 const emailValidations_1 = require("../validations/emailValidations");
 const buffer_1 = require("buffer"); // Importa Buffer si es necesario
 const sellsValidations_1 = require("../validations/sellsValidations");
-const cobranzaService_1 = require("../services/cobranzaService");
 const generatePDF_1 = __importDefault(require("../utils/generatePDF"));
+const cobranza_utils_1 = require("../services/cobranza/cobranza.utils");
 // Configurar el transporte SMTP
 const transporter = nodemailer_1.default.createTransport({
     host: 'smtp.gmail.com',
@@ -43,16 +43,15 @@ const sendEmail = async (req, res, next) => {
 exports.sendEmail = sendEmail;
 const sendEmailWithPDF = async (req, res, next) => {
     const { destinatario, remitente, subject, text, nombreRemitente } = emailValidations_1.emailCobranzaBodySchema.parse(req.body);
-    const { PageNumber, sellsOrderCondition, FilterTipoDoc, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaQuerySchema.parse(req.query);
+    const { PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaByClientQuerySchema.parse(req.query);
     const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
     const userSession = req.sessionWeb;
-    const { sells, brief } = await (0, cobranzaService_1.getAllCobranzaService)({
+    const { sells, brief } = await (0, cobranza_utils_1.getAllCobranzaService)({
         userSession,
         Id_Cliente: client,
         PageNumber: PageNumber || 1,
-        SellsOrderCondition: sellsOrderCondition,
+        SellsOrderCondition: cobranzaOrderCondition,
         TipoDoc,
-        FilterTipoDoc,
         FilterNotExpired,
         FilterExpired,
         DateEnd: DateEnd || null,

@@ -14,7 +14,6 @@ interface reportsCobranzaServiceInterface {
     Id_Cliente: number,
     SellsOrderCondition: SellsOrderConditionType | string,
     TipoDoc?: SellsInterface['TipoDoc']
-    FilterTipoDoc: 0 | 1,
     FilterExpired: 0 | 1,
     FilterNotExpired: 0 | 1,
     DateEnd: string | null,
@@ -28,7 +27,6 @@ const reportsCobranzaService = async ({
     PageNumber,
     Id_Cliente,
     SellsOrderCondition,
-    FilterTipoDoc,
     FilterExpired,
     FilterNotExpired,
     TipoDoc,
@@ -55,7 +53,6 @@ const reportsCobranzaService = async ({
         PageNumber,
         Id_Cliente,
         SellsOrderCondition,
-        FilterTipoDoc,
         FilterExpired,
         FilterNotExpired,
         TipoDoc,
@@ -77,7 +74,6 @@ const fetchDataInBatches = async ({
     pool,
     Id_Cliente,
     SellsOrderCondition,
-    FilterTipoDoc,
     FilterExpired,
     FilterNotExpired,
     TipoDoc,
@@ -100,7 +96,7 @@ const fetchDataInBatches = async ({
                 .input('PageSize', batchSize)
                 .input('Id_Cliente', Id_Cliente)
                 .input('OrderCondition', SellsOrderCondition)
-                .input('FilterTipoDoc', FilterTipoDoc)
+                .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
                 .input('FilterExpired', FilterExpired)
                 .input('FilterNotExpired', FilterNotExpired)
                 .input('DateStart', DateStart)

@@ -3,27 +3,36 @@ export const sellsQuery = {
 
     // Quote, Remission or Invoice.
     getSells: `
-        SELECT
+        WITH CTE_Result AS (
+            SELECT
             C.Id_Cliente,
-            MAX(C.Nombre) AS Nombre, -- Usamos MAX ya que no agrupamos por Nombre
-            MAX(C.Id_Almacen) AS Id_Almacen, -- Si necesitas un almacén asociado
-            MIN(CONCAT(C.Id_Almacen, '-', C.Id_Cliente, '-', V.TipoDoc, '-', TRIM(V.Serie), '-', V.Folio)) AS UniqueKey, -- Una sola clave única
+            MAX(C.Nombre) AS Nombre,
+            MAX(C.Id_Almacen) AS Id_Almacen,
+            MIN(CONCAT(C.Id_Almacen, '-', C.Id_Cliente, '-', V.TipoDoc, '-', TRIM(V.Serie), '-', V.Folio)) AS UniqueKey,
             SUM(V.Saldo) AS Saldo,
             SUM(V.Total) AS Total
-        FROM [dbo].[CLIENTES] AS C
-        INNER JOIN [dbo].[VENTAS] AS V 
+            FROM [dbo].[CLIENTES] AS C
+            INNER JOIN [dbo].[VENTAS] AS V 
             ON C.Id_Cliente = V.Id_Cliente AND C.Id_Almacen = V.Id_Almacen
-        WHERE V.Saldo > 0
-        GROUP BY 
+            WHERE V.Saldo > 0 
+            AND C.Nombre LIKE '%' + @searchTerm + '%'
+            GROUP BY 
             C.Id_Cliente,
             C.Id_Almacen
+        )
+        SELECT *
+        FROM CTE_Result
         ORDER BY 
-            CASE WHEN @OrderCondition = 'Total' THEN SUM(V.Total) END DESC,
-            CASE WHEN @OrderCondition = 'Saldo' THEN SUM(V.Saldo) END DESC,
-            CASE WHEN @OrderCondition = 'Nombre' THEN MAX(C.Nombre) END,
-            C.Id_Cliente
+            CASE WHEN @searchTerm <> '' AND LOWER(Nombre) LIKE LOWER(@searchTerm) + '%' THEN 0
+                WHEN @searchTerm <> '' THEN 1
+                ELSE 0
+            END,
+            CASE WHEN @OrderCondition = 'Total' THEN Total END DESC,
+            CASE WHEN @OrderCondition = 'Saldo' THEN Saldo END DESC,
+            CASE WHEN @OrderCondition = 'Nombre' THEN Nombre END,
+            Id_Cliente
         OFFSET (@PageNumber - 1) * @PageSize ROWS
-        FETCH NEXT @PageSize ROWS ONLY
+        FETCH NEXT @PageSize ROWS ONLY;
     `,
 
     getTotalSells: `
@@ -34,7 +43,8 @@ export const sellsQuery = {
             FROM [dbo].[CLIENTES] AS C
             INNER JOIN [dbo].[VENTAS] AS V 
                 ON C.Id_Cliente = V.Id_Cliente AND C.Id_Almacen = V.Id_Almacen
-            WHERE V.Saldo > 0
+            WHERE V.Saldo > 0 
+            AND C.Nombre LIKE '%' + @searchTerm + '%'
             GROUP BY
                 C.Id_Cliente,
                 C.Id_Almacen

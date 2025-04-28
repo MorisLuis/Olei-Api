@@ -9,7 +9,7 @@ const bitacora_1 = require("../database/querys/bitacora");
 const CustomError_1 = require("../errors/CustomError");
 const meeting_1 = require("../interface/meeting");
 const mssql_1 = __importDefault(require("mssql"));
-const getMeetingsService = async ({ userSession, PageNumber, Id_Cliente, TipoContacto, MeetingOrderCondition, FilterCliente, FilterTipoContacto }) => {
+const getMeetingsService = async ({ userSession, PageNumber, Id_Cliente, TipoContacto, MeetingOrderCondition, FilterCliente }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -20,21 +20,31 @@ const getMeetingsService = async ({ userSession, PageNumber, Id_Cliente, TipoCon
         throw new CustomError_1.ValidationError('Es necesario un Id_Cliente.');
     }
     ;
-    if (FilterTipoContacto === 1 && !TipoContacto) {
-        throw new CustomError_1.ValidationError('Es necesario un TipoContacto.');
-    }
-    let query = bitacora_1.bitacoraQuerys.getMeetings;
+    const query = bitacora_1.bitacoraQuerys.getMeetings;
+    const totalMeetingsQuery = bitacora_1.bitacoraQuerys.getTotalMeetings;
     const request = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
         .input('Id_Cliente', Id_Cliente)
         .input('TipoContacto', TipoContacto)
         .input('OrderCondition', MeetingOrderCondition)
-        .input('FilterTipoContacto', FilterTipoContacto)
+        .input('FilterTipoContacto', TipoContacto === 0 ? 0 : 1)
         .input('FilterCliente', FilterCliente)
         .query(query);
-    const quotes = request.recordset;
-    return quotes;
+    const requestTotal = await pool.request()
+        .input('Id_Cliente', Id_Cliente)
+        .input('TipoContacto', TipoContacto)
+        .input('FilterTipoContacto', TipoContacto === 0 ? 0 : 1)
+        .input('FilterCliente', FilterCliente)
+        .query(totalMeetingsQuery);
+    const [meetingsResult, totalResult] = await Promise.all([
+        request,
+        requestTotal
+    ]);
+    return {
+        meetings: meetingsResult.recordset,
+        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
+    };
 };
 exports.getMeetingsService = getMeetingsService;
 ;

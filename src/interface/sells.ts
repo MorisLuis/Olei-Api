@@ -49,7 +49,7 @@ export type typeTipoDoc = 0 | 1 | 2 | 3 | 4 | 6;
 export const TipoDoc: typeTipoDoc[] = [0, 1, 2, 3, 4];
 
 export type SellsOrderConditionType = 'Nombre' | 'Saldo' | 'Total';
-export const SellsOrderCondition: SellsOrderConditionType[] = ['Nombre', 'Saldo', 'Total']
+export const SellsOrderCondition: SellsOrderConditionType[] = ['Nombre', 'Saldo', 'Total'];
 
 export type SellsOrderConditionByClientType = 'TipoDoc' | 'Folio' | 'Fecha' | 'FechaEntrega' | 'ExpiredDays';
 export const SellsOrderByClientCondition: SellsOrderConditionByClientType[] = ['TipoDoc', 'Folio', 'Fecha', 'FechaEntrega', 'ExpiredDays']
@@ -58,8 +58,6 @@ export type SellsFilterConditionByClientType = 'TipoDoc' | 'Expired' | "Not Expi
 export const SellsFilterCondition: SellsFilterConditionByClientType[] = ['TipoDoc', 'Expired', "Not Expired"]
 
 
-export interface BriefSellsInterface {
-    SaldoVencido: number;
-    SaldoNoVencido: number;
-    TotalSaldo: number;
-}
+/* COBRANZA */
+export type CobranzaOrderConditionType = 'Nombre' | 'ExpiredDays' | 'SaldoVencido' | 'SaldoNoVencido' | 'TotalSaldo';
+export const CobranzaOrderCondition: CobranzaOrderConditionType[] = ['Nombre', 'ExpiredDays', 'SaldoVencido', 'SaldoNoVencido', 'TotalSaldo']

@@ -117,8 +117,7 @@ const validateJWTokenServer = async (req: Request, _res: Response, next: NextFun
             'TOKEN_EXPIRADO',
             `JWT verification failed: ${error instanceof Error ? error.message : String(error)}`
         ));
-
-    }
+    };
 
     // ✅ Todo fine, pasar al siguiente middleware
     return next();

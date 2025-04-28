@@ -1,7 +1,7 @@
 import { dbConnectionWeb } from "../database";
 import { bitacoraQuerys } from "../database/querys/bitacora";
 import { ValidationError } from "../errors/CustomError";
-import type { MeetingOrderConditionType} from "../interface/meeting";
+import type { MeetingOrderConditionType } from "../interface/meeting";
 import type MeetingInterface from "../interface/meeting";
 import { validTipoContacto } from "../interface/meeting";
 import type { UserWebSessionInterface } from "../interface/user";
@@ -13,8 +13,7 @@ interface getMeetingsServiceInterface {
     Id_Cliente: number,
     TipoContacto: number,
     MeetingOrderCondition: MeetingOrderConditionType | string,
-    FilterCliente: 0 | 1,
-    FilterTipoContacto: 0 | 1,
+    FilterCliente: 0 | 1
 }
 
 const getMeetingsService = async ({
@@ -23,9 +22,8 @@ const getMeetingsService = async ({
     Id_Cliente,
     TipoContacto,
     MeetingOrderCondition,
-    FilterCliente,
-    FilterTipoContacto
-}: getMeetingsServiceInterface): Promise<MeetingInterface[]> => {
+    FilterCliente
+}: getMeetingsServiceInterface): Promise<{ meetings: MeetingInterface[], total: number }> => {
 
 
     const { ServidorSQL, BaseSQL } = userSession;
@@ -39,25 +37,36 @@ const getMeetingsService = async ({
         throw new ValidationError('Es necesario un Id_Cliente.')
     };
 
-    if (FilterTipoContacto === 1 && !TipoContacto) {
-        throw new ValidationError('Es necesario un TipoContacto.')
-    }
 
-    let query = bitacoraQuerys.getMeetings;
+    const query = bitacoraQuerys.getMeetings;
+    const totalMeetingsQuery = bitacoraQuerys.getTotalMeetings;
+
     const request = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
         .input('Id_Cliente', Id_Cliente)
         .input('TipoContacto', TipoContacto)
         .input('OrderCondition', MeetingOrderCondition)
-        .input('FilterTipoContacto', FilterTipoContacto)
+        .input('FilterTipoContacto', TipoContacto === 0 ? 0 : 1)
         .input('FilterCliente', FilterCliente)
         .query(query);
 
-    const quotes = request.recordset;
+    const requestTotal = await pool.request()
+        .input('Id_Cliente', Id_Cliente)
+        .input('TipoContacto', TipoContacto)
+        .input('FilterTipoContacto', TipoContacto === 0 ? 0 : 1)
+        .input('FilterCliente', FilterCliente)
+        .query(totalMeetingsQuery);
 
+    const [meetingsResult, totalResult] = await Promise.all([
+        request,
+        requestTotal
+    ]);
 
-    return quotes
+    return {
+        meetings: meetingsResult.recordset,
+        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
+    };
 };
 
 
