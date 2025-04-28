@@ -1,24 +1,26 @@
 import type { NextFunction, Request, Response } from 'express';
 import type { UserWebSessionInterface } from '../interface/user';
-import { getClientIdService, getClientsService, getTotalClientsService, searchClientService } from '../services/clientsServices';
-import { getClientIdQuerySchema, getClientsQuerySchema, searchClientQuerySchema, selectClientBodySchema } from '../validations/clientValidations';
+import { getClientIdService, getClientsService, getTotalClientsService, searchClientService } from '../services/clients/clientsServices';
+import { getClientIdQuerySchema, getClientsQuerySchema, getClientsTotalQuerySchema, searchClientQuerySchema, selectClientBodySchema } from '../validations/clientValidations';
 import { updateWebSession } from '../helpers/generate-redis';
 
 const getClients = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const { PageNumber, clientOrderCondition } = getClientsQuerySchema.parse(req.query);
+        const { PageNumber, clientOrderCondition, searchTerm } = getClientsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
-        const clients = await getClientsService({
+        const { clients, total } = await getClientsService({
             userSession,
             PageNumber: PageNumber,
-            OrderCondition: clientOrderCondition
+            OrderCondition: clientOrderCondition,
+            searchTerm
         });
 
         return res.json({
             ok: true,
-            clients
+            clients,
+            total
         });
     } catch (error) {
         return next(error);
@@ -29,8 +31,9 @@ const getClients = async (req: Request, res: Response, next: NextFunction): Prom
 const getTotalClients = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
+        const { searchTerm } = getClientsTotalQuerySchema.parse(req.query)
         const userSession = req.sessionWeb;
-        const total = await getTotalClientsService(userSession);
+        const total = await getTotalClientsService({ userSession, searchTerm });
         return res.json({ total });
     } catch (error) {
         return next(error);

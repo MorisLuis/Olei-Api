@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchClientQuerySchema = exports.selectClientBodySchema = exports.getClientIdQuerySchema = exports.getClientsQuerySchema = void 0;
+exports.searchClientQuerySchema = exports.selectClientBodySchema = exports.getClientIdQuerySchema = exports.getClientsTotalQuerySchema = exports.getClientsQuerySchema = void 0;
 const zod_1 = require("zod");
 const client_1 = require("../interface/client");
 exports.getClientsQuerySchema = zod_1.z.object({
@@ -10,7 +10,11 @@ exports.getClientsQuerySchema = zod_1.z.object({
     clientOrderCondition: zod_1.z
         .string()
         .optional()
-        .refine((val) => val === undefined || client_1.ClientOrderCondition.includes(val), { message: "sellsOrderCondition debe ser 'Nombre', 'Id_Cliente'" })
+        .refine((val) => val === undefined || client_1.ClientOrderCondition.includes(val), { message: "sellsOrderCondition debe ser 'Nombre', 'Id_Cliente'" }),
+    searchTerm: zod_1.z.preprocess((val) => (val === undefined ? '' : val), zod_1.z.string())
+});
+exports.getClientsTotalQuerySchema = zod_1.z.object({
+    searchTerm: zod_1.z.preprocess((val) => (val === undefined ? '' : val), zod_1.z.string())
 });
 exports.getClientIdQuerySchema = zod_1.z.object({
     Id_Almacen: zod_1.z

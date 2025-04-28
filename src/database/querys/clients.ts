@@ -10,7 +10,14 @@ export const clientsQuerys = {
             Telefono1, 
             CorreoVtas
         FROM [dbo].[CLIENTES]
+        WHERE Nombre LIKE '%' + @searchTerm + '%' 
         ORDER BY 
+        -- 👇 Solo prioriza los que empiecen con @searchTerm si @searchTerm no es vacío
+        CASE 
+            WHEN @searchTerm <> '' AND LOWER(Nombre) LIKE LOWER(@searchTerm) + '%' THEN 0
+            WHEN @searchTerm <> '' THEN 1
+            ELSE 0
+        END,
             CASE WHEN @OrderCondition = 'Id_Cliente' THEN Id_Cliente END,
             CASE WHEN @OrderCondition = 'Nombre' THEN Nombre END,
             Id_Cliente
@@ -21,6 +28,7 @@ export const clientsQuerys = {
     getTotalClients: `
         SELECT COUNT(*) AS TotalCount
         FROM [dbo].[CLIENTES]
+        WHERE Nombre LIKE '%' + @searchTerm + '%'
     `,
 
     getClientId: ` 

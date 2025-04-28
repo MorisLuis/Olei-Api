@@ -44,7 +44,10 @@ const getSellById = async (req, res, next) => {
 exports.getSellById = getSellById;
 const getSellsByClient = async (req, res, next) => {
     try {
+        console.log({ req: req.params });
+        console.log({ body: req.query });
         const { PageNumber, sellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart } = sellsValidations_1.getSellsByClientQuerySchema.parse(req.query);
+        console.log({ PageNumber, sellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart });
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
         const sells = await (0, sellsDocsServices_1.getSellsByClientService)({
@@ -64,12 +67,7 @@ const getSellsByClient = async (req, res, next) => {
         });
     }
     catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
-            return res.status(400).json({ message: "Validation error", errors: error.errors });
-        }
-        else {
-            return next(error);
-        }
+        return next(error);
     }
 };
 exports.getSellsByClient = getSellsByClient;

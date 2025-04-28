@@ -15,8 +15,14 @@ export const getClientsQuerySchema = z.object({
             (val): val is ClientOrderConditionType =>
                 val === undefined || ClientOrderCondition.includes(val as ClientOrderConditionType),
             { message: "sellsOrderCondition debe ser 'Nombre', 'Id_Cliente'" }
-        )
+        ),
+    searchTerm: z.preprocess((val) => (val === undefined ? '' : val), z.string())
 });
+
+export const getClientsTotalQuerySchema = z.object({
+    searchTerm: z.preprocess((val) => (val === undefined ? '' : val), z.string())
+});
+
 
 
 export const getClientIdQuerySchema = z.object({

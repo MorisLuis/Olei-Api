@@ -58,7 +58,11 @@ const getSellById = async (req: Request, res: Response, next: NextFunction): Pro
 const getSellsByClient = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
+        console.log({req: req.params})
+        console.log({body: req.query})
+
         const { PageNumber, sellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart } = getSellsByClientQuerySchema.parse(req.query);
+        console.log({PageNumber, sellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart})
         const { client } = getClientParamsSchema.parse(req.params);
 
         const userSession = req.sessionWeb;
@@ -79,11 +83,7 @@ const getSellsByClient = async (req: Request, res: Response, next: NextFunction)
             sells
         });
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            return res.status(400).json({ message: "Validation error", errors: error.errors });
-        } else {
-            return next(error);
-        }
+        return next(error);
     }
 };
 
