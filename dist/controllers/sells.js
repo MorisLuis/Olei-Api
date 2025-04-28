@@ -133,7 +133,7 @@ const getCobranzaByClient = async (req, res, next) => {
         const { Id_Almacen, PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaByClientQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
-        const { cobranza } = await (0, cobranzaService_1.getCobranzaByClientService)({
+        const { cobranza, total } = await (0, cobranzaService_1.getCobranzaByClientService)({
             Id_Almacen,
             userSession,
             Id_Cliente: client,
@@ -147,7 +147,8 @@ const getCobranzaByClient = async (req, res, next) => {
             DateStart: DateStart || null
         });
         return res.json({
-            cobranza
+            cobranza,
+            total
         });
     }
     catch (error) {

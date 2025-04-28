@@ -166,7 +166,7 @@ const getCobranzaByClient = async (req: Request, res: Response, next: NextFuncti
         const { client } = getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
 
-        const { cobranza } = await getCobranzaByClientService({
+        const { cobranza, total } = await getCobranzaByClientService({
             Id_Almacen,
             userSession,
             Id_Cliente: client,
@@ -181,7 +181,8 @@ const getCobranzaByClient = async (req: Request, res: Response, next: NextFuncti
         });
 
         return res.json({
-            cobranza
+            cobranza,
+            total
         });
     } catch (error) {
         return next(error)

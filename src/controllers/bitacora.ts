@@ -6,21 +6,21 @@ import { getMeetingByIdParmsSchema, getMeetingsQuerySchema, getTotalMeetingsQuer
 const getMeetings = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const { PageNumber, meetingOrderCondition, FilterCliente, TipoContacto, Id_Cliente, FilterTipoContacto } = getMeetingsQuerySchema.parse(req.query);
+        const { PageNumber, meetingOrderCondition, FilterCliente, TipoContacto, Id_Cliente } = getMeetingsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
-        const meetings = await getMeetingsService({
+        const { meetings, total } = await getMeetingsService({
             PageNumber,
             userSession,
             MeetingOrderCondition: meetingOrderCondition,
-            FilterTipoContacto: FilterTipoContacto,
             TipoContacto: TipoContacto,
             Id_Cliente: Id_Cliente ?? 0,
             FilterCliente: FilterCliente
         });
 
         return res.json({
-            meetings
+            meetings,
+            total
         });
     } catch (error) {
         return next(error)

@@ -58,7 +58,7 @@ const getCobranzaByClientService = async ({
     DateStart,
     Id_Cliente,
     Id_Almacen
-}: GetCobranzaByClientParamsWithPagination): Promise<{ cobranza: SellsInterface[] }> => {
+}: GetCobranzaByClientParamsWithPagination): Promise<{ cobranza: SellsInterface[], total: number }> => {
 
 
     const { ServidorSQL, BaseSQL } = userSession;
@@ -68,6 +68,8 @@ const getCobranzaByClientService = async ({
     };
 
     let query = cobranzaQuery.getCobranzaByClient;
+    const totalCobranzaByClientQuery = cobranzaQuery.getTotalCobranzaByClient;
+
     const request = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
@@ -83,8 +85,27 @@ const getCobranzaByClientService = async ({
         .input('Id_Almacen', Id_Almacen)
         .query(query);
 
-    const cobranza = request.recordset
-    return { cobranza }
+    const requestTotal = await pool.request()
+        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
+        .input('FilterExpired', FilterExpired)
+        .input('FilterNotExpired', FilterNotExpired)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
+        .input('TipoDoc', TipoDoc)
+        .input('Id_Cliente', Id_Cliente)
+        .input('Id_Almacen', Id_Almacen)
+        .query(totalCobranzaByClientQuery);
+
+    const [sellsResult, totalResult] = await Promise.all([
+        request,
+        requestTotal
+    ]);
+
+    return {
+        cobranza: sellsResult.recordset,
+        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
+    }
 };
 
 const getTotalCobranzaService = async ({
