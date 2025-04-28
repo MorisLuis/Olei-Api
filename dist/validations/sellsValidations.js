@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getClientParamsSchema = exports.getTotalSellsByClientQuerySchema = exports.getTotalCobranzaQuerySchema = exports.getCobranzaByClientQuerySchema = exports.getCobranzaQuerySchema = exports.getSellsByClientQuerySchema = exports.getSellByIdParamsSchema = exports.getSellByIdQuerySchema = exports.getSellsQuerySchema = void 0;
+exports.getClientParamsSchema = exports.getTotalSellsByClientQuerySchema = exports.getTotalCobranzaQuerySchema = exports.getCobranzaByClientQuerySchema = exports.getCobranzaQuerySchema = exports.getSellsByClientQuerySchema = exports.getSellByIdParamsSchema = exports.getSellByIdQuerySchema = exports.getTotalSellsQuerySchema = exports.getSellsQuerySchema = void 0;
 const zod_1 = require("zod");
 const sells_1 = require("../interface/sells");
 // getSells
@@ -10,7 +10,11 @@ exports.getSellsQuerySchema = zod_1.z.object({
     sellsOrderCondition: zod_1.z
         .string()
         .optional()
-        .refine((val) => val === undefined || sells_1.SellsOrderCondition.includes(val), { message: "sellsOrderCondition debe ser 'Cliente', 'Fecha', 'TipoContacto'" })
+        .refine((val) => val === undefined || sells_1.SellsOrderCondition.includes(val), { message: "sellsOrderCondition debe ser 'Cliente', 'Fecha', 'TipoContacto'" }),
+    searchTerm: zod_1.z.preprocess((val) => (val === undefined ? '' : val), zod_1.z.string())
+});
+exports.getTotalSellsQuerySchema = zod_1.z.object({
+    searchTerm: zod_1.z.preprocess((val) => (val === undefined ? '' : val), zod_1.z.string())
 });
 // getSellById
 exports.getSellByIdQuerySchema = zod_1.z.object({

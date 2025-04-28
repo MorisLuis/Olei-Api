@@ -13,8 +13,15 @@ export const getSellsQuerySchema = z.object({
             (val): val is SellsOrderConditionType =>
                 val === undefined || SellsOrderCondition.includes(val as SellsOrderConditionType),
             { message: "sellsOrderCondition debe ser 'Cliente', 'Fecha', 'TipoContacto'" }
-        )
+        ),
+    searchTerm: z.preprocess((val) => (val === undefined ? '' : val), z.string())
+});
+
+export const getTotalSellsQuerySchema = z.object({
+    searchTerm: z.preprocess((val) => (val === undefined ? '' : val), z.string())
+
 })
+
 
 // getSellById
 export const getSellByIdQuerySchema = z.object({

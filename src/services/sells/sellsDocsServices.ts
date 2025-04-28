@@ -1,16 +1,17 @@
-import { dbConnectionWeb } from "../database";
-import { sellsQuery } from "../database/querys/sells";
-import { ValidationError } from "../errors/CustomError";
-import type { SellsInterface, SellsOrderConditionType } from "../interface/sells";
-import type { UserWebSessionInterface } from "../interface/user";
+import { dbConnectionWeb } from "../../database";
+import { sellsQuery } from "../../database/querys/sells";
+import { ValidationError } from "../../errors/CustomError";
+import type { SellsInterface, SellsOrderConditionType } from "../../interface/sells";
+import type { UserWebSessionInterface } from "../../interface/user";
+import type { getSellsByClientServiceInterface, getTotalSellsByClientServiceInterface, getTotalSellsServiceInterface } from "./sellsDocsServices.interface";
 
 
 const getSellsService = async (
     userSession: UserWebSessionInterface,
     PageNumber: number,
-    SellsOrderCondition: SellsOrderConditionType | string
-): Promise<SellsInterface[]> => {
-
+    sellsOrderCondition: SellsOrderConditionType | string,
+    searchTerm: string
+): Promise<{ sells: SellsInterface[], total: number }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -20,28 +21,29 @@ const getSellsService = async (
     };
 
     let query = sellsQuery.getSells;
-    const request = await pool.request()
-        .input('OrderCondition', SellsOrderCondition)
+    const totalSellsQuery = sellsQuery.getTotalSells;
+
+    const requestSells = await pool.request()
+        .input('OrderCondition', sellsOrderCondition)
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
+        .input('searchTerm', searchTerm)
         .query(query);
 
-    const sells = request.recordset
+    const requestTotal = pool.request()
+        .input('searchTerm', searchTerm)
+        .query(totalSellsQuery);
 
-    return sells
-};
 
-export interface getSellsByClientServiceInterface {
-    userSession: UserWebSessionInterface,
-    PageNumber: number,
-    Id_Cliente: number,
-    SellsOrderCondition: SellsOrderConditionType | string,
-    TipoDoc?: SellsInterface['TipoDoc']
-    FilterExpired: 0 | 1,
-    FilterNotExpired: 0 | 1,
-    DateEnd: string | null,
-    DateExactly: string | null,
-    DateStart: string | null,
+    const [sellsResult, totalResult] = await Promise.all([
+        requestSells,
+        requestTotal
+    ]);
+
+    return {
+        sells: sellsResult.recordset,
+        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
+    };
 };
 
 const getSellsByClientService = async ({
@@ -109,9 +111,7 @@ const getSellByIdService = async (
     return sell
 };
 
-
-
-const getTotalSellsService = async (userSession: UserWebSessionInterface): Promise<number> => {;
+const getTotalSellsService = async ({ userSession, searchTerm }: getTotalSellsServiceInterface): Promise<number> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -121,21 +121,11 @@ const getTotalSellsService = async (userSession: UserWebSessionInterface): Promi
 
     let query = sellsQuery.getTotalSells;
     const request = await pool.request()
+        .input('searchTerm', searchTerm)
         .query(query);
 
     const total = request.recordset[0].TotalCount
     return total
-};
-
-interface getTotalSellsByClientServiceInterface {
-    userSession: UserWebSessionInterface,
-    Id_Cliente: number,
-    TipoDoc?: SellsInterface['TipoDoc']
-    FilterExpired: 0 | 1,
-    FilterNotExpired: 0 | 1,
-    DateEnd: string | null,
-    DateExactly: string | null,
-    DateStart: string | null,
 };
 
 const getTotalSellsByClientService = async ({

@@ -1,17 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCobranzaWithTotals = exports.getTotalCobranza = exports.getCobranza = exports.getCobranzaByClient = exports.getTotalSellsByClient = exports.getTotalSells = exports.getSellById = exports.getSellsByClient = exports.getSells = void 0;
-const sellsDocsServices_1 = require("../services/sellsDocsServices");
+const sellsDocsServices_1 = require("../services/sells/sellsDocsServices");
 const sellsValidations_1 = require("../validations/sellsValidations");
 const zod_1 = require("zod");
 const cobranzaService_1 = require("../services/cobranza/cobranzaService");
 const getSells = async (req, res, next) => {
     try {
-        const { PageNumber, sellsOrderCondition } = sellsValidations_1.getSellsQuerySchema.parse(req.query);
+        const { PageNumber, sellsOrderCondition, searchTerm } = sellsValidations_1.getSellsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
-        const sells = await (0, sellsDocsServices_1.getSellsService)(userSession, PageNumber, sellsOrderCondition);
+        const { sells, total } = await (0, sellsDocsServices_1.getSellsService)(userSession, PageNumber, sellsOrderCondition, searchTerm);
         return res.json({
-            sells
+            sells,
+            total
         });
     }
     catch (error) {
@@ -44,10 +45,7 @@ const getSellById = async (req, res, next) => {
 exports.getSellById = getSellById;
 const getSellsByClient = async (req, res, next) => {
     try {
-        console.log({ req: req.params });
-        console.log({ body: req.query });
         const { PageNumber, sellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart } = sellsValidations_1.getSellsByClientQuerySchema.parse(req.query);
-        console.log({ PageNumber, sellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart });
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
         const sells = await (0, sellsDocsServices_1.getSellsByClientService)({
@@ -73,8 +71,9 @@ const getSellsByClient = async (req, res, next) => {
 exports.getSellsByClient = getSellsByClient;
 const getTotalSells = async (req, res, next) => {
     try {
+        const { searchTerm } = sellsValidations_1.getTotalSellsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
-        const total = await (0, sellsDocsServices_1.getTotalSellsService)(userSession);
+        const total = await (0, sellsDocsServices_1.getTotalSellsService)({ userSession, searchTerm });
         return res.json({ total });
     }
     catch (error) {

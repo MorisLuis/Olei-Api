@@ -1,23 +1,26 @@
 import type { NextFunction, Request, Response } from "express"
-import { getSellsService, getSellsByClientService, getSellByIdService, getTotalSellsService, getTotalSellsByClientService } from "../services/sellsDocsServices";
-import { getTotalSellsByClientQuerySchema, getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getSellByIdParamsSchema, getSellsByClientQuerySchema, getCobranzaQuerySchema, getTotalCobranzaQuerySchema, getCobranzaByClientQuerySchema } from '../validations/sellsValidations'
+import { getSellsService, getSellsByClientService, getSellByIdService, getTotalSellsService, getTotalSellsByClientService } from "../services/sells/sellsDocsServices";
+import { getTotalSellsByClientQuerySchema, getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getSellByIdParamsSchema, getSellsByClientQuerySchema, getCobranzaQuerySchema, getTotalCobranzaQuerySchema, getCobranzaByClientQuerySchema, getTotalSellsQuerySchema } from '../validations/sellsValidations'
 import { z } from "zod";
 import { getCobranzaByClientService, getCobranzaService, getCobranzaWithTotalsService, getTotalCobranzaService } from "../services/cobranza/cobranzaService";
 
 const getSells = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const { PageNumber, sellsOrderCondition } = getSellsQuerySchema.parse(req.query)
-        const userSession = req.sessionWeb
+        const { PageNumber, sellsOrderCondition, searchTerm } = getSellsQuerySchema.parse(req.query)
+        const userSession = req.sessionWeb;
 
-        const sells = await getSellsService(
+
+        const { sells, total } = await getSellsService(
             userSession,
             PageNumber,
-            sellsOrderCondition
+            sellsOrderCondition,
+            searchTerm
         );
 
         return res.json({
-            sells
+            sells,
+            total
         });
     } catch (error) {
         return next(error);
@@ -58,11 +61,8 @@ const getSellById = async (req: Request, res: Response, next: NextFunction): Pro
 const getSellsByClient = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        console.log({req: req.params})
-        console.log({body: req.query})
 
         const { PageNumber, sellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart } = getSellsByClientQuerySchema.parse(req.query);
-        console.log({PageNumber, sellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart})
         const { client } = getClientParamsSchema.parse(req.params);
 
         const userSession = req.sessionWeb;
@@ -90,8 +90,9 @@ const getSellsByClient = async (req: Request, res: Response, next: NextFunction)
 const getTotalSells = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
+        const { searchTerm } = getTotalSellsQuerySchema.parse(req.query)
         const userSession = req.sessionWeb;
-        const total = await getTotalSellsService(userSession)
+        const total = await getTotalSellsService({ userSession, searchTerm })
         return res.json({ total });
     } catch (error) {
         return next(error);
