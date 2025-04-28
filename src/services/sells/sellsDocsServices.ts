@@ -20,7 +20,7 @@ const getSellsService = async (
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
-    let query = sellsQuery.getSells;
+    const query = sellsQuery.getSells;
     const totalSellsQuery = sellsQuery.getTotalSells;
 
     const requestSells = await pool.request()
@@ -57,7 +57,7 @@ const getSellsByClientService = async ({
     DateEnd,
     DateExactly,
     DateStart
-}: getSellsByClientServiceInterface): Promise<SellsInterface[]> => {
+}: getSellsByClientServiceInterface): Promise<{ sells: SellsInterface[], total: number }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -65,8 +65,10 @@ const getSellsByClientService = async ({
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
-    let query = sellsQuery.getSellsByClient;
-    const request = await pool.request()
+    const query = sellsQuery.getSellsByClient;
+    const totalSellsQuery = sellsQuery.getTotalSellsByClient;
+
+    const requestSells = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
         .input('Id_Cliente', Id_Cliente)
@@ -80,8 +82,26 @@ const getSellsByClientService = async ({
         .input('TipoDoc', TipoDoc)
         .query(query);
 
-    const sells = request.recordset
-    return sells
+    const requestTotal = pool.request()
+        .input('Id_Cliente', Id_Cliente)
+        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
+        .input('FilterExpired', FilterExpired)
+        .input('FilterNotExpired', FilterNotExpired)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
+        .input('TipoDoc', TipoDoc)
+        .query(totalSellsQuery);
+
+    const [sellsResult, totalResult] = await Promise.all([
+        requestSells,
+        requestTotal
+    ]);
+
+    return {
+        sells: sellsResult.recordset,
+        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
+    };
 };
 
 const getSellByIdService = async (

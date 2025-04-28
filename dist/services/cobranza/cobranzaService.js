@@ -11,17 +11,24 @@ const getCobranzaService = async ({ userSession, SellsOrderCondition, termSearch
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
-    let query = cobranza_1.cobranzaQuery.getCobranza;
-    const request = await pool.request()
+    const query = cobranza_1.cobranzaQuery.getCobranza;
+    const totalCobranzaQuery = cobranza_1.cobranzaQuery.getTotalCobranza;
+    const requestCobranza = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
         .input('nombre', termSearch)
         .input('OrderCondition', SellsOrderCondition)
         .query(query);
-    const recordsets = Array.isArray(request.recordsets) ? request.recordsets : Object.values(request.recordsets);
-    const cobranza = recordsets[0];
+    const requestTotal = pool.request()
+        .input('nombre', termSearch)
+        .query(totalCobranzaQuery);
+    const [sellsResult, totalResult] = await Promise.all([
+        requestCobranza,
+        requestTotal
+    ]);
     return {
-        cobranza
+        cobranza: sellsResult.recordset,
+        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
     };
 };
 exports.getCobranzaService = getCobranzaService;

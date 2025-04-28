@@ -3,42 +3,42 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.cobranzaQuery = void 0;
 exports.cobranzaQuery = {
     getCobranza: `
-            DECLARE @Ventas TABLE (
-                Id_Cliente INT,
-                Nombre NVARCHAR(200),
-                Id_Almacen INT,
-                ExpiredDays INT,
-                Saldo DECIMAL(18,2)
-            );
-            
-            -- Insertar datos filtrados
-            INSERT INTO @Ventas (Id_Cliente, Nombre, Id_Almacen, ExpiredDays, Saldo)
-            SELECT
-                V.Id_Cliente,
-                C.RazonSocial AS Nombre,
-                V.Id_Almacen,
-                DATEDIFF(DAY, GETDATE(), V.FechaEntrega),
-                V.Saldo
-            FROM [dbo].[VENTAS] V
-            JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = V.Id_Cliente
-            WHERE V.Saldo > 0
-            AND V.FechaLiq >= CAST(GETDATE() AS DATE)
-            AND LOWER(NOMBRE) LIKE '%' + LOWER(@nombre) + '%';
-            
-            -- Totales por cliente y almacén
-            WITH Totales AS (
-                SELECT 
-                    Id_Cliente,
-                    Nombre,
-                    Id_Almacen,
-                    SUM(CASE WHEN ExpiredDays < 0 THEN Saldo ELSE 0 END) AS SaldoVencido,
-                    SUM(CASE WHEN ExpiredDays >= 0 OR ExpiredDays IS NULL THEN Saldo ELSE 0 END) AS SaldoNoVencido,
-                    SUM(Saldo) AS TotalSaldo
-                FROM @Ventas
-                GROUP BY Id_Cliente, Nombre, Id_Almacen
-            )
-            
-            -- Selección final con orden y paginación
+        DECLARE @Ventas TABLE (
+            Id_Cliente INT,
+            Nombre NVARCHAR(200),
+            Id_Almacen INT,
+            ExpiredDays INT,
+            Saldo DECIMAL(18,2)
+        );
+        
+        -- Insertar datos filtrados
+        INSERT INTO @Ventas (Id_Cliente, Nombre, Id_Almacen, ExpiredDays, Saldo)
+        SELECT
+            V.Id_Cliente,
+            C.RazonSocial AS Nombre,
+            V.Id_Almacen,
+            DATEDIFF(DAY, GETDATE(), V.FechaEntrega),
+            V.Saldo
+        FROM [dbo].[VENTAS] V
+        JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = V.Id_Cliente
+        WHERE V.Saldo > 0
+        AND V.FechaLiq >= CAST(GETDATE() AS DATE)
+        AND LOWER(NOMBRE) LIKE '%' + LOWER(@nombre) + '%';
+        
+        -- Totales por cliente y almacén
+        WITH Totales AS (
+            SELECT 
+                Id_Cliente,
+                Nombre,
+                Id_Almacen,
+                SUM(CASE WHEN ExpiredDays < 0 THEN Saldo ELSE 0 END) AS SaldoVencido,
+                SUM(CASE WHEN ExpiredDays >= 0 OR ExpiredDays IS NULL THEN Saldo ELSE 0 END) AS SaldoNoVencido,
+                SUM(Saldo) AS TotalSaldo
+            FROM @Ventas
+            GROUP BY Id_Cliente, Nombre, Id_Almacen
+        )
+        
+        -- Selección final con orden y paginación
         SELECT *
         FROM Totales
         ORDER BY
@@ -108,17 +108,26 @@ exports.cobranzaQuery = {
         FETCH NEXT @PageSize ROWS ONLY
     `,
     getTotalCobranza: `
+        WITH VentasFiltradas AS (
+            SELECT
+                V.Id_Cliente,
+                C.RazonSocial AS Nombre,
+                V.Id_Almacen
+            FROM [dbo].[VENTAS] V
+            JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = V.Id_Cliente
+            WHERE V.Saldo > 0
+            AND V.FechaLiq >= CAST(GETDATE() AS DATE)
+            AND LOWER(NOMBRE) LIKE '%' + LOWER(@nombre) + '%'
+        )
         SELECT COUNT(*) AS TotalCount
-        FROM [dbo].[VENTAS]
-        WHERE Id_Cliente = @Id_Cliente
-        AND Saldo > 0
-        AND FechaLiq >= CAST(GETDATE() AS DATE) -- Condición para FechaLiq
-        AND ( @FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1) )
-        AND (@FilterExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) < 0 AND @FilterExpired = 1))
-        AND (@FilterNotExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) > 0 AND @FilterNotExpired = 1))
-        AND (@DateExactly IS NULL OR CAST(Fecha AS DATE) = @DateExactly)
-        AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)
-        AND (@DateEnd IS NULL OR CAST(Fecha AS DATE) <= @DateEnd)
+        FROM (
+            SELECT 
+                Id_Cliente,
+                Nombre,
+                Id_Almacen
+            FROM VentasFiltradas
+            GROUP BY Id_Cliente, Nombre, Id_Almacen
+        ) AS Agrupados;
     `,
     getCobranzaWithTotals: `
         DECLARE @Ventas TABLE (

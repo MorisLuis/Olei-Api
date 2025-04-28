@@ -66,7 +66,7 @@ const getSellsByClient = async (req: Request, res: Response, next: NextFunction)
         const { client } = getClientParamsSchema.parse(req.params);
 
         const userSession = req.sessionWeb;
-        const sells = await getSellsByClientService({
+        const { sells, total } = await getSellsByClientService({
             userSession,
             Id_Cliente: client,
             PageNumber,
@@ -80,7 +80,8 @@ const getSellsByClient = async (req: Request, res: Response, next: NextFunction)
         });
 
         return res.json({
-            sells
+            sells,
+            total
         });
     } catch (error) {
         return next(error);
@@ -140,7 +141,7 @@ const getCobranza = async (req: Request, res: Response, next: NextFunction): Pro
         const { PageNumber, cobranzaOrderCondition, termSearch } = getCobranzaQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
-        const { cobranza } = await getCobranzaService({
+        const { cobranza, total } = await getCobranzaService({
             userSession,
             PageNumber,
             SellsOrderCondition: cobranzaOrderCondition,
@@ -148,7 +149,8 @@ const getCobranza = async (req: Request, res: Response, next: NextFunction): Pro
         });
 
         return res.json({
-            cobranza
+            cobranza,
+            total
         });
 
     } catch (error) {

@@ -11,7 +11,7 @@ const getSellsService = async (userSession, PageNumber, sellsOrderCondition, sea
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
-    let query = sells_1.sellsQuery.getSells;
+    const query = sells_1.sellsQuery.getSells;
     const totalSellsQuery = sells_1.sellsQuery.getTotalSells;
     const requestSells = await pool.request()
         .input('OrderCondition', sellsOrderCondition)
@@ -39,8 +39,9 @@ const getSellsByClientService = async ({ userSession, PageNumber, Id_Cliente, Se
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
-    let query = sells_1.sellsQuery.getSellsByClient;
-    const request = await pool.request()
+    const query = sells_1.sellsQuery.getSellsByClient;
+    const totalSellsQuery = sells_1.sellsQuery.getTotalSellsByClient;
+    const requestSells = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
         .input('Id_Cliente', Id_Cliente)
@@ -53,8 +54,24 @@ const getSellsByClientService = async ({ userSession, PageNumber, Id_Cliente, Se
         .input('DateExactly', DateExactly)
         .input('TipoDoc', TipoDoc)
         .query(query);
-    const sells = request.recordset;
-    return sells;
+    const requestTotal = pool.request()
+        .input('Id_Cliente', Id_Cliente)
+        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
+        .input('FilterExpired', FilterExpired)
+        .input('FilterNotExpired', FilterNotExpired)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
+        .input('TipoDoc', TipoDoc)
+        .query(totalSellsQuery);
+    const [sellsResult, totalResult] = await Promise.all([
+        requestSells,
+        requestTotal
+    ]);
+    return {
+        sells: sellsResult.recordset,
+        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
+    };
 };
 exports.getSellsByClientService = getSellsByClientService;
 const getSellByIdService = async (userSession, folio, Serie, Id_Almacen, TipoDoc) => {

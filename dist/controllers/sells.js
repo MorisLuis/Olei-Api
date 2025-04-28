@@ -48,7 +48,7 @@ const getSellsByClient = async (req, res, next) => {
         const { PageNumber, sellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart } = sellsValidations_1.getSellsByClientQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
-        const sells = await (0, sellsDocsServices_1.getSellsByClientService)({
+        const { sells, total } = await (0, sellsDocsServices_1.getSellsByClientService)({
             userSession,
             Id_Cliente: client,
             PageNumber,
@@ -61,7 +61,8 @@ const getSellsByClient = async (req, res, next) => {
             DateStart: DateStart || null,
         });
         return res.json({
-            sells
+            sells,
+            total
         });
     }
     catch (error) {
@@ -110,14 +111,15 @@ const getCobranza = async (req, res, next) => {
         // Get session from REDIS.
         const { PageNumber, cobranzaOrderCondition, termSearch } = sellsValidations_1.getCobranzaQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
-        const { cobranza } = await (0, cobranzaService_1.getCobranzaService)({
+        const { cobranza, total } = await (0, cobranzaService_1.getCobranzaService)({
             userSession,
             PageNumber,
             SellsOrderCondition: cobranzaOrderCondition,
             termSearch
         });
         return res.json({
-            cobranza
+            cobranza,
+            total
         });
     }
     catch (error) {

@@ -17,7 +17,6 @@ const getAllCobranzaService = async (params: GetCobranzaByClientParamsWithPagina
         const { cobranza } = await getCobranzaService({ ...params, PageNumber: pageNumber, PageSize: pageSize, termSearch });
 
         if (cobranza.length > 0) {
-            //allSells = allSells.concat(cobranza);
             pageNumber++;
         } else {
             hasMore = false;

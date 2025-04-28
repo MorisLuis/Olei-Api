@@ -11,27 +11,36 @@ const getCobranzaService = async ({
     termSearch,
     PageSize = 10,
     PageNumber
-}: GetCobranzaInterface): Promise<{ cobranza: CobranzaInterfaceByClient[] }> => {
+}: GetCobranzaInterface): Promise<{ cobranza: CobranzaInterfaceByClient[], total: number }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
-    let query = cobranzaQuery.getCobranza;
 
-    const request = await pool.request()
+    const query = cobranzaQuery.getCobranza;
+    const totalCobranzaQuery = cobranzaQuery.getTotalCobranza;
+
+    const requestCobranza = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
         .input('nombre', termSearch)
         .input('OrderCondition', SellsOrderCondition)
         .query(query);
 
-    const recordsets = Array.isArray(request.recordsets) ? request.recordsets : Object.values(request.recordsets);
-    const cobranza = recordsets[0]
+    const requestTotal = pool.request()
+        .input('nombre', termSearch)
+        .query(totalCobranzaQuery);
+
+    const [sellsResult, totalResult] = await Promise.all([
+        requestCobranza,
+        requestTotal
+    ]);
 
     return {
-        cobranza
+        cobranza: sellsResult.recordset,
+        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
     }
 
 };
