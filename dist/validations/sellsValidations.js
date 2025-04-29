@@ -61,7 +61,6 @@ exports.getCobranzaQuerySchema = zod_1.z.object({
     termSearch: zod_1.z.string().optional().transform(val => val ?? '')
 });
 exports.getCobranzaByClientQuerySchema = zod_1.z.object({
-    Id_Almacen: zod_1.z.string().nonempty().transform((val) => (val ? parseInt(val, 10) : 0)),
     PageNumber: zod_1.z.
         preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
     cobranzaOrderCondition: zod_1.z

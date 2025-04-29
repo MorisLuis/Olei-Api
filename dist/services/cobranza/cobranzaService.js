@@ -32,7 +32,7 @@ const getCobranzaService = async ({ userSession, SellsOrderCondition, termSearch
     };
 };
 exports.getCobranzaService = getCobranzaService;
-const getCobranzaByClientService = async ({ userSession, PageNumber, PageSize = 10, SellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, Id_Cliente, Id_Almacen }) => {
+const getCobranzaByClientService = async ({ userSession, PageNumber, PageSize = 10, SellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, Id_Cliente }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -53,7 +53,6 @@ const getCobranzaByClientService = async ({ userSession, PageNumber, PageSize = 
         .input('DateExactly', DateExactly)
         .input('TipoDoc', TipoDoc)
         .input('Id_Cliente', Id_Cliente)
-        .input('Id_Almacen', Id_Almacen)
         .query(query);
     const requestTotal = await pool.request()
         .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
@@ -64,7 +63,6 @@ const getCobranzaByClientService = async ({ userSession, PageNumber, PageSize = 
         .input('DateExactly', DateExactly)
         .input('TipoDoc', TipoDoc)
         .input('Id_Cliente', Id_Cliente)
-        .input('Id_Almacen', Id_Almacen)
         .query(totalCobranzaByClientQuery);
     const [sellsResult, totalResult] = await Promise.all([
         request,

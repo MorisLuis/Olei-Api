@@ -57,7 +57,7 @@ const sendEmailWithPDF = async (req, res, next) => {
         DateEnd: DateEnd || null,
         DateExactly: DateExactly || null,
         DateStart: DateStart || null,
-        PageSize: 100
+        PageSize: 10
     });
     const pdfBuffer = await (0, generatePDF_1.default)(sells, brief);
     // Opciones del correo

@@ -97,7 +97,6 @@ export const getCobranzaQuerySchema = z.object({
 
 
 export const getCobranzaByClientQuerySchema = z.object({
-    Id_Almacen: z.string().nonempty().transform((val) => (val ? parseInt(val, 10) : 0)),
     PageNumber: z.
         preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
         cobranzaOrderCondition: z

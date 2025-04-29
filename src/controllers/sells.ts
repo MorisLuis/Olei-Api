@@ -161,13 +161,11 @@ const getCobranza = async (req: Request, res: Response, next: NextFunction): Pro
 const getCobranzaByClient = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        // Get session from REDIS.
-        const { Id_Almacen, PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaByClientQuerySchema.parse(req.query);
+        const { PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaByClientQuerySchema.parse(req.query);
         const { client } = getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
 
         const { cobranza, total } = await getCobranzaByClientService({
-            Id_Almacen,
             userSession,
             Id_Cliente: client,
             PageNumber,

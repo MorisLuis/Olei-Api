@@ -29,6 +29,7 @@ const loginServer = async (req: Request, res: Response, next: NextFunction): Pro
             RazonSocial: result.RazonSocial.trim(),
             SwImagenes: result.SwImagenes,
             Vigencia: result.Vigencia,
+            Id_ListPre: result.Id_ListPre,
             from: 'mobil',
             userConected: false,
             serverConected: true
@@ -73,7 +74,6 @@ const login = async (req: Request, res: Response, next: NextFunction): Promise<R
             TodosAlmacenes: userData.TodosAlmacenes,
             SalidaSinExistencias: userData.SalidaSinExistencias,
             Id_Almacen: userData.Id_Almacen,
-            Id_ListPre: userData.Id_ListPre,
             AlmacenNombre: userData.AlmacenNombre,
             serverConected: session.serverConected,
             userConected: true,
