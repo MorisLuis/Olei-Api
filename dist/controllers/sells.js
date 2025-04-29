@@ -129,12 +129,10 @@ const getCobranza = async (req, res, next) => {
 exports.getCobranza = getCobranza;
 const getCobranzaByClient = async (req, res, next) => {
     try {
-        // Get session from REDIS.
-        const { Id_Almacen, PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaByClientQuerySchema.parse(req.query);
+        const { PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaByClientQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
         const { cobranza, total } = await (0, cobranzaService_1.getCobranzaByClientService)({
-            Id_Almacen,
             userSession,
             Id_Cliente: client,
             PageNumber,

@@ -56,8 +56,7 @@ const getCobranzaByClientService = async ({
     DateEnd,
     DateExactly,
     DateStart,
-    Id_Cliente,
-    Id_Almacen
+    Id_Cliente
 }: GetCobranzaByClientParamsWithPagination): Promise<{ cobranza: SellsInterface[], total: number }> => {
 
 
@@ -82,7 +81,6 @@ const getCobranzaByClientService = async ({
         .input('DateExactly', DateExactly)
         .input('TipoDoc', TipoDoc)
         .input('Id_Cliente', Id_Cliente)
-        .input('Id_Almacen', Id_Almacen)
         .query(query);
 
     const requestTotal = await pool.request()
@@ -94,7 +92,6 @@ const getCobranzaByClientService = async ({
         .input('DateExactly', DateExactly)
         .input('TipoDoc', TipoDoc)
         .input('Id_Cliente', Id_Cliente)
-        .input('Id_Almacen', Id_Almacen)
         .query(totalCobranzaByClientQuery);
 
     const [sellsResult, totalResult] = await Promise.all([
