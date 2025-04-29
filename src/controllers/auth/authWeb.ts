@@ -18,6 +18,7 @@ const loginWeb = async (req: Request, res: Response, next: NextFunction): Promis
 
         // Generar un ID de sesión único
         const sessionId = v4();
+        console.log({sessionId})
 
         const token = generateAccessTokenWeb(sessionId)
         const refreshToken = generateRefreshTokenWeb(sessionId);

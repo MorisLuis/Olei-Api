@@ -81,7 +81,8 @@ export interface authResultInterface {
     PasswordSQL: string,
     RazonSocial: string,
     SwImagenes: string | null,
-    Vigencia: string
+    Vigencia: string,
+    Id_ListPre: number;
 }
 
 export type ValidationResult = {

@@ -38,7 +38,8 @@ exports.querys = {
             PasswordSQL,
             RazonSocial,
             SwImagenes,
-            Vigencia
+            Vigencia,
+            Id_ListPre
         FROM [dbo].[CLIENTES]
         WHERE IdUsuarioOLEI = @IdUsuarioOLEI
     `,
