@@ -5,7 +5,6 @@ const sells_1 = require("../controllers/sells");
 const validateJWT_1 = require("../middleware/validateJWT");
 const router = (0, express_1.Router)();
 router.get("/", validateJWT_1.validateJWTWeb, sells_1.getSells);
-router.get("/total", validateJWT_1.validateJWTWeb, sells_1.getTotalSells);
 router.get("/:folio", validateJWT_1.validateJWTWeb, sells_1.getSellById); // Ruta general al final
 router.get("/client/total/:client", validateJWT_1.validateJWTWeb, sells_1.getTotalSellsByClient);
 router.get("/client/:client", validateJWT_1.validateJWTWeb, sells_1.getSellsByClient);

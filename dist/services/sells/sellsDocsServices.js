@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTotalSellsByClientService = exports.getTotalSellsService = exports.getSellByIdService = exports.getSellsByClientService = exports.getSellsService = void 0;
+exports.getTotalSellsByClientService = exports.getSellByIdService = exports.getSellsByClientService = exports.getSellsService = void 0;
 const database_1 = require("../../database");
 const sells_1 = require("../../database/querys/sells");
 const CustomError_1 = require("../../errors/CustomError");
@@ -12,23 +12,32 @@ const getSellsService = async (userSession, PageNumber, sellsOrderCondition, sea
     }
     ;
     const query = sells_1.sellsQuery.getSells;
-    const totalSellsQuery = sells_1.sellsQuery.getTotalSells;
+    const totalSellsQuery = sells_1.sellsQuery.getSellsTotal;
+    const countSellsQuery = sells_1.sellsQuery.getSellsCount;
     const requestSells = await pool.request()
         .input('OrderCondition', sellsOrderCondition)
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
         .input('searchTerm', searchTerm)
         .query(query);
-    const requestTotal = pool.request()
+    const requestTotal = await pool.request()
+        .input('OrderCondition', sellsOrderCondition)
+        .input('PageNumber', PageNumber)
+        .input('PageSize', 10)
         .input('searchTerm', searchTerm)
         .query(totalSellsQuery);
-    const [sellsResult, totalResult] = await Promise.all([
+    const requestCount = pool.request()
+        .input('searchTerm', searchTerm)
+        .query(countSellsQuery);
+    const [sellsResult, countResult, totalResult] = await Promise.all([
         requestSells,
+        requestCount,
         requestTotal
     ]);
     return {
         sells: sellsResult.recordset,
-        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
+        count: Number(countResult.recordset[0]?.TotalCount ?? 0),
+        total: totalResult.recordset[0]
     };
 };
 exports.getSellsService = getSellsService;
@@ -92,21 +101,6 @@ const getSellByIdService = async (userSession, folio, Serie, Id_Almacen, TipoDoc
     return sell;
 };
 exports.getSellByIdService = getSellByIdService;
-const getTotalSellsService = async ({ userSession, searchTerm }) => {
-    const { ServidorSQL, BaseSQL } = userSession;
-    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
-    if (!pool) {
-        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
-    }
-    ;
-    let query = sells_1.sellsQuery.getTotalSells;
-    const request = await pool.request()
-        .input('searchTerm', searchTerm)
-        .query(query);
-    const total = request.recordset[0].TotalCount;
-    return total;
-};
-exports.getTotalSellsService = getTotalSellsService;
 const getTotalSellsByClientService = async ({ userSession, Id_Cliente, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);

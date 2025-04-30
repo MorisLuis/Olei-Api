@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express"
-import { getSellsService, getSellsByClientService, getSellByIdService, getTotalSellsService, getTotalSellsByClientService } from "../services/sells/sellsDocsServices";
-import { getTotalSellsByClientQuerySchema, getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getSellByIdParamsSchema, getSellsByClientQuerySchema, getCobranzaQuerySchema, getTotalCobranzaQuerySchema, getCobranzaByClientQuerySchema, getTotalSellsQuerySchema } from '../validations/sellsValidations'
+import { getSellsService, getSellsByClientService, getSellByIdService, getTotalSellsByClientService } from "../services/sells/sellsDocsServices";
+import { getTotalSellsByClientQuerySchema, getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getSellByIdParamsSchema, getSellsByClientQuerySchema, getCobranzaQuerySchema, getTotalCobranzaQuerySchema, getCobranzaByClientQuerySchema } from '../validations/sellsValidations'
 import { z } from "zod";
 import { getCobranzaByClientService, getCobranzaService, getCobranzaWithTotalsService, getTotalCobranzaService } from "../services/cobranza/cobranzaService";
 
@@ -11,7 +11,7 @@ const getSells = async (req: Request, res: Response, next: NextFunction): Promis
         const userSession = req.sessionWeb;
 
 
-        const { sells, total } = await getSellsService(
+        const { sells, count, total } = await getSellsService(
             userSession,
             PageNumber,
             sellsOrderCondition,
@@ -20,6 +20,7 @@ const getSells = async (req: Request, res: Response, next: NextFunction): Promis
 
         return res.json({
             sells,
+            count,
             total
         });
     } catch (error) {
@@ -88,17 +89,6 @@ const getSellsByClient = async (req: Request, res: Response, next: NextFunction)
     }
 };
 
-const getTotalSells = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-
-    try {
-        const { searchTerm } = getTotalSellsQuerySchema.parse(req.query)
-        const userSession = req.sessionWeb;
-        const total = await getTotalSellsService({ userSession, searchTerm })
-        return res.json({ total });
-    } catch (error) {
-        return next(error);
-    }
-}
 
 const getTotalSellsByClient = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
@@ -247,7 +237,6 @@ export {
     getSells,
     getSellsByClient,
     getSellById,
-    getTotalSells,
     getTotalSellsByClient,
 
     /* cobranza */

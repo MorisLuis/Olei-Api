@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCobranzaWithTotals = exports.getTotalCobranza = exports.getCobranza = exports.getCobranzaByClient = exports.getTotalSellsByClient = exports.getTotalSells = exports.getSellById = exports.getSellsByClient = exports.getSells = void 0;
+exports.getCobranzaWithTotals = exports.getTotalCobranza = exports.getCobranza = exports.getCobranzaByClient = exports.getTotalSellsByClient = exports.getSellById = exports.getSellsByClient = exports.getSells = void 0;
 const sellsDocsServices_1 = require("../services/sells/sellsDocsServices");
 const sellsValidations_1 = require("../validations/sellsValidations");
 const zod_1 = require("zod");
@@ -9,9 +9,10 @@ const getSells = async (req, res, next) => {
     try {
         const { PageNumber, sellsOrderCondition, searchTerm } = sellsValidations_1.getSellsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
-        const { sells, total } = await (0, sellsDocsServices_1.getSellsService)(userSession, PageNumber, sellsOrderCondition, searchTerm);
+        const { sells, count, total } = await (0, sellsDocsServices_1.getSellsService)(userSession, PageNumber, sellsOrderCondition, searchTerm);
         return res.json({
             sells,
+            count,
             total
         });
     }
@@ -70,18 +71,6 @@ const getSellsByClient = async (req, res, next) => {
     }
 };
 exports.getSellsByClient = getSellsByClient;
-const getTotalSells = async (req, res, next) => {
-    try {
-        const { searchTerm } = sellsValidations_1.getTotalSellsQuerySchema.parse(req.query);
-        const userSession = req.sessionWeb;
-        const total = await (0, sellsDocsServices_1.getTotalSellsService)({ userSession, searchTerm });
-        return res.json({ total });
-    }
-    catch (error) {
-        return next(error);
-    }
-};
-exports.getTotalSells = getTotalSells;
 const getTotalSellsByClient = async (req, res, next) => {
     try {
         const params = sellsValidations_1.getClientParamsSchema.parse(req.params);
