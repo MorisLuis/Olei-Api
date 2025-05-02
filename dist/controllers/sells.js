@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCobranzaWithTotals = exports.getTotalCobranza = exports.getCobranza = exports.getCobranzaByClient = exports.getTotalSellsByClient = exports.getTotalSells = exports.getSellById = exports.getSellsByClient = exports.getSells = void 0;
+exports.getCobranzaWithTotals = exports.getCobranza = exports.getCobranzaByClient = exports.getSellById = exports.getSellsByClient = exports.getSells = void 0;
 const sellsDocsServices_1 = require("../services/sells/sellsDocsServices");
 const sellsValidations_1 = require("../validations/sellsValidations");
 const zod_1 = require("zod");
@@ -9,9 +9,10 @@ const getSells = async (req, res, next) => {
     try {
         const { PageNumber, sellsOrderCondition, searchTerm } = sellsValidations_1.getSellsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
-        const { sells, total } = await (0, sellsDocsServices_1.getSellsService)(userSession, PageNumber, sellsOrderCondition, searchTerm);
+        const { sells, count, total } = await (0, sellsDocsServices_1.getSellsService)(userSession, PageNumber, sellsOrderCondition, searchTerm);
         return res.json({
             sells,
+            count,
             total
         });
     }
@@ -48,7 +49,7 @@ const getSellsByClient = async (req, res, next) => {
         const { PageNumber, sellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart } = sellsValidations_1.getSellsByClientQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
-        const { sells, total } = await (0, sellsDocsServices_1.getSellsByClientService)({
+        const { sells, count, total } = await (0, sellsDocsServices_1.getSellsByClientService)({
             userSession,
             Id_Cliente: client,
             PageNumber,
@@ -62,6 +63,7 @@ const getSellsByClient = async (req, res, next) => {
         });
         return res.json({
             sells,
+            count,
             total
         });
     }
@@ -70,48 +72,13 @@ const getSellsByClient = async (req, res, next) => {
     }
 };
 exports.getSellsByClient = getSellsByClient;
-const getTotalSells = async (req, res, next) => {
-    try {
-        const { searchTerm } = sellsValidations_1.getTotalSellsQuerySchema.parse(req.query);
-        const userSession = req.sessionWeb;
-        const total = await (0, sellsDocsServices_1.getTotalSellsService)({ userSession, searchTerm });
-        return res.json({ total });
-    }
-    catch (error) {
-        return next(error);
-    }
-};
-exports.getTotalSells = getTotalSells;
-const getTotalSellsByClient = async (req, res, next) => {
-    try {
-        const params = sellsValidations_1.getClientParamsSchema.parse(req.params);
-        const { FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, } = sellsValidations_1.getTotalSellsByClientQuerySchema.parse(req.query);
-        const total = await (0, sellsDocsServices_1.getTotalSellsByClientService)({
-            userSession: req.sessionWeb,
-            Id_Cliente: params.client,
-            TipoDoc,
-            FilterNotExpired,
-            FilterExpired,
-            DateEnd: DateEnd || null,
-            DateExactly: DateExactly || null,
-            DateStart: DateStart || null,
-        });
-        return res.json({
-            total
-        });
-    }
-    catch (error) {
-        return next(error);
-    }
-};
-exports.getTotalSellsByClient = getTotalSellsByClient;
 /* Cobranza */
 const getCobranza = async (req, res, next) => {
     try {
         // Get session from REDIS.
         const { PageNumber, cobranzaOrderCondition, termSearch } = sellsValidations_1.getCobranzaQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
-        const { cobranza, total } = await (0, cobranzaService_1.getCobranzaService)({
+        const { cobranza, count, total } = await (0, cobranzaService_1.getCobranzaService)({
             userSession,
             PageNumber,
             SellsOrderCondition: cobranzaOrderCondition,
@@ -119,6 +86,7 @@ const getCobranza = async (req, res, next) => {
         });
         return res.json({
             cobranza,
+            count,
             total
         });
     }
@@ -132,7 +100,7 @@ const getCobranzaByClient = async (req, res, next) => {
         const { PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaByClientQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
-        const { cobranza, total } = await (0, cobranzaService_1.getCobranzaByClientService)({
+        const { cobranza, total, count } = await (0, cobranzaService_1.getCobranzaByClientService)({
             userSession,
             Id_Cliente: client,
             PageNumber,
@@ -146,6 +114,7 @@ const getCobranzaByClient = async (req, res, next) => {
         });
         return res.json({
             cobranza,
+            count,
             total
         });
     }
@@ -155,33 +124,6 @@ const getCobranzaByClient = async (req, res, next) => {
     ;
 };
 exports.getCobranzaByClient = getCobranzaByClient;
-const getTotalCobranza = async (req, res, next) => {
-    try {
-        const { TipoDoc, FilterNotExpired, FilterExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getTotalCobranzaQuerySchema.parse(req.query);
-        const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
-        const userSession = req.sessionWeb;
-        const total = await (0, cobranzaService_1.getTotalCobranzaService)({
-            Id_Cliente: client,
-            userSession,
-            TipoDoc,
-            FilterNotExpired,
-            FilterExpired,
-            DateEnd: DateEnd || null,
-            DateExactly: DateExactly || null,
-            DateStart: DateStart || null,
-        });
-        return res.json({ total });
-    }
-    catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
-            return res.status(400).json({ message: "Validation error", errors: error.errors });
-        }
-        else {
-            return next(error);
-        }
-    }
-};
-exports.getTotalCobranza = getTotalCobranza;
 const getCobranzaWithTotals = async (req, res, next) => {
     try {
         // Get session from REDIS.

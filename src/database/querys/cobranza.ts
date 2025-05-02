@@ -59,6 +59,75 @@ export const cobranzaQuery = {
             Nombre;
     `,
 
+    getCobranzaTotal: `
+        DECLARE @Ventas TABLE (
+            Id_Cliente INT,
+            Nombre NVARCHAR(200),
+            Id_Almacen INT,
+            ExpiredDays INT,
+            Saldo DECIMAL(18,2),
+            CorreoVtas NVARCHAR(100)
+        );
+        
+        -- Insertar datos filtrados sin ningún cálculo adicional
+        INSERT INTO @Ventas (Id_Cliente, Nombre, Id_Almacen, ExpiredDays, Saldo, CorreoVtas)
+        SELECT
+            V.Id_Cliente,
+            C.RazonSocial AS Nombre,
+            V.Id_Almacen,
+            DATEDIFF(DAY, GETDATE(), V.FechaEntrega) AS ExpiredDays,
+            V.Saldo,
+            ISNULL(C.CorreoVtas, '') AS CorreoVtas
+        FROM [dbo].[VENTAS] V
+        JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = V.Id_Cliente AND C.Id_Almacen = V.Id_Almacen
+        WHERE V.Saldo > 0
+        AND V.FechaLiq >= CAST(GETDATE() AS DATE)
+        AND (@nombre = '' OR LOWER(C.RazonSocial) LIKE LOWER(@nombre) + '%');
+        
+        -- Totales por cliente y almacén
+        WITH Totales AS (
+            SELECT 
+                Id_Cliente,
+                Nombre,
+                Id_Almacen,
+                    CorreoVtas,  -- Usar MAX para obtener un valor consistente de CorreoVtas
+                SUM(CASE WHEN ExpiredDays < 0 THEN Saldo ELSE 0 END) AS SaldoVencido,
+                SUM(CASE WHEN ExpiredDays >= 0 OR ExpiredDays IS NULL THEN Saldo ELSE 0 END) AS SaldoNoVencido,
+                SUM(Saldo) AS TotalSaldo
+            FROM @Ventas
+            GROUP BY Id_Cliente, Nombre, Id_Almacen, CorreoVtas
+        )
+        -- Suma final
+        SELECT
+            SUM(SaldoVencido) AS SumaSaldoVencido,
+            SUM(SaldoNoVencido) AS SumaSaldoNoVencido,
+            SUM(TotalSaldo) AS SumaTotalSaldo
+        FROM Totales;
+    `,
+
+    getCobranzaCount: `
+        WITH VentasFiltradas AS (
+            SELECT
+                V.Id_Cliente,
+                C.RazonSocial AS Nombre,
+                V.Id_Almacen
+            FROM [dbo].[VENTAS] V
+            JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = V.Id_Cliente AND C.Id_Almacen = V.Id_Almacen
+            WHERE V.Saldo > 0
+            AND V.FechaLiq >= CAST(GETDATE() AS DATE)
+            AND LOWER(NOMBRE) LIKE '%' + LOWER(@nombre) + '%'
+        )
+        SELECT COUNT(*) AS TotalCount
+        FROM (
+            SELECT 
+                Id_Cliente,
+                Nombre,
+                Id_Almacen
+            FROM VentasFiltradas
+            GROUP BY Id_Cliente, Nombre, Id_Almacen
+        ) AS Agrupados;
+    `,
+
     getCobranzaByClient: `
         WITH
             VENTAS_CTE
@@ -88,51 +157,63 @@ export const cobranzaQuery = {
                     AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)
                     AND (@DateEnd IS NULL OR CAST(Fecha AS DATE) <= @DateEnd)
             )
-        SELECT *
-        FROM VENTAS_CTE
-        ORDER BY 
-            CASE 
-                WHEN @OrderCondition = 'TipoDoc' THEN TipoDoc 
-                WHEN @OrderCondition = 'Folio' THEN Folio 
-                WHEN @OrderCondition = 'Fecha' THEN Fecha 
-                WHEN @OrderCondition = 'ExpiredDays' THEN ExpiredDays
-                WHEN @OrderCondition = 'FechaEntrega' THEN Fecha 
-            END DESC,
-            CASE 
-                WHEN @OrderCondition = 'TipoDoc' THEN Fecha 
-                WHEN @OrderCondition = 'ExpiredDays' THEN Fecha
-                WHEN @OrderCondition = 'FechaEntrega' THEN Fecha
-            END DESC,
-            Fecha,
-            TipoDoc
-        OFFSET (@PageNumber - 1) * @PageSize ROWS
-        FETCH NEXT @PageSize ROWS ONLY
+            SELECT *
+            FROM VENTAS_CTE
+            ORDER BY 
+                CASE 
+                    WHEN @OrderCondition = 'TipoDoc' THEN TipoDoc 
+                    WHEN @OrderCondition = 'Folio' THEN Folio 
+                    WHEN @OrderCondition = 'Fecha' THEN Fecha 
+                    WHEN @OrderCondition = 'ExpiredDays' THEN ExpiredDays
+                    WHEN @OrderCondition = 'FechaEntrega' THEN Fecha 
+                END DESC,
+                CASE 
+                    WHEN @OrderCondition = 'TipoDoc' THEN Fecha 
+                    WHEN @OrderCondition = 'ExpiredDays' THEN Fecha
+                    WHEN @OrderCondition = 'FechaEntrega' THEN Fecha
+                END DESC,
+                Fecha,
+                TipoDoc
+            OFFSET (@PageNumber - 1) * @PageSize ROWS
+            FETCH NEXT @PageSize ROWS ONLY
     `,
 
-    getTotalCobranza: `
-        WITH VentasFiltradas AS (
-            SELECT
-                V.Id_Cliente,
-                C.RazonSocial AS Nombre,
-                V.Id_Almacen
-            FROM [dbo].[VENTAS] V
-            JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = V.Id_Cliente AND C.Id_Almacen = V.Id_Almacen
-            WHERE V.Saldo > 0
-            AND V.FechaLiq >= CAST(GETDATE() AS DATE)
-            AND LOWER(NOMBRE) LIKE '%' + LOWER(@nombre) + '%'
-        )
-        SELECT COUNT(*) AS TotalCount
-        FROM (
+    getCobranzaByClientTotal: `
+        WITH
+            VENTAS_CTE
+            AS
+            (
+                SELECT
+                    CONCAT(Id_Almacen, '-', TipoDoc, '-', TRIM(Serie), '-', Folio) AS UniqueKey,
+                    Id_Cliente,
+                    Id_Almacen,
+                    TipoDoc,
+                    Folio,
+                    Serie,
+                    Fecha,
+                    FechaEntrega,
+                    FechaLiq,
+                    Saldo,
+                    Total,
+                    DATEDIFF(DAY, GETDATE(), FechaEntrega) AS ExpiredDays
+                FROM [dbo].[VENTAS]
+                WHERE Id_Cliente = @Id_Cliente
+                    AND Saldo > 0
+                    AND FechaLiq >= CAST(GETDATE() AS DATE) -- Condición para FechaLiq
+                    AND (@FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1))
+                    AND (@FilterExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) < 0 AND @FilterExpired = 1))
+                    AND (@FilterNotExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) > 0 AND @FilterNotExpired = 1))
+                    AND (@DateExactly IS NULL OR CAST(Fecha AS DATE) = @DateExactly)
+                    AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)
+                    AND (@DateEnd IS NULL OR CAST(Fecha AS DATE) <= @DateEnd)
+            )
             SELECT 
-                Id_Cliente,
-                Nombre,
-                Id_Almacen
-            FROM VentasFiltradas
-            GROUP BY Id_Cliente, Nombre, Id_Almacen
-        ) AS Agrupados;
+                SUM(Saldo) AS SumaSaldo, 
+                SUM(Total) AS SumaTotal
+            FROM VENTAS_CTE;
     `,
 
-    getTotalCobranzaByClient: `
+    getCobranzaByClientCount: `
         SELECT COUNT(*) AS TotalCount
         FROM [dbo].[VENTAS]
         WHERE Id_Cliente = @Id_Cliente

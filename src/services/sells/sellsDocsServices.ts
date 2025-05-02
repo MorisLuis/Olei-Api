@@ -3,7 +3,7 @@ import { sellsQuery } from "../../database/querys/sells";
 import { ValidationError } from "../../errors/CustomError";
 import type { SellsInterface, SellsOrderConditionType } from "../../interface/sells";
 import type { UserWebSessionInterface } from "../../interface/user";
-import type { getSellsByClientServiceInterface, getTotalSellsByClientServiceInterface, getTotalSellsServiceInterface } from "./sellsDocsServices.interface";
+import type { getSellsByClientServiceInterface } from "./sellsDocsServices.interface";
 
 
 const getSellsService = async (
@@ -11,7 +11,7 @@ const getSellsService = async (
     PageNumber: number,
     sellsOrderCondition: SellsOrderConditionType | string,
     searchTerm: string
-): Promise<{ sells: SellsInterface[], total: number }> => {
+): Promise<{ sells: SellsInterface[], count: number, total: { SumaSubtotal: number, SumaTotal: number } }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -21,7 +21,8 @@ const getSellsService = async (
     };
 
     const query = sellsQuery.getSells;
-    const totalSellsQuery = sellsQuery.getTotalSells;
+    const totalSellsQuery = sellsQuery.getSellsTotal;
+    const countSellsQuery = sellsQuery.getSellsCount;
 
     const requestSells = await pool.request()
         .input('OrderCondition', sellsOrderCondition)
@@ -30,19 +31,28 @@ const getSellsService = async (
         .input('searchTerm', searchTerm)
         .query(query);
 
-    const requestTotal = pool.request()
+    const requestTotal = await pool.request()
+        .input('OrderCondition', sellsOrderCondition)
+        .input('PageNumber', PageNumber)
+        .input('PageSize', 10)
         .input('searchTerm', searchTerm)
         .query(totalSellsQuery);
 
+    const requestCount = pool.request()
+        .input('searchTerm', searchTerm)
+        .query(countSellsQuery);
 
-    const [sellsResult, totalResult] = await Promise.all([
+
+    const [sellsResult, countResult, totalResult] = await Promise.all([
         requestSells,
+        requestCount,
         requestTotal
     ]);
 
     return {
         sells: sellsResult.recordset,
-        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
+        count: Number(countResult.recordset[0]?.TotalCount ?? 0),
+        total: totalResult.recordset[0]
     };
 };
 
@@ -51,13 +61,11 @@ const getSellsByClientService = async ({
     PageNumber,
     Id_Cliente,
     SellsOrderCondition,
-    FilterExpired,
-    FilterNotExpired,
     TipoDoc,
     DateEnd,
     DateExactly,
     DateStart
-}: getSellsByClientServiceInterface): Promise<{ sells: SellsInterface[], total: number }> => {
+}: getSellsByClientServiceInterface): Promise<{ sells: SellsInterface[], count: number, total: { SumaSubtotal: number, SumaTotal: number } }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -66,7 +74,8 @@ const getSellsByClientService = async ({
     };
 
     const query = sellsQuery.getSellsByClient;
-    const totalSellsQuery = sellsQuery.getTotalSellsByClient;
+    const totalSellsQuery = sellsQuery.getSellsByClientTotal;
+    const countSellsQuery = sellsQuery.getSellsByClientCount;
 
     const requestSells = await pool.request()
         .input('PageNumber', PageNumber)
@@ -74,33 +83,41 @@ const getSellsByClientService = async ({
         .input('Id_Cliente', Id_Cliente)
         .input('OrderCondition', SellsOrderCondition)
         .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
-        .input('FilterExpired', FilterExpired)
-        .input('FilterNotExpired', FilterNotExpired)
         .input('DateStart', DateStart)
         .input('DateEnd', DateEnd)
         .input('DateExactly', DateExactly)
         .input('TipoDoc', TipoDoc)
         .query(query);
 
-    const requestTotal = pool.request()
+    const requestTotal = await pool.request()
         .input('Id_Cliente', Id_Cliente)
         .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
-        .input('FilterExpired', FilterExpired)
-        .input('FilterNotExpired', FilterNotExpired)
         .input('DateStart', DateStart)
         .input('DateEnd', DateEnd)
         .input('DateExactly', DateExactly)
         .input('TipoDoc', TipoDoc)
         .query(totalSellsQuery);
 
-    const [sellsResult, totalResult] = await Promise.all([
+    const requestCount = pool.request()
+        .input('Id_Cliente', Id_Cliente)
+        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
+        .input('TipoDoc', TipoDoc)
+        .query(countSellsQuery);
+
+
+    const [sellsResult, sellsCountResult, sellTotalResult] = await Promise.all([
         requestSells,
+        requestCount,
         requestTotal
     ]);
 
     return {
         sells: sellsResult.recordset,
-        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
+        count: Number(sellsCountResult.recordset[0]?.TotalCount ?? 0),
+        total: sellTotalResult.recordset[0]
     };
 };
 
@@ -131,61 +148,8 @@ const getSellByIdService = async (
     return sell
 };
 
-const getTotalSellsService = async ({ userSession, searchTerm }: getTotalSellsServiceInterface): Promise<number> => {
-
-    const { ServidorSQL, BaseSQL } = userSession;
-    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
-    if (!pool) {
-        throw new ValidationError('Error al conectarse a base de datos principal');
-    };
-
-    let query = sellsQuery.getTotalSells;
-    const request = await pool.request()
-        .input('searchTerm', searchTerm)
-        .query(query);
-
-    const total = request.recordset[0].TotalCount
-    return total
-};
-
-const getTotalSellsByClientService = async ({
-    userSession,
-    Id_Cliente,
-    FilterExpired,
-    FilterNotExpired,
-    TipoDoc,
-    DateEnd,
-    DateExactly,
-    DateStart
-}: getTotalSellsByClientServiceInterface): Promise<number> => {
-
-    const { ServidorSQL, BaseSQL } = userSession;
-    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
-    if (!pool) {
-        throw new ValidationError('Error al conectarse a base de datos principal');
-    };
-
-    let query = sellsQuery.getTotalSellsByClient;
-    const request = await pool.request()
-        .input('Id_Cliente', Id_Cliente)
-        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
-        .input('FilterExpired', FilterExpired)
-        .input('FilterNotExpired', FilterNotExpired)
-        .input('DateStart', DateStart)
-        .input('DateEnd', DateEnd)
-        .input('DateExactly', DateExactly)
-        .input('TipoDoc', TipoDoc)
-        .query(query);
-
-    const total = request.recordset[0].TotalCount
-    return total
-};
-
-
 export {
     getSellsService,
     getSellsByClientService,
-    getSellByIdService,
-    getTotalSellsService,
-    getTotalSellsByClientService
+    getSellByIdService
 }

@@ -8,7 +8,7 @@ const postInventory = async (req: Request, res: Response, next: NextFunction): P
         const userSession = req.session;
         const { inventoryDetails, typeOfMovement } = postInventoryBodySchema.parse(req.body);
 
-        const {Folio} = await postInventoryService({
+        const { Folio } = await postInventoryService({
             userSession,
             inventoryDetails,
             typeOfMovement

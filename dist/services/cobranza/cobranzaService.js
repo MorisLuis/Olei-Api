@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTotalCobranzaService = exports.getCobranzaWithTotalsService = exports.getCobranzaService = exports.getCobranzaByClientService = void 0;
+exports.getCobranzaWithTotalsService = exports.getCobranzaService = exports.getCobranzaByClientService = void 0;
 const database_1 = require("../../database");
 const cobranza_1 = require("../../database/querys/cobranza");
 const CustomError_1 = require("../../errors/CustomError");
@@ -12,23 +12,29 @@ const getCobranzaService = async ({ userSession, SellsOrderCondition, termSearch
     }
     ;
     const query = cobranza_1.cobranzaQuery.getCobranza;
-    const totalCobranzaQuery = cobranza_1.cobranzaQuery.getTotalCobranza;
+    const totalCobranzaQuery = cobranza_1.cobranzaQuery.getCobranzaTotal;
+    const countCobranzaQuery = cobranza_1.cobranzaQuery.getCobranzaCount;
     const requestCobranza = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
         .input('nombre', termSearch)
         .input('OrderCondition', SellsOrderCondition)
         .query(query);
-    const requestTotal = pool.request()
+    const requestTotal = await pool.request()
         .input('nombre', termSearch)
         .query(totalCobranzaQuery);
-    const [sellsResult, totalResult] = await Promise.all([
+    const requestCount = pool.request()
+        .input('nombre', termSearch)
+        .query(countCobranzaQuery);
+    const [sellsResult, countResult, totalResult] = await Promise.all([
         requestCobranza,
+        requestCount,
         requestTotal
     ]);
     return {
         cobranza: sellsResult.recordset,
-        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
+        count: Number(countResult.recordset[0]?.TotalCount ?? 0),
+        total: totalResult.recordset[0]
     };
 };
 exports.getCobranzaService = getCobranzaService;
@@ -39,8 +45,9 @@ const getCobranzaByClientService = async ({ userSession, PageNumber, PageSize = 
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
-    let query = cobranza_1.cobranzaQuery.getCobranzaByClient;
-    const totalCobranzaByClientQuery = cobranza_1.cobranzaQuery.getTotalCobranzaByClient;
+    const query = cobranza_1.cobranzaQuery.getCobranzaByClient;
+    const countCobranzaQuery = cobranza_1.cobranzaQuery.getCobranzaByClientCount;
+    const totalCobranzaQuery = cobranza_1.cobranzaQuery.getCobranzaByClientTotal;
     const request = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
@@ -54,6 +61,16 @@ const getCobranzaByClientService = async ({ userSession, PageNumber, PageSize = 
         .input('TipoDoc', TipoDoc)
         .input('Id_Cliente', Id_Cliente)
         .query(query);
+    const requestCount = await pool.request()
+        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
+        .input('FilterExpired', FilterExpired)
+        .input('FilterNotExpired', FilterNotExpired)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
+        .input('TipoDoc', TipoDoc)
+        .input('Id_Cliente', Id_Cliente)
+        .query(countCobranzaQuery);
     const requestTotal = await pool.request()
         .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
         .input('FilterExpired', FilterExpired)
@@ -63,39 +80,19 @@ const getCobranzaByClientService = async ({ userSession, PageNumber, PageSize = 
         .input('DateExactly', DateExactly)
         .input('TipoDoc', TipoDoc)
         .input('Id_Cliente', Id_Cliente)
-        .query(totalCobranzaByClientQuery);
-    const [sellsResult, totalResult] = await Promise.all([
+        .query(totalCobranzaQuery);
+    const [sellsResult, countResult, totalResult] = await Promise.all([
         request,
+        requestCount,
         requestTotal
     ]);
     return {
         cobranza: sellsResult.recordset,
-        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
+        count: Number(countResult.recordset[0]?.TotalCount ?? 0),
+        total: totalResult.recordset[0]
     };
 };
 exports.getCobranzaByClientService = getCobranzaByClientService;
-const getTotalCobranzaService = async ({ userSession, Id_Cliente, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart }) => {
-    const { ServidorSQL, BaseSQL } = userSession;
-    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
-    if (!pool) {
-        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
-    }
-    ;
-    let query = cobranza_1.cobranzaQuery.getTotalCobranza;
-    const request = await pool.request()
-        .input('Id_Cliente', Id_Cliente)
-        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
-        .input('FilterExpired', FilterExpired)
-        .input('FilterNotExpired', FilterNotExpired)
-        .input('DateStart', DateStart)
-        .input('DateEnd', DateEnd)
-        .input('DateExactly', DateExactly)
-        .input('TipoDoc', TipoDoc)
-        .query(query);
-    const total = request.recordset[0].TotalCount;
-    return total;
-};
-exports.getTotalCobranzaService = getTotalCobranzaService;
 const getCobranzaWithTotalsService = async ({ userSession, Id_Cliente, FilterExpired, FilterNotExpired, SellsOrderCondition, TipoDoc, DateEnd, DateExactly, DateStart }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
