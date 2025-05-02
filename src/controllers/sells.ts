@@ -1,8 +1,8 @@
 import type { NextFunction, Request, Response } from "express"
 import { getSellsService, getSellsByClientService, getSellByIdService } from "../services/sells/sellsDocsServices";
-import { getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getSellByIdParamsSchema, getSellsByClientQuerySchema, getCobranzaQuerySchema, getTotalCobranzaQuerySchema, getCobranzaByClientQuerySchema } from '../validations/sellsValidations'
+import { getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getSellByIdParamsSchema, getSellsByClientQuerySchema, getCobranzaQuerySchema, getCobranzaByClientQuerySchema } from '../validations/sellsValidations'
 import { z } from "zod";
-import { getCobranzaByClientService, getCobranzaService, getCobranzaWithTotalsService, getTotalCobranzaService } from "../services/cobranza/cobranzaService";
+import { getCobranzaByClientService, getCobranzaService, getCobranzaWithTotalsService } from "../services/cobranza/cobranzaService";
 
 const getSells = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
@@ -98,7 +98,7 @@ const getCobranza = async (req: Request, res: Response, next: NextFunction): Pro
         const { PageNumber, cobranzaOrderCondition, termSearch } = getCobranzaQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
-        const { cobranza, total } = await getCobranzaService({
+        const { cobranza, count, total } = await getCobranzaService({
             userSession,
             PageNumber,
             SellsOrderCondition: cobranzaOrderCondition,
@@ -107,6 +107,7 @@ const getCobranza = async (req: Request, res: Response, next: NextFunction): Pro
 
         return res.json({
             cobranza,
+            count,
             total
         });
 
@@ -122,7 +123,7 @@ const getCobranzaByClient = async (req: Request, res: Response, next: NextFuncti
         const { client } = getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
 
-        const { cobranza, total } = await getCobranzaByClientService({
+        const { cobranza, total, count } = await getCobranzaByClientService({
             userSession,
             Id_Cliente: client,
             PageNumber,
@@ -137,39 +138,12 @@ const getCobranzaByClient = async (req: Request, res: Response, next: NextFuncti
 
         return res.json({
             cobranza,
+            count,
             total
         });
     } catch (error) {
         return next(error)
     };
-};
-
-const getTotalCobranza = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-
-    try {
-        const { TipoDoc, FilterNotExpired, FilterExpired, DateEnd, DateExactly, DateStart } = getTotalCobranzaQuerySchema.parse(req.query);
-        const { client } = getClientParamsSchema.parse(req.params);
-        const userSession = req.sessionWeb;
-
-        const total = await getTotalCobranzaService({
-            Id_Cliente: client,
-            userSession,
-            TipoDoc,
-            FilterNotExpired,
-            FilterExpired,
-            DateEnd: DateEnd || null,
-            DateExactly: DateExactly || null,
-            DateStart: DateStart || null,
-        })
-        return res.json({ total });
-
-    } catch (error) {
-        if (error instanceof z.ZodError) {
-            return res.status(400).json({ message: "Validation error", errors: error.errors });
-        } else {
-            return next(error);
-        }
-    }
 };
 
 const getCobranzaWithTotals = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
@@ -208,6 +182,5 @@ export {
     /* cobranza */
     getCobranzaByClient,
     getCobranza,
-    getTotalCobranza,
     getCobranzaWithTotals
 }
