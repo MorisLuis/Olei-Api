@@ -215,9 +215,9 @@ const generatePDF = async (sells, briefSells) => {
     if (y < 50)
         addNewPage();
     const totalRowY = y;
-    const saldoVencido = `${(0, currency_1.formatCurrency)(briefSells.SaldoVencido)}`;
-    const saldoNoVencido = `${(0, currency_1.formatCurrency)(briefSells.SaldoNoVencido)}`;
-    const totalSaldo = `${(0, currency_1.formatCurrency)(briefSells.TotalSaldo)}`;
+    const saldoVencido = `${(0, currency_1.formatCurrency)(briefSells.SumaSaldoVencido)}`;
+    const saldoNoVencido = `${(0, currency_1.formatCurrency)(briefSells.SumaSaldoNoVencido)}`;
+    const totalSaldo = `${(0, currency_1.formatCurrency)(briefSells.SumaTotalSaldo)}`;
     // Dibujar "Totales" a la izquierda
     page.drawText('Totales', {
         x: marginLeft,

@@ -61,7 +61,8 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
         FilterNotExpired,
         DateEnd,
         DateExactly,
-        DateStart
+        DateStart,
+        Id_Almacen
     } = getCobranzaByClientQuerySchema.parse(req.query);
 
 
@@ -70,6 +71,7 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
     const userSession = req.sessionWeb;
 
     const { sells, brief } = await getAllCobranzaService({
+        Id_Almacen,
         userSession,
         Id_Cliente: client,
         PageNumber: PageNumber || 1,

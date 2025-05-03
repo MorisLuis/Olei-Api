@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCobranzaWithTotals = exports.getCobranza = exports.getCobranzaByClient = exports.getSellById = exports.getSellsByClient = exports.getSells = void 0;
+exports.getCobranzaWithTotals = exports.getCobranzaByClientCountAndTotal = exports.getCobranzaByClient = exports.getCobranza = exports.getSellById = exports.getSellsByClient = exports.getSells = void 0;
 const sellsDocsServices_1 = require("../services/sells/sellsDocsServices");
 const sellsValidations_1 = require("../validations/sellsValidations");
 const zod_1 = require("zod");
@@ -97,10 +97,10 @@ const getCobranza = async (req, res, next) => {
 exports.getCobranza = getCobranza;
 const getCobranzaByClient = async (req, res, next) => {
     try {
-        const { PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaByClientQuerySchema.parse(req.query);
+        const { Id_Almacen, PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaByClientQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
-        const { cobranza, total, count } = await (0, cobranzaService_1.getCobranzaByClientService)({
+        const { cobranza } = await (0, cobranzaService_1.getCobranzaByClientService)({
             userSession,
             Id_Cliente: client,
             PageNumber,
@@ -110,10 +110,36 @@ const getCobranzaByClient = async (req, res, next) => {
             FilterExpired,
             DateEnd: DateEnd || null,
             DateExactly: DateExactly || null,
-            DateStart: DateStart || null
+            DateStart: DateStart || null,
+            Id_Almacen
         });
         return res.json({
-            cobranza,
+            cobranza
+        });
+    }
+    catch (error) {
+        return next(error);
+    }
+    ;
+};
+exports.getCobranzaByClient = getCobranzaByClient;
+const getCobranzaByClientCountAndTotal = async (req, res, next) => {
+    try {
+        const { Id_Almacen, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaByClientCountAndTotalQuerySchema.parse(req.query);
+        const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
+        const userSession = req.sessionWeb;
+        const { count, total } = await (0, cobranzaService_1.getCobranzaByClientCountAndTotalService)({
+            userSession,
+            Id_Cliente: client,
+            TipoDoc,
+            FilterNotExpired,
+            FilterExpired,
+            DateEnd: DateEnd || null,
+            DateExactly: DateExactly || null,
+            DateStart: DateStart || null,
+            Id_Almacen
+        });
+        return res.json({
             count,
             total
         });
@@ -123,11 +149,11 @@ const getCobranzaByClient = async (req, res, next) => {
     }
     ;
 };
-exports.getCobranzaByClient = getCobranzaByClient;
+exports.getCobranzaByClientCountAndTotal = getCobranzaByClientCountAndTotal;
 const getCobranzaWithTotals = async (req, res, next) => {
     try {
         // Get session from REDIS.
-        const { cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaByClientQuerySchema.parse(req.query);
+        const { Id_Almacen, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaByClientQuerySchema.parse(req.query);
         const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
         const userSession = req.sessionWeb;
         const { brief } = await (0, cobranzaService_1.getCobranzaWithTotalsService)({
@@ -139,7 +165,8 @@ const getCobranzaWithTotals = async (req, res, next) => {
             FilterExpired,
             DateEnd: DateEnd || null,
             DateExactly: DateExactly || null,
-            DateStart: DateStart || null
+            DateStart: DateStart || null,
+            Id_Almacen
         });
         return res.json({
             brief

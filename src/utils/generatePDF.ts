@@ -3,12 +3,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import type { SellsInterface } from '../interface/sells';
 import { formatCurrency } from './currency';
 import { formatTipoDoc } from './tipoDocFormat';
-
-interface BriefSellsInterface {
-    SaldoVencido: number;
-    SaldoNoVencido: number;
-    TotalSaldo: number;
-}
+import type { totalCobranzaByClientInterface } from '../services/cobranza/cobranza.interface';
 
 // Función auxiliar para truncar texto
 const truncateText = (text: string, maxWidth: number, font: PDFFont, fontSize: number): string => {
@@ -24,7 +19,7 @@ const truncateText = (text: string, maxWidth: number, font: PDFFont, fontSize: n
 
 const generatePDF = async (
     sells: SellsInterface[],
-    briefSells: BriefSellsInterface
+    briefSells: totalCobranzaByClientInterface
 ): Promise<Uint8Array> => {
     const pdfDoc = await PDFDocument.create();
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -247,9 +242,9 @@ const generatePDF = async (
     // Agregar la fila de totales al final; si no hay espacio, se añade una nueva página
     if (y < 50) addNewPage();
     const totalRowY = y;
-    const saldoVencido = `${formatCurrency(briefSells.SaldoVencido)}`;
-    const saldoNoVencido = `${formatCurrency(briefSells.SaldoNoVencido)}`;
-    const totalSaldo = `${formatCurrency(briefSells.TotalSaldo)}`;
+    const saldoVencido = `${formatCurrency(briefSells.SumaSaldoVencido)}`;
+    const saldoNoVencido = `${formatCurrency(briefSells.SumaSaldoNoVencido)}`;
+    const totalSaldo = `${formatCurrency(briefSells.SumaTotalSaldo)}`;
 
     // Dibujar "Totales" a la izquierda
     page.drawText('Totales', {

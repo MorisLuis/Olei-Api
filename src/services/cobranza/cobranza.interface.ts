@@ -23,7 +23,7 @@ interface GetCobranzaInterface {
 
 interface GetCobranzaByClientInterface {
     Id_Cliente?: number,
-    Id_Almacen?: number,
+    Id_Almacen: number,
     
     userSession: UserWebSessionInterface,
     TipoDoc: SellsInterface['TipoDoc']
@@ -34,6 +34,14 @@ interface GetCobranzaByClientInterface {
     DateStart: string | null,
     SellsOrderCondition?: SellsOrderConditionType | string
 };
+
+
+// RESPONSE
+interface totalCobranzaByClientInterface {
+    SumaSaldoVencido: number;
+    SumaSaldoNoVencido: number;
+    SumaTotalSaldo: number;
+}
 
 
 interface GetCobranzaByClientParamsWithPagination extends GetCobranzaByClientInterface {
@@ -51,5 +59,8 @@ export {
     GetCobranzaInterface,
     GetCobranzaByClientInterface,
     GetCobranzaByClientParamsWithPagination,
-    CobranzaInterfaceByClient
+    CobranzaInterfaceByClient,
+
+    // RESPONSE
+    totalCobranzaByClientInterface
 }

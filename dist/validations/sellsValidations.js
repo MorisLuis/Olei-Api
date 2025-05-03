@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getClientParamsSchema = exports.getTotalSellsByClientQuerySchema = exports.getTotalCobranzaQuerySchema = exports.getCobranzaByClientQuerySchema = exports.getCobranzaQuerySchema = exports.getSellsByClientQuerySchema = exports.getSellByIdParamsSchema = exports.getSellByIdQuerySchema = exports.getTotalSellsQuerySchema = exports.getSellsQuerySchema = void 0;
+exports.getClientParamsSchema = exports.getTotalSellsByClientQuerySchema = exports.getTotalCobranzaQuerySchema = exports.getCobranzaByClientCountAndTotalQuerySchema = exports.getCobranzaByClientQuerySchema = exports.getCobranzaQuerySchema = exports.getSellsByClientQuerySchema = exports.getSellByIdParamsSchema = exports.getSellByIdQuerySchema = exports.getTotalSellsQuerySchema = exports.getSellsQuerySchema = void 0;
 const zod_1 = require("zod");
 const sells_1 = require("../interface/sells");
 // getSells
@@ -76,7 +76,21 @@ exports.getCobranzaByClientQuerySchema = zod_1.z.object({
     FilterNotExpired: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
     DateEnd: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
     DateExactly: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
-    DateStart: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional())
+    DateStart: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
+    Id_Almacen: zod_1.z.string().nonempty().transform((val) => (val ? parseInt(val, 10) : 0))
+});
+exports.getCobranzaByClientCountAndTotalQuerySchema = zod_1.z.object({
+    TipoDoc: zod_1.z
+        .string()
+        .optional()
+        .transform((val) => (val ? parseInt(val, 10) : 0)) // Convierte a número
+        .refine((val) => sells_1.TipoDoc.includes(val), { message: "TipoDoc debe ser 0, 1 o 2" }),
+    FilterExpired: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
+    FilterNotExpired: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
+    DateEnd: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
+    DateExactly: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
+    DateStart: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
+    Id_Almacen: zod_1.z.string().nonempty().transform((val) => (val ? parseInt(val, 10) : 0))
 });
 exports.getTotalCobranzaQuerySchema = zod_1.z.object({
     FilterExpired: zod_1.z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
@@ -101,7 +115,8 @@ exports.getTotalSellsByClientQuerySchema = zod_1.z.object({
         .refine((val) => sells_1.TipoDoc.includes(val), { message: "TipoDoc debe ser 0, 1 o 2" }),
     DateEnd: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
     DateExactly: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
-    DateStart: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional())
+    DateStart: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
+    Id_Almacen: zod_1.z.string().nonempty().transform((val) => (val ? parseInt(val, 10) : 0))
 });
 exports.getClientParamsSchema = zod_1.z.object({
     client: zod_1.z.string().nonempty().transform((val) => (val ? parseInt(val, 10) : 0))
