@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCobranzaWithTotalsService = exports.getCobranzaService = exports.getCobranzaByClientCountAndTotalService = exports.getCobranzaByClientService = void 0;
+exports.getCobranzaWithTotalsService = exports.getCobranzaByClientCountAndTotalService = exports.getCobranzaByClientService = exports.getCobranzaCountAndTotalService = exports.getCobranzaService = void 0;
 const database_1 = require("../../database");
 const cobranza_1 = require("../../database/querys/cobranza");
 const CustomError_1 = require("../../errors/CustomError");
@@ -12,32 +12,42 @@ const getCobranzaService = async ({ userSession, SellsOrderCondition, termSearch
     }
     ;
     const query = cobranza_1.cobranzaQuery.getCobranza;
-    const totalCobranzaQuery = cobranza_1.cobranzaQuery.getCobranzaTotal;
-    const countCobranzaQuery = cobranza_1.cobranzaQuery.getCobranzaCount;
     const requestCobranza = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
         .input('nombre', termSearch)
         .input('OrderCondition', SellsOrderCondition)
         .query(query);
+    return {
+        cobranza: requestCobranza.recordset
+    };
+};
+exports.getCobranzaService = getCobranzaService;
+const getCobranzaCountAndTotalService = async ({ userSession, termSearch }) => {
+    const { ServidorSQL, BaseSQL } = userSession;
+    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
+    if (!pool) {
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
+    }
+    ;
+    const totalCobranzaQuery = cobranza_1.cobranzaQuery.getCobranzaTotal;
+    const countCobranzaQuery = cobranza_1.cobranzaQuery.getCobranzaCount;
     const requestTotal = await pool.request()
         .input('nombre', termSearch)
         .query(totalCobranzaQuery);
     const requestCount = pool.request()
         .input('nombre', termSearch)
         .query(countCobranzaQuery);
-    const [sellsResult, countResult, totalResult] = await Promise.all([
-        requestCobranza,
+    const [countResult, totalResult] = await Promise.all([
         requestCount,
         requestTotal
     ]);
     return {
-        cobranza: sellsResult.recordset,
         count: Number(countResult.recordset[0]?.TotalCount ?? 0),
         total: totalResult.recordset[0]
     };
 };
-exports.getCobranzaService = getCobranzaService;
+exports.getCobranzaCountAndTotalService = getCobranzaCountAndTotalService;
 const getCobranzaByClientService = async ({ userSession, PageNumber, PageSize = 10, SellsOrderCondition, FilterExpired, FilterNotExpired, TipoDoc, DateEnd, DateExactly, DateStart, Id_Cliente, Id_Almacen }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);

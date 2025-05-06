@@ -3,7 +3,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import type { SellsInterface } from '../interface/sells';
 import { formatCurrency } from './currency';
 import { formatTipoDoc } from './tipoDocFormat';
-import type { totalCobranzaByClientInterface } from '../services/cobranza/cobranza.interface';
+import type { totalCobranzaResponse } from '../services/cobranza/cobranza.interface';
 
 // Función auxiliar para truncar texto
 const truncateText = (text: string, maxWidth: number, font: PDFFont, fontSize: number): string => {
@@ -19,7 +19,7 @@ const truncateText = (text: string, maxWidth: number, font: PDFFont, fontSize: n
 
 const generatePDF = async (
     sells: SellsInterface[],
-    briefSells: totalCobranzaByClientInterface
+    briefSells: totalCobranzaResponse
 ): Promise<Uint8Array> => {
     const pdfDoc = await PDFDocument.create();
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);

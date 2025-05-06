@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCobranzaWithTotals = exports.getCobranzaByClientCountAndTotal = exports.getCobranzaByClient = exports.getCobranza = exports.getSellById = exports.getSellsByClient = exports.getSells = void 0;
+exports.getCobranzaWithTotals = exports.getCobranzaByClientCountAndTotal = exports.getCobranzaByClient = exports.getCobranzaCountAndTotal = exports.getCobranza = exports.getSellById = exports.getSellsByClient = exports.getSells = void 0;
 const sellsDocsServices_1 = require("../services/sells/sellsDocsServices");
 const sellsValidations_1 = require("../validations/sellsValidations");
 const zod_1 = require("zod");
@@ -78,14 +78,31 @@ const getCobranza = async (req, res, next) => {
         // Get session from REDIS.
         const { PageNumber, cobranzaOrderCondition, termSearch } = sellsValidations_1.getCobranzaQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
-        const { cobranza, count, total } = await (0, cobranzaService_1.getCobranzaService)({
+        const { cobranza } = await (0, cobranzaService_1.getCobranzaService)({
             userSession,
             PageNumber,
             SellsOrderCondition: cobranzaOrderCondition,
             termSearch
         });
         return res.json({
-            cobranza,
+            cobranza
+        });
+    }
+    catch (error) {
+        return next(error);
+    }
+};
+exports.getCobranza = getCobranza;
+const getCobranzaCountAndTotal = async (req, res, next) => {
+    try {
+        // Get session from REDIS.
+        const { termSearch } = sellsValidations_1.getCobranzaQueryCountAndTotalSchema.parse(req.query);
+        const userSession = req.sessionWeb;
+        const { count, total } = await (0, cobranzaService_1.getCobranzaCountAndTotalService)({
+            userSession,
+            termSearch
+        });
+        return res.json({
             count,
             total
         });
@@ -94,7 +111,7 @@ const getCobranza = async (req, res, next) => {
         return next(error);
     }
 };
-exports.getCobranza = getCobranza;
+exports.getCobranzaCountAndTotal = getCobranzaCountAndTotal;
 const getCobranzaByClient = async (req, res, next) => {
     try {
         const { Id_Almacen, PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = sellsValidations_1.getCobranzaByClientQuerySchema.parse(req.query);

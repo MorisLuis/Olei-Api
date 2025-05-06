@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getClientParamsSchema = exports.getTotalSellsByClientQuerySchema = exports.getTotalCobranzaQuerySchema = exports.getCobranzaByClientCountAndTotalQuerySchema = exports.getCobranzaByClientQuerySchema = exports.getCobranzaQuerySchema = exports.getSellsByClientQuerySchema = exports.getSellByIdParamsSchema = exports.getSellByIdQuerySchema = exports.getTotalSellsQuerySchema = exports.getSellsQuerySchema = void 0;
+exports.getClientParamsSchema = exports.getTotalSellsByClientQuerySchema = exports.getTotalCobranzaQuerySchema = exports.getCobranzaByClientCountAndTotalQuerySchema = exports.getCobranzaByClientQuerySchema = exports.getCobranzaQuerySchema = exports.getCobranzaQueryCountAndTotalSchema = exports.getSellsByClientQuerySchema = exports.getSellByIdParamsSchema = exports.getSellByIdQuerySchema = exports.getTotalSellsQuerySchema = exports.getSellsQuerySchema = void 0;
 const zod_1 = require("zod");
 const sells_1 = require("../interface/sells");
 // getSells
@@ -51,6 +51,9 @@ exports.getSellsByClientQuerySchema = zod_1.z.object({
     DateStart: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional())
 });
 // getCobranza
+exports.getCobranzaQueryCountAndTotalSchema = zod_1.z.object({
+    termSearch: zod_1.z.string().optional().transform(val => val ?? '')
+});
 exports.getCobranzaQuerySchema = zod_1.z.object({
     PageNumber: zod_1.z.
         preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),

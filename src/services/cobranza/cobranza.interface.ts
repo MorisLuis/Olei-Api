@@ -17,7 +17,7 @@ interface GetCobranzaInterface {
     termSearch: string;
 
     SellsOrderCondition?: CobranzaOrderConditionType | string,
-    PageNumber: number;
+    PageNumber?: number;
     PageSize?: number;  // Hacer PageSize opcional
 };
 
@@ -37,7 +37,7 @@ interface GetCobranzaByClientInterface {
 
 
 // RESPONSE
-interface totalCobranzaByClientInterface {
+interface totalCobranzaResponse {
     SumaSaldoVencido: number;
     SumaSaldoNoVencido: number;
     SumaTotalSaldo: number;
@@ -62,5 +62,5 @@ export {
     CobranzaInterfaceByClient,
 
     // RESPONSE
-    totalCobranzaByClientInterface
+    totalCobranzaResponse
 }

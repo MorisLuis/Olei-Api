@@ -1,15 +1,14 @@
 import type { NextFunction, Request, Response } from "express"
 import { getSellsService, getSellsByClientService, getSellByIdService } from "../services/sells/sellsDocsServices";
-import { getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getSellByIdParamsSchema, getSellsByClientQuerySchema, getCobranzaQuerySchema, getCobranzaByClientQuerySchema, getCobranzaByClientCountAndTotalQuerySchema } from '../validations/sellsValidations'
+import { getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getSellByIdParamsSchema, getSellsByClientQuerySchema, getCobranzaQuerySchema, getCobranzaByClientQuerySchema, getCobranzaByClientCountAndTotalQuerySchema, getCobranzaQueryCountAndTotalSchema } from '../validations/sellsValidations'
 import { z } from "zod";
-import { getCobranzaByClientCountAndTotalService, getCobranzaByClientService, getCobranzaService, getCobranzaWithTotalsService } from "../services/cobranza/cobranzaService";
+import { getCobranzaByClientCountAndTotalService, getCobranzaByClientService, getCobranzaCountAndTotalService, getCobranzaService, getCobranzaWithTotalsService } from "../services/cobranza/cobranzaService";
 
 const getSells = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const { PageNumber, sellsOrderCondition, searchTerm } = getSellsQuerySchema.parse(req.query)
         const userSession = req.sessionWeb;
-
 
         const { sells, count, total } = await getSellsService(
             userSession,
@@ -98,7 +97,7 @@ const getCobranza = async (req: Request, res: Response, next: NextFunction): Pro
         const { PageNumber, cobranzaOrderCondition, termSearch } = getCobranzaQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
-        const { cobranza, count, total } = await getCobranzaService({
+        const { cobranza } = await getCobranzaService({
             userSession,
             PageNumber,
             SellsOrderCondition: cobranzaOrderCondition,
@@ -106,7 +105,26 @@ const getCobranza = async (req: Request, res: Response, next: NextFunction): Pro
         });
 
         return res.json({
-            cobranza,
+            cobranza
+        });
+
+    } catch (error) {
+        return next(error)
+    }
+};
+
+const getCobranzaCountAndTotal = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+    try {
+        // Get session from REDIS.
+        const { termSearch } = getCobranzaQueryCountAndTotalSchema.parse(req.query);
+        const userSession = req.sessionWeb;
+
+        const { count, total } = await getCobranzaCountAndTotalService({
+            userSession,
+            termSearch
+        });
+
+        return res.json({
             count,
             total
         });
@@ -209,6 +227,7 @@ export {
 
     /* cobranza */
     getCobranza,
+    getCobranzaCountAndTotal,
     getCobranzaByClient,
     getCobranzaByClientCountAndTotal,
     getCobranzaWithTotals

@@ -81,6 +81,10 @@ export const getSellsByClientQuerySchema = z.object({
 })
 
 // getCobranza
+export const getCobranzaQueryCountAndTotalSchema = z.object({
+    termSearch: z.string().optional().transform(val => val ?? '')
+});
+
 export const getCobranzaQuerySchema = z.object({
     PageNumber: z.
         preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
