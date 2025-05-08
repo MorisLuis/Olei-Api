@@ -4,7 +4,7 @@ exports.getCobranzaWithTotalsService = exports.getCobranzaByClientCountAndTotalS
 const database_1 = require("../../database");
 const cobranza_1 = require("../../database/querys/cobranza");
 const CustomError_1 = require("../../errors/CustomError");
-const getCobranzaService = async ({ userSession, SellsOrderCondition, termSearch, PageSize = 10, PageNumber }) => {
+const getCobranzaService = async ({ userSession, SellsOrderCondition, PageSize = 10, PageNumber, termSearch }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -135,8 +135,9 @@ const getCobranzaWithTotalsService = async ({ userSession, Id_Cliente, FilterExp
         .query(query);
     const recordsets = Array.isArray(request.recordsets) ? request.recordsets : Object.values(request.recordsets);
     const brief = recordsets[0][0];
+    const { SaldoVencido, SaldoNoVencido, TotalSaldo } = brief;
     return {
-        brief
+        SaldoVencido, SaldoNoVencido, TotalSaldo
     };
 };
 exports.getCobranzaWithTotalsService = getCobranzaWithTotalsService;

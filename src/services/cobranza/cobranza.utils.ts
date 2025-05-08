@@ -1,9 +1,9 @@
 import type { SellsInterface } from "../../interface/sells";
-import type { GetCobranzaByClientParamsWithPagination, totalCobranzaResponse } from "./cobranza.interface";
+import type { GetCobranzaByClientParams, GetCobranzaTotalResponse } from "./cobranza.interface";
 import { getCobranzaByClientCountAndTotalService, getCobranzaByClientService } from "./cobranzaService";
 
 
-const getAllCobranzaService = async (params: GetCobranzaByClientParamsWithPagination): Promise<{ sells: SellsInterface[], brief: totalCobranzaResponse }> => {
+const getAllCobranzaService = async (params: GetCobranzaByClientParams): Promise<{ sells: SellsInterface[], brief: GetCobranzaTotalResponse }> => {
 
     let allSells: SellsInterface[] = [];
     let pageNumber = params.PageNumber || 1;

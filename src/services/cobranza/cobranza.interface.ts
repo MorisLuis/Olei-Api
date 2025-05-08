@@ -1,66 +1,63 @@
-import type { CobranzaOrderConditionType, SellsInterface, SellsOrderConditionType } from "../../interface/sells";
+import type { CobranzaOrderConditionType, SellsInterface } from "../../interface/sells";
 import type { UserWebSessionInterface } from "../../interface/user";
 
 type FilterType = 0 | 1;
-
 interface CobranzaInterface {
-    SaldoVencido: number;
-    SaldoNoVencido: number;
-    TotalSaldo: number;
-};
+    Id_Cliente: number,
+    Nombre: string,
+    Id_Almacen: number,
+    ExpiredDays: number,
+    Saldo: string,
+    CorreoVtas: string
+}
 
-interface GetCobranzaInterface {
-    Id_Cliente?: number,
-    Id_Almacen?: number,
-    
+
+// PARAMS
+interface GetCobranzaParams {
     userSession: UserWebSessionInterface,
-    termSearch: string;
-
     SellsOrderCondition?: CobranzaOrderConditionType | string,
     PageNumber?: number;
-    PageSize?: number;  // Hacer PageSize opcional
+    PageSize?: number;
 };
 
-interface GetCobranzaByClientInterface {
+interface GetCobranzaWithSearchParams extends GetCobranzaParams {
+    termSearch: string;
+}
+
+interface GetCobranzaByClientParams extends GetCobranzaParams {
     Id_Cliente?: number,
-    Id_Almacen: number,
-    
-    userSession: UserWebSessionInterface,
+    Id_Almacen?: number,
     TipoDoc: SellsInterface['TipoDoc']
     FilterExpired: FilterType,
     FilterNotExpired: FilterType,
     DateEnd: string | null,
     DateExactly: string | null,
     DateStart: string | null,
-    SellsOrderCondition?: SellsOrderConditionType | string
-};
+}
 
 
 // RESPONSE
-interface totalCobranzaResponse {
+interface GetCobranzaTotalsResponse {
+    SaldoVencido: number;
+    SaldoNoVencido: number;
+    TotalSaldo: number;
+};
+
+
+interface GetCobranzaTotalResponse {
     SumaSaldoVencido: number;
     SumaSaldoNoVencido: number;
     SumaTotalSaldo: number;
 }
 
-
-interface GetCobranzaByClientParamsWithPagination extends GetCobranzaByClientInterface {
-    PageNumber: number;
-    PageSize?: number;  // Hacer PageSize opcional
-};
-
-interface CobranzaInterfaceByClient extends CobranzaInterface {
-    Nombre: string
-}
-
-
 export {
     CobranzaInterface,
-    GetCobranzaInterface,
-    GetCobranzaByClientInterface,
-    GetCobranzaByClientParamsWithPagination,
-    CobranzaInterfaceByClient,
+
+    //CobranzaInterface,
+    GetCobranzaWithSearchParams,
+    GetCobranzaByClientParams,
 
     // RESPONSE
-    totalCobranzaResponse
+    GetCobranzaTotalResponse,
+    GetCobranzaTotalsResponse 
 }

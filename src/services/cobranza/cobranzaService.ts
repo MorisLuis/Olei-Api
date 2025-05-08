@@ -2,16 +2,16 @@ import { dbConnectionWeb } from "../../database";
 import { cobranzaQuery } from "../../database/querys/cobranza";
 import { ValidationError } from "../../errors/CustomError";
 import type { SellsInterface } from "../../interface/sells";
-import type { CobranzaInterface, CobranzaInterfaceByClient, GetCobranzaByClientParamsWithPagination, GetCobranzaByClientInterface, GetCobranzaInterface, totalCobranzaResponse } from "./cobranza.interface";
+import type { GetCobranzaWithSearchParams, GetCobranzaByClientParams, GetCobranzaTotalResponse, CobranzaInterface, GetCobranzaTotalsResponse } from "./cobranza.interface";
 
 
 const getCobranzaService = async ({
     userSession,
     SellsOrderCondition,
-    termSearch,
     PageSize = 10,
-    PageNumber
-}: GetCobranzaInterface): Promise<{ cobranza: CobranzaInterfaceByClient[] }> => {
+    PageNumber,
+    termSearch
+}: GetCobranzaWithSearchParams ): Promise<{ cobranza: CobranzaInterface[] }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -37,7 +37,7 @@ const getCobranzaService = async ({
 const getCobranzaCountAndTotalService = async ({
     userSession,
     termSearch
-}: GetCobranzaInterface) : Promise<{ count: number, total: totalCobranzaResponse }> => {
+}: GetCobranzaWithSearchParams ) : Promise<{ count: number, total: GetCobranzaTotalResponse }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -81,7 +81,7 @@ const getCobranzaByClientService = async ({
     DateStart,
     Id_Cliente,
     Id_Almacen
-}: GetCobranzaByClientParamsWithPagination): Promise<{ cobranza: SellsInterface[] }> => {
+}: GetCobranzaByClientParams ): Promise<{ cobranza: SellsInterface[] }> => {
 
 
     const { ServidorSQL, BaseSQL } = userSession;
@@ -122,7 +122,7 @@ const getCobranzaByClientCountAndTotalService = async ({
     DateStart,
     Id_Cliente,
     Id_Almacen
-}: GetCobranzaByClientInterface): Promise<{ count: number, total: totalCobranzaResponse }> => {
+}: GetCobranzaByClientParams ): Promise<{ count: number, total: GetCobranzaTotalResponse }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -177,7 +177,7 @@ const getCobranzaWithTotalsService = async ({
     DateEnd,
     DateExactly,
     DateStart
-}: GetCobranzaByClientInterface): Promise<{ brief: CobranzaInterface }> => {
+}: GetCobranzaByClientParams ): Promise<GetCobranzaTotalsResponse> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -199,10 +199,11 @@ const getCobranzaWithTotalsService = async ({
         .query(query);
 
     const recordsets = Array.isArray(request.recordsets) ? request.recordsets : Object.values(request.recordsets);
-    const brief = recordsets[0][0] as CobranzaInterface;
+    const brief = recordsets[0][0] as GetCobranzaTotalsResponse;
+    const { SaldoVencido, SaldoNoVencido, TotalSaldo } = brief;
 
     return {
-        brief
+        SaldoVencido, SaldoNoVencido, TotalSaldo
     }
 };
 

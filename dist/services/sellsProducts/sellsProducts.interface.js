@@ -2,4 +2,4 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 ;
 ;
-//# sourceMappingURL=cobranza.interface.js.map
+//# sourceMappingURL=sellsProducts.interface.js.map
