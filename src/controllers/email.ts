@@ -2,9 +2,10 @@ import type { NextFunction, Request, Response } from 'express';
 import nodemailer from 'nodemailer';
 import { emailBodySchema, emailCobranzaBodySchema } from '../validations/emailValidations';
 import { Buffer } from 'buffer';  // Importa Buffer si es necesario
-import { getClientParamsSchema, getCobranzaByClientQuerySchema } from '../validations/sellsValidations';
+import { getClientParamsSchema } from '../validations/sellsValidations';
 import generatePDF from '../utils/generatePDF';
 import { getAllCobranzaService } from '../services/cobranza/cobranza.utils';
+import { getCobranzaByClientQuerySchema } from '../validations/cobranzaValidations';
 
 // Configurar el transporte SMTP
 const transporter = nodemailer.createTransport({
@@ -61,7 +62,8 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
         FilterNotExpired,
         DateEnd,
         DateExactly,
-        DateStart
+        DateStart,
+        Id_Almacen
     } = getCobranzaByClientQuerySchema.parse(req.query);
 
 
@@ -70,6 +72,7 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
     const userSession = req.sessionWeb;
 
     const { sells, brief } = await getAllCobranzaService({
+        Id_Almacen,
         userSession,
         Id_Cliente: client,
         PageNumber: PageNumber || 1,

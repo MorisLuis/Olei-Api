@@ -147,7 +147,7 @@ export const cobranzaQuery = {
                     Total,
                     DATEDIFF(DAY, GETDATE(), FechaEntrega) AS ExpiredDays
                 FROM [dbo].[VENTAS]
-                WHERE Id_Cliente = @Id_Cliente
+                WHERE Id_Cliente = @Id_Cliente  AND Id_Almacen = @Id_Almacen
                     AND Saldo > 0
                     AND FechaLiq >= CAST(GETDATE() AS DATE) -- Condición para FechaLiq
                     AND (@FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1))
@@ -159,23 +159,24 @@ export const cobranzaQuery = {
             )
             SELECT *
             FROM VENTAS_CTE
-            ORDER BY 
+                ORDER BY 
                 CASE 
                     WHEN @OrderCondition = 'TipoDoc' THEN TipoDoc 
                     WHEN @OrderCondition = 'Folio' THEN Folio 
                     WHEN @OrderCondition = 'Fecha' THEN Fecha 
-                    WHEN @OrderCondition = 'ExpiredDays' THEN ExpiredDays
-                    WHEN @OrderCondition = 'FechaEntrega' THEN Fecha 
-                END DESC,
+                    WHEN @OrderCondition = 'ExpiredDays' THEN 
+                        CASE WHEN ExpiredDays IS NULL THEN 1 ELSE 0 END
+                END ASC,
                 CASE 
                     WHEN @OrderCondition = 'TipoDoc' THEN Fecha 
-                    WHEN @OrderCondition = 'ExpiredDays' THEN Fecha
+                    WHEN @OrderCondition = 'ExpiredDays' THEN 
+                        ExpiredDays -- Orden real de menor a mayor
                     WHEN @OrderCondition = 'FechaEntrega' THEN Fecha
-                END DESC,
+                END ASC,
                 Fecha,
                 TipoDoc
-            OFFSET (@PageNumber - 1) * @PageSize ROWS
-            FETCH NEXT @PageSize ROWS ONLY
+                OFFSET (@PageNumber - 1) * @PageSize ROWS
+                FETCH NEXT @PageSize ROWS ONLY
     `,
 
     getCobranzaByClientTotal: `
@@ -197,7 +198,7 @@ export const cobranzaQuery = {
                     Total,
                     DATEDIFF(DAY, GETDATE(), FechaEntrega) AS ExpiredDays
                 FROM [dbo].[VENTAS]
-                WHERE Id_Cliente = @Id_Cliente
+                WHERE Id_Cliente = @Id_Cliente  AND Id_Almacen = @Id_Almacen
                     AND Saldo > 0
                     AND FechaLiq >= CAST(GETDATE() AS DATE) -- Condición para FechaLiq
                     AND (@FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1))
@@ -208,15 +209,16 @@ export const cobranzaQuery = {
                     AND (@DateEnd IS NULL OR CAST(Fecha AS DATE) <= @DateEnd)
             )
             SELECT 
-                SUM(Saldo) AS SumaSaldo, 
-                SUM(Total) AS SumaTotal
+                SUM(CASE WHEN ExpiredDays < 0 THEN Saldo ELSE 0 END) AS SumaSaldoVencido,
+                SUM(CASE WHEN ExpiredDays >= 0 OR ExpiredDays IS NULL THEN Saldo ELSE 0 END) AS SumaSaldoNoVencido,
+                SUM(Saldo) AS SumaTotalSaldo
             FROM VENTAS_CTE;
     `,
 
     getCobranzaByClientCount: `
         SELECT COUNT(*) AS TotalCount
         FROM [dbo].[VENTAS]
-        WHERE Id_Cliente = @Id_Cliente
+        WHERE Id_Cliente = @Id_Cliente  AND Id_Almacen = @Id_Almacen
         AND Saldo > 0
         AND FechaLiq >= CAST(GETDATE() AS DATE)
         AND (@FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1))

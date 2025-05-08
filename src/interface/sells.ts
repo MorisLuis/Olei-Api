@@ -15,7 +15,7 @@ export interface SellsInterface {
     Impuesto?: number;
     FechaLiq?: string;
     Piezas?: number;
-    
+
     Subtotal?: number;
 }
 
@@ -24,7 +24,7 @@ export interface SellsDetailsInterface {
     Id_Almacen: number;
     Id_ListaPrecios?: number | null;
     Folio: number;
-    
+
     Id_Marca: number;
     Precio?: number | null;
     Cantidad?: number | null;
@@ -44,12 +44,29 @@ export interface SellsDetailsInterface {
     SKU?: string | null;
 }
 
+export interface SellsProductsInterface {
+    Id_Almacen: number,
+    TipoDoc: number,
+    Folio: number,
+    Partida: number,
+
+    Codigo: string,
+    Descripcion: string,
+    Cantidad: number,
+    Precio: number,
+    Importe: number,
+    Impuesto: number,
+    Sku: string,
+    Fecha: string;
+    Marca: string
+}
+
 
 export type typeTipoDoc = 0 | 1 | 2 | 3 | 4 | 6;
 export const TipoDoc: typeTipoDoc[] = [0, 1, 2, 3, 4];
 
-export type SellsOrderConditionType = 'Nombre' | 'Saldo' | 'Total';
-export const SellsOrderCondition: SellsOrderConditionType[] = ['Nombre', 'Saldo', 'Total'];
+export type SellsOrderConditionType = 'Nombre' | 'Total';
+export const SellsOrderCondition: SellsOrderConditionType[] = ['Nombre', 'Total'];
 
 export type SellsOrderConditionByClientType = 'TipoDoc' | 'Folio' | 'Fecha' | 'FechaEntrega' | 'ExpiredDays';
 export const SellsOrderByClientCondition: SellsOrderConditionByClientType[] = ['TipoDoc', 'Folio', 'Fecha', 'FechaEntrega', 'ExpiredDays']
@@ -61,3 +78,9 @@ export const SellsFilterCondition: SellsFilterConditionByClientType[] = ['TipoDo
 /* COBRANZA */
 export type CobranzaOrderConditionType = 'Nombre' | 'ExpiredDays' | 'SaldoVencido' | 'SaldoNoVencido' | 'TotalSaldo';
 export const CobranzaOrderCondition: CobranzaOrderConditionType[] = ['Nombre', 'ExpiredDays', 'SaldoVencido', 'SaldoNoVencido', 'TotalSaldo']
+
+
+/* SELLS PRODUCTS */
+export type SellsProductsOrderConditionType = 'Folio' | 'Codigo' | 'Fecha' | 'Marca';
+export const SellsProductsOrderCondition: SellsProductsOrderConditionType[] = ['Folio', 'Codigo', 'Fecha', 'Marca']
+

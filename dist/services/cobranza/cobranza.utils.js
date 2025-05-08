@@ -7,7 +7,7 @@ const getAllCobranzaService = async (params) => {
     let pageNumber = params.PageNumber || 1;
     let pageSize = params.PageSize || 100;
     let hasMore = true;
-    const { brief } = await (0, cobranzaService_1.getCobranzaWithTotalsService)({ ...params });
+    const { total } = await (0, cobranzaService_1.getCobranzaByClientCountAndTotalService)({ ...params });
     while (hasMore) {
         const { cobranza } = await (0, cobranzaService_1.getCobranzaByClientService)({ ...params, PageNumber: pageNumber, PageSize: pageSize });
         if (cobranza.length > 0) {
@@ -21,7 +21,7 @@ const getAllCobranzaService = async (params) => {
     }
     return {
         sells: allSells,
-        brief
+        brief: total
     };
 };
 exports.getAllCobranzaService = getAllCobranzaService;

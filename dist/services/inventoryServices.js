@@ -11,7 +11,6 @@ const currentTime_1 = require("../utils/currentTime");
 const mssql_1 = __importDefault(require("mssql"));
 const postInventoryService = async ({ userSession, inventoryDetails, typeOfMovement }) => {
     try {
-        console.log({ userSession });
         /* TodosAlmacenes PENDING */
         const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, userId } = userSession;
         const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
@@ -60,7 +59,6 @@ const postInventoryService = async ({ userSession, inventoryDetails, typeOfMovem
         };
     }
     catch (error) {
-        console.log({ error });
         throw new CustomError_1.ValidationError(`${error}`);
     }
 };

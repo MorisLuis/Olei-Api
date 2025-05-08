@@ -2,37 +2,48 @@ import type { SellsInterface, SellsOrderConditionType } from "../../interface/se
 import type { UserWebSessionInterface } from "../../interface/user"
 
 
-interface getSellsByClientServiceInterface {
+// PARAMS
+interface GetSellsServiceParams {
     userSession: UserWebSessionInterface,
+    searchTerm: string
+};
+
+interface GetSellsPaignatedServiceParams extends GetSellsServiceParams {
     PageNumber: number,
+    sellsOrderCondition: SellsOrderConditionType | string,
+}
+
+interface GetSellsByClientServiceParams {
+    userSession: UserWebSessionInterface,
     Id_Cliente: number,
+    TipoDoc?: SellsInterface['TipoDoc']
+    FilterExpired: 0 | 1,
+    FilterNotExpired: 0 | 1,
+    DateEnd: string | null,
+    DateExactly: string | null,
+    DateStart: string | null,
+};
+
+interface GetSellsByClientPaginatedServiceParams extends GetSellsByClientServiceParams {
     SellsOrderCondition: SellsOrderConditionType | string,
-    TipoDoc?: SellsInterface['TipoDoc']
-    FilterExpired: 0 | 1,
-    FilterNotExpired: 0 | 1,
-    DateEnd: string | null,
-    DateExactly: string | null,
-    DateStart: string | null,
-};
+    PageNumber: number,
+}
 
-interface getTotalSellsServiceInterface {
-    userSession: UserWebSessionInterface,
-    searchTerm: string;
-};
+// RESPONSE
+interface  GetSellsTotalServiceResponse {
+    count: number, 
+    total: { SumaSubtotal: number, SumaTotal: number }
+}
 
-interface getTotalSellsByClientServiceInterface {
-    userSession: UserWebSessionInterface,
-    Id_Cliente: number,
-    TipoDoc?: SellsInterface['TipoDoc']
-    FilterExpired: 0 | 1,
-    FilterNotExpired: 0 | 1,
-    DateEnd: string | null,
-    DateExactly: string | null,
-    DateStart: string | null,
-};
+
 
 export type {
-    getSellsByClientServiceInterface,
-    getTotalSellsServiceInterface,
-    getTotalSellsByClientServiceInterface
+    // PARAMS
+    GetSellsServiceParams,
+    GetSellsPaignatedServiceParams,
+    GetSellsByClientServiceParams,
+    GetSellsByClientPaginatedServiceParams,
+
+    // RESPONSE
+    GetSellsTotalServiceResponse
 }
