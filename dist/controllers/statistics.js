@@ -5,9 +5,14 @@ const statisticsService_1 = require("../services/statisticsService");
 const getCRMBrief = async (req, res, next) => {
     try {
         const userSession = req.sessionWeb;
-        const { eventsToday, sellsToday, eventsWeek, sellsWeek } = await (0, statisticsService_1.getCRMBriefService)(userSession);
+        const { eventsToday, sellsToday, eventsWeek, sellsWeek, sells, cobranza } = await (0, statisticsService_1.getStatisticsCRMDashboard)(userSession);
         return res.json({
-            eventsToday, sellsToday, eventsWeek, sellsWeek
+            eventsToday,
+            sellsToday,
+            eventsWeek,
+            sellsWeek,
+            sells,
+            cobranza
         });
     }
     catch (error) {
