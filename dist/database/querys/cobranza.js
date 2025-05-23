@@ -18,7 +18,7 @@ exports.cobranzaQuery = {
             V.Id_Cliente,
             C.RazonSocial AS Nombre,
             V.Id_Almacen,
-            DATEDIFF(DAY, GETDATE(), V.FechaEntrega) AS ExpiredDays,
+            DATEDIFF(DAY, GETDATE(), V.FechaLiq) AS ExpiredDays,
             V.Saldo,
             ISNULL(C.CorreoVtas, '') AS CorreoVtas
         FROM [dbo].[VENTAS] V
@@ -74,7 +74,7 @@ exports.cobranzaQuery = {
             V.Id_Cliente,
             C.RazonSocial AS Nombre,
             V.Id_Almacen,
-            DATEDIFF(DAY, GETDATE(), V.FechaEntrega) AS ExpiredDays,
+            DATEDIFF(DAY, GETDATE(), V.FechaLiq) AS ExpiredDays,
             V.Saldo,
             ISNULL(C.CorreoVtas, '') AS CorreoVtas
         FROM [dbo].[VENTAS] V
@@ -138,18 +138,17 @@ exports.cobranzaQuery = {
                     Folio,
                     Serie,
                     Fecha,
-                    FechaEntrega,
                     FechaLiq,
                     Saldo,
                     Total,
-                    DATEDIFF(DAY, GETDATE(), FechaEntrega) AS ExpiredDays
+                    DATEDIFF(DAY, GETDATE(), FechaLiq) AS ExpiredDays
                 FROM [dbo].[VENTAS]
                 WHERE Id_Cliente = @Id_Cliente  AND Id_Almacen = @Id_Almacen
                     AND Saldo > 0
                     AND FechaLiq >= CAST(GETDATE() AS DATE) -- Condición para FechaLiq
                     AND (@FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1))
-                    AND (@FilterExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) < 0 AND @FilterExpired = 1))
-                    AND (@FilterNotExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) > 0 AND @FilterNotExpired = 1))
+                    AND (@FilterExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaLiq) < 0 AND @FilterExpired = 1))
+                    AND (@FilterNotExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaLiq) > 0 AND @FilterNotExpired = 1))
                     AND (@DateExactly IS NULL OR CAST(Fecha AS DATE) = @DateExactly)
                     AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)
                     AND (@DateEnd IS NULL OR CAST(Fecha AS DATE) <= @DateEnd)
@@ -168,7 +167,7 @@ exports.cobranzaQuery = {
                     WHEN @OrderCondition = 'TipoDoc' THEN Fecha 
                     WHEN @OrderCondition = 'ExpiredDays' THEN 
                         ExpiredDays -- Orden real de menor a mayor
-                    WHEN @OrderCondition = 'FechaEntrega' THEN Fecha
+                    WHEN @OrderCondition = 'FechaLiq' THEN Fecha
                 END ASC,
                 Fecha,
                 TipoDoc
@@ -188,18 +187,17 @@ exports.cobranzaQuery = {
                     Folio,
                     Serie,
                     Fecha,
-                    FechaEntrega,
                     FechaLiq,
                     Saldo,
                     Total,
-                    DATEDIFF(DAY, GETDATE(), FechaEntrega) AS ExpiredDays
+                    DATEDIFF(DAY, GETDATE(), FechaLiq) AS ExpiredDays
                 FROM [dbo].[VENTAS]
                 WHERE Id_Cliente = @Id_Cliente  AND Id_Almacen = @Id_Almacen
                     AND Saldo > 0
                     AND FechaLiq >= CAST(GETDATE() AS DATE) -- Condición para FechaLiq
                     AND (@FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1))
-                    AND (@FilterExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) < 0 AND @FilterExpired = 1))
-                    AND (@FilterNotExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) > 0 AND @FilterNotExpired = 1))
+                    AND (@FilterExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaLiq) < 0 AND @FilterExpired = 1))
+                    AND (@FilterNotExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaLiq) > 0 AND @FilterNotExpired = 1))
                     AND (@DateExactly IS NULL OR CAST(Fecha AS DATE) = @DateExactly)
                     AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)
                     AND (@DateEnd IS NULL OR CAST(Fecha AS DATE) <= @DateEnd)
@@ -217,8 +215,8 @@ exports.cobranzaQuery = {
         AND Saldo > 0
         AND FechaLiq >= CAST(GETDATE() AS DATE)
         AND (@FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1))
-        AND (@FilterExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) < 0 AND @FilterExpired = 1))
-        AND (@FilterNotExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) > 0 AND @FilterNotExpired = 1))
+        AND (@FilterExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaLiq) < 0 AND @FilterExpired = 1))
+        AND (@FilterNotExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaLiq) > 0 AND @FilterNotExpired = 1))
         AND (@DateExactly IS NULL OR CAST(Fecha AS DATE) = @DateExactly)
         AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)
         AND (@DateEnd IS NULL OR CAST(Fecha AS DATE) <= @DateEnd)
@@ -232,7 +230,6 @@ exports.cobranzaQuery = {
             Folio INT,
             Serie VARCHAR(10),
             Fecha DATETIME,
-            FechaEntrega DATETIME,
             FechaLiq DATETIME,
             Saldo DECIMAL(18,2),
             Total DECIMAL(18,2),
@@ -248,18 +245,17 @@ exports.cobranzaQuery = {
             Folio,
             Serie,
             Fecha,
-            FechaEntrega,
             FechaLiq,
             Saldo,
             Total,
-            DATEDIFF(DAY, GETDATE(), FechaEntrega)
+            DATEDIFF(DAY, GETDATE(), FechaLiq)
         FROM [dbo].[VENTAS]
         WHERE Id_Cliente = @Id_Cliente
         AND Saldo > 0
         AND FechaLiq >= CAST(GETDATE() AS DATE)
         AND ( @FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1) )
-        AND (@FilterExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) < 0 AND @FilterExpired = 1))
-        AND (@FilterNotExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaEntrega) > 0 AND @FilterNotExpired = 1))
+        AND (@FilterExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaLiq) < 0 AND @FilterExpired = 1))
+        AND (@FilterNotExpired = 0 OR (DATEDIFF(DAY, GETDATE(), FechaLiq) > 0 AND @FilterNotExpired = 1))
         AND (@DateExactly IS NULL OR CAST(Fecha AS DATE) = @DateExactly)
         AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)
         AND (@DateEnd IS NULL OR CAST(Fecha AS DATE) <= @DateEnd);

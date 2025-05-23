@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getStatisticsCRMDashboard = void 0;
-const database_1 = require("../database");
-const statistics_1 = require("../database/querys/statistics");
-const CustomError_1 = require("../errors/CustomError");
+const database_1 = require("../../database");
+const statistics_1 = require("../../database/querys/statistics");
+const CustomError_1 = require("../../errors/CustomError");
 const getStatisticsCRMDashboard = async (userSession) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
@@ -19,14 +19,18 @@ const getStatisticsCRMDashboard = async (userSession) => {
         .query(statistics_1.statisticsQuery.getSellsOfTheMonth);
     const requestWeeklyAndForwardSaldo = await pool.request()
         .query(statistics_1.statisticsQuery.getWeeklyAndForwardSaldo);
-    const [responseEventsOfTheDay, responseEventsOfTheWeek, responseSellsOfTheMonth, responseWeeklyAndForwardSaldo] = await Promise.all([
+    const requestProductsAndSellersOfTheMonth = await pool.request()
+        .query(statistics_1.statisticsQuery.getProductsAndSellersOfTheMonth);
+    const [responseEventsOfTheDay, responseEventsOfTheWeek, responseSellsOfTheMonth, responseWeeklyAndForwardSaldo, responseProductsAndSellersOfTheMonth] = await Promise.all([
         requestEventsOfTheDay,
         requestEventsOfTheWeek,
         requestSellsOfTheMonth,
-        requestWeeklyAndForwardSaldo
+        requestWeeklyAndForwardSaldo,
+        requestProductsAndSellersOfTheMonth
     ]);
     const { eventsToday, sellsToday } = responseEventsOfTheDay.recordset[0];
     const { eventsWeek, sellsWeek } = responseEventsOfTheWeek.recordset[0];
+    const { TotalProductos, TotalClientes } = responseProductsAndSellersOfTheMonth.recordset[0];
     const sells = responseSellsOfTheMonth.recordset;
     const cobranza = responseWeeklyAndForwardSaldo.recordset;
     return {
@@ -34,6 +38,8 @@ const getStatisticsCRMDashboard = async (userSession) => {
         sellsToday,
         eventsWeek,
         sellsWeek,
+        productsSoldMonth: TotalProductos,
+        sellerOfMonth: TotalClientes,
         sells,
         cobranza
     };

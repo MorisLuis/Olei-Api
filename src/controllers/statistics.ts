@@ -1,14 +1,30 @@
 import type { NextFunction, Request, Response } from "express"
-import { getCRMBriefService } from "../services/statisticsService";
+import { getStatisticsCRMDashboard } from "../services/statistics/statisticsService";
 
 const getCRMBrief = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const userSession = req.sessionWeb;
-        const { eventsToday, sellsToday, eventsWeek, sellsWeek  } = await getCRMBriefService(userSession);
+        const {
+            eventsToday,
+            sellsToday,
+            eventsWeek,
+            sellsWeek,
+            productsSoldMonth,
+            sellerOfMonth,
+            sells,
+            cobranza
+        } = await getStatisticsCRMDashboard(userSession);
 
         return res.json({
-            eventsToday, sellsToday, eventsWeek, sellsWeek
+            eventsToday,
+            sellsToday,
+            eventsWeek,
+            sellsWeek,
+            productsSoldMonth,
+            sellerOfMonth,
+            sells,
+            cobranza
         });
 
     } catch (error) {
