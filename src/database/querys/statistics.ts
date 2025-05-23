@@ -128,5 +128,26 @@ export const statisticsQuery = {
             SUM(V.Saldo) AS sumCobranza
         FROM VentasBase V
         WHERE CAST(V.FechaLiq AS DATE) >= @FechaBase;
+    `,
+
+    getProductsAndSellersOfTheMonth: `
+        SELECT 
+            (SELECT COUNT(*) 
+            FROM [dbo].[DETALLEVENTAS] dv
+            WHERE dv.Folio IN (
+                SELECT v.Folio
+                FROM [dbo].[VENTAS] v
+                WHERE v.Fecha >= '2023-05-01'
+                AND v.Fecha <  '2025-05-24'
+            )) AS TotalProductos,
+
+            (SELECT COUNT(DISTINCT Id_Cliente)
+            FROM [dbo].[VENTAS]
+            WHERE Fecha >= '2023-05-01'
+            AND Fecha <  '2025-05-24') AS TotalClientes;
+
+        /* WHERE v.Fecha >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)
+            AND v.Fecha < DATEADD(DAY, 1, CAST(GETDATE() AS DATE)) */
+    
     `
 }

@@ -1,19 +1,13 @@
-import { dbConnectionWeb } from "../database";
-import { statisticsQuery } from "../database/querys/statistics";
-import { ValidationError } from "../errors/CustomError";
-import type { UserWebSessionInterface } from "../interface/user";
+import { dbConnectionWeb } from "../../database";
+import { statisticsQuery } from "../../database/querys/statistics";
+import { ValidationError } from "../../errors/CustomError";
+import type { UserWebSessionInterface } from "../../interface/user";
+import type { StatisticsCRMDashboardResponse } from "./statisticsService.interface";
 
 
 const getStatisticsCRMDashboard = async (
     userSession: UserWebSessionInterface
-): Promise<{
-    eventsToday: number;
-    sellsToday: number;
-    eventsWeek: number;
-    sellsWeek: number;
-    sells: { period: number, sellsByMonth: number }[];
-    cobranza: { type: string, sumCobranzaExpired: number, sumCobranza: number }[];
-}> => {
+): Promise<StatisticsCRMDashboardResponse> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -34,20 +28,27 @@ const getStatisticsCRMDashboard = async (
     const requestWeeklyAndForwardSaldo = await pool.request()
         .query(statisticsQuery.getWeeklyAndForwardSaldo);
 
+    const requestProductsAndSellersOfTheMonth = await pool.request()
+        .query(statisticsQuery.getProductsAndSellersOfTheMonth);
+
+
     const [
         responseEventsOfTheDay,
         responseEventsOfTheWeek,
         responseSellsOfTheMonth,
-        responseWeeklyAndForwardSaldo
+        responseWeeklyAndForwardSaldo,
+        responseProductsAndSellersOfTheMonth
     ] = await Promise.all([
         requestEventsOfTheDay,
         requestEventsOfTheWeek,
         requestSellsOfTheMonth,
-        requestWeeklyAndForwardSaldo
+        requestWeeklyAndForwardSaldo,
+        requestProductsAndSellersOfTheMonth
     ]);
 
     const { eventsToday, sellsToday } = responseEventsOfTheDay.recordset[0];
     const { eventsWeek, sellsWeek } = responseEventsOfTheWeek.recordset[0];
+    const { TotalProductos, TotalClientes  } = responseProductsAndSellersOfTheMonth.recordset[0]
     const sells = responseSellsOfTheMonth.recordset;
     const cobranza = responseWeeklyAndForwardSaldo.recordset;
 
@@ -57,6 +58,8 @@ const getStatisticsCRMDashboard = async (
         sellsToday,
         eventsWeek,
         sellsWeek,
+        productsSoldMonth: TotalProductos, 
+        sellerOfMonth: TotalClientes,
         sells,
         cobranza
     };

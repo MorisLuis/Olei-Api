@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express"
-import { getStatisticsCRMDashboard } from "../services/statisticsService";
+import { getStatisticsCRMDashboard } from "../services/statistics/statisticsService";
 
 const getCRMBrief = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
@@ -10,6 +10,8 @@ const getCRMBrief = async (req: Request, res: Response, next: NextFunction): Pro
             sellsToday,
             eventsWeek,
             sellsWeek,
+            productsSoldMonth,
+            sellerOfMonth,
             sells,
             cobranza
         } = await getStatisticsCRMDashboard(userSession);
@@ -19,6 +21,8 @@ const getCRMBrief = async (req: Request, res: Response, next: NextFunction): Pro
             sellsToday,
             eventsWeek,
             sellsWeek,
+            productsSoldMonth,
+            sellerOfMonth,
             sells,
             cobranza
         });
