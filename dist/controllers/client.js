@@ -6,13 +6,14 @@ const clientValidations_1 = require("../validations/clientValidations");
 const generate_redis_1 = require("../helpers/generate-redis");
 const getClients = async (req, res, next) => {
     try {
-        const { PageNumber, clientOrderCondition, searchTerm } = clientValidations_1.getClientsQuerySchema.parse(req.query);
+        const { PageNumber, clientOrderCondition, searchTerm, searchId } = clientValidations_1.getClientsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
         const { clients, total } = await (0, clientsServices_1.getClientsService)({
             userSession,
             PageNumber: PageNumber,
             OrderCondition: clientOrderCondition,
-            searchTerm
+            searchTerm,
+            searchId
         });
         return res.json({
             ok: true,

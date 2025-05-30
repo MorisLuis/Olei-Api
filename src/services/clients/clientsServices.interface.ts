@@ -9,6 +9,7 @@ interface getClientsServiceInterface {
     userSession: UserWebSessionInterface,
     OrderCondition: string,
     searchTerm: string;
+    searchId?: string;
 };
 
 interface getClientIdInterface {
