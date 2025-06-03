@@ -38,6 +38,7 @@ exports.getAllOrdersParamsSchema = zod_1.z.object({
 // getSells
 exports.getOrderDetailsQuerrySchema = zod_1.z.object({
     folio: zod_1.z.string().nonempty(),
+    TipoDoc: zod_1.z.preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
     PageNumber: zod_1.z.
         preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
 });

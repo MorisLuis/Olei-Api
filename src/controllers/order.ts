@@ -69,10 +69,11 @@ const getOrderDetails = async (req: Request, res: Response, next: NextFunction):
 
     try {
         const userSession = req.sessionWeb
-        const { folio, PageNumber } = getOrderDetailsQuerrySchema.parse(req.query);
+        const { folio, TipoDoc, PageNumber } = getOrderDetailsQuerrySchema.parse(req.query);
 
         const { orderDetails } = await getOrderDetailsSells({
             folio,
+            TipoDoc,
             PageNumber,
             userSession
         })

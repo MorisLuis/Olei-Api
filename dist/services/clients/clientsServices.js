@@ -8,7 +8,7 @@ const database_1 = require("../../database");
 const clients_1 = require("../../database/querys/clients");
 const CustomError_1 = require("../../errors/CustomError");
 const mssql_1 = __importDefault(require("mssql"));
-const getClientsService = async ({ PageNumber, userSession, OrderCondition, searchTerm }) => {
+const getClientsService = async ({ PageNumber, userSession, OrderCondition, searchTerm, searchId }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -21,9 +21,11 @@ const getClientsService = async ({ PageNumber, userSession, OrderCondition, sear
         .input('PageSize', 10)
         .input('OrderCondition', OrderCondition)
         .input('searchTerm', searchTerm)
+        .input('searchId', searchId)
         .query(clientsQuery);
     const requestTotal = pool.request()
         .input('searchTerm', searchTerm)
+        .input('searchId', searchId)
         .query(totalClientsQuery);
     const [clientsResult, totalResult] = await Promise.all([
         requestClients,

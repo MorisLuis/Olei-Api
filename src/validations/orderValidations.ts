@@ -43,6 +43,7 @@ export const getAllOrdersParamsSchema = z.object({
 // getSells
 export const getOrderDetailsQuerrySchema = z.object({
     folio: z.string().nonempty(),
+    TipoDoc: z.preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
     PageNumber: z.
         preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
 })

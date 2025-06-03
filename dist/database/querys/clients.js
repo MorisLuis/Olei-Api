@@ -11,7 +11,8 @@ exports.clientsQuerys = {
             Telefono1, 
             CorreoVtas
         FROM [dbo].[CLIENTES]
-        WHERE Nombre LIKE '%' + @searchTerm + '%' 
+        WHERE Nombre LIKE '%' + @searchTerm + '%'
+        AND (@searchId IS NULL OR Id_Cliente = @searchId)
         ORDER BY 
         -- 👇 Solo prioriza los que empiecen con @searchTerm si @searchTerm no es vacío
         CASE 
@@ -29,6 +30,7 @@ exports.clientsQuerys = {
         SELECT COUNT(*) AS TotalCount
         FROM [dbo].[CLIENTES]
         WHERE Nombre LIKE '%' + @searchTerm + '%'
+        AND (@searchId IS NULL OR Id_Cliente = @searchId)
     `,
     getClientId: ` 
         SELECT 

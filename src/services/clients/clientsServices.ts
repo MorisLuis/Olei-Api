@@ -11,7 +11,8 @@ const getClientsService = async ({
     PageNumber,
     userSession,
     OrderCondition,
-    searchTerm
+    searchTerm,
+    searchId
 }: getClientsServiceInterface): Promise<GetClientsServiceResult> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
@@ -29,10 +30,12 @@ const getClientsService = async ({
         .input('PageSize', 10)
         .input('OrderCondition', OrderCondition)
         .input('searchTerm', searchTerm)
+        .input('searchId', searchId)
         .query(clientsQuery);
 
     const requestTotal = pool.request()
         .input('searchTerm', searchTerm)
+        .input('searchId', searchId)
         .query(totalClientsQuery);
 
     const [clientsResult, totalResult] = await Promise.all([

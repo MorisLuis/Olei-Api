@@ -7,14 +7,15 @@ import { updateWebSession } from '../helpers/generate-redis';
 const getClients = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const { PageNumber, clientOrderCondition, searchTerm } = getClientsQuerySchema.parse(req.query);
+        const { PageNumber, clientOrderCondition, searchTerm, searchId } = getClientsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
         const { clients, total } = await getClientsService({
             userSession,
             PageNumber: PageNumber,
             OrderCondition: clientOrderCondition,
-            searchTerm
+            searchTerm,
+            searchId
         });
 
         return res.json({

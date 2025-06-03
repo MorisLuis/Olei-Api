@@ -87,7 +87,7 @@ const getAllOrdersService = async ({ userSession, page, limit }) => {
     };
 };
 exports.getAllOrdersService = getAllOrdersService;
-const getOrderDetailsSells = async ({ PageNumber, folio, userSession }) => {
+const getOrderDetailsSells = async ({ PageNumber, folio, TipoDoc, userSession }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -101,6 +101,7 @@ const getOrderDetailsSells = async ({ PageNumber, folio, userSession }) => {
     const query = orders_1.orderQuerys.getOrderDetails;
     const request = await pool.request()
         .input('folio', mssql_1.default.Int, folio)
+        .input('TipoDoc', mssql_1.default.Int, TipoDoc)
         .input('PageNumber', mssql_1.default.Int, pageNumberModified)
         .input('PageSize', mssql_1.default.Int, pageSizeModified)
         .query(query);

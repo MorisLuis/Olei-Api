@@ -139,12 +139,14 @@ const getAllOrdersService = async ({
 interface getOrderDetailsSellsInterface {
     PageNumber: number;
     folio: string;
+    TipoDoc: number;
     userSession: UserWebSessionInterface;
 }
 
 const getOrderDetailsSells = async ({
     PageNumber,
     folio,
+    TipoDoc,
     userSession
 }: getOrderDetailsSellsInterface): Promise<{orderDetails: SellsDetailsInterface[]}> => {
 
@@ -162,6 +164,7 @@ const getOrderDetailsSells = async ({
     const query = orderQuerys.getOrderDetails;
     const request = await pool.request()
         .input('folio', sql.Int, folio)
+        .input('TipoDoc', sql.Int, TipoDoc)
         .input('PageNumber', sql.Int, pageNumberModified)
         .input('PageSize', sql.Int, pageSizeModified)
         .query(query);

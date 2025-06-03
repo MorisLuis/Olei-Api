@@ -60,9 +60,10 @@ exports.getAllOrders = getAllOrders;
 const getOrderDetails = async (req, res, next) => {
     try {
         const userSession = req.sessionWeb;
-        const { folio, PageNumber } = orderValidations_1.getOrderDetailsQuerrySchema.parse(req.query);
+        const { folio, TipoDoc, PageNumber } = orderValidations_1.getOrderDetailsQuerrySchema.parse(req.query);
         const { orderDetails } = await (0, orderServices_1.getOrderDetailsSells)({
             folio,
+            TipoDoc,
             PageNumber,
             userSession
         });
