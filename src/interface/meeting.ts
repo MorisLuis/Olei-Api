@@ -1,4 +1,5 @@
 export default interface MeetingInterface {
+    Nombre: string;
     Id_Bitacora: number;
     Id_Almacen?: number;
     Id_Cliente?: number;

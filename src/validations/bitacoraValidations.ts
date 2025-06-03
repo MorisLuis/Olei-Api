@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { MeetingOrderConditionType} from "../interface/meeting";
+import type { MeetingOrderConditionType } from "../interface/meeting";
 import type MeetingInterface from "../interface/meeting";
 import { MeetingOrderCondition, validTipoContacto } from "../interface/meeting";
 
@@ -36,6 +36,8 @@ export const getMeetingsQuerySchema = z.object({
         .optional()
         .transform((val) => (val ? parseInt(val, 10) : 0)) // Convertimos a número
         .refine((val) => val >= 0, { message: "Id_Cliente debe ser un número positivo" }),
+
+    searchTerm: z.preprocess((val) => (val === '' ? undefined : val), z.string().optional())
 
 });
 

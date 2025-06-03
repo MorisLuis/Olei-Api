@@ -155,8 +155,22 @@ export const sellsQuery = {
     `,
 
     getSellById: `
-        SELECT Id_Cliente, Id_Almacen, TipoDoc, Folio, Serie, Fecha, FechaEntrega, Saldo, Total, Subtotal, Impuesto, FechaLiq, Estado, Piezas
-        FROM dbo.VENTAS
-        WHERE Id_Almacen = @Id_Almacen AND TipoDoc = @TipoDoc AND Serie = @Serie AND Folio = @Folio
+        SELECT
+            C.Nombre,
+            V.Id_Cliente,
+            V.Id_Almacen,
+            V.TipoDoc,
+            V.Folio,
+            V.Serie,
+            V.Fecha,
+            V.Saldo,
+            V.Total,
+            V.Subtotal,
+            V.Impuesto,
+            V.FechaLiq,
+            V.Piezas
+        FROM dbo.VENTAS V
+            JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = V.Id_Cliente AND C.Id_Almacen = V.Id_Almacen
+        WHERE V.Id_Almacen = @Id_Almacen AND TipoDoc = @TipoDoc AND Serie = @Serie AND Folio = @Folio
     `
 }

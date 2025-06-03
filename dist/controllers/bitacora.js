@@ -5,7 +5,7 @@ const meetingsServices_1 = require("../services/meetingsServices");
 const bitacoraValidations_1 = require("../validations/bitacoraValidations");
 const getMeetings = async (req, res, next) => {
     try {
-        const { PageNumber, meetingOrderCondition, FilterCliente, TipoContacto, Id_Cliente } = bitacoraValidations_1.getMeetingsQuerySchema.parse(req.query);
+        const { PageNumber, meetingOrderCondition, FilterCliente, TipoContacto, Id_Cliente, searchTerm } = bitacoraValidations_1.getMeetingsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
         const { meetings, total } = await (0, meetingsServices_1.getMeetingsService)({
             PageNumber,
@@ -13,7 +13,8 @@ const getMeetings = async (req, res, next) => {
             MeetingOrderCondition: meetingOrderCondition,
             TipoContacto: TipoContacto,
             Id_Cliente: Id_Cliente ?? 0,
-            FilterCliente: FilterCliente
+            FilterCliente: FilterCliente,
+            searchTerm
         });
         return res.json({
             meetings,

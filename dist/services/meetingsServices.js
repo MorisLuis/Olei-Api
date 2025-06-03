@@ -9,7 +9,7 @@ const bitacora_1 = require("../database/querys/bitacora");
 const CustomError_1 = require("../errors/CustomError");
 const meeting_1 = require("../interface/meeting");
 const mssql_1 = __importDefault(require("mssql"));
-const getMeetingsService = async ({ userSession, PageNumber, Id_Cliente, TipoContacto, MeetingOrderCondition, FilterCliente }) => {
+const getMeetingsService = async ({ userSession, PageNumber, Id_Cliente, TipoContacto, MeetingOrderCondition, FilterCliente, searchTerm }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -30,12 +30,14 @@ const getMeetingsService = async ({ userSession, PageNumber, Id_Cliente, TipoCon
         .input('OrderCondition', MeetingOrderCondition)
         .input('FilterTipoContacto', TipoContacto === 0 ? 0 : 1)
         .input('FilterCliente', FilterCliente)
+        .input('searchTerm', searchTerm)
         .query(query);
     const requestTotal = await pool.request()
         .input('Id_Cliente', Id_Cliente)
         .input('TipoContacto', TipoContacto)
         .input('FilterTipoContacto', TipoContacto === 0 ? 0 : 1)
         .input('FilterCliente', FilterCliente)
+        .input('searchTerm', searchTerm)
         .query(totalMeetingsQuery);
     const [meetingsResult, totalResult] = await Promise.all([
         request,

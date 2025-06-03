@@ -49,6 +49,8 @@ export const clientsQuerys = {
             Id_Ciudad,
             CodigoPost,
             Telefono1,
+            Telefono2,
+            UsuarioSQL AS TelefonoWhatsapp,
             CorreoVtas
             FROM dbo.CLIENTES
         WHERE Id_Cliente = @Id_Cliente AND Id_Almacen = @Id_Almacen

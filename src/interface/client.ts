@@ -14,6 +14,9 @@ export interface ClientInterface {
     Id_Ciudad?: number,
     CodigoPost?: string,
     Telefono1?: string,
+    Telefono2?: string,
+    TelefonoWhatsapp?: string,
+
     CorreoVtas?: string,
 
     Id_ListPre?: number | null,
