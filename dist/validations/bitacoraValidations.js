@@ -21,6 +21,7 @@ exports.getMeetingsQuerySchema = zod_1.z.object({
         .optional()
         .transform((val) => (val ? parseInt(val, 10) : 0)) // Convertimos a número
         .refine((val) => val >= 0, { message: "Id_Cliente debe ser un número positivo" }),
+    searchTerm: zod_1.z.preprocess((val) => (val === '' ? undefined : val), zod_1.z.string().optional())
 });
 exports.getTotalMeetingsQuerySchema = zod_1.z.object({
     FilterTipoContacto: zod_1.z.union([zod_1.z.string(), zod_1.z.number()]).optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),

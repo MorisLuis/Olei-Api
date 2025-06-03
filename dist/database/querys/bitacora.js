@@ -7,18 +7,21 @@ exports.bitacoraQuerys = {
             MEETINGS_CTE
             AS
             (
-                SELECT Id_Bitacora,
-                    Id_Almacen,
-                    Id_Cliente,
-                    Fecha,
-                    Descripcion,
-                    TipoContacto,
-                    Hour,
-                    HourEnd
-                FROM dbo.BITACORACRM
-                WHERE
-            (@FilterCliente = 0 OR (Id_Cliente = @Id_Cliente AND @FilterCliente = 1))
+                SELECT 
+                    B.Id_Bitacora,
+                    C.Nombre,
+                    B.Id_Almacen,
+                    B.Id_Cliente,
+                    B.Fecha,
+                    B.Descripcion,
+                    B.TipoContacto,
+                    B.Hour,
+                    B.HourEnd
+                FROM dbo.BITACORACRM B
+                JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = B.Id_Cliente AND C.Id_Almacen = B.Id_Almacen
+                WHERE (@FilterCliente = 0 OR (B.Id_Cliente = @Id_Cliente AND @FilterCliente = 1))
                     AND (@FilterTipoContacto = 0 OR (TipoContacto = @TipoContacto AND @FilterTipoContacto = 1))
+                    AND (C.Nombre LIKE '%' + ISNULL(@searchTerm, '') + '%')
             )
         SELECT *
         FROM MEETINGS_CTE
@@ -39,10 +42,12 @@ exports.bitacoraQuerys = {
     `,
     getTotalMeetings: `
         SELECT COUNT(*) AS TotalCount
-        FROM dbo.BITACORACRM
+        FROM dbo.BITACORACRM B
+        JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = B.Id_Cliente AND C.Id_Almacen = B.Id_Almacen
         WHERE
-        (@FilterCliente = 0 OR (Id_Cliente = @Id_Cliente AND @FilterCliente = 1))
+        (@FilterCliente = 0 OR (B.Id_Cliente = @Id_Cliente AND @FilterCliente = 1))
         AND (@FilterTipoContacto = 0 OR (TipoContacto = @TipoContacto AND @FilterTipoContacto = 1))
+        AND (C.Nombre LIKE '%' + ISNULL(@searchTerm, '') + '%')
     `,
     getMeetingById: `
         SELECT
