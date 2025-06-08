@@ -84,7 +84,6 @@ const postMeeting = async (req: Request, res: Response, next: NextFunction): Pro
 
     try {
         const body = postBitacoraBodySchema.parse(req.body) as MeetingInterface;
-
         const userSession = req.sessionWeb;
         const meeting = await postMeetingService(userSession, body);
         return res.json(meeting);

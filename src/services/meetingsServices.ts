@@ -164,7 +164,6 @@ const updateMeetingService = async (
         Fecha,
         Hour,
         HourEnd,
-        Titulo,
         Descripcion,
         TipoContacto,
         Comentarios
@@ -179,7 +178,6 @@ const updateMeetingService = async (
         .input('Fecha', sql.Date, Fecha)
         .input('Hour', sql.VarChar, Hour)
         .input('HourEnd', sql.VarChar, HourEnd)
-        .input('Titulo', sql.VarChar, Titulo)
         .input('Descripcion', sql.VarChar, Descripcion)
         .input('TipoContacto', sql.Int, TipoContacto)
         .input('Comentarios', sql.VarChar, Comentarios)
@@ -215,7 +213,6 @@ const postMeetingService = async (userSession: UserWebSessionInterface, body: Me
         Fecha,
         Hour,
         HourEnd,
-        Titulo,
         Descripcion,
         TipoContacto,
         Comentarios
@@ -235,7 +232,6 @@ const postMeetingService = async (userSession: UserWebSessionInterface, body: Me
         .input('Fecha', sql.Date, Fecha)
         .input('Hour', sql.VarChar, Hour)
         .input('HourEnd', sql.VarChar, HourEnd)
-        .input('Titulo', sql.VarChar, Titulo)
         .input('Descripcion', sql.VarChar, Descripcion)
         .input('TipoContacto', sql.Int, TipoContacto)
         .input('Comentarios', sql.VarChar, Comentarios)

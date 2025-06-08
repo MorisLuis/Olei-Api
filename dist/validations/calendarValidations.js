@@ -55,6 +55,13 @@ exports.getCalendarTaskByDayQuerySchema = zod_1.z.object({
         }
         return val;
     }),
+    Id_Cliente: zod_1.z.preprocess((val) => {
+        if (val === 'null')
+            return null;
+        if (typeof val === 'string')
+            return parseInt(val, 10);
+        return val;
+    }, zod_1.z.number().nullable())
 });
 exports.getCalendarByMonthAndClientQuerySchema = zod_1.z.object({
     Anio: zod_1.z

@@ -45,9 +45,6 @@ exports.postBitacoraBodySchema = zod_1.z.object({
     Fecha: zod_1.z
         .preprocess((val) => (typeof val === "string" ? new Date(val) : val), zod_1.z.date())
         .refine((val) => !isNaN(val.getTime()), { message: "Fecha debe ser una fecha válida." }),
-    Titulo: zod_1.z
-        .string()
-        .nonempty("El título es obligatorio."),
     TipoContacto: zod_1.z
         .union([zod_1.z.string(), zod_1.z.number()]) // Permite que sea string o number
         .transform((val) => (typeof val === "string" ? parseInt(val, 10) : val)) // Convierte string a número si es necesario

@@ -39,11 +39,13 @@ const getCalendarTaskByMonthService = async ({
 interface getCalendarTaskByDayServiceInterface {
     userSession: UserWebSessionInterface;
     Day: string;
+    Id_Cliente: number | null
 }
 
 const getCalendarTaskByDayService = async ({
     userSession,
-    Day
+    Day,
+    Id_Cliente
 }: getCalendarTaskByDayServiceInterface)  : Promise<CalendarInterface[]> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
@@ -56,6 +58,7 @@ const getCalendarTaskByDayService = async ({
     let query = celendarQuerys.getCalendarTasksDay;
     const request = await pool.request()
         .input('FechaEspecifica', Day)
+        .input('Id_Cliente', Id_Cliente)
         .query(query);
 
     const quotes = request.recordset

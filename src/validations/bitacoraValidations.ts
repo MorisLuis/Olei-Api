@@ -74,10 +74,6 @@ export const postBitacoraBodySchema = z.object({
         .preprocess((val) => (typeof val === "string" ? new Date(val) : val), z.date())
         .refine((val) => !isNaN(val.getTime()), { message: "Fecha debe ser una fecha válida." }),
 
-    Titulo: z
-        .string()
-        .nonempty("El título es obligatorio."),
-
     TipoContacto: z
         .union([z.string(), z.number()]) // Permite que sea string o number
         .transform((val) => (typeof val === "string" ? parseInt(val, 10) : val)) // Convierte string a número si es necesario
