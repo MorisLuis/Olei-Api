@@ -27,12 +27,13 @@ const getCalendarTaskByDay = async (req: Request, res: Response, next: NextFunct
 
     /* Timeline */
     try {
-        const { Day } = getCalendarTaskByDayQuerySchema.parse(req.query);
+        const { Day, Id_Cliente } = getCalendarTaskByDayQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
         const tasks = await getCalendarTaskByDayService({
             userSession,
-            Day
+            Day,
+            Id_Cliente
         });
 
         res.json({

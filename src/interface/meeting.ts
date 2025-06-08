@@ -6,7 +6,6 @@ export default interface MeetingInterface {
     Fecha: Date;
     Hour: string | undefined;
     HourEnd: string | undefined;
-    Titulo: string;
     Descripcion: string;
     TipoContacto: 0 | 1 | 2 | 3 | 4;
     Comentarios?: string;

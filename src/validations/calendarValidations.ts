@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-
 export const getCalendarTaskByMonthQuerySchema = z.object({
     Anio: z
         .union([z.string().max(4), z.number()])
@@ -60,6 +59,12 @@ export const getCalendarTaskByDayQuerySchema = z.object({
 
             return val;
         }),
+
+    Id_Cliente: z.preprocess((val) => {
+        if (val === 'null') return null;
+        if (typeof val === 'string') return parseInt(val, 10);
+        return val;
+    }, z.number().nullable())
 });
 
 

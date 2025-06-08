@@ -24,11 +24,12 @@ exports.getCalendarTaskByMonth = getCalendarTaskByMonth;
 const getCalendarTaskByDay = async (req, res, next) => {
     /* Timeline */
     try {
-        const { Day } = calendarValidations_1.getCalendarTaskByDayQuerySchema.parse(req.query);
+        const { Day, Id_Cliente } = calendarValidations_1.getCalendarTaskByDayQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
         const tasks = await (0, calendarService_1.getCalendarTaskByDayService)({
             userSession,
-            Day
+            Day,
+            Id_Cliente
         });
         res.json({
             tasks

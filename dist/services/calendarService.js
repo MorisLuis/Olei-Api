@@ -20,7 +20,7 @@ const getCalendarTaskByMonthService = async ({ userSession, Mes, Anio }) => {
     return quotes;
 };
 exports.getCalendarTaskByMonthService = getCalendarTaskByMonthService;
-const getCalendarTaskByDayService = async ({ userSession, Day }) => {
+const getCalendarTaskByDayService = async ({ userSession, Day, Id_Cliente }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -30,6 +30,7 @@ const getCalendarTaskByDayService = async ({ userSession, Day }) => {
     let query = calendar_1.celendarQuerys.getCalendarTasksDay;
     const request = await pool.request()
         .input('FechaEspecifica', Day)
+        .input('Id_Cliente', Id_Cliente)
         .query(query);
     const quotes = request.recordset;
     return quotes;

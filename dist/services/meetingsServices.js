@@ -104,7 +104,7 @@ const updateMeetingService = async (id, userSession, body) => {
     //START TRANSACTION
     const transaction = new mssql_1.default.Transaction(pool);
     await transaction.begin();
-    const { Fecha, Hour, HourEnd, Titulo, Descripcion, TipoContacto, Comentarios } = body;
+    const { Fecha, Hour, HourEnd, Descripcion, TipoContacto, Comentarios } = body;
     if (TipoContacto && !meeting_1.validTipoContacto.includes(TipoContacto)) {
         throw new CustomError_1.ValidationError('No es valido el tipo de contacto');
     }
@@ -114,7 +114,6 @@ const updateMeetingService = async (id, userSession, body) => {
         .input('Fecha', mssql_1.default.Date, Fecha)
         .input('Hour', mssql_1.default.VarChar, Hour)
         .input('HourEnd', mssql_1.default.VarChar, HourEnd)
-        .input('Titulo', mssql_1.default.VarChar, Titulo)
         .input('Descripcion', mssql_1.default.VarChar, Descripcion)
         .input('TipoContacto', mssql_1.default.Int, TipoContacto)
         .input('Comentarios', mssql_1.default.VarChar, Comentarios);
@@ -137,7 +136,7 @@ const postMeetingService = async (userSession, body) => {
     await transaction.begin();
     const request = new mssql_1.default.Request(transaction);
     const query = bitacora_1.bitacoraQuerys.insertMeeting;
-    const { Id_Almacen, Id_Cliente, Fecha, Hour, HourEnd, Titulo, Descripcion, TipoContacto, Comentarios } = body;
+    const { Id_Almacen, Id_Cliente, Fecha, Hour, HourEnd, Descripcion, TipoContacto, Comentarios } = body;
     if (!meeting_1.validTipoContacto.includes(TipoContacto)) {
         throw new CustomError_1.ValidationError('No es valido el tipo de contacto');
     }
@@ -151,7 +150,6 @@ const postMeetingService = async (userSession, body) => {
         .input('Fecha', mssql_1.default.Date, Fecha)
         .input('Hour', mssql_1.default.VarChar, Hour)
         .input('HourEnd', mssql_1.default.VarChar, HourEnd)
-        .input('Titulo', mssql_1.default.VarChar, Titulo)
         .input('Descripcion', mssql_1.default.VarChar, Descripcion)
         .input('TipoContacto', mssql_1.default.Int, TipoContacto)
         .input('Comentarios', mssql_1.default.VarChar, Comentarios)
