@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { loginServer, login, logoutUser, logoutServer, refresh, refreshServer } from "../controllers/auth/auth";
 import { loginWeb, logout, renewWeb } from "../controllers/auth/authWeb";
-import { validateJWT, validateJWTWeb, validateJWTokenServer, validateRefreshToken } from "../middleware/validateJWT";
+import { validateJWT, validateJWTokenServer, validateRefreshToken } from "../middleware/validateJWT";
+import { validateJWTWeb } from "../middleware/validateJWTWeb";
 
 const router = Router();
 

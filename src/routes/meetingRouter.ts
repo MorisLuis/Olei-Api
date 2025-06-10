@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { deleteMeeting, getMeetingById, getMeetings, getTotalMeetings, postMeeting, updateMeeting } from "../controllers/bitacora";
-import { validateJWTWeb } from "../middleware/validateJWT";
+import { validateJWTWeb } from "../middleware/validateJWTWeb";
 
 
 const router = Router();

@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { validateJWTWeb } from "../middleware/validateJWT";
 import { getCRMBrief } from "../controllers/statistics";
+import { validateJWTWeb } from "../middleware/validateJWTWeb";
 
 
 const router = Router();

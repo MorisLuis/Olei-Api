@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { sendEmail, sendEmailWithPDF } from "../controllers/email";
-import { validateJWTWeb } from "../middleware/validateJWT";
+import { validateJWTWeb } from "../middleware/validateJWTWeb";
 
 
 const router = Router();

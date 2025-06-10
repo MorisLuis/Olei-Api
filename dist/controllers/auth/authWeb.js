@@ -43,6 +43,7 @@ const renewWeb = async (req, res, next) => {
         const userSession = req.sessionWeb;
         const sessionId = req.sessionId;
         const refreshToken = req.cookies.refreshToken;
+        console.log({ refreshToken });
         if (!refreshToken) {
             return res.status(401).json({ message: "No hay refresh token" });
         }

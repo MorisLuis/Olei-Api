@@ -11,7 +11,8 @@ import {
     
 } from "../controllers/products/products";
 import { getProducByIdWeb, getProducts, getTotalProducts, searchProduct } from "../controllers/products/productsWeb";
-import { validateJWT, validateJWTWeb } from "../middleware/validateJWT";
+import { validateJWT } from "../middleware/validateJWT";
+import { validateJWTWeb } from "../middleware/validateJWTWeb";
 
 
 const router = Router()

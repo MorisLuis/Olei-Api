@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { getSellById, getSells, getSellsByClient, getSellsByClientCountAndTotal, getSellsCountAndTotal } from "../controllers/sells/sells";
-import { validateJWTWeb } from "../middleware/validateJWT";
 import { getCobranza, getCobranzaByClient, getCobranzaByClientCountAndTotal, getCobranzaCountAndTotal, getCobranzaWithTotals } from "../controllers/sells/cobranza";
 import { getSellsProducts, getSellsProductsCountAndTotal } from "../controllers/sells/productsSells";
+import { validateJWTWeb } from "../middleware/validateJWTWeb";
 
 
 const router = Router();

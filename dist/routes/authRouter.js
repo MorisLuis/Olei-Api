@@ -4,11 +4,12 @@ const express_1 = require("express");
 const auth_1 = require("../controllers/auth/auth");
 const authWeb_1 = require("../controllers/auth/authWeb");
 const validateJWT_1 = require("../middleware/validateJWT");
+const validateJWTWeb_1 = require("../middleware/validateJWTWeb");
 const router = (0, express_1.Router)();
 // Web
 router.post("/loginWeb", authWeb_1.loginWeb);
-router.get('/renewWeb', validateJWT_1.validateJWTWeb, authWeb_1.renewWeb);
-router.get("/logout", validateJWT_1.validateJWTWeb, authWeb_1.logout);
+router.get('/renewWeb', validateJWTWeb_1.validateJWTWeb, authWeb_1.renewWeb);
+router.get("/logout", validateJWTWeb_1.validateJWTWeb, authWeb_1.logout);
 // App
 router.post("/loginServer", auth_1.loginServer);
 router.post("/login", validateJWT_1.validateJWT, auth_1.login);

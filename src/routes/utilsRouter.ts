@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getExcellTest, getBanner } from "../controllers/utils";
-import { validateJWT, validateJWTWeb } from "../middleware/validateJWT";
+import { validateJWT } from "../middleware/validateJWT";
+import { validateJWTWeb } from "../middleware/validateJWTWeb";
 
 const router = Router();
 
