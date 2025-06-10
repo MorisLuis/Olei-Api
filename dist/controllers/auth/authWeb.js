@@ -24,7 +24,7 @@ const loginWeb = async (req, res, next) => {
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: true,
-            sameSite: 'strict',
+            sameSite: 'none',
             maxAge: 30 * 24 * 60 * 60 * 1000
         });
         return res.json({
@@ -43,7 +43,6 @@ const renewWeb = async (req, res, next) => {
         const userSession = req.sessionWeb;
         const sessionId = req.sessionId;
         const refreshToken = req.cookies.refreshToken;
-        console.log({ refreshToken });
         if (!refreshToken) {
             return res.status(401).json({ message: "No hay refresh token" });
         }

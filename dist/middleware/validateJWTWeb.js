@@ -32,8 +32,9 @@ const CustomError_1 = require("../errors/CustomError");
 const redisClient_1 = __importDefault(require("../config/redisClient"));
 const validateJWTWeb = async (req, _res, next) => {
     const authHeader = req.headers['authorization'];
-    console.log("req.headers", req.headers);
     const token = authHeader?.split(' ')[1];
+    const refreshToken = req.headers['cookie']?.split(' ')[1];
+    console.log({ refreshToken });
     if (!token) {
         return next(new CustomError_1.UnauthorizedError('TOKEN_EXPIRADO', 'Session is invalid or expired'));
     }
