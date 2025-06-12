@@ -52,16 +52,18 @@ export const bitacoraQuerys = {
 
     getMeetingById: `
         SELECT
-        [Id_Almacen]
-        ,[Id_Cliente]
-        ,[Fecha]
-        ,[Descripcion]
-        ,[TipoContacto]
-        ,[Id_Bitacora]
-        ,[Hour]
-        ,[HourEnd]
-        ,[Comentarios]
-        FROM [dbo].[BITACORACRM]
+            B.Id_Almacen,
+            B.Id_Cliente,
+            B.Fecha,
+            B.Descripcion,
+            B.TipoContacto,
+            B.Id_Bitacora,
+            B.Hour,
+            B.HourEnd,
+            B.Comentarios,
+            C.Nombre
+        FROM [dbo].[BITACORACRM] B
+        JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = B.Id_Cliente AND C.Id_Almacen = B.Id_Almacen
         WHERE Id_Bitacora = @Id_Bitacora
     `,
 

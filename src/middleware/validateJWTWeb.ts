@@ -12,8 +12,6 @@ const validateJWTWeb = async (req: Request, _res: Response, next: NextFunction):
     const token = authHeader?.split(' ')[1];
     const refreshToken = req.headers['cookie']?.split(' ')[1];
 
-    console.log({refreshToken})
-
     if (!token) {
         return next(new UnauthorizedError('TOKEN_EXPIRADO', 'Session is invalid or expired'));
     }

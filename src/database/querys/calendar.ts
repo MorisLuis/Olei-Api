@@ -3,8 +3,9 @@ export const celendarQuerys = {
 
     getCalendarTasksMonth: `
         SELECT
-        Id_Cliente,
+            Id_Cliente,
             Id_Bitacora,
+            Descripcion,
             NULL AS Folio,
             NULL AS Id_Sell,
             Fecha,
@@ -17,8 +18,9 @@ export const celendarQuerys = {
         UNION ALL
 
         SELECT
-        Id_Cliente,
+            Id_Cliente,
             NULL AS Id_Bitacora,
+            NULL AS Descripcion,
             Folio,
             CONCAT(Id_Almacen, '-', TipoDoc, '-', TRIM(Serie), '-', Folio) AS Id_Sell,
             Fecha,
@@ -38,6 +40,7 @@ export const celendarQuerys = {
         SELECT
             Id_Cliente,
             Id_Bitacora,
+            Descripcion,
             NULL AS Folio,
             NULL AS Id_Sell,
             Fecha,
@@ -53,6 +56,7 @@ export const celendarQuerys = {
         SELECT
             Id_Cliente,
             NULL AS Id_Bitacora,
+            NULL AS Descripcion,
             Folio,
             CONCAT(Id_Almacen, '-', TipoDoc, '-', TRIM(Serie), '-', Folio) AS Id_Sell,
             Fecha,
@@ -74,6 +78,7 @@ export const celendarQuerys = {
         SELECT
             Id_Cliente,
             Id_Bitacora,
+            Descripcion,
             NULL AS Folio,
             NULL AS Id_Sell,
             Fecha,
@@ -87,8 +92,9 @@ export const celendarQuerys = {
         UNION ALL
 
         SELECT
-        Id_Cliente,
+            Id_Cliente,
             NULL AS Id_Bitacora,
+            NULL AS Descripcion,
             Folio,
             CONCAT(Id_Almacen, '-', TipoDoc, '-', TRIM(Serie), '-', Folio) AS Id_Sell,
             Fecha,

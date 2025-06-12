@@ -1,9 +1,9 @@
 import type { NextFunction, Request, Response } from 'express'
 import type { JwtPayload } from 'jsonwebtoken';
-import jwt, { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { AppError, ForbiddenError, UnauthorizedError } from '../errors/CustomError';
 import redisClient from '../config/redisClient';
-import type { UserSessionInterface, UserWebSessionInterface } from '../interface/user';
+import type { UserSessionInterface } from '../interface/user';
 
 
 
