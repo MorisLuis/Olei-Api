@@ -10,7 +10,6 @@ import type { UserWebSessionInterface } from '../interface/user';
 const validateJWTWeb = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     const authHeader = req.headers['authorization'];
     const token = authHeader?.split(' ')[1];
-    const refreshToken = req.headers['cookie']?.split(' ')[1];
 
     if (!token) {
         return next(new UnauthorizedError('TOKEN_EXPIRADO', 'Session is invalid or expired'));

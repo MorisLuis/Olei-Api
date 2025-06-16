@@ -7,7 +7,6 @@ import { getSellsProductsCountAndTotalService, getSellsProductsService } from ".
 const getSellsProducts = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-
         const { Marca, PageNumber, DateEnd, DateExactly, DateStart, Descripcion, OrderCondition, Sku, Codigo } = getSellsProductsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
@@ -20,7 +19,7 @@ const getSellsProducts = async (req: Request, res: Response, next: NextFunction)
             DateStart: DateStart || null,
             Descripcion: Descripcion || null,
             Codigo: Codigo || null,
-            Sku,
+            Sku: Sku || null,
             OrderCondition
         })
 

@@ -19,6 +19,7 @@ const getSellsProductsService = async ({
     PageNumber
 }: GetSellsProductsPaginatedServiceParams): Promise<{ sells: SellsProductsInterface[] }> => {
 
+
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
