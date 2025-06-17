@@ -1,14 +1,12 @@
 import type { NextFunction, Request, Response } from 'express';
 import nodemailer from 'nodemailer';
 import { emailBodySchema, emailCobranzaBodySchema } from '../validations/emailValidations';
-import { Buffer } from 'buffer';  // Importa Buffer si es necesario
 import { getClientParamsSchema } from '../validations/sellsValidations';
-import generatePDF from '../utils/generatePDF';
-import { getAllCobranzaService } from '../services/cobranza/cobranza.utils';
 import { getCobranzaByClientQuerySchema } from '../validations/cobranzaValidations';
+import { sendEmailWithPDFService } from '../services/email/emailService';
 
 // Configurar el transporte SMTP
-const transporter = nodemailer.createTransport({
+export const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,
@@ -46,13 +44,8 @@ const sendEmail = async (req: Request, res: Response, next: NextFunction): Promi
 
 const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
-    const {
-        destinatario,
-        remitente,
-        subject,
-        text,
-        nombreRemitente
-    } = emailCobranzaBodySchema.parse(req.body);
+    const { destinatario, remitente, subject, text, nombreRemitente } = emailCobranzaBodySchema.parse(req.body);
+    const queryRequest = { ...req.query, Id_Almacen: '0' };
 
     const {
         PageNumber,
@@ -62,47 +55,28 @@ const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction)
         FilterNotExpired,
         DateEnd,
         DateExactly,
-        DateStart,
-        Id_Almacen
-    } = getCobranzaByClientQuerySchema.parse(req.query);
-
-
+        DateStart
+    } = getCobranzaByClientQuerySchema.parse(queryRequest);
     const { client } = getClientParamsSchema.parse(req.params);
-
     const userSession = req.sessionWeb;
 
-    const { sells, brief } = await getAllCobranzaService({
-        Id_Almacen,
-        userSession,
+    const mailOptions = await sendEmailWithPDFService({
         Id_Cliente: client,
-        PageNumber: PageNumber || 1,
+        userSession: userSession,
+        destinatario,
+        remitente,
+        subject,
+        text,
+        nombreRemitente,
+        PageNumber,
         SellsOrderCondition: cobranzaOrderCondition,
         TipoDoc,
-        FilterNotExpired,
         FilterExpired,
-        DateEnd: DateEnd || null,
-        DateExactly: DateExactly || null,
-        DateStart: DateStart || null,
-        PageSize: 10
-    });
-
-    const pdfBuffer = await generatePDF(sells, brief);
-
-    // Opciones del correo
-    const mailOptions = {
-        from: '"Olei Software" <moradoluisenrique@gmail.com>',
-        to: destinatario,
-        subject: subject,
-        text: text,
-        replyTo: remitente,
-        attachments: [
-            {
-                filename: `Cobranza-${nombreRemitente}.pdf`,
-                content: Buffer.from(pdfBuffer),
-                contentType: 'application/pdf',
-            },
-        ],
-    };
+        FilterNotExpired,
+        DateEnd,
+        DateExactly,
+        DateStart
+    })
 
     try {
         await transporter.sendMail(mailOptions);

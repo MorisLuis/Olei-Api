@@ -78,9 +78,7 @@ const updateMeeting = async (req, res, next) => {
 exports.updateMeeting = updateMeeting;
 const postMeeting = async (req, res, next) => {
     try {
-        console.log("req.body", req.body);
         const body = bitacoraValidations_1.postBitacoraBodySchema.parse(req.body);
-        console.log({ body });
         const userSession = req.sessionWeb;
         const meeting = await (0, meetingsServices_1.postMeetingService)(userSession, body);
         return res.json(meeting);

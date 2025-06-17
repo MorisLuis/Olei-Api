@@ -16,7 +16,7 @@ const getSellsProducts = async (req, res, next) => {
             DateStart: DateStart || null,
             Descripcion: Descripcion || null,
             Codigo: Codigo || null,
-            Sku,
+            Sku: Sku || null,
             OrderCondition
         });
         return res.json({

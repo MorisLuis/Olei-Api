@@ -1,7 +1,7 @@
 import type { CobranzaOrderConditionType, SellsInterface } from "../../interface/sells";
 import type { UserWebSessionInterface } from "../../interface/user";
 
-type FilterType = 0 | 1;
+export type FilterType = 0 | 1;
 interface CobranzaInterface {
     Id_Cliente: number,
     Nombre: string,
