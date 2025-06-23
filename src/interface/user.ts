@@ -15,7 +15,7 @@ export interface UserSessionInterface {
     serverConected: boolean;
     userConected: boolean;
 
-    userId?: string;
+    Id_UsuarioOLEI?: string;
     userRol?: string;
     TodosAlmacenes?: number;
     SalidaSinExistencias?: number
@@ -44,11 +44,8 @@ export interface UserWebSessionInterface {
     TipoUsuario: string,
     Vigencia: string,
     TipoDocOO: number,
-    
-    //PrecioIncIVA: number,
-    //Id: string, // revisar
 
-    // Online
+
     SwSinStock: boolean, 
     SwsinPrecio: boolean, 
     IsEmploye?: boolean

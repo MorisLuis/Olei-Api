@@ -12,7 +12,7 @@ const mssql_1 = __importDefault(require("mssql"));
 const postInventoryService = async ({ userSession, inventoryDetails, typeOfMovement }) => {
     try {
         /* TodosAlmacenes PENDING */
-        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, userId } = userSession;
+        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_UsuarioOLEI } = userSession;
         const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
         if (!pool) {
             throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
@@ -47,7 +47,7 @@ const postInventoryService = async ({ userSession, inventoryDetails, typeOfMovem
             .input('Accion', mssql_1.default.Int, Accion)
             .input('Id_TipoMovInv', mssql_1.default.Int, Id_TipoMovInv)
             .input('Id_Almacen', mssql_1.default.Int, Id_Almacen)
-            .input('user', mssql_1.default.NVarChar(50), userId)
+            .input('user', mssql_1.default.NVarChar(50), Id_UsuarioOLEI)
             .input('ExpectedRows', mssql_1.default.Int, ExpectedRows)
             .input('ExpectedTotalQuantity', mssql_1.default.Decimal(18, 0), ExpectedTotalQuantity)
             .output('Folio', mssql_1.default.Int)

@@ -4,7 +4,7 @@ import { validateJWTWeb } from "../middleware/validateJWTWeb";
 
 
 const router = Router();
-router.post('/', sendEmail);
+router.post('/', validateJWTWeb, sendEmail);
 router.post('/cobranza/pdf/:client', validateJWTWeb, sendEmailWithPDF);
 router.post('/cobranza/excell', validateJWTWeb, sendEmailWithPDF);
 

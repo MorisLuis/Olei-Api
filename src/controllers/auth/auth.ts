@@ -67,9 +67,9 @@ const login = async (req: Request, res: Response, next: NextFunction): Promise<R
             session
         });
 
+
         const datosDelUsuario: UserSessionInterface = {
             ...session,
-            userId: Id_Usuario.trim(),
             userRol: userData.Id_Perfil,
             TodosAlmacenes: userData.TodosAlmacenes,
             SalidaSinExistencias: userData.SalidaSinExistencias,
@@ -118,7 +118,7 @@ const logoutUser = async (req: Request, res: Response, next: NextFunction): Prom
 
         const datosDelUsuario: UserSessionInterface = {
             ...sessionUser,
-            userId: '',
+            Id_UsuarioOLEI: '',
             userRol: '',
             TodosAlmacenes: 0,
             SalidaSinExistencias: 0,

@@ -1,9 +1,17 @@
+import type { Transporter } from "../../infra/email/transporter";
 import type { SellsInterface, SellsOrderConditionByClientType } from "../../interface/sells";
 import type { UserWebSessionInterface } from "../../interface/user";
 import type { FilterType } from "../cobranza/cobranza.interface";
 
+interface SendEmailServiceParams {
+    destinatario: string,
+    remitente: string,
+    subject: string,
+    text: string,
+    userSession: UserWebSessionInterface;
+};
 
-interface SendEmailWithPDFServiceInterface {
+interface SendEmailWithPDFServiceParams {
 
     Id_Cliente: number;
     PageNumber: number;
@@ -24,23 +32,30 @@ interface SendEmailWithPDFServiceInterface {
 
 };
 
+interface SendEmailResponse {
+    mailOptions: MailOptionsInterface;
+    emailTransporterData: Transporter;
+};
+
 interface MailOptionsInterface {
     from: string;
     to: string;
     subject: string;
     text: string;
     replyTo: string;
-    attachments: [
+    attachments?: [
         {
             filename: string;
-            content:  Buffer;
+            content: Buffer;
             contentType: 'application/pdf'
         }
     ]
-}
-
+};
 
 export type {
-    SendEmailWithPDFServiceInterface,
+    SendEmailServiceParams,
+    SendEmailWithPDFServiceParams,
+    SendEmailResponse,
+
     MailOptionsInterface
 }

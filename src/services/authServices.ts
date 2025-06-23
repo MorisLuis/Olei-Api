@@ -28,7 +28,7 @@ const loginWebService = async (email: string, password: string): Promise<UserWeb
 
     if (isExpired) {
         throw new UnauthorizedError(`Cuenta de usuario vencida`);
-    }
+    };
 
     return user;
 };

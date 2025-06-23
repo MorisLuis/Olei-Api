@@ -20,7 +20,7 @@ export const postInventoryService = async ({
 
     try {
         /* TodosAlmacenes PENDING */
-        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, userId } = userSession;
+        const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL, Id_Almacen, Id_UsuarioOLEI } = userSession;
         const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
         if (!pool) {
@@ -61,7 +61,7 @@ export const postInventoryService = async ({
             .input('Accion', sql.Int, Accion)
             .input('Id_TipoMovInv', sql.Int, Id_TipoMovInv)
             .input('Id_Almacen', sql.Int, Id_Almacen)
-            .input('user', sql.NVarChar(50), userId)
+            .input('user', sql.NVarChar(50), Id_UsuarioOLEI)
             .input('ExpectedRows', sql.Int, ExpectedRows)
             .input('ExpectedTotalQuantity', sql.Decimal(18, 0), ExpectedTotalQuantity)
             .output('Folio', sql.Int)

@@ -26,6 +26,7 @@ const loginWebService = async (email, password) => {
     if (isExpired) {
         throw new CustomError_1.UnauthorizedError(`Cuenta de usuario vencida`);
     }
+    ;
     return user;
 };
 exports.loginWebService = loginWebService;

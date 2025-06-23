@@ -19,8 +19,8 @@ export const getUserIdFromRequest = async (req: Request): Promise<string | null>
         const sessionDataRaw = await redisClient.get(`session:${sessionId}`);
         const session = sessionDataRaw ? JSON.parse(sessionDataRaw) : null;
 
-        const user = session?.userId
-            ? `${session?.IdUsuarioOLEI?.toString()}-${session?.userId?.toString()}`
+        const user = session?.Id_UsuarioOLEI
+            ? `${session?.IdUsuarioOLEI?.toString()}-${session?.Id_UsuarioOLEI?.toString()}`
             : session?.IdUsuarioOLEI
                 ? `${session?.IdUsuarioOLEI?.toString()}`
                 : null;

@@ -1,41 +1,29 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendEmailWithPDF = exports.sendEmail = exports.transporter = void 0;
-const nodemailer_1 = __importDefault(require("nodemailer"));
+exports.sendEmailWithPDF = exports.sendEmail = void 0;
 const emailValidations_1 = require("../validations/emailValidations");
 const sellsValidations_1 = require("../validations/sellsValidations");
 const cobranzaValidations_1 = require("../validations/cobranzaValidations");
 const emailService_1 = require("../services/email/emailService");
-// Configurar el transporte SMTP
-exports.transporter = nodemailer_1.default.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-        user: 'moradoluisenrique@gmail.com', // Tu usuario SMTP
-        pass: process.env.KEY_EMAIL, // Tu contraseña SMTP
-    },
-});
+const transporter_1 = require("../infra/email/transporter");
 const sendEmail = async (req, res, next) => {
     const { destinatario, remitente, subject, text } = emailValidations_1.emailBodySchema.parse(req.body);
-    // Opciones del correo
-    const mailOptions = {
-        from: '"Olei Software" <moradoluisenrique@gmail.com>',
-        to: destinatario,
-        subject: subject,
-        text: text,
-        replyTo: remitente
-    };
+    const userSession = req.sessionWeb;
+    const { emailTransporterData, mailOptions } = await (0, emailService_1.sendEmailService)({
+        destinatario,
+        remitente,
+        subject,
+        text,
+        userSession
+    });
     try {
-        await exports.transporter.sendMail(mailOptions);
+        await (0, transporter_1.handleTransporter)(emailTransporterData).sendMail(mailOptions);
         return res.json({
             ok: true
         });
     }
     catch (error) {
+        console.log({ error });
         return next(error);
     }
 };
@@ -46,25 +34,25 @@ const sendEmailWithPDF = async (req, res, next) => {
     const { PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = cobranzaValidations_1.getCobranzaByClientQuerySchema.parse(queryRequest);
     const { client } = sellsValidations_1.getClientParamsSchema.parse(req.params);
     const userSession = req.sessionWeb;
-    const mailOptions = await (0, emailService_1.sendEmailWithPDFService)({
-        Id_Cliente: client,
-        userSession: userSession,
-        destinatario,
-        remitente,
-        subject,
-        text,
-        nombreRemitente,
-        PageNumber,
-        SellsOrderCondition: cobranzaOrderCondition,
-        TipoDoc,
-        FilterExpired,
-        FilterNotExpired,
-        DateEnd,
-        DateExactly,
-        DateStart
-    });
     try {
-        await exports.transporter.sendMail(mailOptions);
+        const { mailOptions, emailTransporterData } = await (0, emailService_1.sendEmailWithPDFService)({
+            Id_Cliente: client,
+            userSession: userSession,
+            destinatario,
+            remitente,
+            subject,
+            text,
+            nombreRemitente,
+            PageNumber,
+            SellsOrderCondition: cobranzaOrderCondition,
+            TipoDoc,
+            FilterExpired,
+            FilterNotExpired,
+            DateEnd,
+            DateExactly,
+            DateStart
+        });
+        await (0, transporter_1.handleTransporter)(emailTransporterData).sendMail(mailOptions);
         return res.json({
             ok: true
         });

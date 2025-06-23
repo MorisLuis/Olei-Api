@@ -320,7 +320,7 @@ const searchProductByStockService = async ({
     withCodebar
 }: searchProductInventoryServiceInterface): Promise<{ products: ProductInterface[] }> => {
 
-    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userSession;
+    const { ServidorSQL, BaseSQL, Id_UsuarioOLEI, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userSession;
 
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
@@ -337,7 +337,7 @@ const searchProductByStockService = async ({
 
     const result = await pool.request()
         .input("searchTerm", searchTerm)
-        .input('Id_Usuario', userId)
+        .input('Id_Usuario', Id_UsuarioOLEI)
         .input('Id_Almacen', Id_Almacen)
         .input('Id_ListPre', Id_ListPre)
         .query(query);

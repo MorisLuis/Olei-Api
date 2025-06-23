@@ -185,7 +185,7 @@ const getProductByStockAndCodeBarService = async ({ userSession, CodBar, SKU, Co
 };
 exports.getProductByStockAndCodeBarService = getProductByStockAndCodeBarService;
 const searchProductByStockService = async ({ userSession, searchTerm, withCodebar }) => {
-    const { ServidorSQL, BaseSQL, userId, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userSession;
+    const { ServidorSQL, BaseSQL, Id_UsuarioOLEI, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userSession;
     const pool = await (0, database_1.dbConnection)(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
@@ -200,7 +200,7 @@ const searchProductByStockService = async ({ userSession, searchTerm, withCodeba
     ;
     const result = await pool.request()
         .input("searchTerm", searchTerm)
-        .input('Id_Usuario', userId)
+        .input('Id_Usuario', Id_UsuarioOLEI)
         .input('Id_Almacen', Id_Almacen)
         .input('Id_ListPre', Id_ListPre)
         .query(query);
