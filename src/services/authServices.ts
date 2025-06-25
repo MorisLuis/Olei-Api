@@ -35,6 +35,7 @@ const loginWebService = async (email: string, password: string): Promise<UserWeb
 
 // Utils
 const getUserByEmailWeb = async (mainPool: ConnectionPool, email: string): Promise<UserWebSessionInterface> => {
+
     const query = querys.authWeb;
     const result = await mainPool.request().input('email', email).query(query);
     const user = result?.recordset[0]
@@ -53,5 +54,6 @@ const isSubscriptionExpired = (dueDate: string): boolean => {
 };
 
 export {
-    loginWebService
+    loginWebService,
+    getUserByEmailWeb
 }
