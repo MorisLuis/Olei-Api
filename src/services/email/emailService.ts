@@ -20,7 +20,6 @@ const sendEmailService = async ({
     userSession
 }: SendEmailServiceParams): Promise<SendEmailResponse> => {
 
-
     const { ServidorSQL, BaseSQL, Id_UsuarioOLEI } = userSession;
 
     const userEmailData = await getUserEmailConfig(Id_UsuarioOLEI, {
@@ -28,7 +27,7 @@ const sendEmailService = async ({
         BaseSQL
     });
 
-    if ( !remitente || !destinatario ) {
+    if (!remitente || !destinatario) {
         throw new ValidationError('Es necesario remitente y destinatario.');
     }
 
@@ -108,7 +107,7 @@ const sendEmailWithPDFService = async ({
         BaseSQL
     });
 
-    if ( !remitente || !destinatario ) {
+    if (!remitente || !destinatario) {
         throw new ValidationError('Es necesario remitente y destinatario.');
     };
 
@@ -153,16 +152,18 @@ const sendEmailWithPDFService = async ({
 };
 
 const getUserEmailConfig = async (Id_UsuarioOLEI: string, dbConfig: DBConfig): Promise<UserEmailDataInterface> => {
-    const pool = await dbConnectionWeb(dbConfig.ServidorSQL, dbConfig.BaseSQL);
-    const userRequest = await pool
-        .request()
-        .input('Id_Usuario', Id_UsuarioOLEI)
-        .query(EmailQuery.getUserEmailData);
-
-    return userRequest.recordset[0];
+    try {
+        const pool = await dbConnectionWeb(dbConfig.ServidorSQL, dbConfig.BaseSQL);
+        const userRequest = await pool.request().input('Id_Usuario', Id_UsuarioOLEI).query(EmailQuery.getUserEmailData);
+        return userRequest.recordset[0];
+    } catch (error) {
+        console.error('Error fetching user email config:', error);
+        throw new Error('Failed to get user email config');
+    }
 };
 
 export {
     sendEmailService,
-    sendEmailWithPDFService
+    sendEmailWithPDFService,
+    getUserEmailConfig
 }

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendEmailWithPDFService = exports.sendEmailService = void 0;
+exports.getUserEmailConfig = exports.sendEmailWithPDFService = exports.sendEmailService = void 0;
 const database_1 = require("../../database");
 const email_1 = require("../../database/querys/email");
 const CustomError_1 = require("../../errors/CustomError");
@@ -18,19 +18,19 @@ const sendEmailService = async ({ destinatario, remitente, subject, text, userSe
     if (!remitente || !destinatario) {
         throw new CustomError_1.ValidationError('Es necesario remitente y destinatario.');
     }
-    const mailOptions = {
-        from: `"Olei Software" <${remitente}>`,
-        to: destinatario,
-        subject: subject,
-        text: text,
-        replyTo: remitente
-    };
     if (!userEmailData.SMTPHost?.trim() ||
         !userEmailData.SMTPPuerto ||
         !userEmailData.MailUsuario?.trim() ||
         !userEmailData.MailPassword?.trim()) {
         throw new CustomError_1.ValidationError('Es necesario toda la información para enviar correo, consulta con el proveedor.');
     }
+    const mailOptions = {
+        from: `"Olei Software" <${userEmailData.MailUsuario}>`,
+        to: destinatario,
+        subject: subject,
+        text: text,
+        replyTo: remitente
+    };
     const emailTransporterData = {
         host: userEmailData.SMTPHost.trim(),
         port: userEmailData.SMTPPuerto,
@@ -71,8 +71,15 @@ const sendEmailWithPDFService = async ({ Id_Cliente, TipoDoc, FilterExpired, Fil
         throw new CustomError_1.ValidationError('Es necesario remitente y destinatario.');
     }
     ;
+    if (!userEmailData.SMTPHost?.trim() ||
+        !userEmailData.SMTPPuerto ||
+        !userEmailData.MailUsuario?.trim() ||
+        !userEmailData.MailPassword?.trim()) {
+        throw new CustomError_1.ValidationError('Es necesario toda la información para enviar correo, consulta con el proveedor.');
+    }
+    ;
     const mailOptions = {
-        from: `"Olei Software" <${remitente}>`,
+        from: `"Olei Software" <${userEmailData.MailUsuario}>`,
         to: destinatario,
         subject: subject,
         text: text,
@@ -85,12 +92,6 @@ const sendEmailWithPDFService = async ({ Id_Cliente, TipoDoc, FilterExpired, Fil
             },
         ],
     };
-    if (!userEmailData.SMTPHost?.trim() ||
-        !userEmailData.SMTPPuerto ||
-        !userEmailData.MailUsuario?.trim() ||
-        !userEmailData.MailPassword?.trim()) {
-        throw new CustomError_1.ValidationError('Es necesario toda la información para enviar correo, consulta con el proveedor.');
-    }
     const emailTransporterData = {
         host: userEmailData.SMTPHost.trim(),
         port: userEmailData.SMTPPuerto,
@@ -107,11 +108,15 @@ const sendEmailWithPDFService = async ({ Id_Cliente, TipoDoc, FilterExpired, Fil
 };
 exports.sendEmailWithPDFService = sendEmailWithPDFService;
 const getUserEmailConfig = async (Id_UsuarioOLEI, dbConfig) => {
-    const pool = await (0, database_1.dbConnectionWeb)(dbConfig.ServidorSQL, dbConfig.BaseSQL);
-    const userRequest = await pool
-        .request()
-        .input('Id_Usuario', Id_UsuarioOLEI)
-        .query(email_1.EmailQuery.getUserEmailData);
-    return userRequest.recordset[0];
+    try {
+        const pool = await (0, database_1.dbConnectionWeb)(dbConfig.ServidorSQL, dbConfig.BaseSQL);
+        const userRequest = await pool.request().input('Id_Usuario', Id_UsuarioOLEI).query(email_1.EmailQuery.getUserEmailData);
+        return userRequest.recordset[0];
+    }
+    catch (error) {
+        console.error('Error fetching user email config:', error);
+        throw new Error('Failed to get user email config');
+    }
 };
+exports.getUserEmailConfig = getUserEmailConfig;
 //# sourceMappingURL=emailService.js.map

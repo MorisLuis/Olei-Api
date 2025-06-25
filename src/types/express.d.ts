@@ -9,6 +9,7 @@ declare global {
       sessionId: string;
       session: UserSessionInterface;
       sessionWeb: UserWebSessionInterface;
+      user: any;
     }
   }
 }
