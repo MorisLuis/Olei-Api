@@ -80,6 +80,8 @@ export interface authResultInterface {
     SwImagenes: string | null,
     Vigencia: string,
     Id_ListPre: number;
+
+    Id_UsuarioOLEI: string;
 }
 
 export type ValidationResult = {

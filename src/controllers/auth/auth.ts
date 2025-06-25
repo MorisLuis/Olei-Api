@@ -26,6 +26,7 @@ const loginServer = async (req: Request, res: Response, next: NextFunction): Pro
             IdUsuarioOLEI: result.IdUsuarioOLEI.trim(),
             PasswordOLEI: result.PasswordOLEI,
 
+            
             RazonSocial: result.RazonSocial.trim(),
             SwImagenes: result.SwImagenes,
             Vigencia: result.Vigencia,
@@ -66,10 +67,11 @@ const login = async (req: Request, res: Response, next: NextFunction): Promise<R
             password,
             session
         });
-
+        
 
         const datosDelUsuario: UserSessionInterface = {
             ...session,
+            Id_UsuarioOLEI: Id_Usuario.trim(),
             userRol: userData.Id_Perfil,
             TodosAlmacenes: userData.TodosAlmacenes,
             SalidaSinExistencias: userData.SalidaSinExistencias,

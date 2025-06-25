@@ -57,6 +57,7 @@ const login = async (req, res, next) => {
         });
         const datosDelUsuario = {
             ...session,
+            Id_UsuarioOLEI: Id_Usuario.trim(),
             userRol: userData.Id_Perfil,
             TodosAlmacenes: userData.TodosAlmacenes,
             SalidaSinExistencias: userData.SalidaSinExistencias,
