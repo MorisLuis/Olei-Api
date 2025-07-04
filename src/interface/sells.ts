@@ -56,7 +56,6 @@ export interface SellsProductsInterface {
     Precio: number,
     Importe: number,
     Impuesto: number,
-    Sku: string,
     Fecha: string;
     Marca: string
 }
@@ -81,6 +80,6 @@ export const CobranzaOrderCondition: CobranzaOrderConditionType[] = ['Nombre', '
 
 
 /* SELLS PRODUCTS */
-export type SellsProductsOrderConditionType = 'Folio' | 'Codigo' | 'Fecha' | 'Marca';
-export const SellsProductsOrderCondition: SellsProductsOrderConditionType[] = ['Folio', 'Codigo', 'Fecha', 'Marca']
+export type SellsProductsOrderConditionType = 'Folio' | 'Codigo' | 'Fecha' | 'Marca' | 'Descripcion';
+export const SellsProductsOrderCondition: SellsProductsOrderConditionType[] = ['Folio', 'Codigo', 'Fecha', 'Marca', 'Descripcion']
 

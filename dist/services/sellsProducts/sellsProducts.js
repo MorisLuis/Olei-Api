@@ -4,7 +4,7 @@ exports.getSellsProductsCountAndTotalService = exports.getSellsProductsService =
 const database_1 = require("../../database");
 const sellsProducts_1 = require("../../database/querys/sellsProducts");
 const CustomError_1 = require("../../errors/CustomError");
-const getSellsProductsService = async ({ Marca, DateEnd, DateExactly, DateStart, Descripcion, userSession, Sku, Codigo, OrderCondition, PageNumber }) => {
+const getSellsProductsService = async ({ Marca, DateEnd, DateExactly, DateStart, Descripcion, userSession, Codigo, OrderCondition, PageNumber }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -21,7 +21,6 @@ const getSellsProductsService = async ({ Marca, DateEnd, DateExactly, DateStart,
         .input('DateExactly', DateExactly)
         .input('DateStart', DateStart)
         .input('Descripcion', Descripcion)
-        .input('Sku', Sku)
         .input('Codigo', Codigo)
         .query(query);
     const sells = requestSells.recordset;
@@ -30,7 +29,7 @@ const getSellsProductsService = async ({ Marca, DateEnd, DateExactly, DateStart,
     };
 };
 exports.getSellsProductsService = getSellsProductsService;
-const getSellsProductsCountAndTotalService = async ({ Codigo, Sku, Marca, DateEnd, DateExactly, DateStart, Descripcion, userSession, }) => {
+const getSellsProductsCountAndTotalService = async ({ Codigo, Marca, DateEnd, DateExactly, DateStart, Descripcion, userSession, }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -45,7 +44,6 @@ const getSellsProductsCountAndTotalService = async ({ Codigo, Sku, Marca, DateEn
         .input('DateExactly', DateExactly)
         .input('DateStart', DateStart)
         .input('Descripcion', Descripcion)
-        .input('Sku', Sku)
         .input('Codigo', Codigo)
         .query(totalSellsProductsQuery);
     const requestCount = await pool.request()
@@ -54,7 +52,6 @@ const getSellsProductsCountAndTotalService = async ({ Codigo, Sku, Marca, DateEn
         .input('DateExactly', DateExactly)
         .input('DateStart', DateStart)
         .input('Descripcion', Descripcion)
-        .input('Sku', Sku)
         .input('Codigo', Codigo)
         .query(countSellsProductsQuery);
     const [countResult, totalResult] = await Promise.all([

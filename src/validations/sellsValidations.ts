@@ -14,12 +14,35 @@ export const getSellsQuerySchema = z.object({
                 val === undefined || SellsOrderCondition.includes(val as SellsOrderConditionType),
             { message: "sellsOrderCondition debe ser 'Nombre', 'Total'" }
         ),
-    searchTerm: z.preprocess((val) => (val === undefined ? '' : val), z.string())
+    searchTerm: z.preprocess((val) => (val === undefined ? '' : val), z.string()),
+    DateEnd: z.preprocess(
+        (val) => (val === "undefined" ? undefined : val),
+        z.string().optional()
+    ),
+    DateExactly: z.preprocess(
+        (val) => (val === "undefined" ? undefined : val),
+        z.string().optional()
+    ),
+    DateStart: z.preprocess(
+        (val) => (val === "undefined" ? undefined : val),
+        z.string().optional()
+    )
 });
 
 export const getSellsCountAndTotalQuerySchema = z.object({
-    searchTerm: z.preprocess((val) => (val === undefined ? '' : val), z.string())
-
+    searchTerm: z.preprocess((val) => (val === undefined ? '' : val), z.string()),
+    DateEnd: z.preprocess(
+        (val) => (val === "undefined" ? undefined : val),
+        z.string().optional()
+    ),
+    DateExactly: z.preprocess(
+        (val) => (val === "undefined" ? undefined : val),
+        z.string().optional()
+    ),
+    DateStart: z.preprocess(
+        (val) => (val === "undefined" ? undefined : val),
+        z.string().optional()
+    )
 });
 
 export const getSellsByClientQuerySchema = z.object({

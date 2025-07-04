@@ -10,7 +10,6 @@ interface GetSellsProductsServiceParams {
     DateExactly?: string | null;
     DateStart?: string | null;
     Descripcion: string | null;
-    Sku: string | null;
     Codigo: string | null;
 }
 

@@ -8,7 +8,6 @@ const getSellsProductsQuerySchema = zod_1.z.object({
     Marca: zod_1.z.preprocess((val) => val === undefined || val === null ? null : val, zod_1.z.string().nullable()),
     Codigo: zod_1.z.preprocess((val) => val === undefined || val === null ? null : val, zod_1.z.string().nullable()),
     Descripcion: zod_1.z.preprocess((val) => val === undefined || val === null ? null : val, zod_1.z.string().nullable()),
-    Sku: zod_1.z.preprocess((val) => val === undefined || val === null ? null : val, zod_1.z.string().nullable()),
     DateEnd: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
     DateExactly: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
     DateStart: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
@@ -24,7 +23,6 @@ const getSellsProductsCountAndTotalQuerySchema = zod_1.z.object({
     Marca: zod_1.z.preprocess((val) => val === undefined || val === null ? null : val, zod_1.z.string().nullable()),
     Codigo: zod_1.z.preprocess((val) => val === undefined || val === null ? null : val, zod_1.z.string().nullable()),
     Descripcion: zod_1.z.preprocess((val) => val === undefined || val === null ? null : val, zod_1.z.string().nullable()),
-    Sku: zod_1.z.preprocess((val) => val === undefined || val === null ? null : val, zod_1.z.string().nullable()),
     DateEnd: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
     DateExactly: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
     DateStart: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional())

@@ -14,20 +14,17 @@ export const sellsProductsQuery = {
                 D.Precio,
                 D.Importe,
                 D.Impuesto,
-                D.Sku,
                 V.Fecha,
                 M.Nombre AS Marca
             FROM dbo.DETALLEVENTAS D
                 JOIN dbo.VENTAS V ON V.Folio = D.Folio
                 JOIN dbo.MARCAS M ON M.Id_Marca = D.Id_Marca
-            WHERE (@Sku IS NULL OR Sku = @Sku)
-                AND (@Marca IS NULL OR M.Nombre = @Marca)
+            WHERE (@Marca IS NULL OR M.Nombre = @Marca)
                 AND (@Codigo IS NULL OR Codigo = @Codigo)
                 AND (@Descripcion IS NULL OR Descripcion = @Descripcion)
                 AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)
                 AND (@DateEnd IS NULL OR CAST(Fecha AS DATE) <= @DateEnd)
                 AND (@DateExactly IS NULL OR CAST(Fecha AS DATE) = @DateExactly)
-
         )
         SELECT * 
         FROM DETALLEVENTAS_CTE
@@ -35,7 +32,8 @@ export const sellsProductsQuery = {
             CASE WHEN @OrderCondition = 'Folio' THEN CAST(Folio AS INT) END,
             CASE WHEN @OrderCondition = 'Codigo' THEN CAST(Codigo AS VARCHAR(50)) END,
             CASE WHEN @OrderCondition = 'Fecha' THEN CAST(Fecha AS DATETIME) END DESC,
-            CASE WHEN @OrderCondition = 'Marca' THEN CAST(Marca AS VARCHAR(50)) END
+            CASE WHEN @OrderCondition = 'Marca' THEN CAST(Marca AS VARCHAR(50)) END,
+            CASE WHEN @OrderCondition = 'Descripcion' THEN CAST(Descripcion AS VARCHAR(50)) END
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY;
     `,
@@ -57,14 +55,12 @@ export const sellsProductsQuery = {
                     D.Precio,
                     D.Importe,
                     D.Impuesto,
-                    D.Sku,
                     V.Fecha,
                     M.Nombre AS Marca
                 FROM dbo.DETALLEVENTAS D
                     JOIN dbo.VENTAS V ON V.Folio = D.Folio
                     JOIN dbo.MARCAS M ON M.Id_Marca = D.Id_Marca
-                WHERE (@Sku IS NULL OR Sku = @Sku)
-                    AND (@Marca IS NULL OR M.Nombre = @Marca)
+                WHERE (@Marca IS NULL OR M.Nombre = @Marca)
                     AND (@Codigo IS NULL OR Codigo = @Codigo)
                     AND (@Descripcion IS NULL OR Descripcion = @Descripcion)
                     AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)
@@ -92,14 +88,12 @@ export const sellsProductsQuery = {
                 D.Precio,
                 D.Importe,
                 D.Impuesto,
-                D.Sku,
                 V.Fecha,
                 M.Nombre AS Marca
             FROM dbo.DETALLEVENTAS D
                 JOIN dbo.VENTAS V ON V.Folio = D.Folio
                 JOIN dbo.MARCAS M ON M.Id_Marca = D.Id_Marca
-            WHERE (@Sku IS NULL OR Sku = @Sku)
-                AND (@Marca IS NULL OR M.Nombre = @Marca)
+            WHERE (@Marca IS NULL OR M.Nombre = @Marca)
                 AND (@Codigo IS NULL OR Codigo = @Codigo)
                 AND (@Descripcion IS NULL OR Descripcion = @Descripcion)
                 AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)

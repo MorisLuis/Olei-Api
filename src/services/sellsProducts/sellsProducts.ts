@@ -12,7 +12,6 @@ const getSellsProductsService = async ({
     DateStart,
     Descripcion,
     userSession,
-    Sku,
     Codigo,
 
     OrderCondition,
@@ -38,7 +37,6 @@ const getSellsProductsService = async ({
         .input('DateExactly', DateExactly)
         .input('DateStart', DateStart)
         .input('Descripcion', Descripcion)
-        .input('Sku', Sku)
         .input('Codigo', Codigo)
         .query(query);
 
@@ -53,7 +51,6 @@ const getSellsProductsService = async ({
 
 const getSellsProductsCountAndTotalService = async ({
     Codigo,
-    Sku,
     Marca,
     DateEnd,
     DateExactly,
@@ -78,7 +75,6 @@ const getSellsProductsCountAndTotalService = async ({
         .input('DateExactly', DateExactly)
         .input('DateStart', DateStart)
         .input('Descripcion', Descripcion)
-        .input('Sku', Sku)
         .input('Codigo', Codigo)
         .query(totalSellsProductsQuery);
 
@@ -88,7 +84,6 @@ const getSellsProductsCountAndTotalService = async ({
         .input('DateExactly', DateExactly)
         .input('DateStart', DateStart)
         .input('Descripcion', Descripcion)
-        .input('Sku', Sku)
         .input('Codigo', Codigo)
         .query(countSellsProductsQuery);
 

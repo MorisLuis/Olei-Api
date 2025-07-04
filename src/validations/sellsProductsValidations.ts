@@ -20,10 +20,6 @@ const getSellsProductsQuerySchema = z.object({
         z.string().nullable()
     ),
 
-    Sku: z.preprocess(
-        (val) => val === undefined || val === null ? null : val,
-        z.string().nullable()
-    ),
 
     DateEnd: z.preprocess(
         (val) => (val === "undefined" ? undefined : val),
@@ -63,11 +59,6 @@ const getSellsProductsCountAndTotalQuerySchema = z.object({
     ),
 
     Descripcion: z.preprocess(
-        (val) => val === undefined || val === null ? null : val,
-        z.string().nullable()
-    ),
-
-    Sku: z.preprocess(
         (val) => val === undefined || val === null ? null : val,
         z.string().nullable()
     ),

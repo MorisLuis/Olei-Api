@@ -5,14 +5,17 @@ import { getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, get
 const getSells = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const { PageNumber, sellsOrderCondition, searchTerm } = getSellsQuerySchema.parse(req.query)
+        const { PageNumber, sellsOrderCondition, searchTerm, DateEnd, DateExactly, DateStart } = getSellsQuerySchema.parse(req.query)
         const userSession = req.sessionWeb;
 
         const { sells } = await getSellsService({
             userSession,
             PageNumber,
             sellsOrderCondition,
-            searchTerm
+            searchTerm,
+            DateEnd: DateEnd || null,
+            DateExactly: DateExactly || null,
+            DateStart: DateStart || null
         });
 
         return res.json({
@@ -29,12 +32,15 @@ const getSellsCountAndTotal = async (req: Request, res: Response, next: NextFunc
 
     try {
 
-        const { searchTerm } = getSellsCountAndTotalQuerySchema.parse(req.query)
+        const { searchTerm, DateStart, DateEnd, DateExactly } = getSellsCountAndTotalQuerySchema.parse(req.query)
         const userSession = req.sessionWeb;
 
         const { count, total } = await getSellsCountAndTotalService({
             userSession,
-            searchTerm
+            searchTerm,
+            DateEnd: DateEnd || null,
+            DateExactly: DateExactly || null,
+            DateStart: DateStart || null
         });
 
         return res.json({

@@ -6,5 +6,5 @@ exports.SellsOrderCondition = ['Nombre', 'Total'];
 exports.SellsOrderByClientCondition = ['TipoDoc', 'Folio', 'Fecha', 'FechaEntrega', 'ExpiredDays'];
 exports.SellsFilterCondition = ['TipoDoc', 'Expired', "Not Expired"];
 exports.CobranzaOrderCondition = ['Nombre', 'ExpiredDays', 'SaldoVencido', 'SaldoNoVencido', 'TotalSaldo'];
-exports.SellsProductsOrderCondition = ['Folio', 'Codigo', 'Fecha', 'Marca'];
+exports.SellsProductsOrderCondition = ['Folio', 'Codigo', 'Fecha', 'Marca', 'Descripcion'];
 //# sourceMappingURL=sells.js.map

@@ -5,13 +5,16 @@ const sellsDocsServices_1 = require("../../services/sells/sellsDocsServices");
 const sellsValidations_1 = require("../../validations/sellsValidations");
 const getSells = async (req, res, next) => {
     try {
-        const { PageNumber, sellsOrderCondition, searchTerm } = sellsValidations_1.getSellsQuerySchema.parse(req.query);
+        const { PageNumber, sellsOrderCondition, searchTerm, DateEnd, DateExactly, DateStart } = sellsValidations_1.getSellsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
         const { sells } = await (0, sellsDocsServices_1.getSellsService)({
             userSession,
             PageNumber,
             sellsOrderCondition,
-            searchTerm
+            searchTerm,
+            DateEnd: DateEnd || null,
+            DateExactly: DateExactly || null,
+            DateStart: DateStart || null
         });
         return res.json({
             sells
@@ -25,11 +28,14 @@ const getSells = async (req, res, next) => {
 exports.getSells = getSells;
 const getSellsCountAndTotal = async (req, res, next) => {
     try {
-        const { searchTerm } = sellsValidations_1.getSellsCountAndTotalQuerySchema.parse(req.query);
+        const { searchTerm, DateStart, DateEnd, DateExactly } = sellsValidations_1.getSellsCountAndTotalQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
         const { count, total } = await (0, sellsDocsServices_1.getSellsCountAndTotalService)({
             userSession,
-            searchTerm
+            searchTerm,
+            DateEnd: DateEnd || null,
+            DateExactly: DateExactly || null,
+            DateStart: DateStart || null
         });
         return res.json({
             count,

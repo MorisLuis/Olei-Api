@@ -4,7 +4,7 @@ exports.getSellByIdService = exports.getSellsByClientCountAndTotalService = expo
 const database_1 = require("../../database");
 const sells_1 = require("../../database/querys/sells");
 const CustomError_1 = require("../../errors/CustomError");
-const getSellsService = async ({ userSession, PageNumber, sellsOrderCondition, searchTerm }) => {
+const getSellsService = async ({ userSession, PageNumber, sellsOrderCondition, searchTerm, DateEnd, DateExactly, DateStart }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -17,6 +17,9 @@ const getSellsService = async ({ userSession, PageNumber, sellsOrderCondition, s
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
         .input('searchTerm', searchTerm)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
         .query(query);
     const sells = requestSells.recordset;
     return {
@@ -24,7 +27,7 @@ const getSellsService = async ({ userSession, PageNumber, sellsOrderCondition, s
     };
 };
 exports.getSellsService = getSellsService;
-const getSellsCountAndTotalService = async ({ userSession, searchTerm }) => {
+const getSellsCountAndTotalService = async ({ userSession, searchTerm, DateEnd, DateExactly, DateStart }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
@@ -36,9 +39,15 @@ const getSellsCountAndTotalService = async ({ userSession, searchTerm }) => {
     const requestTotal = await pool.request()
         .input('PageSize', 10)
         .input('searchTerm', searchTerm)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
         .query(totalSellsQuery);
     const requestCount = await pool.request()
         .input('searchTerm', searchTerm)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
         .query(countSellsQuery);
     const [countResult, totalResult] = await Promise.all([
         requestCount,

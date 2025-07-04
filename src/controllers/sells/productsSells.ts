@@ -7,7 +7,7 @@ import { getSellsProductsCountAndTotalService, getSellsProductsService } from ".
 const getSellsProducts = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const { Marca, PageNumber, DateEnd, DateExactly, DateStart, Descripcion, OrderCondition, Sku, Codigo } = getSellsProductsQuerySchema.parse(req.query);
+        const { Marca, PageNumber, DateEnd, DateExactly, DateStart, Descripcion, OrderCondition, Codigo } = getSellsProductsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
         const { sells } = await getSellsProductsService({
@@ -19,7 +19,6 @@ const getSellsProducts = async (req: Request, res: Response, next: NextFunction)
             DateStart: DateStart || null,
             Descripcion: Descripcion || null,
             Codigo: Codigo || null,
-            Sku: Sku || null,
             OrderCondition
         })
 
@@ -37,7 +36,7 @@ const getSellsProductsCountAndTotal = async (req: Request, res: Response, next: 
 
     try {
 
-        const { Marca, DateEnd, DateExactly, DateStart, Descripcion, Sku, Codigo } = getSellsProductsCountAndTotalQuerySchema.parse(req.query);
+        const { Marca, DateEnd, DateExactly, DateStart, Descripcion, Codigo } = getSellsProductsCountAndTotalQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
         const { count, totals } = await getSellsProductsCountAndTotalService({
@@ -47,8 +46,7 @@ const getSellsProductsCountAndTotal = async (req: Request, res: Response, next: 
             DateExactly: DateExactly || null,
             DateStart: DateStart || null,
             Descripcion: Descripcion || null,
-            Codigo: Codigo || null,
-            Sku,
+            Codigo: Codigo || null
         });
 
         return res.json({

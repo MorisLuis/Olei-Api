@@ -11,10 +11,16 @@ exports.getSellsQuerySchema = zod_1.z.object({
         .string()
         .optional()
         .refine((val) => val === undefined || sells_1.SellsOrderCondition.includes(val), { message: "sellsOrderCondition debe ser 'Nombre', 'Total'" }),
-    searchTerm: zod_1.z.preprocess((val) => (val === undefined ? '' : val), zod_1.z.string())
+    searchTerm: zod_1.z.preprocess((val) => (val === undefined ? '' : val), zod_1.z.string()),
+    DateEnd: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
+    DateExactly: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
+    DateStart: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional())
 });
 exports.getSellsCountAndTotalQuerySchema = zod_1.z.object({
-    searchTerm: zod_1.z.preprocess((val) => (val === undefined ? '' : val), zod_1.z.string())
+    searchTerm: zod_1.z.preprocess((val) => (val === undefined ? '' : val), zod_1.z.string()),
+    DateEnd: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
+    DateExactly: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional()),
+    DateStart: zod_1.z.preprocess((val) => (val === "undefined" ? undefined : val), zod_1.z.string().optional())
 });
 exports.getSellsByClientQuerySchema = zod_1.z.object({
     PageNumber: zod_1.z.

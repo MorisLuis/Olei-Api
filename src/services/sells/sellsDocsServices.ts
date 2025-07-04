@@ -10,7 +10,11 @@ const getSellsService = async ({
     userSession,
     PageNumber,
     sellsOrderCondition,
-    searchTerm
+    searchTerm,
+
+    DateEnd,
+    DateExactly,
+    DateStart
 }: GetSellsPaignatedServiceParams): Promise<{ sells: SellsInterface[] }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
@@ -27,6 +31,9 @@ const getSellsService = async ({
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
         .input('searchTerm', searchTerm)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
         .query(query);
 
     const sells = requestSells.recordset
@@ -37,7 +44,12 @@ const getSellsService = async ({
 
 const getSellsCountAndTotalService = async ({
     userSession,
-    searchTerm
+    searchTerm,
+
+
+    DateEnd,
+    DateExactly,
+    DateStart
 }: GetSellsServiceParams): Promise<GetSellsTotalServiceResponse> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
@@ -54,12 +66,17 @@ const getSellsCountAndTotalService = async ({
     const requestTotal = await pool.request()
         .input('PageSize', 10)
         .input('searchTerm', searchTerm)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
         .query(totalSellsQuery);
 
     const requestCount = await pool.request()
         .input('searchTerm', searchTerm)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
         .query(countSellsQuery);
-
 
     const [countResult, totalResult] = await Promise.all([
         requestCount,

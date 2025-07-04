@@ -5,12 +5,20 @@ import type { UserWebSessionInterface } from "../../interface/user"
 // PARAMS
 interface GetSellsServiceParams {
     userSession: UserWebSessionInterface,
-    searchTerm: string
+    searchTerm: string;
+
+    DateEnd: string | null,
+    DateExactly: string | null,
+    DateStart: string | null,
 };
 
 interface GetSellsPaignatedServiceParams extends GetSellsServiceParams {
     PageNumber: number,
     sellsOrderCondition: SellsOrderConditionType | string,
+
+    DateEnd: string | null,
+    DateExactly: string | null,
+    DateStart: string | null,
 }
 
 interface GetSellsByClientServiceParams {

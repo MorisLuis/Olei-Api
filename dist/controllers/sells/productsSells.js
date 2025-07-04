@@ -5,7 +5,7 @@ const sellsProductsValidations_1 = require("../../validations/sellsProductsValid
 const sellsProducts_1 = require("../../services/sellsProducts/sellsProducts");
 const getSellsProducts = async (req, res, next) => {
     try {
-        const { Marca, PageNumber, DateEnd, DateExactly, DateStart, Descripcion, OrderCondition, Sku, Codigo } = sellsProductsValidations_1.getSellsProductsQuerySchema.parse(req.query);
+        const { Marca, PageNumber, DateEnd, DateExactly, DateStart, Descripcion, OrderCondition, Codigo } = sellsProductsValidations_1.getSellsProductsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
         const { sells } = await (0, sellsProducts_1.getSellsProductsService)({
             userSession,
@@ -16,7 +16,6 @@ const getSellsProducts = async (req, res, next) => {
             DateStart: DateStart || null,
             Descripcion: Descripcion || null,
             Codigo: Codigo || null,
-            Sku: Sku || null,
             OrderCondition
         });
         return res.json({
@@ -31,7 +30,7 @@ const getSellsProducts = async (req, res, next) => {
 exports.getSellsProducts = getSellsProducts;
 const getSellsProductsCountAndTotal = async (req, res, next) => {
     try {
-        const { Marca, DateEnd, DateExactly, DateStart, Descripcion, Sku, Codigo } = sellsProductsValidations_1.getSellsProductsCountAndTotalQuerySchema.parse(req.query);
+        const { Marca, DateEnd, DateExactly, DateStart, Descripcion, Codigo } = sellsProductsValidations_1.getSellsProductsCountAndTotalQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
         const { count, totals } = await (0, sellsProducts_1.getSellsProductsCountAndTotalService)({
             userSession,
@@ -40,8 +39,7 @@ const getSellsProductsCountAndTotal = async (req, res, next) => {
             DateExactly: DateExactly || null,
             DateStart: DateStart || null,
             Descripcion: Descripcion || null,
-            Codigo: Codigo || null,
-            Sku,
+            Codigo: Codigo || null
         });
         return res.json({
             count,

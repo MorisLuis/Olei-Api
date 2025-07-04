@@ -89,45 +89,60 @@ export const statisticsQuery = {
 
     // HARDCODE
     getWeeklyAndForwardSaldo: `
-        DECLARE @FechaBase DATE = '2023-10-07';   -- o GETDATE()
-        SET DATEFIRST 1;
+        DECLARE @FechaBase DATE = '2023-11-08';
+
+        /* 1. Rangos de tiempo */
+        DECLARE @InicioMes  DATE = DATEFROMPARTS(YEAR(@FechaBase), MONTH(@FechaBase), 1);
+        DECLARE @FinMes     DATE = EOMONTH(@FechaBase);        -- último día del mes
         
-        DECLARE @DiaSemana  INT  = DATEPART(WEEKDAY, @FechaBase);
-        DECLARE @InicioSem  DATE = DATEADD(DAY, -(@DiaSemana - 1), @FechaBase);
-        DECLARE @FinSem     DATE = DATEADD(DAY, 6, @InicioSem);
-        
-        -- CTE base
+        /* 2. CTE base (sin cambios) */
         ;WITH VentasBase AS (
             SELECT
                 V.Id_Cliente,
-                C.RazonSocial     AS Nombre,
+                C.RazonSocial  AS Nombre,
                 V.Id_Almacen,
                 V.Saldo,
                 V.FechaLiq,
                 DATEDIFF(DAY, @FechaBase, V.FechaLiq) AS ExpiredDays
-            FROM dbo.VENTAS V
+            FROM dbo.VENTAS  V
             JOIN dbo.CLIENTES C
             ON C.Id_Cliente = V.Id_Cliente
             AND C.Id_Almacen = V.Id_Almacen
             WHERE V.Saldo > 0
         )
         
-        -- Resultado combinado
-        SELECT
-            'SEMANA' AS type,
-            NULL     AS sumCobranzaExpired,
+        /* 3. Resultado combinado */
+        SELECT 
+            'MES'  AS type,
+            NULL AS sumCobranzaExpired,
             SUM(V.Saldo) AS sumCobranza
         FROM VentasBase V
-        WHERE V.FechaLiq BETWEEN @InicioSem AND @FinSem
+        WHERE V.FechaLiq BETWEEN @InicioMes AND @FinMes
+        
+        UNION ALL
+        
+        SELECT
+            'HOY' AS type,
+            NULL  AS sumCobranzaExpired,
+            SUM(V.Saldo) AS sumCobranza
+        FROM VentasBase V
+        WHERE CAST(V.FechaLiq AS DATE) = @FechaBase
         
         UNION ALL
         
         SELECT
             'HOY_FWD' AS type,
             SUM(CASE WHEN V.ExpiredDays < 0 THEN V.Saldo ELSE 0 END) AS sumCobranzaExpired,
+            SUM(CASE WHEN V.ExpiredDays > 0 THEN V.Saldo ELSE 0 END) AS sumCobranza
+        FROM VentasBase V
+        
+        UNION ALL
+        
+        SELECT
+            'TOTAL' AS type,
+            SUM(CASE WHEN V.ExpiredDays < 0 THEN V.Saldo ELSE 0 END) AS sumCobranzaExpired,
             SUM(V.Saldo) AS sumCobranza
         FROM VentasBase V
-        WHERE CAST(V.FechaLiq AS DATE) >= @FechaBase;
     `,
 
     getProductsAndSellersOfTheMonth: `
