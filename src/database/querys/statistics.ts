@@ -3,7 +3,7 @@
 export const statisticsQuery = {
 
     getEventsOfTheDay: `
-        DECLARE @FechaEspecifica DATE = '2024-02-14'
+        DECLARE @FechaEspecifica DATE = CONVERT(date, SYSDATETIMEOFFSET() AT TIME ZONE 'Central Standard Time (Mexico)');
 
         -- Reuniones y ventas del dia
         SELECT 
@@ -27,7 +27,8 @@ export const statisticsQuery = {
     `,
 
     getEventsOfTheWeek: `
-        DECLARE @FechaEspecifica DATE = '2024-02-14';
+        DECLARE @FechaEspecifica DATE = CONVERT(date, SYSDATETIMEOFFSET() AT TIME ZONE 'Central Standard Time (Mexico)');
+
         DECLARE @Hoy DATE = @FechaEspecifica;
         DECLARE @DiaSemana INT;
         DECLARE @FinDeSemana DATE;
@@ -61,7 +62,7 @@ export const statisticsQuery = {
     `,
 
     getSellsOfTheMonth: `
-        DECLARE @FechaBase DATE = GETDATE();
+        DECLARE @FechaBase DATE = CONVERT(date, SYSDATETIMEOFFSET() AT TIME ZONE 'Central Standard Time (Mexico)');
 
         -- Get the las 4 months
         WITH Meses AS (
@@ -87,9 +88,8 @@ export const statisticsQuery = {
         ORDER BY m.Periodo DESC;
     `,
 
-    // HARDCODE
     getWeeklyAndForwardSaldo: `
-        DECLARE @FechaBase DATE = '2023-11-08';
+        DECLARE @FechaBase DATE = CONVERT(date, SYSDATETIMEOFFSET() AT TIME ZONE 'Central Standard Time (Mexico)');
 
         /* 1. Rangos de tiempo */
         DECLARE @InicioMes  DATE = DATEFROMPARTS(YEAR(@FechaBase), MONTH(@FechaBase), 1);

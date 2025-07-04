@@ -52,17 +52,6 @@ const getStatisticsCRMDashboard = async (
     const sells = responseSellsOfTheMonth.recordset;
     const cobranza = responseWeeklyAndForwardSaldo.recordset;
 
-    console.log({
-        eventsToday,
-        sellsToday,
-        eventsWeek,
-        sellsWeek,
-        productsSoldMonth: TotalProductos, 
-        sellerOfMonth: TotalClientes,
-        sells,
-        cobranza
-    })
-
     return {
         eventsToday,
         sellsToday,

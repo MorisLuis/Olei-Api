@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.statisticsQuery = void 0;
 exports.statisticsQuery = {
     getEventsOfTheDay: `
-        DECLARE @FechaEspecifica DATE = '2024-02-14'
+        DECLARE @FechaEspecifica DATE = CONVERT(date, SYSDATETIMEOFFSET() AT TIME ZONE 'Central Standard Time (Mexico)');
 
         -- Reuniones y ventas del dia
         SELECT 
@@ -26,7 +26,8 @@ exports.statisticsQuery = {
         DECLARE @FinDeSemana DATE; */
     `,
     getEventsOfTheWeek: `
-        DECLARE @FechaEspecifica DATE = '2024-02-14';
+        DECLARE @FechaEspecifica DATE = CONVERT(date, SYSDATETIMEOFFSET() AT TIME ZONE 'Central Standard Time (Mexico)');
+
         DECLARE @Hoy DATE = @FechaEspecifica;
         DECLARE @DiaSemana INT;
         DECLARE @FinDeSemana DATE;
@@ -59,7 +60,7 @@ exports.statisticsQuery = {
         ) AS Counts;
     `,
     getSellsOfTheMonth: `
-        DECLARE @FechaBase DATE = GETDATE();
+        DECLARE @FechaBase DATE = CONVERT(date, SYSDATETIMEOFFSET() AT TIME ZONE 'Central Standard Time (Mexico)');
 
         -- Get the las 4 months
         WITH Meses AS (
@@ -84,9 +85,8 @@ exports.statisticsQuery = {
         LEFT JOIN VentasPorMes AS v ON v.Periodo = m.Periodo
         ORDER BY m.Periodo DESC;
     `,
-    // HARDCODE
     getWeeklyAndForwardSaldo: `
-        DECLARE @FechaBase DATE = '2023-11-08';
+        DECLARE @FechaBase DATE = CONVERT(date, SYSDATETIMEOFFSET() AT TIME ZONE 'Central Standard Time (Mexico)');
 
         /* 1. Rangos de tiempo */
         DECLARE @InicioMes  DATE = DATEFROMPARTS(YEAR(@FechaBase), MONTH(@FechaBase), 1);
