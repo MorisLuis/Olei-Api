@@ -69,23 +69,38 @@ export const statisticsQuery = {
             SELECT 
                 n,
                 Periodo = FORMAT(DATEADD(MONTH, -n, @FechaBase), 'yyyy-MM')
-            FROM (VALUES (0), (1), (2), (3), (4)) AS v(n)
+            FROM (VALUES (0), (1), (2), (3), (4), (5), (6)) AS v(n)
         ),
         -- Get the sells by month
         VentasPorMes AS (
             SELECT
                 Periodo = FORMAT(DATEFROMPARTS(YEAR(V.Fecha), MONTH(V.Fecha), 1), 'yyyy-MM'),
-                SUM(V.Total) AS Total
+                sellsTotal = SUM(v.Total),
+                sellsByMonthContado = SUM(CASE WHEN V.Id_CondVta = 1 THEN V.Total ELSE 0 END),
+                sellsByMonthCredit  = SUM(CASE WHEN V.Id_CondVta <> 1 THEN V.Total ELSE 0 END)
             FROM dbo.VENTAS AS V
             WHERE V.Saldo > 0
             GROUP BY DATEFROMPARTS(YEAR(V.Fecha), MONTH(V.Fecha), 1)
         )
         SELECT 
             m.Periodo AS period,
-            ISNULL(v.Total, 0) AS sellsByMonth
+            ISNULL(v.sellsTotal ,0)       AS sellsTotal,
+            ISNULL(v.sellsByMonthCredit ,0)       AS sellsByMonthCredit,
+            ISNULL(v.sellsByMonthContado,0)       AS sellsByMonthContado
         FROM Meses AS m
         LEFT JOIN VentasPorMes AS v ON v.Periodo = m.Periodo
         ORDER BY m.Periodo DESC;
+    `,
+
+    getSellsOfToday: `
+        DECLARE @FechaBase DATE = CONVERT(date, SYSDATETIMEOFFSET() AT TIME ZONE 'Central Standard Time (Mexico)');
+
+        SELECT
+            sellsTotal = SUM(v.Total),
+            sellsByMonthContado = SUM(CASE WHEN V.Id_CondVta = 1 THEN V.Total ELSE 0 END),
+            sellsByMonthCredit  = SUM(CASE WHEN V.Id_CondVta <> 1 THEN V.Total ELSE 0 END)
+        FROM dbo.VENTAS AS V
+        WHERE V.Fecha = @FechaBase
     `,
 
     getWeeklyAndForwardSaldo: `

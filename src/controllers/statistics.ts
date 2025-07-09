@@ -6,7 +6,6 @@ const getCRMBrief = async (req: Request, res: Response, next: NextFunction): Pro
     try {
         const userSession = req.sessionWeb;
         const {
-            eventsToday,
             sellsToday,
             eventsWeek,
             sellsWeek,
@@ -17,7 +16,6 @@ const getCRMBrief = async (req: Request, res: Response, next: NextFunction): Pro
         } = await getStatisticsCRMDashboard(userSession);
 
         return res.json({
-            eventsToday,
             sellsToday,
             eventsWeek,
             sellsWeek,
