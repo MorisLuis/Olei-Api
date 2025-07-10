@@ -1,11 +1,10 @@
-import fetch from 'node-fetch';
 import type ProductInterface from "../interface/product";
 
 interface getImageInterface {
     baseSQL: string,
     Codigo: string,
     product: ProductInterface
-}
+};
 
 export const getProductWithImages = async ({
     baseSQL,
@@ -68,7 +67,6 @@ export const getProductsWithImage = async (products: ProductInterface[]): Promis
 
     return productsWithImages;
 };
-
 
 export const checkImageExist = async (url: string): Promise<boolean> => {
     try {

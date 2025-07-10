@@ -1,10 +1,7 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkImageExist = exports.getProductsWithImage = exports.getProductWithImages = void 0;
-const node_fetch_1 = __importDefault(require("node-fetch"));
+;
 const getProductWithImages = async ({ baseSQL, Codigo, product }) => {
     if (baseSQL && baseSQL.length > 0) {
         const formatImageDB = baseSQL.split('_');
@@ -56,7 +53,7 @@ const getProductsWithImage = async (products) => {
 exports.getProductsWithImage = getProductsWithImage;
 const checkImageExist = async (url) => {
     try {
-        const response = await (0, node_fetch_1.default)(url, { method: 'HEAD' });
+        const response = await fetch(url, { method: 'HEAD' });
         return response.ok;
     }
     catch {
