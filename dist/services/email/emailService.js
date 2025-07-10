@@ -7,7 +7,7 @@ exports.getUserEmailConfig = exports.sendEmailWithPDFService = exports.sendEmail
 const database_1 = require("../../database");
 const email_1 = require("../../database/querys/email");
 const CustomError_1 = require("../../errors/CustomError");
-const generatePDF_1 = __importDefault(require("../../utils/generatePDF"));
+const generatePDF_1 = __importDefault(require("../../utils/pdf/generatePDF"));
 const cobranza_utils_1 = require("../cobranza/cobranza.utils");
 const sendEmailService = async ({ destinatario, remitente, subject, text, userSession }) => {
     const { ServidorSQL, BaseSQL, Id_UsuarioOLEI } = userSession;

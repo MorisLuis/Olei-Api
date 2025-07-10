@@ -3,7 +3,7 @@ import { EmailQuery } from "../../database/querys/email";
 import { ValidationError } from "../../errors/CustomError";
 import type { Transporter } from "../../infra/email/transporter";
 import type { UserEmailDataInterface } from "../../interface/email";
-import generatePDF from "../../utils/generatePDF";
+import generatePDF from "../../utils/pdf/generatePDF";
 import { getAllCobranzaService } from "../cobranza/cobranza.utils";
 import type { SendEmailResponse, MailOptionsInterface, SendEmailServiceParams, SendEmailWithPDFServiceParams } from "./email.interface";
 
