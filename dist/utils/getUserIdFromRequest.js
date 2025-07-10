@@ -26,6 +26,7 @@ const getUserIdFromRequest = async (req) => {
         return user;
     }
     catch (_err) {
+        void _err;
         return null;
     }
 };

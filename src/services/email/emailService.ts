@@ -6,6 +6,7 @@ import type { UserEmailDataInterface } from "../../interface/email";
 import generatePDF from "../../utils/pdf/generatePDF";
 import { getAllCobranzaService } from "../cobranza/cobranza.utils";
 import type { SendEmailResponse, MailOptionsInterface, SendEmailServiceParams, SendEmailWithPDFServiceParams } from "./email.interface";
+import { Buffer } from 'buffer';
 
 interface DBConfig {
     ServidorSQL: string;

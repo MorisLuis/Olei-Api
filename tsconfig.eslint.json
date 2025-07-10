@@ -1,0 +1,13 @@
+// tsconfig.eslint.json
+{
+    "extends": "./tsconfig.json",
+    "include": [
+        "src",
+        "__tests__",
+        "__mocks__"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}

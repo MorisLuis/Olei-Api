@@ -27,6 +27,7 @@ export const getUserIdFromRequest = async (req: Request): Promise<string | null>
 
         return user;
     } catch (_err) {
+        void _err;
         return null;
     }
 };

@@ -1,4 +1,4 @@
-import { ConnectionPool } from 'mssql';
+import type { ConnectionPool } from 'mssql';
 import { getUserByEmailWeb } from '../../src/services/authServices';
 import { NotFoundError } from '../../src/errors/CustomError';
 

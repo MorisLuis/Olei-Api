@@ -3,18 +3,21 @@
 export class ConnectionPool {
     connected = false;
 
-    constructor(config: any) {
-        // Simula conectar instantáneamente
+    constructor(_config: unknown) {
+        void _config;
     }
 
-    async connect() {
+    async connect(): Promise<this> {
+        await Promise.resolve();
         this.connected = true;
         return this;
     }
 
-    async close() {
+
+    async close(): Promise<this> {
+        await Promise.resolve();
         this.connected = false;
-        return;
+        return this;
     }
 }
 

@@ -6,6 +6,9 @@ interface ErrorResponse extends Error {
 }
 
 const errorHandler = async (err: ErrorResponse, req: Request, res: Response, _next: NextFunction): Promise<void> => {
+
+  void _next;
+  
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
 

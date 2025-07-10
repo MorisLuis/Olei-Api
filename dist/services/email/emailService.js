@@ -9,6 +9,7 @@ const email_1 = require("../../database/querys/email");
 const CustomError_1 = require("../../errors/CustomError");
 const generatePDF_1 = __importDefault(require("../../utils/pdf/generatePDF"));
 const cobranza_utils_1 = require("../cobranza/cobranza.utils");
+const buffer_1 = require("buffer");
 const sendEmailService = async ({ destinatario, remitente, subject, text, userSession }) => {
     const { ServidorSQL, BaseSQL, Id_UsuarioOLEI } = userSession;
     const userEmailData = await getUserEmailConfig(Id_UsuarioOLEI, {
@@ -87,7 +88,7 @@ const sendEmailWithPDFService = async ({ Id_Cliente, TipoDoc, FilterExpired, Fil
         attachments: [
             {
                 filename: `Cobranza-${nombreRemitente}.pdf`,
-                content: Buffer.from(pdfBuffer),
+                content: buffer_1.Buffer.from(pdfBuffer),
                 contentType: 'application/pdf',
             },
         ],

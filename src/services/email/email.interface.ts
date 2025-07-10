@@ -2,6 +2,7 @@ import type { Transporter } from "../../infra/email/transporter";
 import type { SellsInterface, SellsOrderConditionByClientType } from "../../interface/sells";
 import type { UserWebSessionInterface } from "../../interface/user";
 import type { FilterType } from "../cobranza/cobranza.interface";
+import type { Buffer } from 'buffer';
 
 interface SendEmailServiceParams {
     destinatario: string,
