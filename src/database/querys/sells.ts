@@ -200,6 +200,7 @@ export const sellsQuery = {
                     Total
                 FROM [dbo].[VENTAS]
                 WHERE Id_Cliente = @Id_Cliente
+                    AND TipoDoc IN (0,1,2)
                     AND (@FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1))
                     AND (@DateExactly IS NULL OR CAST(Fecha AS DATE) = @DateExactly)
                     AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)
@@ -215,6 +216,7 @@ export const sellsQuery = {
         SELECT COUNT(*) AS TotalCount
         FROM [dbo].[VENTAS]
         WHERE Id_Cliente = @Id_Cliente
+            AND TipoDoc IN (0,1,2)
             AND ( @FilterTipoDoc = 0 OR (TipoDoc = @TipoDoc AND @FilterTipoDoc = 1))
             AND (@DateExactly IS NULL OR CAST(Fecha AS DATE) = @DateExactly)
             AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)
