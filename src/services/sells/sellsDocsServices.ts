@@ -112,7 +112,7 @@ const getSellsByClientService = async ({
         .input('PageSize', 10)
         .input('Id_Cliente', Id_Cliente)
         .input('OrderCondition', SellsOrderCondition)
-        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
+        .input('FilterTipoDoc', TipoDoc == 0 ? 0 : 1)
         .input('DateStart', DateStart)
         .input('DateEnd', DateEnd)
         .input('DateExactly', DateExactly)
