@@ -207,8 +207,8 @@ export const sellsQuery = {
                     AND (@DateEnd IS NULL OR CAST(Fecha AS DATE) <= @DateEnd)
             )
             SELECT 
-                SUM(Subtotal) AS TotalSubtotal, 
-                SUM(Total) AS TotalTotal
+                SUM(Subtotal) AS SumaSubtotal, 
+                SUM(Total) AS SumaTotal
             FROM VENTAS_CTE;
     `,
 
