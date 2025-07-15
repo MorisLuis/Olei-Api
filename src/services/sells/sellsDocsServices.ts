@@ -64,7 +64,6 @@ const getSellsCountAndTotalService = async ({
 
 
     const requestTotal = await pool.request()
-        .input('PageSize', 10)
         .input('searchTerm', searchTerm)
         .input('DateStart', DateStart)
         .input('DateEnd', DateEnd)

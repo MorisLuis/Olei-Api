@@ -57,7 +57,9 @@ exports.cobranzaQuery = {
             CASE WHEN @OrderCondition = 'SaldoNoVencido' THEN SaldoNoVencido ELSE NULL END DESC,
             CASE WHEN @OrderCondition = 'TotalSaldo' THEN TotalSaldo ELSE NULL END DESC,
             Id_Cliente,
-            Nombre;
+            Nombre
+            OFFSET (@PageNumber - 1) * @PageSize ROWS
+            FETCH NEXT @PageSize ROWS ONLY
     `,
     getCobranzaTotal: `
         DECLARE @Ventas TABLE (
@@ -116,7 +118,7 @@ exports.cobranzaQuery = {
             WHERE V.Saldo > 0
             AND V.FechaLiq >= CAST(GETDATE() AS DATE)
             AND V.Id_CondVta <> 1
-            AND LOWER(NOMBRE) LIKE '%' + LOWER(@nombre) + '%'
+            AND (@nombre = '' OR LOWER(C.RazonSocial) LIKE LOWER(@nombre) + '%')
         )
         SELECT COUNT(*) AS TotalCount
         FROM (
@@ -178,7 +180,6 @@ exports.cobranzaQuery = {
             TipoDoc
             OFFSET (@PageNumber - 1) * @PageSize ROWS
             FETCH NEXT @PageSize ROWS ONLY
-
     `,
     getCobranzaByClientTotal: `
         WITH VENTAS_CTE

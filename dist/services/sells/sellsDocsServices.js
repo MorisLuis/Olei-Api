@@ -37,7 +37,6 @@ const getSellsCountAndTotalService = async ({ userSession, searchTerm, DateEnd, 
     const totalSellsQuery = sells_1.sellsQuery.getSellsTotal;
     const countSellsQuery = sells_1.sellsQuery.getSellsCount;
     const requestTotal = await pool.request()
-        .input('PageSize', 10)
         .input('searchTerm', searchTerm)
         .input('DateStart', DateStart)
         .input('DateEnd', DateEnd)
