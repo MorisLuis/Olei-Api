@@ -47,21 +47,24 @@ const sendEmailService = async ({ destinatario, remitente, subject, text, userSe
     };
 };
 exports.sendEmailService = sendEmailService;
-const sendEmailWithPDFService = async ({ Id_Cliente, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart, PageNumber, SellsOrderCondition, userSession, destinatario, remitente, subject, text, nombreRemitente }) => {
+const sendEmailWithPDFService = async ({ userSession, 
+// Cobranza params
+Id_Cliente, Id_Almacen, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart, SellsOrderCondition, 
+// Email data
+destinatario, remitente, subject, text, nombreRemitente }) => {
     const { ServidorSQL, BaseSQL, Id_UsuarioOLEI } = userSession;
     const { sells, brief } = await (0, cobranza_utils_1.getAllCobranzaService)({
-        Id_Almacen: userSession.Id_Almacen,
         userSession,
-        Id_Cliente,
-        PageNumber: PageNumber || 1,
+        PageSize: 10,
         SellsOrderCondition,
+        Id_Almacen,
+        Id_Cliente,
         TipoDoc,
         FilterNotExpired,
         FilterExpired,
         DateEnd: DateEnd || null,
         DateExactly: DateExactly || null,
         DateStart: DateStart || null,
-        PageSize: 10
     });
     const pdfBuffer = await (0, generatePDF_1.default)(sells, brief);
     const userEmailData = await getUserEmailConfig(Id_UsuarioOLEI, {

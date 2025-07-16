@@ -31,17 +31,28 @@ const sendEmail = async (req: Request, res: Response, next: NextFunction): Promi
     }
 };
 
+
+/**
+ * Controller to send a cobranza email with a PDF attachment.
+ * Validates request body and query parameters using Zod schemas,
+ * then triggers the email service and responds with JSON.
+ */
+
 const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
-    const { destinatario, remitente, subject, text, nombreRemitente } = emailCobranzaBodySchema.parse(req.body);
-    const queryRequest = { ...req.query, Id_Almacen: '0' };
-    const { PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart } = getCobranzaByClientQuerySchema.parse(queryRequest);
-    const { client } = getClientParamsSchema.parse(req.params);
+    const { destinatario, remitente, subject, text, nombreRemitente, Id_Almacen: Id_Almacen_Client } = emailCobranzaBodySchema.parse(req.body);
+
+    // Add the Id_Almacen_Client to te query, to comply with 'getCobranzaByClientQuerySchema' schema zod.
+    const queryRequest = { ...req.query, Id_Almacen: Id_Almacen_Client };
+    const { PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart, Id_Almacen } = getCobranzaByClientQuerySchema.parse(queryRequest);
+
+    const { client: Id_Cliente } = getClientParamsSchema.parse(req.params);
     const userSession = req.sessionWeb;
 
     try {
         const { mailOptions, emailTransporterData } = await sendEmailWithPDFService({
-            Id_Cliente: client,
+            Id_Cliente,
+            Id_Almacen,
             userSession: userSession,
             destinatario,
             remitente,

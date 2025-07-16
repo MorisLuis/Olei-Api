@@ -30,7 +30,7 @@ const generatePDF = async (sells, briefSells) => {
         fecha: marginLeft,
         folio: marginLeft + maxWidths.fecha,
         tipoDoc: marginLeft + maxWidths.fecha + maxWidths.folio,
-        fechaEntrega: marginLeft + maxWidths.fecha + maxWidths.folio + maxWidths.tipoDoc,
+        FechaExp: marginLeft + maxWidths.fecha + maxWidths.folio + maxWidths.tipoDoc,
         expiredDays: marginLeft +
             maxWidths.fecha +
             maxWidths.folio +
@@ -53,7 +53,7 @@ const generatePDF = async (sells, briefSells) => {
         { text: 'Fecha', x: columns.fecha },
         { text: 'Folio', x: columns.folio },
         { text: 'Tipo de Documento', x: columns.tipoDoc },
-        { text: 'Fecha de Vencimiento', x: columns.fechaEntrega },
+        { text: 'Fecha de Vencimiento', x: columns.FechaExp },
         { text: 'Días vencidos', x: columns.expiredDays },
         { text: 'Saldo', x: columns.saldo },
     ];
@@ -135,7 +135,7 @@ const generatePDF = async (sells, briefSells) => {
     for (let i = 0; i < sells.length; i++) {
         const sell = sells[i];
         const fecha = formatDate(sell.Fecha);
-        const fechaEntrega = sell.FechaEntrega ? formatDate(sell.FechaEntrega) : 'Sin Fecha de entrega';
+        const fechaEntrega = sell.FechaExp ? formatDate(sell.FechaExp) : 'Sin Fecha de entrega';
         const saldo = `${(0, currency_1.formatCurrency)(sell.Saldo)}`;
         const tipoDoc = (0, tipoDocFormat_1.formatTipoDoc)(sell.TipoDoc);
         const diasVencidos = sell.ExpiredDays ? sell.ExpiredDays : 'N/A';
@@ -180,7 +180,7 @@ const generatePDF = async (sells, briefSells) => {
         });
         const fechaEntregaText = (0, truncateText_1.truncateText)(fechaEntrega, maxWidths.fechaEntrega, helveticaFont, rowFontSize);
         page.drawText(fechaEntregaText, {
-            x: columns.fechaEntrega,
+            x: columns.FechaExp,
             y: y,
             size: rowFontSize,
             font: helveticaFont,

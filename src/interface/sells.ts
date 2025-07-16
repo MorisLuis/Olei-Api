@@ -7,6 +7,7 @@ export interface SellsInterface {
     Serie: string;
     Fecha: string;
     FechaEntrega?: string;
+    FechaExp?: string;
     Saldo: number;
     Total: number;
     Nombre: string;

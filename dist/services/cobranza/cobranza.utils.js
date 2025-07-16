@@ -4,12 +4,18 @@ exports.getAllCobranzaService = void 0;
 const cobranzaService_1 = require("./cobranzaService");
 const getAllCobranzaService = async (params) => {
     let allSells = [];
-    let pageNumber = params.PageNumber || 1;
-    let pageSize = params.PageSize || 100;
+    let pageNumber = 1;
+    const pageSize = params.PageSize || 100;
     let hasMore = true;
-    const { total } = await (0, cobranzaService_1.getCobranzaByClientCountAndTotalService)({ ...params });
+    // Obtenemos el resumen
+    const { total } = await (0, cobranzaService_1.getCobranzaByClientCountAndTotalService)(params);
     while (hasMore) {
-        const { cobranza } = await (0, cobranzaService_1.getCobranzaByClientService)({ ...params, PageNumber: pageNumber, PageSize: pageSize });
+        const sanitizedParams = {
+            ...params,
+            PageNumber: pageNumber,
+            PageSize: pageSize
+        };
+        const { cobranza } = await (0, cobranzaService_1.getCobranzaByClientService)(sanitizedParams);
         if (cobranza.length > 0) {
             allSells.push(...cobranza);
             pageNumber++;
@@ -17,7 +23,6 @@ const getAllCobranzaService = async (params) => {
         else {
             hasMore = false;
         }
-        ;
     }
     return {
         sells: allSells,

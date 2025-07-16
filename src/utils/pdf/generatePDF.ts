@@ -38,7 +38,7 @@ const generatePDF = async (
         fecha: marginLeft,
         folio: marginLeft + maxWidths.fecha,
         tipoDoc: marginLeft + maxWidths.fecha + maxWidths.folio,
-        fechaEntrega:
+        FechaExp:
             marginLeft + maxWidths.fecha + maxWidths.folio + maxWidths.tipoDoc,
         expiredDays:
             marginLeft +
@@ -67,7 +67,7 @@ const generatePDF = async (
         { text: 'Fecha', x: columns.fecha },
         { text: 'Folio', x: columns.folio },
         { text: 'Tipo de Documento', x: columns.tipoDoc },
-        { text: 'Fecha de Vencimiento', x: columns.fechaEntrega },
+        { text: 'Fecha de Vencimiento', x: columns.FechaExp },
         { text: 'Días vencidos', x: columns.expiredDays },
         { text: 'Saldo', x: columns.saldo },
     ];
@@ -154,7 +154,7 @@ const generatePDF = async (
     for (let i = 0; i < sells.length; i++) {
         const sell = sells[i];
         const fecha = formatDate(sell.Fecha);
-        const fechaEntrega = sell.FechaEntrega ? formatDate(sell.FechaEntrega) : 'Sin Fecha de entrega';
+        const fechaEntrega = sell.FechaExp ? formatDate(sell.FechaExp) : 'Sin Fecha de entrega';
         const saldo = `${formatCurrency(sell.Saldo)}`;
         const tipoDoc = formatTipoDoc(sell.TipoDoc);
         const diasVencidos = sell.ExpiredDays ? sell.ExpiredDays : 'N/A';
@@ -205,7 +205,7 @@ const generatePDF = async (
 
         const fechaEntregaText = truncateText(fechaEntrega, maxWidths.fechaEntrega, helveticaFont, rowFontSize);
         page.drawText(fechaEntregaText, {
-            x: columns.fechaEntrega,
+            x: columns.FechaExp,
             y: y,
             size: rowFontSize,
             font: helveticaFont,

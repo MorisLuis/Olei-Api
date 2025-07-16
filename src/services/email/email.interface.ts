@@ -13,8 +13,11 @@ interface SendEmailServiceParams {
 };
 
 interface SendEmailWithPDFServiceParams {
-
+    userSession: UserWebSessionInterface;
+    
+    // Cobranza params
     Id_Cliente: number;
+    Id_Almacen: number;
     PageNumber: number;
     TipoDoc: SellsInterface['TipoDoc']
     FilterExpired: FilterType,
@@ -23,14 +26,13 @@ interface SendEmailWithPDFServiceParams {
     DateExactly?: string,
     DateStart?: string,
     SellsOrderCondition: SellsOrderConditionByClientType | string;
-    userSession: UserWebSessionInterface;
 
+    // Email data
     destinatario: string,
     remitente: string,
     subject: string,
     text: string,
     nombreRemitente: string
-
 };
 
 interface SendEmailResponse {

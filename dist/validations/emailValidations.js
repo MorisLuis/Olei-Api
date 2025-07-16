@@ -13,6 +13,7 @@ exports.emailCobranzaBodySchema = zod_1.z.object({
     remitente: zod_1.z.string().min(1, "El remitente es requerido"),
     subject: zod_1.z.string().min(1, "El asunto es requerido"),
     text: zod_1.z.string().min(1, "El texto es requerido"),
-    nombreRemitente: zod_1.z.string().min(1, "El nombre del remitente es requerido")
+    nombreRemitente: zod_1.z.string().min(1, "El nombre del remitente es requerido"),
+    Id_Almacen: zod_1.z.number().transform((val) => (val ? val.toString() : '0'))
 });
 //# sourceMappingURL=emailValidations.js.map

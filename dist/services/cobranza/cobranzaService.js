@@ -60,7 +60,7 @@ const getCobranzaByClientService = async ({ userSession, PageNumber, PageSize = 
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
         .input('OrderCondition', SellsOrderCondition)
-        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
+        .input('FilterTipoDoc', TipoDoc)
         .input('FilterExpired', FilterExpired)
         .input('FilterNotExpired', FilterNotExpired)
         .input('DateStart', DateStart)

@@ -147,10 +147,10 @@ export const cobranzaQuery = {
                 Serie,
                 Fecha,
                 FechaLiq,
+                DATEADD(DAY, CD.Dias, V.Fecha) AS FechaExp,
                 Saldo,
                 Total,
                 DATEDIFF(DAY, GETDATE(), DATEADD(DAY, CD.Dias, V.Fecha)) AS ExpiredDays
-        
             FROM [dbo].[VENTAS] V
             JOIN [dbo].[CONDVTAS] CD ON CD.Id_CondVta = V.Id_CondVta
             WHERE Id_Cliente = @Id_Cliente  AND Id_Almacen = @Id_Almacen

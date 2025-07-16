@@ -67,16 +67,20 @@ const sendEmailService = async ({
 }
 
 const sendEmailWithPDFService = async ({
+    userSession,
+    
+    // Cobranza params
     Id_Cliente,
+    Id_Almacen,
     TipoDoc,
     FilterExpired,
     FilterNotExpired,
     DateEnd,
     DateExactly,
     DateStart,
-    PageNumber,
     SellsOrderCondition,
-    userSession,
+
+    // Email data
     destinatario,
     remitente,
     subject,
@@ -87,18 +91,18 @@ const sendEmailWithPDFService = async ({
     const { ServidorSQL, BaseSQL, Id_UsuarioOLEI } = userSession;
 
     const { sells, brief } = await getAllCobranzaService({
-        Id_Almacen: userSession.Id_Almacen,
         userSession,
-        Id_Cliente,
-        PageNumber: PageNumber || 1,
+        PageSize: 10,
         SellsOrderCondition,
+
+        Id_Almacen,
+        Id_Cliente,
         TipoDoc,
         FilterNotExpired,
         FilterExpired,
         DateEnd: DateEnd || null,
         DateExactly: DateExactly || null,
         DateStart: DateStart || null,
-        PageSize: 10
     });
 
     const pdfBuffer = await generatePDF(sells, brief);

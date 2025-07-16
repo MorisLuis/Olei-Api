@@ -3,25 +3,33 @@ import type { GetCobranzaByClientParams, GetCobranzaTotalResponse } from "./cobr
 import { getCobranzaByClientCountAndTotalService, getCobranzaByClientService } from "./cobranzaService";
 
 
-const getAllCobranzaService = async (params: GetCobranzaByClientParams): Promise<{ sells: SellsInterface[], brief: GetCobranzaTotalResponse }> => {
+const getAllCobranzaService = async (
+    params: Omit<GetCobranzaByClientParams, 'PageNumber'>
+): Promise<{ sells: SellsInterface[], brief: GetCobranzaTotalResponse }> => {
 
     let allSells: SellsInterface[] = [];
-    let pageNumber = params.PageNumber || 1;
-    let pageSize = params.PageSize || 100;
+    let pageNumber = 1;
+    const pageSize = params.PageSize || 100;
     let hasMore = true;
 
-    const { total } = await getCobranzaByClientCountAndTotalService({ ...params });
+    // Obtenemos el resumen
+    const { total } = await getCobranzaByClientCountAndTotalService(params);
 
     while (hasMore) {
-        const { cobranza } = await getCobranzaByClientService({ ...params, PageNumber: pageNumber, PageSize: pageSize });
+        const sanitizedParams: GetCobranzaByClientParams = {
+            ...params,
+            PageNumber: pageNumber,
+            PageSize: pageSize
+        };
+
+        const { cobranza } = await getCobranzaByClientService(sanitizedParams);
 
         if (cobranza.length > 0) {
-            allSells.push(...cobranza)
+            allSells.push(...cobranza);
             pageNumber++;
         } else {
             hasMore = false;
-        };
-
+        }
     }
 
     return {
@@ -29,6 +37,8 @@ const getAllCobranzaService = async (params: GetCobranzaByClientParams): Promise
         brief: total
     };
 };
+
+
 
 export {
     getAllCobranzaService

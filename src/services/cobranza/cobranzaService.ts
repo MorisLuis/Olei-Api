@@ -11,7 +11,7 @@ const getCobranzaService = async ({
     PageSize = 10,
     PageNumber,
     termSearch
-}: GetCobranzaWithSearchParams ): Promise<{ cobranza: CobranzaInterface[] }> => {
+}: GetCobranzaWithSearchParams): Promise<{ cobranza: CobranzaInterface[] }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -37,7 +37,7 @@ const getCobranzaService = async ({
 const getCobranzaCountAndTotalService = async ({
     userSession,
     termSearch
-}: GetCobranzaWithSearchParams ) : Promise<{ count: number, total: GetCobranzaTotalResponse }> => {
+}: GetCobranzaWithSearchParams): Promise<{ count: number, total: GetCobranzaTotalResponse }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -81,8 +81,7 @@ const getCobranzaByClientService = async ({
     DateStart,
     Id_Cliente,
     Id_Almacen
-}: GetCobranzaByClientParams ): Promise<{ cobranza: SellsInterface[] }> => {
-
+}: GetCobranzaByClientParams): Promise<{ cobranza: SellsInterface[] }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -96,7 +95,7 @@ const getCobranzaByClientService = async ({
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
         .input('OrderCondition', SellsOrderCondition)
-        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
+        .input('FilterTipoDoc', TipoDoc)
         .input('FilterExpired', FilterExpired)
         .input('FilterNotExpired', FilterNotExpired)
         .input('DateStart', DateStart)
@@ -122,7 +121,7 @@ const getCobranzaByClientCountAndTotalService = async ({
     DateStart,
     Id_Cliente,
     Id_Almacen
-}: GetCobranzaByClientParams ): Promise<{ count: number, total: GetCobranzaTotalResponse }> => {
+}: GetCobranzaByClientParams): Promise<{ count: number, total: GetCobranzaTotalResponse }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -177,7 +176,7 @@ const getCobranzaWithTotalsService = async ({
     DateEnd,
     DateExactly,
     DateStart
-}: GetCobranzaByClientParams ): Promise<GetCobranzaTotalsResponse> => {
+}: GetCobranzaByClientParams): Promise<GetCobranzaTotalsResponse> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
