@@ -17,22 +17,22 @@ const getStatisticsCRMDashboard = async (userSession) => {
         .query(statistics_1.statisticsQuery.getSellsOfTheMonth);
     const requestSellsOfToday = await pool.request()
         .query(statistics_1.statisticsQuery.getSellsOfToday);
-    const requestWeeklyAndForwardSaldo = await pool.request()
-        .query(statistics_1.statisticsQuery.getWeeklyAndForwardSaldo);
+    const requestCobranzaStats = await pool.request()
+        .query(statistics_1.statisticsQuery.getCobranzaStats);
     const requestProductsAndSellersOfTheMonth = await pool.request()
         .query(statistics_1.statisticsQuery.getProductsAndSellersOfTheMonth);
-    const [responseEventsOfTheWeek, responseSellsOfTheMonth, responseSellsOfToday, responseWeeklyAndForwardSaldo, responseProductsAndSellersOfTheMonth] = await Promise.all([
+    const [responseEventsOfTheWeek, responseSellsOfTheMonth, responseSellsOfToday, responseCobranzaStats, responseProductsAndSellersOfTheMonth] = await Promise.all([
         requestEventsOfTheWeek,
         requestSellsOfTheMonth,
         requestSellsOfToday,
-        requestWeeklyAndForwardSaldo,
+        requestCobranzaStats,
         requestProductsAndSellersOfTheMonth
     ]);
     const { eventsWeek, sellsWeek } = responseEventsOfTheWeek.recordset[0];
     const { TotalProductos, TotalClientes } = responseProductsAndSellersOfTheMonth.recordset[0];
     const sells = responseSellsOfTheMonth.recordset;
     const sellsToday = responseSellsOfToday.recordset[0];
-    const cobranza = responseWeeklyAndForwardSaldo.recordset;
+    const cobranza = responseCobranzaStats.recordset;
     return {
         sellsToday,
         eventsWeek,
