@@ -2,30 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTotalOrderDetails = exports.getTotalAllOrders = exports.getOrderDetails = exports.getAllOrders = exports.getOrder = exports.postOrder = void 0;
 const orderValidations_1 = require("../validations/orderValidations");
-const orderServices_1 = require("../services/orderServices");
-const postOrder = async (req, res, next) => {
-    try {
-        // Get session from REDIS.
-        const userSession = req.sessionWeb;
-        const { sellsDetails, sellsData } = orderValidations_1.postOrderBodySchema.parse(req.body);
-        const { Subtotal, Total } = sellsData ?? {};
-        const { folio } = await (0, orderServices_1.postOrderService)({
-            sellsData,
-            sellsDetails,
-            userSession,
-            Subtotal,
-            Total
-        });
-        return res.status(201).json({
-            ok: true,
-            folio
-        });
-    }
-    catch (error) {
-        return next(error);
-    }
-};
-exports.postOrder = postOrder;
+const orderServices_1 = require("../services/order/orderServices");
 const getOrder = async (req, res, next) => {
     try {
         const userSession = req.sessionWeb;
@@ -90,9 +67,10 @@ exports.getTotalAllOrders = getTotalAllOrders;
 const getTotalOrderDetails = async (req, res, next) => {
     try {
         const userSession = req.sessionWeb;
-        const { folio } = orderValidations_1.getTotalOrderDetailsQuerrySchema.parse(req.query);
+        const { folio, TipoDoc } = orderValidations_1.getTotalOrderDetailsQuerrySchema.parse(req.query);
         const { total } = await (0, orderServices_1.getTotalOrderDetailsService)({
             folio,
+            TipoDoc,
             userSession
         });
         return res.json({
@@ -104,4 +82,27 @@ const getTotalOrderDetails = async (req, res, next) => {
     }
 };
 exports.getTotalOrderDetails = getTotalOrderDetails;
+const postOrder = async (req, res, next) => {
+    try {
+        // Get session from REDIS.
+        const userSession = req.sessionWeb;
+        const { sellsDetails, sellsData } = orderValidations_1.postOrderBodySchema.parse(req.body);
+        const { Subtotal, Total } = sellsData ?? {};
+        const { folio } = await (0, orderServices_1.postOrderService)({
+            sellsData,
+            sellsDetails,
+            userSession,
+            Subtotal,
+            Total
+        });
+        return res.status(201).json({
+            ok: true,
+            folio
+        });
+    }
+    catch (error) {
+        return next(error);
+    }
+};
+exports.postOrder = postOrder;
 //# sourceMappingURL=order.js.map

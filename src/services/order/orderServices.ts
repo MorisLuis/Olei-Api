@@ -1,85 +1,18 @@
-import { dbConnectionWeb } from "../database";
-import { orderQuerys } from "../database/querys/orders";
+import { dbConnectionWeb } from "../../database";
+import { orderQuerys } from "../../database/querys/orders";
 import sql from 'mssql';
-import { numeroALetra } from "../utils/numeroALetra";
-import { convertArrayToXml } from "../utils/convertArrayToXml";
-import type { SellsDetailsInterface, SellsInterface } from "../interface/sells";
-import { ValidationError } from "../errors/CustomError";
-import type OrderInterface from "../interface/order";
-import type { UserWebSessionInterface } from "../interface/user";
+import { numeroALetra } from "../../utils/numeroALetra";
+import { convertArrayToXml } from "../../utils/convertArrayToXml";
+import type { SellsDetailsInterface } from "../../interface/sells";
+import { ValidationError } from "../../errors/CustomError";
+import type { UserWebSessionInterface } from "../../interface/user";
+import type { GetAllOrdersServiceParams, GetAllOrdersServiceResponse, GetOrderDetailsSellsParams, GetOrderDetailsSellsResponse, GetOrderServiceParams, GetOrderServiceResponse, GetTotalOrderDetailsSellsParams, GetTotalOrderDetailsSellsResponse, PostOrderServiceParams, PostOrderServiceResponse } from "./orderService.interface";
 
-interface postOrderServiceInterface {
-    userSession: UserWebSessionInterface;
-    Total: number;
-    Subtotal: number;
-    sellsDetails: Partial<SellsDetailsInterface>[];
-    sellsData: Partial<SellsInterface>;
-};
-
-const postOrderService = async ({
-    userSession,
-    Total,
-    Subtotal,
-    sellsDetails,
-    sellsData
-}: postOrderServiceInterface): Promise<{ folio: string }> => {
-
-
-    const { ServidorSQL, BaseSQL, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userSession;
-    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
-    if (!pool) {
-        throw new ValidationError('Error al conectarse a base de datos principal');
-    };
-
-    const transaction = new sql.Transaction(pool);
-    await transaction.begin();
-    const request = new sql.Request(transaction);
-
-    const TotalImpuesto = Total - Subtotal;
-    const CantLetra = numeroALetra(Total);
-
-
-    const xmlDataSales = await convertArrayToXml(sellsData);
-    const xmlDataSalesDetails = await convertArrayToXml(sellsDetails);
-
-    if(!Id_Almacen) {
-        throw new ValidationError("Id Almacen necesario")
-    };
-
-    if(!Id_Cliente) {
-        throw new ValidationError("Id Cliente necesario")
-    }
-
-    const result = await request
-        .input('xmlDataSales', sql.Xml, xmlDataSales)
-        .input('xmlDataSalesDetails', sql.Xml, xmlDataSalesDetails)
-        .input('Id_Usuario', sql.Int, 1)
-        .input('Id_Almacen', sql.Int, Id_Almacen)
-        .input('Id_Cliente', sql.Int, Id_Cliente)
-        .input('Id_ListPre', sql.Int, Id_ListPre)
-        .input('TipoDoc', sql.Int, TipoDocOO)
-        .input('CantLetra', sql.VarChar, CantLetra)
-        .input('TotalImpuesto', sql.Decimal, TotalImpuesto)
-        .output('Folio', sql.Int)
-        .execute('fn_ExecuteSales');
-
-    await transaction.commit();
-    const folio = result.recordset[0].Folio
-
-    return {
-        folio
-    }
-};
-
-interface getOrderServiceInterface {
-    userSession: UserWebSessionInterface;
-    folio: string;
-}
 
 const getOrderService = async ({
     userSession,
     folio
-}: getOrderServiceInterface): Promise<{ order: OrderInterface }> => {
+}: GetOrderServiceParams): Promise<GetOrderServiceResponse> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -100,17 +33,11 @@ const getOrderService = async ({
     }
 };
 
-interface getAllOrdersServiceInterface {
-    userSession: UserWebSessionInterface;
-    page: number;
-    limit: number;
-}
-
 const getAllOrdersService = async ({
     userSession,
     page,
     limit
-}: getAllOrdersServiceInterface): Promise<{ allOrders: OrderInterface[] }> => {
+}: GetAllOrdersServiceParams): Promise<GetAllOrdersServiceResponse> => {
 
     const { ServidorSQL, BaseSQL, TipoDocOO, Id_Cliente } = userSession;
 
@@ -136,19 +63,12 @@ const getAllOrdersService = async ({
     }
 };
 
-interface getOrderDetailsSellsInterface {
-    PageNumber: number;
-    folio: string;
-    TipoDoc: number;
-    userSession: UserWebSessionInterface;
-}
-
 const getOrderDetailsSells = async ({
     PageNumber,
     folio,
     TipoDoc,
     userSession
-}: getOrderDetailsSellsInterface): Promise<{orderDetails: SellsDetailsInterface[]}> => {
+}: GetOrderDetailsSellsParams): Promise<GetOrderDetailsSellsResponse> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -198,15 +118,11 @@ const getTotalAllOrdersService = async (userSession: UserWebSessionInterface): P
 
 };
 
-interface getTotalOrderDetailsSellsInterface {
-    folio: string;
-    userSession: UserWebSessionInterface;
-};
-
 const getTotalOrderDetailsService = async ({
     folio,
+    TipoDoc,
     userSession
-}: getTotalOrderDetailsSellsInterface): Promise<{ total: number }> => {
+}: GetTotalOrderDetailsSellsParams): Promise<GetTotalOrderDetailsSellsResponse> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -217,11 +133,67 @@ const getTotalOrderDetailsService = async ({
     const query = orderQuerys.getTotalOrderDetails;
     const request = await pool.request()
         .input('folio', sql.Int, folio)
+        .input('TipoDoc', sql.Int, TipoDoc)
         .query(query);
 
     const total = request.recordset[0].TotalCount
 
     return { total };
+};
+
+const postOrderService = async ({
+    userSession,
+    Total,
+    Subtotal,
+    sellsDetails,
+    sellsData
+}: PostOrderServiceParams): Promise<PostOrderServiceResponse> => {
+
+
+    const { ServidorSQL, BaseSQL, Id_ListPre, Id_Cliente, Id_Almacen, TipoDocOO } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
+    if (!pool) {
+        throw new ValidationError('Error al conectarse a base de datos principal');
+    };
+
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+    const request = new sql.Request(transaction);
+
+    const TotalImpuesto = Total - Subtotal;
+    const CantLetra = numeroALetra(Total);
+
+
+    const xmlDataSales = await convertArrayToXml(sellsData);
+    const xmlDataSalesDetails = await convertArrayToXml(sellsDetails);
+
+    if (!Id_Almacen) {
+        throw new ValidationError("Id Almacen necesario")
+    };
+
+    if (!Id_Cliente) {
+        throw new ValidationError("Id Cliente necesario")
+    }
+
+    const result = await request
+        .input('xmlDataSales', sql.Xml, xmlDataSales)
+        .input('xmlDataSalesDetails', sql.Xml, xmlDataSalesDetails)
+        .input('Id_Usuario', sql.Int, 1)
+        .input('Id_Almacen', sql.Int, Id_Almacen)
+        .input('Id_Cliente', sql.Int, Id_Cliente)
+        .input('Id_ListPre', sql.Int, Id_ListPre)
+        .input('TipoDoc', sql.Int, TipoDocOO)
+        .input('CantLetra', sql.VarChar, CantLetra)
+        .input('TotalImpuesto', sql.Decimal, TotalImpuesto)
+        .output('Folio', sql.Int)
+        .execute('fn_ExecuteSales');
+
+    await transaction.commit();
+    const folio = result.recordset[0].Folio
+
+    return {
+        folio
+    }
 };
 
 export {

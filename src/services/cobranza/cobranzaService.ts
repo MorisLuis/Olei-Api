@@ -85,6 +85,7 @@ const getCobranzaByClientService = async ({
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
+
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
@@ -95,7 +96,7 @@ const getCobranzaByClientService = async ({
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
         .input('OrderCondition', SellsOrderCondition)
-        .input('FilterTipoDoc', TipoDoc)
+        .input('FilterTipoDoc', TipoDoc !== 0 ? 1 : 0)
         .input('FilterExpired', FilterExpired)
         .input('FilterNotExpired', FilterNotExpired)
         .input('DateStart', DateStart)

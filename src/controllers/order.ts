@@ -1,32 +1,7 @@
 import type { NextFunction, Request, Response } from "express"
 import { getAllOrdersParamsSchema, getOrderDetailsQuerrySchema, getOrderParamsSchema, getTotalOrderDetailsQuerrySchema, postOrderBodySchema } from '../validations/orderValidations';
-import { getAllOrdersService, getOrderDetailsSells, getOrderService, getTotalOrderDetailsService, getTotalAllOrdersService, postOrderService } from "../services/orderServices";
+import { getAllOrdersService, getOrderDetailsSells, getOrderService, getTotalOrderDetailsService, getTotalAllOrdersService, postOrderService } from "../services/order/orderServices";
 
-const postOrder = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-
-    try {
-        // Get session from REDIS.
-        const userSession = req.sessionWeb
-        const { sellsDetails, sellsData } = postOrderBodySchema.parse(req.body);
-        const { Subtotal, Total } = sellsData ?? {}
-
-        const { folio } = await postOrderService({
-            sellsData,
-            sellsDetails,
-            userSession,
-            Subtotal,
-            Total
-        });
-
-        return res.status(201).json({
-            ok: true,
-            folio
-        });
-
-    } catch (error) {
-        return next(error);
-    }
-};
 
 const getOrder = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
@@ -78,6 +53,7 @@ const getOrderDetails = async (req: Request, res: Response, next: NextFunction):
             userSession
         })
 
+
         return res.json({
             orderDetails
         })
@@ -96,7 +72,6 @@ const getTotalAllOrders = async (req: Request, res: Response, next: NextFunction
         return res.json({ total });
     } catch (error) {
         return next(error);
-
     }
 };
 
@@ -104,16 +79,43 @@ const getTotalOrderDetails = async (req: Request, res: Response, next: NextFunct
 
     try {
         const userSession = req.sessionWeb
-        const { folio } = getTotalOrderDetailsQuerrySchema.parse(req.query);
+        const { folio, TipoDoc } = getTotalOrderDetailsQuerrySchema.parse(req.query);
 
         const { total } = await getTotalOrderDetailsService({
             folio,
+            TipoDoc,
             userSession
         })
 
         return res.json({
             total
         })
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+const postOrder = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+
+    try {
+        // Get session from REDIS.
+        const userSession = req.sessionWeb
+        const { sellsDetails, sellsData } = postOrderBodySchema.parse(req.body);
+        const { Subtotal, Total } = sellsData ?? {}
+
+        const { folio } = await postOrderService({
+            sellsData,
+            sellsDetails,
+            userSession,
+            Subtotal,
+            Total
+        });
+
+        return res.status(201).json({
+            ok: true,
+            folio
+        });
 
     } catch (error) {
         return next(error);

@@ -56,7 +56,7 @@ exports.getCalendarTaskByDayQuerySchema = zod_1.z.object({
         return val;
     }),
     Id_Cliente: zod_1.z.preprocess((val) => {
-        if (val === 'null')
+        if (val === 'null' || val === undefined)
             return null;
         if (typeof val === 'string')
             return parseInt(val, 10);

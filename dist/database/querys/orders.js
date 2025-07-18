@@ -56,7 +56,8 @@ exports.orderQuerys = {
         FROM [dbo].[DETALLEVENTAS] AS D
         INNER JOIN [dbo].[EXISTENCIAS] AS E ON D.Codigo = E.Codigo AND D.Id_Marca = E.Id_Marca AND D.Id_Almacen = E.Id_Almacen
         INNER JOIN [dbo].[MARCAS] AS F ON D.Id_Marca = F.Id_Marca
-        WHERE Folio = @folio
+        INNER JOIN [dbo].[UNIDADES] AS U ON D.Id_Unidad = U.Id_Unidad
+        WHERE Folio = @folio AND TipoDoc = @TipoDoc
     `,
 };
 //# sourceMappingURL=orders.js.map

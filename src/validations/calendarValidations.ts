@@ -61,7 +61,7 @@ export const getCalendarTaskByDayQuerySchema = z.object({
         }),
 
     Id_Cliente: z.preprocess((val) => {
-        if (val === 'null') return null;
+        if (val === 'null' || val === undefined) return null;
         if (typeof val === 'string') return parseInt(val, 10);
         return val;
     }, z.number().nullable())

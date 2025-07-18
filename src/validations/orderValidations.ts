@@ -49,5 +49,6 @@ export const getOrderDetailsQuerrySchema = z.object({
 })
 
 export const getTotalOrderDetailsQuerrySchema = z.object({
-    folio: z.string().nonempty()
+    folio: z.string().nonempty(),
+    TipoDoc: z.preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
 })

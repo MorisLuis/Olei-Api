@@ -43,6 +43,7 @@ exports.getOrderDetailsQuerrySchema = zod_1.z.object({
         preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
 });
 exports.getTotalOrderDetailsQuerrySchema = zod_1.z.object({
-    folio: zod_1.z.string().nonempty()
+    folio: zod_1.z.string().nonempty(),
+    TipoDoc: zod_1.z.preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()),
 });
 //# sourceMappingURL=orderValidations.js.map
