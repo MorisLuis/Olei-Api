@@ -2,65 +2,6 @@
 
 export const statisticsQuery = {
 
-    getEventsOfTheDay: `
-        DECLARE @FechaEspecifica DATE = CONVERT(date, SYSDATETIMEOFFSET() AT TIME ZONE 'Central Standard Time (Mexico)');
-
-        -- Reuniones y ventas del dia
-        SELECT 
-            ISNULL(BitacoraCount, 0) AS eventsToday,
-            ISNULL(VentasCount, 0) AS sellsToday
-        FROM (
-            SELECT 
-                (SELECT COUNT(*) 
-                FROM dbo.BITACORACRM 
-                WHERE Fecha >= @FechaEspecifica AND Fecha < DATEADD(DAY, 1, @FechaEspecifica)) AS BitacoraCount,
-        
-                (SELECT COUNT(*) 
-                FROM dbo.VENTAS 
-                WHERE Fecha >= @FechaEspecifica AND Fecha < DATEADD(DAY, 1, @FechaEspecifica)) AS VentasCount
-        ) AS Counts;
-        
-        /* DECLARE @Hoy DATE = CAST(GETDATE() AS DATE);
-        DECLARE @Hoy DATE = @FechaEspecifica;
-        DECLARE @DiaSemana INT = DATEPART(WEEKDAY, @Hoy); -- 1 = domingo (por default, depende de @@DATEFIRST)
-        DECLARE @FinDeSemana DATE; */
-    `,
-
-    getEventsOfTheWeek: `
-        DECLARE @FechaEspecifica DATE = CONVERT(date, SYSDATETIMEOFFSET() AT TIME ZONE 'Central Standard Time (Mexico)');
-
-        DECLARE @Hoy DATE = @FechaEspecifica;
-        DECLARE @DiaSemana INT;
-        DECLARE @FinDeSemana DATE;
-        
-        -- Normalizamos a que el domingo sea 7 (independientemente del DATEFIRST)
-        SET @DiaSemana = DATEPART(WEEKDAY, @Hoy);
-        SET @DiaSemana = CASE 
-            WHEN @@DATEFIRST = 7 THEN CASE WHEN @DiaSemana = 1 THEN 7 ELSE @DiaSemana - 1 END
-            ELSE @DiaSemana 
-        END;
-        
-        -- Calculamos fecha del domingo de esta semana
-        SET @FinDeSemana = DATEADD(DAY, (7 - @DiaSemana), @Hoy);
-        
-        -- Query de conteo total y por tabla
-        SELECT 
-            ISNULL(BitacoraCount, 0) AS eventsWeek,
-            ISNULL(VentasCount, 0) AS sellsWeek,
-            @Hoy AS FechaInicio,
-            @FinDeSemana AS FechaFin
-        FROM (
-            SELECT 
-                (SELECT COUNT(*) 
-                FROM dbo.BITACORACRM 
-                WHERE Fecha >= @Hoy AND Fecha < DATEADD(DAY, 1, @FinDeSemana)) AS BitacoraCount,
-        
-                (SELECT COUNT(*) 
-                FROM dbo.VENTAS 
-                WHERE Fecha >= @Hoy AND Fecha < DATEADD(DAY, 1, @FinDeSemana)) AS VentasCount
-        ) AS Counts;
-    `,
-
     getSellsOfTheMonth: `
         DECLARE @FechaBase DATE = CONVERT(date, SYSDATETIMEOFFSET() AT TIME ZONE 'Central Standard Time (Mexico)');
 
@@ -124,27 +65,9 @@ export const statisticsQuery = {
             JOIN dbo.CLIENTES C ON C.Id_Cliente = V.Id_Cliente AND C.Id_Almacen = V.Id_Almacen
             JOIN [dbo].[CONDVTAS] CD ON CD.Id_CondVta = V.Id_CondVta
             WHERE V.Saldo > 0
+            AND V.Id_CondVta <> 1
         )
-        
-        
-        SELECT 
-            'MES'  AS type,
-            NULL AS sumCobranzaExpired,
-            SUM(V.Saldo) AS sumCobranza
-        FROM VentasBase V
-        WHERE V.Fecha BETWEEN @InicioMes AND @FinMes
-        
-        UNION ALL
-        
-        SELECT
-            'HOY' AS type,
-            NULL  AS sumCobranzaExpired,
-            SUM(V.Saldo) AS sumCobranza
-        FROM VentasBase V
-        WHERE CAST(V.Fecha AS DATE) = @FechaBase
-        
-        UNION ALL
-        
+
         SELECT
             'TOTAL' AS type,
             NULL AS sumCobranzaExpired,
@@ -160,24 +83,37 @@ export const statisticsQuery = {
         FROM VentasBase V
     `,
 
-    getProductsAndSellersOfTheMonth: `
+    getAbonosStats: `
+        DECLARE @FechaBase DATE = CONVERT(date, SYSDATETIMEOFFSET() AT TIME ZONE 'Central Standard Time (Mexico)');
+
+        /* 1. Rangos de tiempo */
+        DECLARE @InicioMes  DATE = DATEFROMPARTS(YEAR(@FechaBase), MONTH(@FechaBase), 1);
+        DECLARE @FinMes     DATE = EOMONTH(@FechaBase);        -- último día del mes
+
+        ;WITH AbonosBase AS (
+            SELECT TOP (1000) 
+                Folio, 
+                Fecha, 
+                Importe, 
+                Id_Cliente,
+                Id_Almacen
+            FROM [dbo].[ABONOS]
+        )
+
         SELECT 
-            (SELECT COUNT(*) 
-            FROM [dbo].[DETALLEVENTAS] dv
-            WHERE dv.Folio IN (
-                SELECT v.Folio
-                FROM [dbo].[VENTAS] v
-                WHERE v.Fecha >= '2023-05-01'
-                AND v.Fecha <  '2025-05-24'
-            )) AS TotalProductos,
+            'MES'  AS type,
+            NULL AS sumCobranzaExpired,
+            SUM(A.Importe) AS sumCobranza
+        FROM AbonosBase A
+        WHERE A.Fecha BETWEEN @InicioMes AND @FinMes
 
-            (SELECT COUNT(DISTINCT Id_Cliente)
-            FROM [dbo].[VENTAS]
-            WHERE Fecha >= '2023-05-01'
-            AND Fecha <  '2025-05-24') AS TotalClientes;
+        UNION ALL
 
-        /* WHERE v.Fecha >= DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)
-            AND v.Fecha < DATEADD(DAY, 1, CAST(GETDATE() AS DATE)) */
-    
+        SELECT
+            'HOY' AS type,
+            NULL  AS sumCobranzaExpired,
+            SUM(A.Importe) AS sumCobranza
+        FROM AbonosBase A
+        WHERE CAST(A.Fecha AS DATE) = @FechaBase
     `
 }

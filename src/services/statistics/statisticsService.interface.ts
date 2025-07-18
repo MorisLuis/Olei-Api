@@ -1,15 +1,10 @@
 
 
 interface StatisticsCRMDashboardResponse {
-    eventsWeek: number;
-    sellsWeek: number;
-
-    productsSoldMonth: number;
-    sellerOfMonth: number;
-
     sells: SellsMontlyStatistics[];
     sellsToday: SellsStatistics;
     cobranza: { type: string, sumCobranzaExpired: number, sumCobranza: number }[];
+    abonos: { type: string, sumCobranzaExpired: number, sumCobranza: number }[];
 };
 
 interface SellsStatistics {

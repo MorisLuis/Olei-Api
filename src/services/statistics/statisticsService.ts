@@ -16,10 +16,6 @@ const getStatisticsCRMDashboard = async (
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
 
-
-    const requestEventsOfTheWeek = await pool.request()
-        .query(statisticsQuery.getEventsOfTheWeek);
-
     const requestSellsOfTheMonth = await pool.request()
         .query(statisticsQuery.getSellsOfTheMonth);
 
@@ -29,38 +25,33 @@ const getStatisticsCRMDashboard = async (
     const requestCobranzaStats = await pool.request()
         .query(statisticsQuery.getCobranzaStats);
 
-    const requestProductsAndSellersOfTheMonth = await pool.request()
-        .query(statisticsQuery.getProductsAndSellersOfTheMonth);
+    const requestAbonosStats = await pool.request()
+        .query(statisticsQuery.getAbonosStats);
+
 
 
     const [
-        responseEventsOfTheWeek,
         responseSellsOfTheMonth,
         responseSellsOfToday,
         responseCobranzaStats,
-        responseProductsAndSellersOfTheMonth
+        responseAbonosStats
     ] = await Promise.all([
-        requestEventsOfTheWeek,
         requestSellsOfTheMonth,
         requestSellsOfToday,
         requestCobranzaStats,
-        requestProductsAndSellersOfTheMonth
+        requestAbonosStats
     ]);
 
-    const { eventsWeek, sellsWeek } = responseEventsOfTheWeek.recordset[0];
-    const { TotalProductos, TotalClientes  } = responseProductsAndSellersOfTheMonth.recordset[0]
     const sells = responseSellsOfTheMonth.recordset;
     const sellsToday = responseSellsOfToday.recordset[0];
     const cobranza = responseCobranzaStats.recordset;
+    const abonos = responseAbonosStats.recordset;
 
     return {
         sellsToday,
-        eventsWeek,
-        sellsWeek,
-        productsSoldMonth: TotalProductos, 
-        sellerOfMonth: TotalClientes,
         sells,
-        cobranza
+        cobranza,
+        abonos
     };
 };
 

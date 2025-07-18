@@ -7,22 +7,16 @@ const getCRMBrief = async (req: Request, res: Response, next: NextFunction): Pro
         const userSession = req.sessionWeb;
         const {
             sellsToday,
-            eventsWeek,
-            sellsWeek,
-            productsSoldMonth,
-            sellerOfMonth,
             sells,
-            cobranza
+            cobranza,
+            abonos
         } = await getStatisticsCRMDashboard(userSession);
 
         return res.json({
             sellsToday,
-            eventsWeek,
-            sellsWeek,
-            productsSoldMonth,
-            sellerOfMonth,
             sells,
-            cobranza
+            cobranza,
+            abonos
         });
 
     } catch (error) {

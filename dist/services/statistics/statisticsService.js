@@ -11,36 +11,29 @@ const getStatisticsCRMDashboard = async (userSession) => {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
     ;
-    const requestEventsOfTheWeek = await pool.request()
-        .query(statistics_1.statisticsQuery.getEventsOfTheWeek);
     const requestSellsOfTheMonth = await pool.request()
         .query(statistics_1.statisticsQuery.getSellsOfTheMonth);
     const requestSellsOfToday = await pool.request()
         .query(statistics_1.statisticsQuery.getSellsOfToday);
     const requestCobranzaStats = await pool.request()
         .query(statistics_1.statisticsQuery.getCobranzaStats);
-    const requestProductsAndSellersOfTheMonth = await pool.request()
-        .query(statistics_1.statisticsQuery.getProductsAndSellersOfTheMonth);
-    const [responseEventsOfTheWeek, responseSellsOfTheMonth, responseSellsOfToday, responseCobranzaStats, responseProductsAndSellersOfTheMonth] = await Promise.all([
-        requestEventsOfTheWeek,
+    const requestAbonosStats = await pool.request()
+        .query(statistics_1.statisticsQuery.getAbonosStats);
+    const [responseSellsOfTheMonth, responseSellsOfToday, responseCobranzaStats, responseAbonosStats] = await Promise.all([
         requestSellsOfTheMonth,
         requestSellsOfToday,
         requestCobranzaStats,
-        requestProductsAndSellersOfTheMonth
+        requestAbonosStats
     ]);
-    const { eventsWeek, sellsWeek } = responseEventsOfTheWeek.recordset[0];
-    const { TotalProductos, TotalClientes } = responseProductsAndSellersOfTheMonth.recordset[0];
     const sells = responseSellsOfTheMonth.recordset;
     const sellsToday = responseSellsOfToday.recordset[0];
     const cobranza = responseCobranzaStats.recordset;
+    const abonos = responseAbonosStats.recordset;
     return {
         sellsToday,
-        eventsWeek,
-        sellsWeek,
-        productsSoldMonth: TotalProductos,
-        sellerOfMonth: TotalClientes,
         sells,
-        cobranza
+        cobranza,
+        abonos
     };
 };
 exports.getStatisticsCRMDashboard = getStatisticsCRMDashboard;
