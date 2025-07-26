@@ -28,8 +28,6 @@ const getStatisticsCRMDashboard = async (
     const requestAbonosStats = await pool.request()
         .query(statisticsQuery.getAbonosStats);
 
-
-
     const [
         responseSellsOfTheMonth,
         responseSellsOfToday,

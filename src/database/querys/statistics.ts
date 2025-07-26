@@ -41,7 +41,7 @@ export const statisticsQuery = {
             sellsByMonthContado = SUM(CASE WHEN V.Id_CondVta = 1 THEN V.Total ELSE 0 END),
             sellsByMonthCredit  = SUM(CASE WHEN V.Id_CondVta <> 1 THEN V.Total ELSE 0 END)
         FROM dbo.VENTAS AS V
-        WHERE V.Fecha = @FechaBase
+        WHERE V.Fecha >= @FechaBase AND V.Fecha <  DATEADD(DAY, 1, @FechaBase);
     `,
 
     getCobranzaStats: `
