@@ -100,7 +100,7 @@ class Server {
             // Demos
             'https://oleiweb-git-demo2-morisluis-projects.vercel.app'
         ];
-    
+
         const corsOptions: CorsOptions = {
             origin: (origin: string | undefined, callback) => {
                 if (!origin || allowedOrigins.includes(origin)) {
@@ -111,14 +111,14 @@ class Server {
             },
             credentials: true,
         };
-        
+
         this.app.use(cors(corsOptions));
         this.app.use(express.json({ limit: '50mb' }));
         this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-        this.app.use(cookieParser());  // Agrega esta línea
+        this.app.use(cookieParser());
     }
-    
+
 
     private routes() {
         this.app.use(this.paths.product, productRouter);

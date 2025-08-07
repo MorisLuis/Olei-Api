@@ -8,32 +8,18 @@ const database_1 = require("../../database");
 const clients_1 = require("../../database/querys/clients");
 const CustomError_1 = require("../../errors/CustomError");
 const mssql_1 = __importDefault(require("mssql"));
-const getClientsService = async ({ PageNumber, userSession, OrderCondition, searchTerm, searchId }) => {
+const prismaConnection_1 = require("../../database/prismaConnection");
+const getClientsService = async ({ skip, limit, userSession }) => {
     const { ServidorSQL, BaseSQL } = userSession;
-    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
-    if (!pool) {
-        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
-    }
-    const clientsQuery = clients_1.clientsQuerys.getClients;
-    const totalClientsQuery = clients_1.clientsQuerys.getTotalClients;
-    const requestClients = pool.request()
-        .input('PageNumber', PageNumber)
-        .input('PageSize', 10)
-        .input('OrderCondition', OrderCondition)
-        .input('searchTerm', searchTerm)
-        .input('searchId', searchId)
-        .query(clientsQuery);
-    const requestTotal = pool.request()
-        .input('searchTerm', searchTerm)
-        .input('searchId', searchId)
-        .query(totalClientsQuery);
-    const [clientsResult, totalResult] = await Promise.all([
-        requestClients,
-        requestTotal
-    ]);
+    const prisma = (0, prismaConnection_1.getPrismaClient)(ServidorSQL, BaseSQL);
+    const clientes = await prisma.clientes.findMany({
+        skip,
+        take: limit,
+    });
+    const totalClientes = await prisma.clientes.count();
     return {
-        clients: clientsResult.recordset,
-        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
+        clients: clientes,
+        total: totalClientes
     };
 };
 exports.getClientsService = getClientsService;

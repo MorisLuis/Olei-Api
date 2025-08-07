@@ -8,14 +8,12 @@ const getClients = async (req: Request, res: Response, next: NextFunction): Prom
 
     try {
         const { PageNumber, clientOrderCondition, searchTerm, searchId } = getClientsQuerySchema.parse(req.query);
+        const limit = 10;
+        const skip = (PageNumber - 1) * limit;
         const userSession = req.sessionWeb;
 
         const { clients, total } = await getClientsService({
-            userSession,
-            PageNumber: PageNumber,
-            OrderCondition: clientOrderCondition,
-            searchTerm,
-            searchId
+            skip, limit, userSession
         });
 
         return res.json({

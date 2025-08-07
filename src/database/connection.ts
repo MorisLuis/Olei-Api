@@ -4,7 +4,7 @@ import config from "../config";
 let mainPool: sql.ConnectionPool | null = null;
 const connectionPools: Map<string, sql.ConnectionPool> = new Map(); // Mapa para almacenar las conexiones activas
 const MAX_CONNECTIONS = 10; // Límite de conexiones simultáneas
-const getPoolKey = (server: string, base: string) => `${server.trim()}-${base.trim()}`; // Función para generar una clave única por servidor y base de datos
+export const getPoolKey = (server: string, base: string) : string => `${server.trim()}-${base.trim()}`; // Función para generar una clave única por servidor y base de datos
 
 
 // Conexion App
@@ -53,6 +53,7 @@ export const dbConnection = async (server: string, base: string, user: string, p
 export const dbConnectionWeb = async (server: string, base: string) : Promise<sql.ConnectionPool> => {
     // Get pool key
     const poolKey = getPoolKey(server, base);
+    console.log({poolKey})
 
     // Si ya existe un pool de conexión y sigue activo, lo reutilizamos
     if (connectionPools.has(poolKey)) {

@@ -1,15 +1,12 @@
-import type { ClientInterface } from "../../interface/client";
 import type { UserWebSessionInterface } from "../../interface/user";
 
 
 //PARAMS
 
 interface getClientsServiceInterface {
-    PageNumber: number,
+    skip: number
+    limit: number
     userSession: UserWebSessionInterface,
-    OrderCondition: string,
-    searchTerm: string;
-    searchId?: string;
 };
 
 interface getClientIdInterface {
@@ -33,7 +30,7 @@ interface searchClientServiceInterface {
 // RESPONSE
 
 interface GetClientsServiceResult {
-    clients: ClientInterface[];
+    clients: any[];
     total: number;
 }
 

@@ -83,7 +83,7 @@ class Server {
         this.app.use((0, cors_1.default)(corsOptions));
         this.app.use(express_1.default.json({ limit: '50mb' }));
         this.app.use(express_1.default.urlencoded({ extended: true, limit: '50mb' }));
-        this.app.use((0, cookie_parser_1.default)()); // Agrega esta línea
+        this.app.use((0, cookie_parser_1.default)());
     }
     routes() {
         this.app.use(this.paths.product, productRouter_1.default);

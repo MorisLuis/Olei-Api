@@ -4,48 +4,28 @@ import { ValidationError } from "../../errors/CustomError";
 import type { ClientInterface } from "../../interface/client";
 import sql from 'mssql';
 import type { GetClientsServiceResult, getClientIdInterface, getClientsServiceInterface, getTotalClientsServiceInterface, searchClientServiceInterface } from "./clientsServices.interface";
+import { getPrismaClient } from "../../database/prismaConnection";
 
 
 
 const getClientsService = async ({
-    PageNumber,
-    userSession,
-    OrderCondition,
-    searchTerm,
-    searchId
+    skip,
+    limit,
+    userSession
 }: getClientsServiceInterface): Promise<GetClientsServiceResult> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
-    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
+    const prisma = getPrismaClient(ServidorSQL, BaseSQL);
 
-    if (!pool) {
-        throw new ValidationError('Error al conectarse a base de datos principal');
-    }
-
-    const clientsQuery = clientsQuerys.getClients;
-    const totalClientsQuery = clientsQuerys.getTotalClients;
-
-    const requestClients = pool.request()
-        .input('PageNumber', PageNumber)
-        .input('PageSize', 10)
-        .input('OrderCondition', OrderCondition)
-        .input('searchTerm', searchTerm)
-        .input('searchId', searchId)
-        .query(clientsQuery);
-
-    const requestTotal = pool.request()
-        .input('searchTerm', searchTerm)
-        .input('searchId', searchId)
-        .query(totalClientsQuery);
-
-    const [clientsResult, totalResult] = await Promise.all([
-        requestClients,
-        requestTotal
-    ]);
+    const clientes = await prisma.clientes.findMany({
+        skip,
+        take: limit,
+    });
+    const totalClientes = await prisma.clientes.count();
 
     return {
-        clients: clientsResult.recordset,
-        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
+        clients: clientes,
+        total: totalClientes
     };
 };
 

@@ -1,0 +1,1372 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Clientes {
+  IdOLEI        Int       @default(1, map: "DF__CLIENTES__IdOLEI__47DBAE45")
+  Id_Almacen    Int
+  Id_Cliente    Int
+  FechaAlta     DateTime? @db.Date
+  Nombre        String    @db.NChar(100)
+  RazonSocial   String    @db.NChar(100)
+  RFC           String    @db.NChar(16)
+  CURP          String?   @db.NChar(30)
+  Calle         String?   @db.NChar(100)
+  NoExt         String?   @db.NChar(20)
+  NoInt         String?   @db.NChar(20)
+  Colonia       String?   @db.NChar(50)
+  Id_Ciudad     Int?
+  Delegacion    String?   @db.NChar(50)
+  Referencia    String?   @db.NChar(50)
+  CodigoPost    String?   @db.NChar(10)
+  Telefono1     String?   @db.NChar(20)
+  Telefono2     String?   @db.NChar(20)
+  CorreoVtas    String?   @db.NChar(200)
+  CorreoCob     String?   @db.NChar(100)
+  CorreoAdm     String?   @db.NChar(100)
+  Id_FormaPago  Int?
+  NumCtaPago    String?   @db.NChar(30)
+  Id_TipoCl     Int?
+  Id_Vendedor   Int?
+  Id_Transporte Int?
+  Id_Descuento  Int?
+  Id_CondVta    Int?
+  Id_ListPre    Int?
+  EncPagos      String?   @db.NChar(50)
+  EncCompras    String?   @db.NChar(50)
+  Observaciones String?   @db.VarChar(4000)
+  Status        Boolean
+  LimiteCredito Decimal?  @db.Decimal(18, 0)
+  Id_Uso        Int?
+  IdUsuarioOLEI String?   @db.NChar(10)
+  PasswordOLEI  String?   @db.NChar(10)
+  ServidorSQL   String?   @db.NChar(50)
+  BaseSQL       String?   @db.NChar(50)
+  UsuarioSQL    String?   @db.NChar(20)
+  PasswordSQL   String?   @db.NChar(20)
+  NoUsuarios    Int?
+  Vigencia      DateTime? @db.Date
+  TimbresDisp   Int?      @default(0, map: "DF_CLIENTES_TimbresDisp")
+  SwEnvioRel    Boolean?  @default(false, map: "DF_CLIENTES_SwEnvioRel_1")
+  FechaEnvioRel DateTime? @db.DateTime
+  TipoEntrega   Int?      @db.SmallInt
+  DomiEntrega   String?   @db.NVarChar(Max)
+  Id_Chofer     Int?
+  Id_Regimen    Int?
+  SwImagenes    Boolean?
+  SwSinStock    Boolean?
+  SwSinPrecio   Boolean?
+  TipoDocOO     Int?
+
+  vendedor      VENDEDORES?  @relation(fields: [Id_Vendedor], references: [Id_Vendedor])
+
+  @@id([Id_Almacen, Id_Cliente], map: "PK_CLIENTES")
+  @@map("CLIENTES")
+}
+
+model ABONOS {
+  Id_Almacen     Int
+  Folio          Int
+  Fecha          DateTime @db.DateTime
+  Fecha_op       DateTime @db.DateTime
+  TipoMov        Int
+  Id_FormaPago   Int
+  Id_Banco       Int
+  NumDoc         Int      @default(0, map: "DF__tmp_ms_xx__NumDo__35FCF52C")
+  Importe        Float    @db.Money
+  Moneda         Int
+  Paridad        Decimal  @db.Decimal(18, 2)
+  Estado         Int
+  Descripcion    String?  @db.NChar(100)
+  Id_Usuario     String?  @db.NChar(50)
+  Id_Cliente     Int
+  Id_AlmacenClte Int
+  SwBancos       Int?
+  CtaOrigen      String?  @db.NChar(50)
+  Id_CtaDestino  Int?
+  SwCFDI         Boolean? @default(false, map: "DF_ABONOS_SwCFDI_1")
+  FolioCaja      Int?     @default(0, map: "DF_ABONOS_FolioCaja")
+  TipoDocA       Int      @default(10, map: "DF_ABONOS_TipoDocA_1") @db.SmallInt
+  SerieA         String   @db.NChar(10)
+
+  @@id([Id_Almacen, Folio], map: "PK__tmp_ms_x__6537F67179C5143A")
+}
+
+model ALMACENES {
+  Id_Almacen Int    @id(map: "PK__Table__1E9C729E6BEEAE3C")
+  IdOLEI     Int?   @default(1, map: "DF__ALMACENES__IdOLE__7DCDAAA2")
+  Nombre     String @db.NChar(100)
+}
+
+model APLICACIONES {
+  Codigo      String   @db.NChar(20)
+  Id_Vehiculo Int
+  Mod_Inicial Int
+  Mod_Final   Int
+  Id_MarcaVeh Int
+  NumAplic    Int
+  Rango       String?  @db.NChar(200)
+  Motor       String?  @db.NChar(10)
+  Litros      Decimal? @db.Decimal(18, 2)
+
+  @@id([Codigo, NumAplic], map: "PK__tmp_ms_x__EBD562371F1EC3DA")
+}
+
+model BANCOS {
+  Id_Banco Int     @id(map: "PK__Table__37C5FC615241B8EA")
+  Nombre   String  @db.NChar(100)
+  RFC      String? @db.NChar(20)
+}
+
+model BANCOSMOVS {
+  Id_Almacen    Int
+  Id_CtaDestino Int
+  Folio         Int
+  Fecha         DateTime? @db.DateTime
+  Fecha_op      DateTime? @db.DateTime
+  TipoMov       Int?
+  Importe       Float?    @db.Money
+  Descripcion   String?   @db.NChar(100)
+  Id_Usuario    String?   @db.NChar(50)
+
+  @@id([Id_Almacen, Id_CtaDestino, Folio], map: "PK_BANCOSMOVS")
+}
+
+model CAJAMOVS {
+  Id_Almacen Int
+  Folio      Int
+  Tipo       Int       @db.SmallInt
+  Fecha      DateTime? @db.DateTime
+  Estado     Int?      @db.SmallInt
+  Cantidad   Decimal?  @db.Decimal(18, 2)
+  Concepto   String?   @db.NChar(100)
+  Id_Usuario String?   @db.NChar(50)
+  FolioCaja  Int?
+
+  @@id([Id_Almacen, Folio], map: "PK_CAJAMOVS")
+}
+
+model CAJASESIONES {
+  Id_Almacen   Int
+  Folio        Int
+  FechaInicio  DateTime? @db.DateTime
+  FechaFin     DateTime? @db.DateTime
+  SaldoInicial Decimal?  @db.Decimal(18, 2)
+  Id_Usuario   String?   @db.NChar(50)
+  SwCerrada    Boolean?  @default(false, map: "DF_CAJASESIONES_SwCerrada_1")
+
+  @@id([Id_Almacen, Folio], map: "PK_CAJASESIONES")
+}
+
+model CESTADOS {
+  Id_cEstado   Int     @id(map: "PK__CESTADOS__89E9B82118F3E69E")
+  c_Pais       String? @db.NChar(10)
+  c_Estado     String? @db.NChar(10)
+  NombreEstado String? @db.NChar(50)
+}
+
+model CHOFERES {
+  Id_Chofer Int     @id(map: "PK_CHOFERES")
+  Nombre    String? @db.NChar(100)
+}
+
+model CIUDADES {
+  Id_Ciudad Int     @id(map: "PK__Table__4EF9A3E8F4D38E51")
+  IdOLEI    Int
+  Nombre    String  @db.NChar(100)
+  Id_Estado Int
+  Lada      String? @db.NChar(10)
+}
+
+model CLASIFICACIONES {
+  Id_Clasificacion Int    @id(map: "PK_CLASIFICACIONES")
+  Nombre           String @db.NChar(10)
+}
+
+model ClaveProdServ {
+  Id_ClaveProdServ Int      @id(map: "PK__ClavePro__691A7F6BA2F64892")
+  c_ClaveProdServ  String   @db.NChar(20)
+  Descripcion      String?  @db.NChar(100)
+  IncIVA           Boolean? @default(false, map: "DF__ClaveProd__IncIV__64B7E415")
+  IncIEPS          Boolean? @default(false, map: "DF__ClaveProd__IncIE__65AC084E")
+}
+
+model CLAVEPRODSERVSAT {
+  c_ClaveProdServ String  @id(map: "PK_CLAVEPRODSERVSAT") @db.NChar(20)
+  Descripcion     String? @db.NChar(100)
+}
+
+model ClaveUnidades {
+  Id_ClaveUnidad Int     @id(map: "PK__ClaveUni__9CD37C8DCCAE8BE2")
+  c_ClaveUnidad  String  @db.NChar(10)
+  Nombre         String? @db.NChar(100)
+}
+
+model COMPONENTES {
+  CodigoPT String   @db.NChar(20)
+  Codigo   String   @db.NChar(20)
+  Marca    Int
+  Cantidad Decimal? @db.Decimal(18, 2)
+
+  @@id([CodigoPT, Codigo], map: "PK__tmp_ms_x__1B52E41571AA23D6")
+}
+
+model COMPRAS {
+  Id_Almacen    Int
+  TipoDocComp   Int       @db.SmallInt
+  Serie         String    @db.NChar(10)
+  Folio         Int
+  Id_Proveedor  Int
+  Fecha         DateTime  @db.DateTime
+  Subtotal      Float?    @db.Money
+  Impuesto      Float?    @db.Money
+  Total         Float?    @db.Money
+  CantDescuento Float?    @db.Money
+  Saldo         Float?    @db.Money
+  Id_Descuento  Int?
+  Id_CondVta    Int?
+  FechaLiq      DateTime? @db.DateTime
+  Estado        Int?      @default(1, map: "DF__tmp_ms_xx__Estad__38D961D7") @db.SmallInt
+  Notas         String?   @db.VarChar(4000)
+  DocsOrigen    String?   @db.VarChar(4000)
+  DocsDestino   String?   @db.VarChar(4000)
+  Piezas        Decimal?  @db.Decimal(18, 2)
+  Retencion     Float?    @db.Money
+  RetencionIVA  Float?    @db.Money
+  Moneda        Int?      @db.SmallInt
+  Paridad       Int?
+  Suma          Float?    @db.Money
+  SwImpOrg      Boolean?
+  SwPag         Boolean?
+  Id_Usuario    String?   @db.NChar(50)
+  FolioDocProv  String?   @db.NChar(15)
+  Id_AlmacenReq Int?
+
+  @@id([Id_Almacen, TipoDocComp, Serie, Folio], map: "PK__tmp_ms_x__E3C8B3AE18F05B16")
+}
+
+model CONDVTAS {
+  IdOLEI     Int
+  Id_CondVta Int     @id(map: "PK_CONDVTAS")
+  NoPagos    Int?
+  Dias       Int?
+  Display    String? @db.NChar(20)
+}
+
+model CONFIGIMPRE {
+  Id_Almacen     Int      @id(map: "PK__tmp_ms_x__1E9C729E1996C1D3")
+  IdOLEI         Int      @default(1, map: "DF__tmp_ms_xx__IdOLE__113584D1")
+  FmtFact        String?  @default("FACTURACFDI1", map: "DF__CONFIGIMP__FmtFa__338A9CD5") @db.NChar(50)
+  FmtRemi        String?  @default("REMISION1", map: "DF__CONFIGIMP__FmtRe__347EC10E") @db.NChar(50)
+  FmtPedi        String?  @default("PEDIDO1", map: "DF__CONFIGIMP__FmtPe__3572E547") @db.NChar(50)
+  FmtCoti        String?  @default("COTIZACION1", map: "DF__CONFIGIMP__FmtCo__36670980") @db.NChar(50)
+  FmtNota        String?  @default("NOTA1", map: "DF__CONFIGIMP__FmtNo__375B2DB9") @db.NChar(50)
+  FmtNoNF        String?  @default("NOTANF1", map: "DF__CONFIGIMP__FmtNo__384F51F2") @db.NChar(50)
+  FmtComp        String?  @default("COMPRA1", map: "DF__CONFIGIMP__FmtCo__3943762B") @db.NChar(50)
+  FmtOrde        String?  @default("ORDEN1", map: "DF__CONFIGIMP__FmtOr__3A379A64") @db.NChar(50)
+  FmtReqi        String?  @default("REQUI1", map: "DF__CONFIGIMP__FmtRe__3B2BBE9D") @db.NChar(50)
+  FmtCob         String?  @default("COBRANZA1", map: "DF__CONFIGIMP__FmtCo__3C1FE2D6") @db.NChar(50)
+  FmtInv         String?  @default("INVENTARIO1", map: "DF__CONFIGIMP__FmtIn__3D14070F") @db.NChar(50)
+  MaxPartFact    Int?     @default(100, map: "DF__CONFIGIMP__MaxPa__3E082B48") @db.SmallInt
+  MaxPartRemi    Int?     @default(100, map: "DF__CONFIGIMP__MaxPa__3EFC4F81") @db.SmallInt
+  MaxPartPedi    Int?     @default(100, map: "DF__CONFIGIMP__MaxPa__3FF073BA") @db.SmallInt
+  MaxPartCoti    Int?     @default(100, map: "DF__CONFIGIMP__MaxPa__40E497F3") @db.SmallInt
+  MaxPartNota    Int?     @default(100, map: "DF__CONFIGIMP__MaxPa__41D8BC2C") @db.SmallInt
+  MaxPartNoNF    Int?     @default(100, map: "DF__CONFIGIMP__MaxPa__42CCE065") @db.SmallInt
+  MaxPartComp    Int?     @default(100, map: "DF__CONFIGIMP__MaxPa__43C1049E") @db.SmallInt
+  MaxPartOrde    Int?     @default(100, map: "DF__CONFIGIMP__MaxPa__44B528D7") @db.SmallInt
+  MaxPartReqi    Int?     @default(100, map: "DF__CONFIGIMP__MaxPa__45A94D10") @db.SmallInt
+  MaxPartInv     Int?     @default(100, map: "DF__CONFIGIMP__MaxPa__469D7149") @db.SmallInt
+  CopiasFact     Int?     @default(1, map: "DF__CONFIGIMP__Copia__47919582") @db.SmallInt
+  CopiasRemi     Int?     @default(1, map: "DF__CONFIGIMP__Copia__4885B9BB") @db.SmallInt
+  CopiasPedi     Int?     @default(1, map: "DF__CONFIGIMP__Copia__4979DDF4") @db.SmallInt
+  CopiasCoti     Int?     @default(1, map: "DF__CONFIGIMP__Copia__4A6E022D") @db.SmallInt
+  CopiasNota     Int?     @default(1, map: "DF__CONFIGIMP__Copia__4B622666") @db.SmallInt
+  CopiasNoNF     Int?     @default(1, map: "DF__CONFIGIMP__Copia__4C564A9F") @db.SmallInt
+  CopiasComp     Int?     @default(1, map: "DF__CONFIGIMP__Copia__4D4A6ED8") @db.SmallInt
+  CopiasOrde     Int?     @default(1, map: "DF__CONFIGIMP__Copia__4E3E9311") @db.SmallInt
+  CopiasReqi     Int?     @default(1, map: "DF__CONFIGIMP__Copia__4F32B74A") @db.SmallInt
+  CopiasInv      Int?     @default(1, map: "DF__CONFIGIMP__Copia__5026DB83") @db.SmallInt
+  CopiasCob      Int?     @default(1, map: "DF__CONFIGIMP__Copia__511AFFBC") @db.SmallInt
+  FactImprimir   Boolean? @default(true, map: "DF__CONFIGIMP__FactI__520F23F5")
+  RemiImprimir   Boolean? @default(true, map: "DF__CONFIGIMP__RemiI__5303482E")
+  PediImprimir   Boolean? @default(true, map: "DF__CONFIGIMP__PediI__53F76C67")
+  CotiImprimir   Boolean? @default(true, map: "DF__CONFIGIMP__CotiI__54EB90A0")
+  NotaImprimir   Boolean? @default(true, map: "DF__CONFIGIMP__NotaI__55DFB4D9")
+  NoNFImprimir   Boolean? @default(true, map: "DF__CONFIGIMP__NoNFI__56D3D912")
+  CompImprimir   Boolean? @default(true, map: "DF__CONFIGIMP__CompI__57C7FD4B")
+  OrdeImprimir   Boolean? @default(true, map: "DF__CONFIGIMP__OrdeI__58BC2184")
+  ReqiImprimir   Boolean? @default(true, map: "DF__CONFIGIMP__ReqiI__59B045BD")
+  InvImprimir    Boolean? @default(true, map: "DF__CONFIGIMP__InvIm__5AA469F6")
+  CobImprimir    Boolean? @default(true, map: "DF__CONFIGIMP__CobIm__7C055DC1")
+  FactImpresora  String?  @default("PREDETERMINADA", map: "DF__CONFIGIMP__FactI__5B988E2F") @db.NChar(100)
+  RemiImpresora  String?  @default("PREDETERMINADA", map: "DF__CONFIGIMP__RemiI__5C8CB268") @db.NChar(100)
+  PediImpresora  String?  @default("PREDETERMINADA", map: "DF__CONFIGIMP__PediI__5D80D6A1") @db.NChar(100)
+  CotiImpresora  String?  @default("PREDETERMINADA", map: "DF__CONFIGIMP__CotiI__5E74FADA") @db.NChar(100)
+  NotaImpresora  String?  @default("PREDETERMINADA", map: "DF__CONFIGIMP__NotaI__5F691F13") @db.NChar(100)
+  NoNFImpresora  String?  @default("PREDETERMINADA", map: "DF__CONFIGIMP__NoNFI__605D434C") @db.NChar(100)
+  CompImpresora  String?  @default("PREDETERMINADA", map: "DF__CONFIGIMP__CompI__61516785") @db.NChar(100)
+  OrdeImpresora  String?  @default("PREDETERMINADA", map: "DF__CONFIGIMP__OrdeI__62458BBE") @db.NChar(100)
+  ReqiImpresora  String?  @default("PREDETERMINADA", map: "DF__CONFIGIMP__ReqiI__6339AFF7") @db.NChar(100)
+  InvImpresora   String?  @default("PREDETERMINADA", map: "DF__CONFIGIMP__InvIm__642DD430") @db.NChar(100)
+  CobImpresora   String?  @default("PREDETERMINADA", map: "DF__CONFIGIMP__CobIm__6521F869") @db.NChar(100)
+  FactEnviarPDF  Boolean? @default(true, map: "DF__CONFIGIMP__FactE__66161CA2")
+  RemiEnviarPDF  Boolean? @default(false, map: "DF__CONFIGIMP__RemiE__670A40DB")
+  PediEnviarPDF  Boolean? @default(false, map: "DF__CONFIGIMP__PediE__67FE6514")
+  CotiEnviarPDF  Boolean? @default(false, map: "DF__CONFIGIMP__CotiE__68F2894D")
+  NotaEnviarPDF  Boolean? @default(false, map: "DF__CONFIGIMP__NotaE__69E6AD86")
+  NoNFEnviarPDF  Boolean? @default(false, map: "DF__CONFIGIMP__NoNFE__6ADAD1BF")
+  CompEnviarPDF  Boolean? @default(false, map: "DF__CONFIGIMP__CompE__6BCEF5F8")
+  OrdeEnviarPDF  Boolean? @default(false, map: "DF__CONFIGIMP__OrdeE__6CC31A31")
+  ReqiEnviarPDF  Boolean? @default(false, map: "DF__CONFIGIMP__ReqiE__6DB73E6A")
+  InvEnviarPDF   Boolean? @default(false, map: "DF__CONFIGIMP__InvEn__6EAB62A3")
+  CobEnviarPDF   Boolean? @default(false, map: "DF__CONFIGIMP__CobEn__6F9F86DC")
+  FactPreview    Boolean? @default(true, map: "DF__CONFIGIMP__FactP__7093AB15")
+  RemiPreview    Boolean? @default(true, map: "DF__CONFIGIMP__RemiP__7187CF4E")
+  PediPreview    Boolean? @default(true, map: "DF__CONFIGIMP__PediP__727BF387")
+  CotiPreview    Boolean? @default(true, map: "DF__CONFIGIMP__CotiP__737017C0")
+  NotaPreview    Boolean? @default(true, map: "DF__CONFIGIMP__NotaP__74643BF9")
+  NoNFPreview    Boolean? @default(true, map: "DF__CONFIGIMP__NoNFP__75586032")
+  CompPreview    Boolean? @default(true, map: "DF__CONFIGIMP__CompP__764C846B")
+  OrdePreview    Boolean? @default(true, map: "DF__CONFIGIMP__OrdeP__7740A8A4")
+  ReqiPreview    Boolean? @default(true, map: "DF__CONFIGIMP__ReqiP__7834CCDD")
+  InvPreview     Boolean? @default(true, map: "DF__CONFIGIMP__InvPr__7928F116")
+  CobPreview     Boolean? @default(true, map: "DF__CONFIGIMP__CobPr__7A1D154F")
+  EnviarPDFCopia Boolean? @default(false, map: "DF__CONFIGIMP__Envia__7B113988")
+  FolioFact      Int?
+  FolioRemi      Int?
+  FolioPedi      Int?
+  FolioCoti      Int?
+  FolioNota      Int?
+  FolioNoNF      Int?
+  FolioComp      Int?
+  FolioOrde      Int?
+  FolioReqi      Int?
+  FolioInv       Int?
+  FolioCob       Int?
+  FmtCaja        String?  @default("INVENTARIO1", map: "DF_CONFIGIMPRE_FmtCaja") @db.NChar(50)
+  CopiasCaja     Int?     @default(1, map: "DF_CONFIGIMPRE_CopiasCaja") @db.SmallInt
+  CajaImprimir   Boolean? @default(true, map: "DF_CONFIGIMPRE_CajaImprimir")
+  CajaImpresora  String?  @default("PREDETERMINADA", map: "DF_CONFIGIMPRE_CajaImpresora") @db.NChar(100)
+  CajaPreview    Boolean? @default(true, map: "DF_CONFIGIMPRE_CajaPreview")
+  FmtPagos       String?  @db.NChar(50)
+  CopiasPagos    Int?     @db.SmallInt
+  PagosImprimir  Boolean?
+  PagosImpresora String?  @db.NChar(100)
+  PagosEnviarPDF Boolean?
+  PagosPreview   Boolean?
+}
+
+model CONFIGSIST {
+  IdOLEI               Int      @id(map: "PK__CONFIGSI__8A861CC1AC733D83") @default(1, map: "DF__CONFIGSIS__IdOLE__4A18FC72")
+  TipodeAutorizacion   Int?     @default(0, map: "DF__CONFIGSIS__Tipod__4B0D20AB") @db.SmallInt
+  CompartirClientes    Int?     @default(1, map: "DF__CONFIGSIS__Compa__4C0144E4") @db.SmallInt
+  AutExcedeLimiteCR    Int?     @default(0, map: "DF__CONFIGSIS__AutEx__4CF5691D") @db.SmallInt
+  AutVencidos          Int?     @default(0, map: "DF__CONFIGSIS__AutVe__4DE98D56") @db.SmallInt
+  PrecioIncIVA         Int?     @default(0, map: "DF__CONFIGSIS__Preci__4EDDB18F") @db.SmallInt
+  MultipleMarcas       Int?     @default(0, map: "DF__CONFIGSIS__Multi__2E3BD7D3") @db.SmallInt
+  SalidaSinExistencias Int?     @default(0, map: "DF__CONFIGSIS__Salid__2F2FFC0C") @db.SmallInt
+  PeriodoActual        Int?     @default(0, map: "DF__CONFIGSIS__Perio__00FF1D08")
+  TipodeBusqueda       Int?
+  ListaPreDefault      Int?
+  VersionDB            String?  @db.NChar(10)
+  VersionApp           String?  @db.NChar(10)
+  NotasAct             String?  @db.NVarChar(50)
+  ActMandatoria        Int?     @default(0, map: "DF_CONFIGSIST_ActMandatoria")
+  SwNewUpd             Boolean? @default(false, map: "DF_CONFIGSIST_SwNewUpd")
+  TipoDeCambio         Decimal? @db.Decimal(18, 2)
+  Id_TipoClDefault     Int?
+  Id_ListPreDefault    Int?
+  Id_DescuentoDefault  Int?
+  Id_CondVtaDefault    Int?
+  CodigoServicio       String?  @db.NChar(20)
+  CopiasExtrasCredito  Int?
+  SwDolares            Boolean? @default(false, map: "DF_CONFIGSIST_SwDolares_1")
+  SaldarVtasCtdo       Boolean? @default(true, map: "DF_CONFIGSIST_SaldarVtasCtdo_1")
+  ProcessWait          Boolean? @default(false, map: "DF_CONFIGSIST_ProcessWait_1")
+  IncluirCobaCorte     Boolean?
+  ImpCorteDet          Boolean?
+  ImpCorteCon          Boolean?
+  SwImagenes           Boolean?
+  SwBotonFamilia       Boolean?
+  SwBotonGrupo         Boolean?
+  SwBotonCodigo        Boolean?
+  SwRedPrecios         Boolean? @default(false, map: "DF_CONFIGSIST_SwRedPrecios")
+  ColsBot              Int?
+  HeightRow            Int?
+  WidthCol             Int?
+  SwPuntoVenta         Boolean?
+  SwOrdCompAnal        Boolean?
+  SwSerieRemCr         Boolean?
+}
+
+model COSTOS {
+  Codigo         String    @db.Char(20)
+  Id_Marca       Int
+  IdOLEI         Int?      @default(1, map: "DF__COSTOS__IdOLEI__7CD98669")
+  Costo          Decimal?  @db.Decimal(18, 2)
+  CostoDllr      Decimal?  @db.Decimal(18, 2)
+  Impto          Decimal   @db.Decimal(18, 2)
+  Maximo         Decimal?  @db.Decimal(18, 2)
+  Minimo         Decimal?  @db.Decimal(18, 2)
+  Descuento      Decimal?  @db.Decimal(18, 2)
+  VigDescto      DateTime? @db.DateTime
+  CodBar         String?   @db.NChar(20)
+  FactorOc       Decimal?  @db.Decimal(18, 2)
+  Peso           Decimal?  @db.Decimal(18, 2)
+  CostoProm      Decimal?  @db.Decimal(18, 2)
+  SwImportado    Boolean?  @default(false, map: "DF__COSTOS__SwImport__5708E33C")
+  FechaUltCamb   DateTime? @db.Date
+  Descuento2     Decimal?  @db.Decimal(18, 2)
+  CantMinDescto  Decimal?  @db.Decimal(18, 2)
+  CantMinDescto2 Decimal?  @db.Decimal(18, 2)
+
+  @@id([Codigo, Id_Marca], map: "PK__tmp_ms_x__B4B9F38583082793")
+}
+
+model CUENTASBN {
+  Id_CuentaBanco Int     @id(map: "PK_CUENTASBN")
+  Numero         String? @db.NChar(50)
+  Id_Banco       Int?
+}
+
+model DATOSFISCALES {
+  Id_Almacen       Int      @id(map: "PK__tmp_ms_x__1E9C729E8CAF23EB")
+  IdOLEI           Int      @default(1, map: "DF__tmp_ms_xx__IdOLE__65570293")
+  RazonSocial      String   @db.NChar(200)
+  RFC              String   @db.NChar(16)
+  Regimen1         String?  @db.NChar(100)
+  Regimen2         String?  @db.NChar(100)
+  Regimen3         String?  @db.NChar(100)
+  Telefonos        String?  @db.NChar(100)
+  PaginaWEB        String?  @db.NChar(100)
+  Emails           String?  @db.NChar(100)
+  Calle            String?  @db.NChar(100)
+  NoExt            String?  @db.NChar(20)
+  NoInt            String?  @db.NChar(20)
+  Colonia          String?  @db.NChar(50)
+  Ciudad           String?  @db.NChar(50)
+  Delegacion       String?  @db.NChar(50)
+  Estado           String?  @db.NChar(50)
+  Pais             String?  @db.NChar(50)
+  CodigoPostal     String?  @db.NChar(10)
+  LExpCalle        String?  @db.NChar(100)
+  LExpNoExt        String?  @db.NChar(20)
+  LExpNoInt        String?  @db.NChar(20)
+  LExpColonia      String?  @db.NChar(50)
+  LExpCiudad       String?  @db.NChar(50)
+  LExpDelegacion   String?  @db.NChar(50)
+  LExpEstado       String?  @db.NChar(50)
+  LExpPais         String?  @db.NChar(50)
+  LExpCodigoPostal String?  @db.NChar(10)
+  Certificado      String?  @db.NChar(250)
+  LlavePrivada     String?  @db.NChar(250)
+  VigenciaDesde    String?  @db.NChar(100)
+  VigenciaHasta    String?  @db.NChar(100)
+  NotBefore        String?  @db.NChar(100)
+  NotAfter         String?  @db.NChar(100)
+  Serial           String?  @db.NChar(100)
+  Serie            String?  @db.NChar(100)
+  Certificado1     String?  @db.NVarChar(Max)
+  Clavellave       String?  @db.NChar(100)
+  Passwordllave    String?  @db.NChar(100)
+  PathdeArchivos   String?  @db.NChar(200)
+  PathdeImagenes   String?  @db.NChar(200)
+  SwCFDI           Boolean?
+  Id_Regimen       Int?
+  CURP             String?  @db.NChar(30)
+  Id_cEstado       Int?
+  SerieActiva      String?  @db.NChar(10)
+}
+
+model DESCUENTOS {
+  IdOLEI       Int      @default(1, map: "DF__tmp_ms_xx__IdOLE__73BA3083")
+  Id_Descuento Int      @id(map: "PK_DESCUENTOS")
+  Valor        Decimal? @db.Decimal(18, 2)
+}
+
+model DETALLEABONOS {
+  Id_Almacen     Int
+  Folio          Int
+  Partida        Int      @db.SmallInt
+  TipoDoc        Int      @db.SmallInt
+  Serie          String?  @db.NChar(10)
+  FolioRef       Int?
+  Cantidad       Float?   @db.Money
+  SaldoRef       Float?   @db.Money
+  UUID           String?  @db.NChar(50)
+  SaldoNuevo     Decimal? @db.Decimal(18, 2)
+  SaldoAnterior  Decimal? @db.Decimal(18, 2)
+  NumParcialidad Int?
+  Moneda         Int?
+
+  @@id([Id_Almacen, Folio, Partida], map: "PK__Table__D72D940FB6DE36B0")
+}
+
+model DETALLECOMPRAS {
+  Id_Almacen   Int
+  TipoDocComp  Int      @db.SmallInt
+  Serie        String   @db.NChar(10)
+  Folio        Int
+  Partida      Int      @db.SmallInt
+  Codigo       String   @db.NChar(20)
+  Id_Marca     Int
+  Cantidad     Decimal? @db.Decimal(18, 2)
+  Surtido      Decimal? @default(0, map: "DF__DETALLECO__Surti__78F3E6EC") @db.Decimal(18, 2)
+  Precio       Float?   @db.Money
+  Importe      Float?   @db.Money
+  Impuesto     Float?   @db.Money
+  Descripcion  String?  @db.VarChar(4000)
+  Descuento    Float?   @db.Money
+  Id_Unidad    Int?
+  NumsdeSerie  String?  @db.VarChar(4000)
+  SwNs         Boolean?
+  TasaImpuesto Float?   @db.Money
+  SKU          String?  @db.NChar(20)
+
+  @@id([Id_Almacen, TipoDocComp, Serie, Folio, Partida], map: "PK__tmp_ms_x__9D7AA9CCC7A81F5B")
+}
+
+model DETALLEFORMATOIMPORTA {
+  Id_FormatoImp Int
+  Campo         String   @db.NChar(20)
+  HeadExcel     String?  @db.NChar(50)
+  Activado      Boolean? @default(false, map: "DF_DETALLEFORMATOIMPORTA_Activado")
+  Tabla         Int?
+  Orden         Int?
+  Tipo          Int?
+  Columna       Int?
+  Columna1      Int?
+
+  @@id([Id_FormatoImp, Campo], map: "PK_DETALLEFORMATOIMPORTA")
+}
+
+model DETALLEINVENTARIOS {
+  Id_Almacen   Int
+  Folio        Int
+  Partida      Int
+  Codigo       String  @db.Char(20)
+  Id_Marca     Int
+  Cantidad     Decimal @db.Decimal(18, 0)
+  Id_Ubicacion Int     @default(0, map: "DF__Table__Id_Ubicac__69C6B1F5")
+  Diferencia   Decimal @default(0, map: "DF__Table__Diferenci__6ABAD62E") @db.Decimal(18, 0)
+  SwNS         Int?    @default(0, map: "DF__DETALLEINV__SwNS__74444068")
+  NumsDeSerie  String? @db.VarChar(Max)
+  SKU          String? @db.NChar(20)
+
+  @@id([Id_Almacen, Folio, Partida], map: "PK__Table__D72D940FFE78BBA2")
+}
+
+model DETALLEMERCANCIAS {
+  Id_Almacen  Int
+  TipoDoc     Int      @db.SmallInt
+  Serie       String   @db.NChar(10)
+  Folio       Int
+  Partida     Int      @db.SmallInt
+  Codigo      String   @db.NChar(20)
+  CveProdServ String?  @db.NChar(20)
+  Descripcion String?  @db.VarChar(4000)
+  Cantidad    Decimal? @db.Decimal(18, 6)
+  ClaveUnidad String?  @db.NChar(10)
+  PesoEnKg    Decimal? @db.Decimal(18, 3)
+
+  @@id([Id_Almacen, TipoDoc, Serie, Folio, Partida], map: "PK_DETALLEMERCANCIAS")
+}
+
+model DETALLEPAGOS {
+  Id_Almacen     Int
+  Folio          Int
+  Partida        Int      @db.SmallInt
+  TipoDoc        Int      @db.SmallInt
+  Serie          String?  @db.NChar(10)
+  FolioRef       Int?
+  Cantidad       Float?   @db.Money
+  SaldoRef       Float?   @db.Money
+  UUID           String?  @db.NChar(50)
+  SaldoNuevo     Decimal? @db.Decimal(18, 2)
+  SaldoAnterior  Decimal? @db.Decimal(18, 2)
+  NumParcialidad Int?
+  Moneda         Int?
+
+  @@id([Id_Almacen, Folio, Partida], map: "PK_DETALLEPAGOS")
+}
+
+model DETALLEVENTAS {
+  Id_Almacen       Int
+  TipoDoc          Int      @db.SmallInt
+  Serie            String   @db.NChar(10)
+  Folio            Int
+  Partida          Int      @db.SmallInt
+  Codigo           String   @db.NChar(20)
+  Id_Marca         Int
+  Id_ListaPrecios  Int?
+  Cantidad         Decimal? @db.Decimal(18, 6)
+  Precio           Decimal? @db.Decimal(18, 6)
+  Importe          Decimal? @db.Decimal(18, 6)
+  Impuesto         Decimal? @db.Decimal(18, 6)
+  Retencion        Decimal? @db.Decimal(18, 6)
+  RetencionIVA     Decimal? @db.Decimal(18, 6)
+  Descripcion      String?  @db.VarChar(4000)
+  Descuento        Decimal? @db.Decimal(18, 6)
+  PrecioOrg        Decimal? @db.Decimal(18, 6)
+  Costo            Decimal? @db.Decimal(18, 6)
+  Id_Unidad        Int?
+  NumsdeSerie      String?  @db.VarChar(4000)
+  SwNs             Boolean?
+  CodigoCupon      String?  @db.NChar(20)
+  TasaImpuesto     Float?   @db.Money
+  TasaRetencion    Float?   @db.Money
+  TasaRetencionIVA Float?   @db.Money
+  SKU              String?  @db.NChar(20)
+  TipoDoc_org      Int?     @default(0, map: "DF_DETALLEVENTAS_TipoDoc_org") @db.SmallInt
+  Serie_org        String?  @db.NChar(10)
+  Folio_org        Int?     @default(0, map: "DF_DETALLEVENTAS_Folio_org")
+
+  @@id([Id_Almacen, TipoDoc, Serie, Folio, Partida], map: "PK_Table")
+}
+
+model ENVIARA {
+  IdOLEI      Int
+  Id_Almacen  Int
+  Id_Cliente  Int
+  Direccion   String? @db.NChar(100)
+  Ciudad      String? @db.NChar(50)
+  Telefono    String? @db.NChar(20)
+  Persona     String? @db.NChar(50)
+  Observacion String? @db.NChar(50)
+
+  @@id([Id_Almacen, Id_Cliente], map: "PK_ENVIARA")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model ERRORES {
+  Id         Int       @default(autoincrement())
+  From       String?   @db.NVarChar(50)
+  Message    String?   @db.NVarChar(255)
+  Id_Usuario String?   @db.NVarChar(200)
+  Fecha      DateTime? @db.DateTime
+  Metodo     String?   @db.NVarChar(10)
+  code       String?   @db.VarChar(255)
+  endpoint   String?   @db.VarChar(255)
+
+  @@ignore
+}
+
+model ESPECIFICACIONES {
+  Id_Especif Int    @id(map: "PK__Table__EF20C3F9B6FC7619")
+  Nombre     String @db.NChar(50)
+}
+
+model ESPECIFXFAM {
+  Id_Especif  Int     @id(map: "PK__Table__EF20C3F926C3F4E8")
+  Id_Familia  Int
+  InxEspecif  Int?
+  Poscicion   Int?
+  Descripcion String? @db.NChar(50)
+}
+
+model ESPECIFXPROD {
+  Codigo     String @db.NChar(20)
+  Id_Especif Int
+  Secuencia  Int
+
+  @@id([Codigo, Id_Especif], map: "PK__tmp_ms_x__88C501925264B844")
+}
+
+model ESTADOS {
+  IdOLEI    Int
+  Id_Estado Int     @id(map: "PK_ESTADOS")
+  Nombre    String  @db.NChar(50)
+  Pais      String  @db.NChar(50)
+  CveEst    String? @db.NChar(2)
+  CvePais   String? @db.NChar(2)
+}
+
+model EXISTENCIAS {
+  Id_Almacen    Int
+  Codigo        String   @db.NChar(20)
+  Id_Marca      Int
+  Id_Ubicacion  Int      @default(0, map: "DF__tmp_ms_xx__Id_Ub__7D2E8C24")
+  Periodo       Int
+  IdOLEI        Int?     @default(1, map: "DF__tmp_ms_xx__IdOLE__7E22B05D")
+  Existencia    Decimal  @db.Decimal(18, 0)
+  ExistenciaAnt Decimal? @default(0, map: "DF__tmp_ms_xx__Exist__7F16D496") @db.Decimal(18, 0)
+  Diferencia    Decimal  @default(0, map: "DF__tmp_ms_xx__Difer__000AF8CF") @db.Decimal(18, 0)
+
+  @@id([Id_Almacen, Codigo, Id_Marca], map: "PK__tmp_ms_x__55D7EDA6B2A4C959")
+}
+
+model FAMILIAS {
+  Id_Familia       Int     @id(map: "PK__Table__F2CA5E99E5D8207A")
+  Nombre           String  @db.NChar(50)
+  Id_ClaveProdServ Int?
+  R                Int?    @db.SmallInt
+  G                Int?    @db.SmallInt
+  B                Int?    @db.SmallInt
+  Imagen           String? @db.NChar(100)
+  SpanCol          Int?
+  SpanRow          Int?
+}
+
+model FIELDSORIGENQRY {
+  Id_FdOrgQry   Int      @id(map: "PK__tmp_ms_x__C120DC88001F7828")
+  Id_OrigenQry  Int
+  IdOLEI        Int?     @default(1, map: "DF__tmp_ms_xx__IdOLE__168449D3")
+  Nombre        String?  @db.NVarChar(50)
+  Encabezado    String?  @db.NVarChar(50)
+  CampoDisplay  String?  @db.NVarChar(50)
+  Visible       Boolean? @default(false, map: "DF__tmp_ms_xx__Visib__17786E0C")
+  Filtro        Boolean? @default(false, map: "DF__tmp_ms_xx__Filtr__186C9245")
+  TipoFiltro    Int?     @default(1, map: "DF__tmp_ms_xx__TipoF__1960B67E")
+  AyudaFiltro   Int?     @default(0, map: "DF__tmp_ms_xx__Ayuda__1A54DAB7")
+  OpcionFiltro  Int?     @default(1, map: "DF__tmp_ms_xx__Opcio__1B48FEF0")
+  DataSource    String?  @db.NChar(200)
+  DisplayMember String?  @db.NChar(50)
+  ValueMember   String?  @db.NChar(50)
+  FiltroFijo    Int?     @default(0, map: "DF__tmp_ms_xx__Filtr__1C3D2329")
+  Sort          Boolean? @default(false, map: "DF__tmp_ms_xx___Sort__1D314762")
+}
+
+model FORMASDEPAGO {
+  IdOLEI       Int?     @default(1, map: "DF__FORMASDEP__IdOLE__0C1BC9F9")
+  Id_Formapago Int      @id(map: "PK_FORMASDEPAGO")
+  Nombre       String   @db.NChar(100)
+  Clave        String?  @default("1", map: "DF__FORMASDEP__Clave__52E34C9D") @db.NChar(50)
+  Bancarizado  Boolean? @default(false, map: "DF__FORMASDEP__Banca__73FA27A5")
+  RFCCtaOrd    String?  @db.NChar(20)
+  RFCCtaBenif  String?  @db.NChar(20)
+  NombreBanco  String?  @db.NChar(100)
+}
+
+model FORMASPAGO {
+  Id_FormaPago Int     @id(map: "PK__Table__4FF4E53B4510395C")
+  Descripcion  String? @db.NChar(100)
+}
+
+model FORMATOIMPORTA {
+  Id_FormatoImp Int     @id(map: "PK_FORMATOIMPORTA")
+  Tipo          Int
+  Descripcion   String? @db.NChar(100)
+}
+
+model FORMATOIMPORTAPRECIOS {
+  Id_FormatoImp   Int
+  Id_ListaPrecios Int
+  HeadExcel       String?  @db.NChar(50)
+  Activado        Boolean? @default(false, map: "DF_FORMATOIMPORTAPRECIOS_Activado")
+  HeadExcelFactor String?  @db.NChar(50)
+  ActivadoFactor  Boolean?
+  Columna         Int?
+  ColumnaFactor   Int?
+
+  @@id([Id_FormatoImp, Id_ListaPrecios], map: "PK_FORMATOIMPORTAPRECIOS")
+}
+
+model GRUPOS {
+  Id_Grupo Int     @id(map: "PK__Table__ACDDD97870992E98")
+  Nombre   String  @db.NChar(50)
+  R        Int?    @db.SmallInt
+  G        Int?    @db.SmallInt
+  B        Int?    @db.SmallInt
+  Imagen   String? @db.NChar(100)
+  SpanCol  Int?
+  SpanRow  Int?
+}
+
+model INVENTARIOS {
+  Id_Almacen     Int
+  Folio          Int
+  Id_TipoMovInv  Int
+  Estado         Int       @default(1, map: "DF__tmp_ms_xx__Estad__3BB5CE82")
+  Fecha          DateTime  @db.DateTime
+  Id_AlmacenDest Int       @default(0, map: "DF__tmp_ms_xx__Id_Al__3CA9F2BB")
+  SwPendiente    Int       @default(0, map: "DF__tmp_ms_xx__SwPen__3D9E16F4") @db.SmallInt
+  Descripcion    String?   @db.NChar(100)
+  Id_Usuario     String?   @db.NChar(50)
+  SwTr           Int?      @default(0, map: "DF__tmp_ms_xx___SwTr__3E923B2D") @db.SmallInt
+  FechaRecepcion DateTime? @db.DateTime
+  FolioReq       Int?
+  AlmReq         Int?
+
+  @@id([Id_Almacen, Folio], map: "PK__tmp_ms_x__6537F67191C10673")
+}
+
+model LISTASPRECIOS {
+  IdOLEI     Int
+  Id_ListPre Int     @id(map: "PK_LISTASPRECIOS")
+  Nombre     String? @db.NChar(50)
+  Id_Moneda  Int?    @default(1, map: "DF_LISTASPRECIOS_Id_Moneda")
+}
+
+model MARCAS {
+  Id_Marca Int    @id(map: "PK__Table__28EFE28A4232CEA7")
+  Nombre   String @db.NChar(50)
+}
+
+model MARCASVEH {
+  Id_MarcaVeh Int    @id(map: "PK__Table__29D204191FE04414")
+  Nombre      String @db.NChar(50)
+}
+
+model MERCANCIAS {
+  Id_Almacen         Int
+  TipoDoc            Int      @db.SmallInt
+  Serie              String   @db.NChar(10)
+  Folio              Int
+  PesoBrutoTotal     Decimal? @db.Decimal(18, 3)
+  UnidadPeso         String?  @db.NChar(10)
+  NumTotalMercancias Int?
+
+  @@id([Id_Almacen, TipoDoc, Serie, Folio], map: "PK_MERCANCIAS")
+}
+
+model MONEDAS {
+  Id_Moneda Int     @id(map: "PK__Table__4EDE3600765DDE3D")
+  Nombre    String  @db.NChar(50)
+  c_Moneda  String? @db.NChar(10)
+}
+
+model MULTICIAS {
+  Id_UsuarioPadre String  @db.NChar(10)
+  IdUsuarioOLEI   String  @db.NChar(10)
+  PasswordOLEI    String  @db.NChar(10)
+  Nombre          String? @db.NChar(100)
+
+  @@id([Id_UsuarioPadre, IdUsuarioOLEI, PasswordOLEI], map: "PK_MULTICIAS")
+}
+
+model NOTIFICACIONES {
+  Id_Usuario     String    @db.NChar(50)
+  Id_UsuarioDest String?   @db.NChar(50)
+  IdOLEI         Int       @default(1, map: "DF__tmp_ms_xx__IdOLE__705EA0EB")
+  Tipo           Int
+  Folio          Int       @id(map: "PK__tmp_ms_x__BAB84EF6B045E306")
+  FolioOrg       Int?
+  FolioAut       Int?
+  Mensaje        String?   @db.NChar(200)
+  Accion         Int?
+  Fecha          DateTime? @db.DateTime
+  SWLeido        Int?      @default(0, map: "DF__tmp_ms_xx__SWLei__7152C524")
+  Id_1           Int?
+  Id_2           Int?
+  SwEstado       Int?      @default(0, map: "DF__tmp_ms_xx__SwEst__7246E95D")
+}
+
+model ORIGENQRYS {
+  Id_OrigenQry Int     @id(map: "PK__ORIGENQR__8A2D3D080012DEC1")
+  IdOLEI       Int?    @default(1, map: "DF__ORIGENQRY__IdOLE__0371755F")
+  Descripcion  String? @db.NChar(100)
+  Froms        String? @db.NVarChar(Max)
+}
+
+model PAGOS {
+  Id_Almacen   Int
+  Folio        Int
+  Fecha        DateTime @db.DateTime
+  Fecha_op     DateTime @db.DateTime
+  TipoMov      Int
+  Id_FormaPago Int
+  Id_Banco     Int
+  NumDoc       Int      @default(0, map: "DF_PAGOS_NumDoc")
+  Importe      Float    @db.Money
+  Moneda       Int
+  Paridad      Decimal  @db.Decimal(18, 2)
+  Estado       Int
+  Descripcion  String?  @db.NChar(100)
+  Id_Usuario   String?  @db.NChar(50)
+  Id_Proveedor Int
+  SwBancos     Int?
+  CtaDestino   String?  @db.NChar(50)
+  Id_CtaOrigen Int?
+
+  @@id([Id_Almacen, Folio], map: "PK_PAGOS")
+}
+
+model PAISES {
+  Id_Pais Int     @id(map: "PK__PAISES__3E79BDD37E9720BF")
+  Nombre  String? @db.NChar(100)
+  c_Pais  String? @db.NChar(10)
+}
+
+model PARIDADES {
+  Id_Paridad Int    @id(map: "PK__Table__51984A14A165B97B")
+  Id_Moneda  Int
+  Valor      Float? @db.Money
+}
+
+model PERFILESUSUARIO {
+  Id_Perfil             Int      @id(map: "PK__tmp_ms_x__2CDD9419FA45FFD3")
+  IdOLEI                Int      @default(1, map: "DF__tmp_ms_xx__IdOLE__0F183235")
+  Nombre                String   @db.NChar(50)
+  ClientesR             Boolean  @default(false, map: "DF__tmp_ms_xx__Clien__100C566E")
+  ClientesW             Boolean  @default(false, map: "DF__tmp_ms_xx__Clien__11007AA7")
+  ClientesC             Boolean  @default(false, map: "DF__tmp_ms_xx__Clien__11F49EE0")
+  ClientesCtrls         Boolean  @default(false, map: "DF__tmp_ms_xx__Clien__12E8C319")
+  ProductosR            Boolean  @default(false, map: "DF__tmp_ms_xx__Produ__13DCE752")
+  ProductosW            Boolean  @default(false, map: "DF__tmp_ms_xx__Produ__14D10B8B")
+  ProductosC            Boolean  @default(false, map: "DF__tmp_ms_xx__Produ__15C52FC4")
+  ProductosInhabPre     Boolean  @default(false, map: "DF__tmp_ms_xx__Produ__16B953FD")
+  ProductosInhabCos     Boolean?
+  ProductosActMasiv     Boolean?
+  FacturasR             Boolean  @default(false, map: "DF__tmp_ms_xx__Factu__17AD7836")
+  FacturasW             Boolean  @default(false, map: "DF__tmp_ms_xx__Factu__18A19C6F")
+  FacturasC             Boolean  @default(false, map: "DF__tmp_ms_xx__Factu__1995C0A8")
+  RemisionesR           Boolean  @default(false, map: "DF__tmp_ms_xx__Remis__1A89E4E1")
+  RemisionesW           Boolean  @default(false, map: "DF__tmp_ms_xx__Remis__1B7E091A")
+  RemisionesC           Boolean  @default(false, map: "DF__tmp_ms_xx__Remis__1C722D53")
+  PedidosR              Boolean  @default(false, map: "DF__tmp_ms_xx__Pedid__1D66518C")
+  PedidosW              Boolean  @default(false, map: "DF__tmp_ms_xx__Pedid__1E5A75C5")
+  PedidosC              Boolean  @default(false, map: "DF__tmp_ms_xx__Pedid__1F4E99FE")
+  CotizacionesR         Boolean  @default(false, map: "DF__tmp_ms_xx__Cotiz__2042BE37")
+  CotizacionesW         Boolean  @default(false, map: "DF__tmp_ms_xx__Cotiz__2136E270")
+  CotizacionesC         Boolean  @default(false, map: "DF__tmp_ms_xx__Cotiz__222B06A9")
+  NotasCrR              Boolean  @default(false, map: "DF__tmp_ms_xx__Notas__231F2AE2")
+  NotasCrW              Boolean  @default(false, map: "DF__tmp_ms_xx__Notas__24134F1B")
+  NotasCrC              Boolean  @default(false, map: "DF__tmp_ms_xx__Notas__25077354")
+  CreditoNFR            Boolean  @default(false, map: "DF__tmp_ms_xx__Credi__25FB978D")
+  CreditoNFW            Boolean  @default(false, map: "DF__tmp_ms_xx__Credi__26EFBBC6")
+  CreditoNFC            Boolean  @default(false, map: "DF__tmp_ms_xx__Credi__27E3DFFF")
+  DocPredeterminadoVtas Int      @default(1, map: "DF__tmp_ms_xx__DocPr__28D80438") @db.SmallInt
+  PermitirCambiarLista  Boolean  @default(false, map: "DF__tmp_ms_xx__Permi__29CC2871")
+  AutorizarVenta        Boolean  @default(false, map: "DF__tmp_ms_xx__Autor__2AC04CAA")
+  PermitirCambiarPrecio Boolean  @default(false, map: "DF__tmp_ms_xx__Permi__2BB470E3")
+  CambioSinRestriccion  Boolean  @default(false, map: "DF__tmp_ms_xx__Cambi__2CA8951C")
+  CambioaMayores        Boolean  @default(false, map: "DF__tmp_ms_xx__Cambi__2D9CB955")
+  PorcentajeMeno        Boolean  @default(false, map: "DF__tmp_ms_xx__Porce__2E90DD8E")
+  Porcentaje            Float    @default(0, map: "DF__tmp_ms_xx__Porce__2F8501C7") @db.Money
+  InventarioR           Boolean  @default(false, map: "DF__tmp_ms_xx__Inven__30792600")
+  InventarioW           Boolean  @default(false, map: "DF__tmp_ms_xx__Inven__316D4A39")
+  InventarioC           Boolean  @default(false, map: "DF__tmp_ms_xx__Inven__32616E72")
+  TraspasosR            Boolean  @default(false, map: "DF__tmp_ms_xx__Trasp__335592AB")
+  TraspasosW            Boolean  @default(false, map: "DF__tmp_ms_xx__Trasp__3449B6E4")
+  TraspasosC            Boolean  @default(false, map: "DF__tmp_ms_xx__Trasp__353DDB1D")
+  InventarioFisico      Boolean  @default(false, map: "DF__tmp_ms_xx__Inven__3631FF56")
+  NotificarLlegadaTras  Boolean  @default(false, map: "DF__tmp_ms_xx__Notif__3726238F")
+  CobranzaR             Boolean  @default(false, map: "DF__tmp_ms_xx__Cobra__381A47C8")
+  CobranzaW             Boolean  @default(false, map: "DF__tmp_ms_xx__Cobra__390E6C01")
+  CobranzaC             Boolean  @default(false, map: "DF__tmp_ms_xx__Cobra__3A02903A")
+  FacturaCompR          Boolean  @default(false, map: "DF__tmp_ms_xx__Factu__3AF6B473")
+  FacturaCompW          Boolean  @default(false, map: "DF__tmp_ms_xx__Factu__3BEAD8AC")
+  FacturaCompC          Boolean  @default(false, map: "DF__tmp_ms_xx__Factu__3CDEFCE5")
+  OrdendeCompR          Boolean  @default(false, map: "DF__tmp_ms_xx__Orden__3DD3211E")
+  OrdendeCompW          Boolean  @default(false, map: "DF__tmp_ms_xx__Orden__3EC74557")
+  OrdendeCompC          Boolean  @default(false, map: "DF__tmp_ms_xx__Orden__3FBB6990")
+  RequisicionR          Boolean  @default(false, map: "DF__tmp_ms_xx__Requi__40AF8DC9")
+  RequisicionW          Boolean  @default(false, map: "DF__tmp_ms_xx__Requi__41A3B202")
+  RequisicionC          Boolean  @default(false, map: "DF__tmp_ms_xx__Requi__4297D63B")
+  ActualizarCostos      Boolean  @default(false, map: "DF__tmp_ms_xx__Actua__438BFA74")
+  ActualizarPrecios     Boolean  @default(false, map: "DF__tmp_ms_xx__Actua__44801EAD")
+  ActualizarMayores     Boolean  @default(false, map: "DF__tmp_ms_xx__Actua__457442E6")
+  ProveedoresR          Boolean  @default(false, map: "DF__tmp_ms_xx__Prove__4668671F")
+  ProveedoresW          Boolean  @default(false, map: "DF__tmp_ms_xx__Prove__475C8B58")
+  ProveedoresC          Boolean  @default(false, map: "DF__tmp_ms_xx__Prove__4850AF91")
+  ClientePred           Int?     @default(0, map: "DF__tmp_ms_xx__Clien__4944D3CA")
+  NotifEntregaProd      Boolean? @default(false, map: "DF__PERFILESU__Notif__733B0D96")
+  NotifRequi            Boolean? @default(false, map: "DF__PERFILESU__Notif__742F31CF")
+  RequiReqTraspaso      Boolean? @default(false, map: "DF__PERFILESU__Requi__77FFC2B3")
+  MonedaPredeterminada  Int?     @default(1, map: "DF_PERFILESUSUARIO_MonedaPredeterminada_1")
+  CajaW                 Boolean? @default(false, map: "DF_PERFILESUSUARIO_CajaW_1")
+  CajaRetiros           Boolean? @default(false, map: "DF_PERFILESUSUARIO_CajaRetiros_1")
+  CajaC                 Boolean? @default(false, map: "DF_PERFILESUSUARIO_CajaC_1")
+  RecibirPagoVtas       Boolean? @default(false, map: "DF_PERFILESUSUARIO_RecibirPagoVtas_1")
+  PagosR                Boolean? @default(false, map: "DF_PERFILESUSUARIO_PagosR")
+  PagosW                Boolean? @default(false, map: "DF_PERFILESUSUARIO_PagosW")
+  PagosC                Boolean? @default(false, map: "DF_PERFILESUSUARIO_PAgosC")
+}
+
+model PRECIOS {
+  Codigo          String   @db.NChar(20)
+  Id_Marca        Int
+  Id_ListaPrecios Int
+  Precio          Decimal  @db.Decimal(18, 2)
+  Factor          Decimal? @db.Decimal(18, 2)
+  Instalacion     Decimal? @db.Decimal(18, 2)
+
+  @@id([Codigo, Id_Marca, Id_ListaPrecios], map: "PK__tmp_ms_x__E7F4EAA4C1C2BA67")
+}
+
+model PRODPROV {
+  Codigo     String   @db.NChar(20)
+  Id_Prov    Int
+  CodigoProv String?  @db.NChar(20)
+  Precio     Decimal? @db.Decimal(18, 2)
+  Moneda     Int?
+
+  @@id([Codigo, Id_Prov], map: "PK__tmp_ms_x__05929F038AB87EE0")
+}
+
+model PRODUBIC {
+  Codigo  String @db.NChar(20)
+  Id_Ubic Int
+
+  @@id([Codigo, Id_Ubic], map: "PK__tmp_ms_x__095817441671DCFD")
+}
+
+model PRODUCTOS {
+  IdOLEI          Int?      @default(1, map: "DF__tmp_ms_xx__IdOLE__52442E1F")
+  Codigo          String    @id(map: "PK__tmp_ms_x__06370DADB6BC4071") @db.NChar(20)
+  Descripcion     String    @db.NChar(100)
+  DescrCorta      String?   @db.NChar(50)
+  Id_Familia      Int
+  Id_Unidad       Int?
+  Id_Grupo        Int
+  Observaciones   String?   @db.NVarChar(Max)
+  TipoProd        Int
+  SwNs            Int?
+  FechaAlta       DateTime? @db.Date
+  FechaUltEnt     DateTime? @db.Date
+  FechaUltSal     DateTime? @db.Date
+  FechaUltCamb    DateTime? @db.Date
+  SwComponentes   Boolean?  @default(false, map: "DF__tmp_ms_xx__SwCom__53385258")
+  SwActivo        Boolean   @default(true, map: "DF__tmp_ms_xx__SwAct__542C7691")
+  Id_Ubic         Int       @default(1, map: "DF__tmp_ms_xx__Id_Ub__55209ACA")
+  c_ClaveProdServ String?   @db.NChar(20)
+  SKU             String?   @db.NChar(20)
+  PalabrasClave   String?   @db.NVarChar(200)
+  SwExcRet        Boolean?  @default(false, map: "DF_PRODUCTOS_SwExcRet_1")
+  R               Int?      @db.SmallInt
+  G               Int?      @db.SmallInt
+  B               Int?      @db.SmallInt
+  Imagen          String?   @db.NChar(100)
+  SpanCol         Int?
+  SpanRow         Int?
+}
+
+model PROVEEDORES {
+  IdOLEI        Int?      @default(1, map: "DF__tmp_ms_xx__IdOLE__0EF836A4")
+  Id_Proveedor  Int       @id(map: "PK__tmp_ms_x__477B858E4E30BA8B")
+  FechaAlta     DateTime? @db.Date
+  Nombre        String    @db.NChar(100)
+  RFC           String?   @db.NChar(16)
+  CURP          String?   @db.NChar(30)
+  Calle         String?   @db.NChar(100)
+  NoExt         String?   @db.NChar(20)
+  NoInt         String?   @db.NChar(20)
+  Colonia       String?   @db.NChar(50)
+  Id_Ciudad     Int?
+  Delegacion    String?   @db.NChar(50)
+  Referencia    String?   @db.NChar(50)
+  CodigoPost    String?   @db.NChar(10)
+  Telefono1     String?   @db.NChar(20)
+  Telefono2     String?   @db.NChar(20)
+  CorreoVtas    String?   @db.NChar(100)
+  CorreoCob     String?   @db.NChar(100)
+  CorreoAdm     String?   @db.NChar(100)
+  Id_TipoPr     Int?
+  Id_Descuento  Int?
+  Id_CondVta    Int?
+  EncPagos      String?   @db.NChar(50)
+  EncVentas     String?   @db.NChar(50)
+  Observaciones String?   @db.VarChar(4000)
+  Status        Boolean?
+  DesctoPPP     Decimal?  @db.Decimal(18, 2)
+}
+
+model REGIMENESFISCALES {
+  Id_Regimen  Int      @id(map: "PK__REGIMENE__601ADA630FF5DDFB")
+  cRegimen    String?  @db.NChar(10)
+  Descripcion String?  @db.NChar(200)
+  Fisica      Boolean? @default(false, map: "DF__REGIMENES__Fisic__7AA72534")
+  Moral       Boolean? @default(false, map: "DF__REGIMENES__Moral__7B9B496D")
+}
+
+model REPORTES {
+  Id_Reporte     Int      @id(map: "PK_REPORTES")
+  Nombre         String   @db.NChar(100)
+  Categoria      Int?
+  Descripcion    String?  @db.VarChar(Max)
+  SQL            String?  @db.VarChar(Max)
+  FileRPT        String?  @db.NChar(100)
+  Disponibilidad Int?
+  Id_Perfil      Int?
+  Id_Usuario     String?  @db.NChar(50)
+  SwTodosAlm     Boolean? @default(false, map: "DF_REPORTES_SwTodosAlm")
+  SwTodosVend    Boolean? @default(true, map: "DF_REPORTES_SwTodosVend")
+  SwTDoc         Boolean? @default(false, map: "DF_REPORTES_SwTDoc")
+  FiltroAlmacen  String?  @db.NChar(50)
+  FiltroTDoc     String?  @db.NChar(50)
+  FiltroCoP      String?  @db.NChar(50)
+  FiltroVend     String?  @db.NChar(50)
+  FiltroFam      String?  @db.NChar(50)
+  FiltroGpo      String?  @db.NChar(50)
+  FiltroMar      String?  @db.NChar(50)
+  FiltroClteProv String?  @db.NChar(50)
+  FiltroCodigo   String?  @db.NChar(50)
+  FiltroFecha    String?  @db.NChar(50)
+  FiltroESC      String?  @db.NChar(100)
+  SwWhere        Boolean? @default(true, map: "DF_REPORTES_SwWhere")
+  SwFechaWhere   Boolean? @default(true, map: "DF_REPORTES_SwFechaWhere")
+  FiltroList     String?  @db.NChar(50)
+  SwList         Boolean? @default(false, map: "DF_REPORTES_SwList_1")
+  FiltroTransp   String?  @db.NChar(50)
+  FiltroTipoCL   String?  @db.NChar(50)
+}
+
+model REPORTESFILTROS {
+  Id_Reporte Int
+  Id_Filtro  Int
+  Tipo       Int?
+  SQL        String? @db.VarChar(Max)
+  Etiqueta   String? @db.NChar(100)
+  Campo      String? @db.NChar(100)
+
+  @@id([Id_Reporte, Id_Filtro], map: "PK_REPORTESFILTROS")
+}
+
+model SALDOSBN {
+  Id_CuentaBanco Int
+  Periodo        Int
+  Saldo          Decimal? @db.Decimal(18, 2)
+
+  @@id([Id_CuentaBanco, Periodo], map: "PK_SALDOSBN")
+}
+
+model TIPODOCS {
+  TipoDoc Int    @id(map: "PK__Table__C6FEC468E016AD3A") @db.SmallInt
+  Nombre  String @db.NChar(30)
+}
+
+model TIPODOCSCOMP {
+  TipoDocComp Int    @id(map: "PK__TIPODOCS__556E82DD69F91FB6") @db.SmallInt
+  Nombre      String @db.NChar(30)
+}
+
+model TIPOMOVS {
+  Id_TipoMov  Int    @id(map: "PK__Table__28A912EDA7820D40")
+  Descripcion String @db.NChar(100)
+}
+
+model TIPOMOVSINV {
+  Id_TipoMovInv Int    @id(map: "PK__TIPOMOVS__27D91D0FCC7EF651")
+  Descripcion   String @db.NChar(100)
+  Accion        Int    @db.SmallInt
+  Id_AlmDest    Int?
+}
+
+model TIPOPAGOS {
+  Id_TipoPago Int     @id(map: "PK__TIPOPAGO__55DB838A2725E1C9")
+  Descripcion String  @db.NChar(100)
+  Porcentaje  Decimal @default(0, map: "DF__TIPOPAGOS__Porce__29971E47") @db.Decimal(18, 0)
+}
+
+model TIPOSDECLIENTE {
+  IdOLEI    Int
+  Id_TipoCl Int      @id(map: "PK_TIPOSDECLIENTE")
+  Nombre    String   @db.NChar(50)
+  IVA       Decimal? @db.Decimal(18, 2)
+  RetISR    Decimal? @db.Decimal(18, 2)
+  RetIVA    Decimal? @db.Decimal(18, 2)
+  SwDXV     Boolean?
+}
+
+model TIPOSDEPROVEEDOR {
+  IdOLEI       Int      @default(1, map: "DF__TIPOSDEPR__IdOLE__11D4A34F")
+  Id_TipoPr    Int      @id(map: "PK_TIPOSDEPROVEEDOR")
+  Nombre       String   @db.NChar(50)
+  IVA          Decimal? @db.Decimal(18, 2)
+  RetISR       Decimal? @db.Decimal(18, 2)
+  RetIVA       Decimal? @db.Decimal(18, 2)
+  SwPorvdeProd Int?     @db.SmallInt
+}
+
+model TRANSPORTES {
+  IdOLEI        Int     @default(1, map: "DF__TRANSPORT__IdOLE__5AEE82B9")
+  Id_Transporte Int     @id(map: "PK_TRANSPORTES")
+  Nombre        String? @db.NChar(50)
+  Direccion     String? @db.NChar(100)
+  Ciudad        String? @db.NChar(50)
+  Telefono      String? @db.NChar(20)
+}
+
+model TUTORIALES {
+  Id_Tutorial Int
+  Secuencia   Int
+  Archivo     String? @db.NChar(50)
+  Tipo        Int?
+  Nombre      String? @db.NChar(200)
+  Descripcion String?
+
+  @@id([Id_Tutorial, Secuencia], map: "PK_TUTORIALES")
+}
+
+model UBICACIONES {
+  Id_Ubic    Int    @id(map: "PK__tmp_ms_x__F6F1AE911A192D77")
+  Id_Almacen Int
+  Nombre     String @db.NChar(50)
+}
+
+model UNIDADES {
+  Id_Unidad      Int    @id(map: "PK__Table__32CFC4CCCA0B5C80")
+  Nombre         String @db.NChar(50)
+  Id_ClaveUnidad Int?
+}
+
+model USOCFDI {
+  Id_Uso      Int      @id(map: "PK__USOCFDI__52A331F517940576")
+  cUsoCFDI    String?  @db.NChar(10)
+  Descripcion String?  @db.NChar(200)
+  Fisica      Boolean? @default(false, map: "DF__USOCFDI__Fisica__005FFE8A")
+  Moral       Boolean? @default(false, map: "DF__USOCFDI__Moral__015422C3")
+}
+
+model USUARIOS {
+  Id_Usuario        String   @id(map: "PK__USUARIOS__63C76BE2576CEA41") @db.NChar(50)
+  IdOLEI            Int
+  Password          String   @db.NChar(50)
+  Nombre            String?  @db.NChar(200)
+  EMail             String?  @db.NChar(200)
+  Id_Almacen        Int
+  ActualizarListas  Int?     @db.SmallInt
+  Id_Perfil         Int
+  Administrador     Int?     @default(0, map: "DF__USUARIOS__Admini__74CE504D") @db.SmallInt
+  MailAddr          String?  @db.NChar(100)
+  MailRemitente     String?  @db.NChar(100)
+  MailUsuario       String?  @db.NChar(100)
+  MailPassword      String?  @db.NChar(50)
+  SMTPHost          String?  @db.NChar(100)
+  SMTPPuerto        Int?
+  SMTPSSL           Boolean?
+  SMTPAut           Boolean?
+  TodosAlmacenes    Int?     @default(0, map: "DF__USUARIOS__TodosA__2A8B4280") @db.SmallInt
+  SwActivo          Boolean? @default(false, map: "DF_USUARIOS_SwActivo")
+  IdEquipo          String?  @db.NChar(20)
+  SwEnviaRelCC      Boolean? @default(false, map: "DF_USUARIOS_SwEnviaRelCC")
+  EnviaRelCCTipo    Int?     @default(1, map: "DF_USUARIOS_EnviaRelCCTipo")
+  EnviaRelCCDia     Int?
+  TodosAlmacenesAct Int?     @db.SmallInt
+  SwCopiaamiMismo   Boolean? @default(false, map: "DF_USUARIOS_SwCopiaamiMismo_1")
+  SwEnlaceVendedor  Boolean?
+  Id_Vendedor       Int?
+}
+
+model USUARIOSOOL {
+  Id_UsuarioOOL         String  @id(map: "PK_USUARIOSOOL") @db.NChar(100)
+  PasswordOOL           String  @db.NChar(20)
+  ServidorSQL           String? @db.NChar(50)
+  BaseSQL               String? @db.NChar(50)
+  TipoUsuario           Int?
+  PrivilegioTipoCliente Int?
+  Id_UsuarioOLEI        String? @db.NChar(50)
+  PasswordOLEI          String? @db.NChar(50)
+  Id_ClienteDBCLIENTES  Int?
+  Id_Cliente            Int?
+  Id_Almacen            Int?
+}
+
+model VEHICULOS {
+  Id_Vehiculo Int    @id(map: "PK__tmp_ms_x__46DBF4B4D76B083F")
+  Id_MarcaVeh Int?
+  Nombre      String @db.NChar(50)
+}
+
+model VENDEDORES {
+  IdOLEI      Int       @default(1, map: "DF__VENDEDORE__IdOLE__5BE2A6F2")
+  Id_Vendedor Int       @id(map: "PK_VENDEDORES")
+  Nombre      String    @db.NChar(100)
+  Comision    Decimal?  @db.Decimal(18, 0)
+  Fecha       DateTime? @db.DateTime
+
+  clientes     Clientes[]
+}
+
+model VENTAS {
+  Id_Almacen          Int
+  TipoDoc             Int       @db.SmallInt
+  Serie               String    @db.NChar(10)
+  Folio               Int
+  Id_Cliente          Int
+  Id_AlmacenClte      Int
+  Fecha               DateTime  @db.DateTime
+  Subtotal            Float?    @db.Money
+  Impuesto            Decimal?  @db.Decimal(18, 6)
+  Total               Float?    @db.Money
+  Saldo               Float?    @db.Money
+  Id_Descuento        Int?
+  Id_CondVta          Int?
+  Id_Vendedor         Int?
+  Id_Formapago        Int?
+  Id_Transporte       Int?
+  FechaLiq            DateTime? @db.DateTime
+  Estado              Int?      @default(1, map: "DF__tmp_ms_xx__Estad__416EA7D8") @db.SmallInt
+  Notas               String?   @db.VarChar(4000)
+  DocsOrigen          String?   @db.VarChar(4000)
+  DocsDestino         String?   @db.VarChar(4000)
+  TipoDocOrigen       Int?      @default(0, map: "DF_VENTAS_TipoDocOrigen") @db.SmallInt
+  TipoDocDestino      Int?      @default(0, map: "DF_VENTAS_TipoDocDestino") @db.SmallInt
+  Piezas              Decimal?  @db.Decimal(18, 2)
+  Retencion           Decimal?  @db.Decimal(18, 6)
+  RetencionIVA        Decimal?  @db.Decimal(18, 6)
+  Moneda              Int?
+  Paridad             Decimal?  @db.Decimal(18, 2)
+  TipoEntrega         Int?      @db.SmallInt
+  DatoOB1             String?   @db.NChar(100)
+  DatoOB2             String?   @db.NChar(100)
+  DatoOB3             String?   @db.NChar(100)
+  NumCtaPago          String?   @db.NChar(30)
+  Suma                Decimal?  @db.Decimal(18, 6)
+  SwImpOrg            Boolean?
+  SwPag               Boolean?
+  Id_Usuario          String?   @db.NChar(50)
+  CantDescuento       Decimal?  @db.Decimal(18, 6)
+  Id_ListPre          Int?
+  CantLetra           String?   @db.VarChar(200)
+  Id_TipoPago         Int?
+  Id_Uso              Int?
+  ClaveConfirm        String?   @db.NChar(20)
+  SwAnticipo          Boolean?  @default(false, map: "DF_VENTAS_SwAnticipo_1")
+  SaldoAnticipo       Decimal?  @default(0, map: "DF_VENTAS_SaldoAnticipo_1") @db.Decimal(18, 6)
+  DocsRel             String?   @db.VarChar(400)
+  SwNotaAnticipo      Boolean?  @default(false, map: "DF_VENTAS_SwNotaAnticipo_1")
+  ImporteNotaAnticipo Decimal?  @default(0, map: "DF_VENTAS_ImporteNotaAnticipo_1") @db.Decimal(18, 6)
+  TipoRel             Int?      @default(0, map: "DF_VENTAS_TipoRel_1")
+  Id_FormaPago2       Int?
+  Id_FormaPago3       Int?
+  Pago1               Decimal?  @db.Decimal(18, 2)
+  Pago2               Decimal?  @db.Decimal(18, 2)
+  Pago3               Decimal?  @db.Decimal(18, 2)
+  Cambio              Decimal?  @db.Decimal(18, 2)
+  SwPagada            Boolean?  @default(false, map: "DF_VENTAS_SwPagada_1")
+  FolioCaja           Int?
+  Id_Chofer           Int?
+  FechaEntrega        DateTime? @db.DateTime
+
+  @@id([Id_Almacen, TipoDoc, Serie, Folio], map: "PK__tmp_ms_x__BAF1B7C55DEE656D")
+}
+
+model VENTASCFDI {
+  Id_Almacen     Int
+  TipoDoc        Int     @db.SmallInt
+  Serie          String  @db.NChar(10)
+  Folio          Int
+  Certificado    String? @db.NChar(50)
+  Cadena         String? @db.VarChar(Max)
+  Sello          String? @db.VarChar(4000)
+  FechaHora      String? @db.NChar(50)
+  SelloSAT       String? @db.VarChar(4000)
+  CertificadoSAT String? @db.NChar(50)
+  FechaTimbrado  String? @db.NChar(50)
+  UUID           String? @db.NChar(50)
+  Version        String? @db.NChar(50)
+  CadenaSAT      String? @db.VarChar(Max)
+
+  @@id([Id_Almacen, TipoDoc, Serie, Folio], map: "PK__VENTASCF__BAF1B7C52ACD1BD4")
+}
+
+model VENTASCFDIREL {
+  Id_Almacen Int
+  TipoDoc    Int      @db.SmallInt
+  Serie      String   @db.NChar(10)
+  Folio      Int
+  TipoDocRel Int?     @db.SmallInt
+  SerieRel   String?  @db.NChar(10)
+  FolioRel   Int
+  ImporteRel Decimal? @db.Decimal(18, 6)
+  UUID       String?  @db.NChar(50)
+
+  @@id([Id_Almacen, TipoDoc, Serie, Folio, FolioRel], map: "PK_VENTASCFDIREL")
+}

@@ -3,17 +3,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dbConnectionMain = exports.dbConnectionWeb = exports.dbConnection = void 0;
+exports.dbConnectionMain = exports.dbConnectionWeb = exports.dbConnection = exports.getPoolKey = void 0;
 const mssql_1 = __importDefault(require("mssql"));
 const config_1 = __importDefault(require("../config"));
 let mainPool = null;
 const connectionPools = new Map(); // Mapa para almacenar las conexiones activas
 const MAX_CONNECTIONS = 10; // Límite de conexiones simultáneas
 const getPoolKey = (server, base) => `${server.trim()}-${base.trim()}`; // Función para generar una clave única por servidor y base de datos
+exports.getPoolKey = getPoolKey;
 // Conexion App
 const dbConnection = async (server, base, user, pass) => {
     // Get pool key
-    const poolKey = getPoolKey(server, base);
+    const poolKey = (0, exports.getPoolKey)(server, base);
     // Si ya existe un pool de conexión y sigue activo, lo reutilizamos
     if (connectionPools.has(poolKey)) {
         const existingPool = connectionPools.get(poolKey);
@@ -52,7 +53,8 @@ exports.dbConnection = dbConnection;
 // Conexion Web
 const dbConnectionWeb = async (server, base) => {
     // Get pool key
-    const poolKey = getPoolKey(server, base);
+    const poolKey = (0, exports.getPoolKey)(server, base);
+    console.log({ poolKey });
     // Si ya existe un pool de conexión y sigue activo, lo reutilizamos
     if (connectionPools.has(poolKey)) {
         const existingPool = connectionPools.get(poolKey);

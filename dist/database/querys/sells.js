@@ -29,6 +29,7 @@ exports.sellsQuery = {
                 SELECT
                     MIN(CONCAT(v.Id_Almacen, '-', v.Id_Cliente, '-', v.TipoDoc, '-', TRIM(v.Serie), '-', v.Folio)) AS UniqueKey,
                     c.Id_Cliente,
+                    v.Id_Almacen,
                     MAX(c.Nombre) AS Nombre,
                     SUM(v.Subtotal) AS Subtotal,
                     SUM(v.Total) AS Total
@@ -37,8 +38,9 @@ exports.sellsQuery = {
                     ON c.Id_Cliente = v.Id_Cliente
                     AND c.Id_Almacen = v.Id_Almacen
                 WHERE   (@searchTerm = N'' OR c.Nombre LIKE N'%' + @searchTerm + N'%')
-                GROUP BY c.Id_Cliente
+                GROUP BY c.Id_Cliente, v.Id_Almacen
             )
+            
             
             /* Pagina y ordena */
             SELECT *
