@@ -7,13 +7,17 @@ import { updateWebSession } from '../helpers/generate-redis';
 const getClients = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const { PageNumber, clientOrderCondition, searchTerm, searchId } = getClientsQuerySchema.parse(req.query);
-        const limit = 10;
+        const { PageNumber, clientOrderCondition, searchTerm, searchId, limit } = getClientsQuerySchema.parse(req.query);
         const skip = (PageNumber - 1) * limit;
         const userSession = req.sessionWeb;
 
         const { clients, total } = await getClientsService({
-            skip, limit, userSession
+            skip,
+            limit,
+            userSession,
+            clientOrderCondition,
+            searchTerm,
+            searchId
         });
 
         return res.json({

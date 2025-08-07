@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { string, z } from "zod";
 import type { ClientOrderConditionType } from "../interface/client";
 import { ClientOrderCondition } from "../interface/client";
 
@@ -17,7 +17,9 @@ export const getClientsQuerySchema = z.object({
             { message: "sellsOrderCondition debe ser 'Nombre', 'Id_Cliente'" }
         ),
     searchTerm: z.preprocess((val) => (val === undefined ? '' : val), z.string()),
-    searchId: z.preprocess((val) => (val === '' ? undefined : val), z.string().optional())
+    searchId: z.preprocess((val) => (val === '' ? undefined : val), z.string().optional()),
+    limit: z.preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number())
+
 
 });
 

@@ -5,23 +5,41 @@ import type { ClientInterface } from "../../interface/client";
 import sql from 'mssql';
 import type { GetClientsServiceResult, getClientIdInterface, getClientsServiceInterface, getTotalClientsServiceInterface, searchClientServiceInterface } from "./clientsServices.interface";
 import { getPrismaClient } from "../../database/prismaConnection";
+import { Prisma } from "@prisma/client";
 
 
 
 const getClientsService = async ({
     skip,
     limit,
-    userSession
+    userSession,
+    clientOrderCondition,
+    searchTerm,
+    searchId
 }: getClientsServiceInterface): Promise<GetClientsServiceResult> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const prisma = getPrismaClient(ServidorSQL, BaseSQL);
 
-    const clientes = await prisma.clientes.findMany({
-        skip,
-        take: limit,
-    });
-    const totalClientes = await prisma.clientes.count();
+    const where = buildWhereCondition(searchTerm, searchId);
+    const orderBy = buildOrder<Prisma.ClientesOrderByWithRelationInput>(
+        { field: clientOrderCondition, direction: "asc"},
+        'Id_Cliente'
+    );
+
+    const [clientes, totalClientes] = await Promise.all([
+        prisma.clientes.findMany({ 
+            where, 
+            skip, 
+            take: limit, 
+            orderBy,
+            select: {
+                Nombre: true,
+                Id_Almacen: true
+            }
+        }),
+        prisma.clientes.count({ where }),
+    ]);
 
     return {
         clients: clientes,
@@ -93,6 +111,24 @@ const searchClientService = async ({
         clients
     }
 }
+
+const buildWhereCondition = (term?: string, id?: number | string) => {
+    const where: any = {};
+    if (term) where.NombreCliente = { contains: term, mode: 'insensitive' };
+    if (id) where.Id_Cliente = id;
+    return where;
+};
+
+function buildOrder<T extends Record<string, any>>(
+    order: { field: keyof T; direction: Prisma.SortOrder },
+    defaultField: keyof T
+): T {
+    if (order?.field && order?.direction) {
+        return { [order.field]: order.direction } as T;
+    }
+    return { [defaultField]: 'asc' } as T;
+}
+
 
 export {
     getClientsService,

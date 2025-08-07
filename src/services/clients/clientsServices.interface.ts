@@ -7,6 +7,9 @@ interface getClientsServiceInterface {
     skip: number
     limit: number
     userSession: UserWebSessionInterface,
+    clientOrderCondition: any,
+    searchTerm: string, 
+    searchId?: string
 };
 
 interface getClientIdInterface {
