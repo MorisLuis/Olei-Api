@@ -3,20 +3,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchClientService = exports.getTotalClientsService = exports.getClientIdService = exports.getClientsService = void 0;
+exports.updateClientService = exports.searchClientService = exports.getTotalClientsService = exports.getClientIdService = exports.getClientsService = void 0;
+const mssql_1 = __importDefault(require("mssql"));
 const database_1 = require("../../database");
 const clients_1 = require("../../database/querys/clients");
 const CustomError_1 = require("../../errors/CustomError");
-const mssql_1 = __importDefault(require("mssql"));
 const prismaConnection_1 = require("../../database/prismaConnection");
-const getClientsService = async ({ skip, limit, userSession }) => {
+const orderFunction_1 = require("../../utils/prisma/orderFunction");
+const whereFunction_1 = require("../../utils/prisma/whereFunction");
+const updateFunction_1 = require("../../utils/prisma/updateFunction");
+const getClientsService = async ({ skip, limit, userSession, clientOrderCondition, searchTerm, searchId }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const prisma = (0, prismaConnection_1.getPrismaClient)(ServidorSQL, BaseSQL);
-    const clientes = await prisma.clientes.findMany({
-        skip,
-        take: limit,
-    });
-    const totalClientes = await prisma.clientes.count();
+    const where = (0, whereFunction_1.buildWhereCondition)({
+        Nombre: searchTerm,
+        Id_Cliente: searchId
+    }, ["Nombre"]);
+    const orderBy = (0, orderFunction_1.buildOrder)({ field: clientOrderCondition, direction: "asc" }, 'Id_Cliente');
+    const [clientes, totalClientes] = await Promise.all([
+        prisma.clientes.findMany({
+            where,
+            skip,
+            take: limit,
+            orderBy,
+            select: {
+                Nombre: true,
+                Id_Almacen: true,
+                Id_Cliente: true,
+                IdOLEI: true
+            }
+        }),
+        prisma.clientes.count({ where }),
+    ]);
     return {
         clients: clientes,
         total: totalClientes
@@ -71,4 +89,23 @@ const searchClientService = async ({ userSession, term }) => {
     };
 };
 exports.searchClientService = searchClientService;
+const updateClientService = async ({ userSession, Id_Cliente, Id_Almacen, IdOLEI, body }) => {
+    const { ServidorSQL, BaseSQL } = userSession;
+    const prisma = (0, prismaConnection_1.getPrismaClient)(ServidorSQL, BaseSQL);
+    const data = (0, updateFunction_1.buildUpdate)(body);
+    const updatedClient = await prisma.clientes.update({
+        where: {
+            IdOLEI_Id_Almacen_Id_Cliente: {
+                IdOLEI,
+                Id_Almacen,
+                Id_Cliente
+            }
+        },
+        data
+    });
+    return {
+        client: updatedClient
+    };
+};
+exports.updateClientService = updateClientService;
 //# sourceMappingURL=clientsServices.js.map

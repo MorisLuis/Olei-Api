@@ -1,13 +1,15 @@
+import sql from 'mssql';
+
 import { dbConnectionWeb } from "../../database";
 import { clientsQuerys } from "../../database/querys/clients";
 import { ValidationError } from "../../errors/CustomError";
 import type { ClientInterface } from "../../interface/client";
-import sql from 'mssql';
-import type { GetClientsServiceResult, getClientIdInterface, getClientsServiceInterface, getTotalClientsServiceInterface, searchClientServiceInterface } from "./clientsServices.interface";
+import type { GetClientsServiceResult, getClientIdInterface, getClientsServiceInterface, getTotalClientsServiceInterface, searchClientServiceInterface, updateClientParams } from "./clientsServices.interface";
 import { getPrismaClient } from "../../database/prismaConnection";
-import { Prisma } from "@prisma/client";
-
-
+import type { Prisma } from "@prisma/client";
+import { buildOrder } from "../../utils/prisma/orderFunction";
+import { buildWhereCondition } from "../../utils/prisma/whereFunction";
+import { buildUpdate } from '../../utils/prisma/updateFunction';
 
 const getClientsService = async ({
     skip,
@@ -21,21 +23,30 @@ const getClientsService = async ({
     const { ServidorSQL, BaseSQL } = userSession;
     const prisma = getPrismaClient(ServidorSQL, BaseSQL);
 
-    const where = buildWhereCondition(searchTerm, searchId);
+    const where = buildWhereCondition<Prisma.ClientesWhereInput>(
+        {
+            Nombre: searchTerm,
+            Id_Cliente: searchId
+        },
+        ["Nombre"]
+    );
+
     const orderBy = buildOrder<Prisma.ClientesOrderByWithRelationInput>(
-        { field: clientOrderCondition, direction: "asc"},
+        { field: clientOrderCondition, direction: "asc" },
         'Id_Cliente'
     );
 
     const [clientes, totalClientes] = await Promise.all([
-        prisma.clientes.findMany({ 
-            where, 
-            skip, 
-            take: limit, 
+        prisma.clientes.findMany({
+            where,
+            skip,
+            take: limit,
             orderBy,
             select: {
                 Nombre: true,
-                Id_Almacen: true
+                Id_Almacen: true,
+                Id_Cliente: true,
+                IdOLEI: true
             }
         }),
         prisma.clientes.count({ where }),
@@ -112,27 +123,39 @@ const searchClientService = async ({
     }
 }
 
-const buildWhereCondition = (term?: string, id?: number | string) => {
-    const where: any = {};
-    if (term) where.NombreCliente = { contains: term, mode: 'insensitive' };
-    if (id) where.Id_Cliente = id;
-    return where;
-};
+const updateClientService = async ({
+    userSession,
+    Id_Cliente,
+    Id_Almacen,
+    IdOLEI,
+    body
+}: updateClientParams) => {
 
-function buildOrder<T extends Record<string, any>>(
-    order: { field: keyof T; direction: Prisma.SortOrder },
-    defaultField: keyof T
-): T {
-    if (order?.field && order?.direction) {
-        return { [order.field]: order.direction } as T;
+    const { ServidorSQL, BaseSQL } = userSession;
+
+    const prisma = getPrismaClient(ServidorSQL, BaseSQL);
+    const data = buildUpdate(body)
+
+    const updatedClient = await prisma.clientes.update({
+        where: {
+            IdOLEI_Id_Almacen_Id_Cliente: {
+                IdOLEI,
+                Id_Almacen,
+                Id_Cliente
+            }
+        },
+        data
+    });
+
+    return {
+        client: updatedClient
     }
-    return { [defaultField]: 'asc' } as T;
 }
-
 
 export {
     getClientsService,
     getClientIdService,
     getTotalClientsService,
-    searchClientService
+    searchClientService,
+    updateClientService
 }

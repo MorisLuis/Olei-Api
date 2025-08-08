@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getClientId, getClients, getTotalClients, searchClient, selectClient } from "../controllers/client";
+import { getClientId, getClients, getTotalClients, searchClient, selectClient, updateClient } from "../controllers/clients/client";
 import { validateJWTWeb } from "../middleware/validateJWTWeb";
 
 
@@ -10,5 +10,7 @@ router.get('/clientId', validateJWTWeb, getClientId)
 
 router.post('/', validateJWTWeb, selectClient)
 router.get("/search", validateJWTWeb, searchClient)
+
+router.put("/:id", validateJWTWeb, updateClient)
 
 export default router;

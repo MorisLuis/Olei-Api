@@ -1,8 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
-import type { UserWebSessionInterface } from '../interface/user';
-import { getClientIdService, getClientsService, getTotalClientsService, searchClientService } from '../services/clients/clientsServices';
-import { getClientIdQuerySchema, getClientsQuerySchema, getClientsTotalQuerySchema, searchClientQuerySchema, selectClientBodySchema } from '../validations/clientValidations';
-import { updateWebSession } from '../helpers/generate-redis';
+import type { UserWebSessionInterface } from '../../interface/user';
+import { getClientIdService, getClientsService, getTotalClientsService, searchClientService, updateClientService } from '../../services/clients/clientsServices';
+import { getClientIdQuerySchema, getClientsQuerySchema, getClientsTotalQuerySchema, searchClientQuerySchema, selectClientBodySchema } from '../../validations/clientValidations';
+import { updateWebSession } from '../../helpers/generate-redis';
 
 const getClients = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
@@ -109,10 +109,36 @@ const searchClient = async (req: Request, res: Response, next: NextFunction): Pr
     }
 };
 
+const updateClient = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+
+    try {
+        const userSession = req.sessionWeb
+        const body = req.body;
+        const { id: Id_Cliente } = req.params
+        const { Id_Almacen, IdOLEI } = req.query;
+
+        const { client } = await updateClientService({
+            userSession,
+            Id_Cliente: Number(Id_Cliente),
+            Id_Almacen: Number(Id_Almacen),
+            IdOLEI: Number(IdOLEI),
+            body
+        })
+
+        return res.json({
+            client
+        })
+
+    } catch (error) {
+        return next(error)
+    }
+};
+
 export {
     getClients,
     getClientId,
     selectClient,
     searchClient,
-    getTotalClients
+    getTotalClients,
+    updateClient
 }

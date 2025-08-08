@@ -1,3 +1,4 @@
+import type { ClientInterface } from "../../interface/client";
 import type { UserWebSessionInterface } from "../../interface/user";
 
 
@@ -30,6 +31,14 @@ interface searchClientServiceInterface {
     term: string
 };
 
+interface updateClientParams {
+    userSession: UserWebSessionInterface;
+    Id_Cliente: number,
+    Id_Almacen: number,
+    IdOLEI: number,
+    body: ClientInterface
+}
+
 // RESPONSE
 
 interface GetClientsServiceResult {
@@ -43,6 +52,7 @@ export type {
     getClientIdInterface,
     getTotalClientsServiceInterface,
     searchClientServiceInterface,
+    updateClientParams,
 
     // Response
     GetClientsServiceResult
