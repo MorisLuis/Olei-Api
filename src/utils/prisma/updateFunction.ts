@@ -1,8 +1,10 @@
 
+type DataReponse = Record<string, string | number | boolean | object>
+
 export function buildUpdate(
-    data: Record<string, any>,
+    data: any,
     allowedFields?: string[]
-) {
+) : DataReponse {
     // Si se especifican campos permitidos, filtramos
     const filteredData = allowedFields
         ? Object.fromEntries(

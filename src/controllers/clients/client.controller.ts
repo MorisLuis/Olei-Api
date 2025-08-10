@@ -1,28 +1,38 @@
 import type { NextFunction, Request, Response } from 'express';
 import type { UserWebSessionInterface } from '../../interface/user';
-import { getClientIdService, getClientsService, getTotalClientsService, searchClientService, updateClientService } from '../../services/clients/clientsServices';
-import { getClientIdQuerySchema, getClientsQuerySchema, getClientsTotalQuerySchema, searchClientQuerySchema, selectClientBodySchema } from '../../validations/clientValidations';
+import { getClientIdService, getClientsService, getTotalClientsService, searchClientService, updateClientService } from '../../services/clients/clients.service';
+import { getClientIdQuerySchema, getClientsQuerySchema, getClientsTotalQuerySchema, searchClientQuerySchema, selectClientBodySchema } from './client.schema';
 import { updateWebSession } from '../../helpers/generate-redis';
+import { parsePrismaFilter } from '../../utils/prisma/parsePrismaFilter';
 
 const getClients = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const { PageNumber, clientOrderCondition, searchTerm, searchId, limit } = getClientsQuerySchema.parse(req.query);
+        const {
+            PageNumber,
+            limit,
+            orderField,
+            orderDirection,
+            filterField,
+            filterValue
+        } = getClientsQuerySchema.parse(req.query);
+    
         const skip = (PageNumber - 1) * limit;
         const userSession = req.sessionWeb;
+        const filters = parsePrismaFilter(filterField, filterValue)
 
-        const { clients, total } = await getClientsService({
+        const { clientes, total } = await getClientsService({
+            userSession,
+            orderField,
+            orderDirection,
             skip,
             limit,
-            userSession,
-            clientOrderCondition,
-            searchTerm,
-            searchId
+            filters
         });
 
         return res.json({
             ok: true,
-            clients,
+            clients: clientes,
             total
         });
     } catch (error) {
@@ -115,13 +125,12 @@ const updateClient = async (req: Request, res: Response, next: NextFunction): Pr
         const userSession = req.sessionWeb
         const body = req.body;
         const { id: Id_Cliente } = req.params
-        const { Id_Almacen, IdOLEI } = req.query;
+        const { Id_Almacen } = req.query;
 
         const { client } = await updateClientService({
             userSession,
             Id_Cliente: Number(Id_Cliente),
             Id_Almacen: Number(Id_Almacen),
-            IdOLEI: Number(IdOLEI),
             body
         })
 

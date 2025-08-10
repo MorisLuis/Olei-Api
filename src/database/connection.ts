@@ -51,9 +51,9 @@ export const dbConnection = async (server: string, base: string, user: string, p
 
 // Conexion Web
 export const dbConnectionWeb = async (server: string, base: string) : Promise<sql.ConnectionPool> => {
+
     // Get pool key
     const poolKey = getPoolKey(server, base);
-    console.log({poolKey})
 
     // Si ya existe un pool de conexión y sigue activo, lo reutilizamos
     if (connectionPools.has(poolKey)) {
@@ -94,6 +94,7 @@ export const dbConnectionWeb = async (server: string, base: string) : Promise<sq
 
 // Conexion App Main
 export const dbConnectionMain = async () : Promise<sql.ConnectionPool> => {
+
     if (!mainPool) {
         const dbConfig = {
             user: config.dbUser,

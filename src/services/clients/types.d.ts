@@ -1,16 +1,19 @@
+import type { Clientes } from "@prisma/client";
 import type { ClientInterface } from "../../interface/client";
 import type { UserWebSessionInterface } from "../../interface/user";
 
+import type { Prisma } from "@prisma/client";
+import type { FilterPrisma } from "../../utils/prisma/types";
 
 //PARAMS
+interface getClientsParams {
+    userSession: UserWebSessionInterface
+    orderField: typeof Prisma.ClientesOrderByWithRelationInput
+    orderDirection: "asc" | "desc"
 
-interface getClientsServiceInterface {
     skip: number
     limit: number
-    userSession: UserWebSessionInterface,
-    clientOrderCondition: any,
-    searchTerm: string, 
-    searchId?: string
+    filters?: FilterPrisma[]
 };
 
 interface getClientIdInterface {
@@ -35,25 +38,24 @@ interface updateClientParams {
     userSession: UserWebSessionInterface;
     Id_Cliente: number,
     Id_Almacen: number,
-    IdOLEI: number,
-    body: ClientInterface
+    body: Record<typeof ClientInterface, string | number | boolean>
 }
 
 // RESPONSE
 
-interface GetClientsServiceResult {
-    clients: any[];
+interface getClientsResponse {
+    clientes: typeof Clientes;
     total: number;
 }
 
 
 export type {
-    getClientsServiceInterface,
+    getClientsParams,
     getClientIdInterface,
     getTotalClientsServiceInterface,
     searchClientServiceInterface,
     updateClientParams,
 
     // Response
-    GetClientsServiceResult
+    getClientsResponse
 }

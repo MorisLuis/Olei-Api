@@ -1,9 +1,9 @@
-import type { Prisma } from "@prisma/client";
 
-export function buildOrder<T extends Record<string, any>>(
-    order: { field: keyof T; direction: Prisma.SortOrder },
+export function buildOrder<T extends Record<string, string | number | object | boolean>>(
+    order: { field: string, direction: string },
     defaultField: keyof T
 ): T {
+
     if (order?.field && order?.direction) {
         return { [order.field]: order.direction } as T;
     }

@@ -54,7 +54,6 @@ exports.dbConnection = dbConnection;
 const dbConnectionWeb = async (server, base) => {
     // Get pool key
     const poolKey = (0, exports.getPoolKey)(server, base);
-    console.log({ poolKey });
     // Si ya existe un pool de conexión y sigue activo, lo reutilizamos
     if (connectionPools.has(poolKey)) {
         const existingPool = connectionPools.get(poolKey);

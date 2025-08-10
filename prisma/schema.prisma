@@ -58,12 +58,9 @@ model Clientes {
   DomiEntrega   String?   @db.NVarChar(Max)
   Id_Chofer     Int?
   Id_Regimen    Int?
-  SwImagenes    Boolean?
-  SwSinStock    Boolean?
-  SwSinPrecio   Boolean?
-  TipoDocOO     Int?
 
-  vendedor      VENDEDORES?  @relation(fields: [Id_Vendedor], references: [Id_Vendedor])
+  vendedor VENDEDORES? @relation(fields: [Id_Vendedor], references: [Id_Vendedor])
+  abonos   ABONOS[]
 
   @@id([Id_Almacen, Id_Cliente], map: "PK_CLIENTES")
   @@map("CLIENTES")
@@ -93,6 +90,9 @@ model ABONOS {
   FolioCaja      Int?     @default(0, map: "DF_ABONOS_FolioCaja")
   TipoDocA       Int      @default(10, map: "DF_ABONOS_TipoDocA_1") @db.SmallInt
   SerieA         String   @db.NChar(10)
+
+  cliente       Clientes?     @relation(fields: [Id_AlmacenClte, Id_Cliente], references: [Id_Almacen, Id_Cliente])
+  forma_de_pago FORMASDEPAGO? @relation(fields: [Id_FormaPago], references: [Id_Formapago])
 
   @@id([Id_Almacen, Folio], map: "PK__tmp_ms_x__6537F67179C5143A")
 }
@@ -741,6 +741,7 @@ model FORMASDEPAGO {
   RFCCtaOrd    String?  @db.NChar(20)
   RFCCtaBenif  String?  @db.NChar(20)
   NombreBanco  String?  @db.NChar(100)
+  abonos       ABONOS[]
 }
 
 model FORMASPAGO {
@@ -1271,7 +1272,7 @@ model VENDEDORES {
   Comision    Decimal?  @db.Decimal(18, 0)
   Fecha       DateTime? @db.DateTime
 
-  clientes     Clientes[]
+  clientes Clientes[]
 }
 
 model VENTAS {

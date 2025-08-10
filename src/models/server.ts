@@ -25,6 +25,7 @@ import emailRouter from "../routes/emailRouter";
 import reportsRouter from "../routes/reportsRouter";
 import almacenesRouter from "../routes/almacenesRouter";
 import statisticsRouter from "../routes/statisticsRouter";
+import abonosRouter from "../routes/abonosRouter";
 
 import { errorHandler } from "../middleware/errorHandler";
 import cookieParser from 'cookie-parser';  // Asegúrate de importar cookie-parser
@@ -52,6 +53,7 @@ class Server {
         reports: string
         almacenes: string,
         statistics: string,
+        abonos: string
     };
 
     constructor() {
@@ -75,7 +77,8 @@ class Server {
             email: "/api/email",
             reports: "/api/reports",
             almacenes: "/api/almacenes",
-            statistics: "/api/statistics"
+            statistics: "/api/statistics",
+            abonos: "/api/abonos"
         };
 
         void this.connectDB();
@@ -139,6 +142,8 @@ class Server {
         this.app.use(this.paths.reports, reportsRouter);
         this.app.use(this.paths.almacenes, almacenesRouter);
         this.app.use(this.paths.statistics, statisticsRouter);
+        this.app.use(this.paths.abonos, abonosRouter);
+
     }
 
     public async closeConnections(): Promise<void> {

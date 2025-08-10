@@ -26,6 +26,7 @@ const emailRouter_1 = __importDefault(require("../routes/emailRouter"));
 const reportsRouter_1 = __importDefault(require("../routes/reportsRouter"));
 const almacenesRouter_1 = __importDefault(require("../routes/almacenesRouter"));
 const statisticsRouter_1 = __importDefault(require("../routes/statisticsRouter"));
+const abonosRouter_1 = __importDefault(require("../routes/abonosRouter"));
 const errorHandler_1 = require("../middleware/errorHandler");
 const cookie_parser_1 = __importDefault(require("cookie-parser")); // Asegúrate de importar cookie-parser
 class Server {
@@ -50,7 +51,8 @@ class Server {
             email: "/api/email",
             reports: "/api/reports",
             almacenes: "/api/almacenes",
-            statistics: "/api/statistics"
+            statistics: "/api/statistics",
+            abonos: "/api/abonos"
         };
         void this.connectDB();
         this.middlewares();
@@ -104,6 +106,7 @@ class Server {
         this.app.use(this.paths.reports, reportsRouter_1.default);
         this.app.use(this.paths.almacenes, almacenesRouter_1.default);
         this.app.use(this.paths.statistics, statisticsRouter_1.default);
+        this.app.use(this.paths.abonos, abonosRouter_1.default);
     }
     async closeConnections() {
         await (0, connection_1.dbConnectionMain)().then(pool => pool.close()).catch(() => { });

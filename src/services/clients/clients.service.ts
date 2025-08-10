@@ -4,44 +4,39 @@ import { dbConnectionWeb } from "../../database";
 import { clientsQuerys } from "../../database/querys/clients";
 import { ValidationError } from "../../errors/CustomError";
 import type { ClientInterface } from "../../interface/client";
-import type { GetClientsServiceResult, getClientIdInterface, getClientsServiceInterface, getTotalClientsServiceInterface, searchClientServiceInterface, updateClientParams } from "./clientsServices.interface";
+import type { getClientsResponse, getClientIdInterface, getClientsParams, getTotalClientsServiceInterface, searchClientServiceInterface, updateClientParams } from "./types";
 import { getPrismaClient } from "../../database/prismaConnection";
-import type { Prisma } from "@prisma/client";
+import type { Clientes, Prisma } from "@prisma/client";
 import { buildOrder } from "../../utils/prisma/orderFunction";
-import { buildWhereCondition } from "../../utils/prisma/whereFunction";
 import { buildUpdate } from '../../utils/prisma/updateFunction';
+import { buildFilters } from '../../utils/prisma/filterFunction';
 
-const getClientsService = async ({
-    skip,
-    limit,
-    userSession,
-    clientOrderCondition,
-    searchTerm,
-    searchId
-}: getClientsServiceInterface): Promise<GetClientsServiceResult> => {
+const getClientsService = async (params: getClientsParams): Promise<getClientsResponse> => {
 
-    const { ServidorSQL, BaseSQL } = userSession;
+    const {
+        userSession: { ServidorSQL, BaseSQL },
+        orderField,
+        orderDirection,
+        skip,
+        limit,
+        filters = [],
+    } = params;
+
     const prisma = getPrismaClient(ServidorSQL, BaseSQL);
 
-    const where = buildWhereCondition<Prisma.ClientesWhereInput>(
-        {
-            Nombre: searchTerm,
-            Id_Cliente: searchId
-        },
-        ["Nombre"]
-    );
-
     const orderBy = buildOrder<Prisma.ClientesOrderByWithRelationInput>(
-        { field: clientOrderCondition, direction: "asc" },
+        { field: orderField, direction: orderDirection },
         'Id_Cliente'
     );
 
+    const where = buildFilters(filters)
+
     const [clientes, totalClientes] = await Promise.all([
         prisma.clientes.findMany({
-            where,
             skip,
             take: limit,
             orderBy,
+            where,
             select: {
                 Nombre: true,
                 Id_Almacen: true,
@@ -53,7 +48,7 @@ const getClientsService = async ({
     ]);
 
     return {
-        clients: clientes,
+        clientes,
         total: totalClientes
     };
 };
@@ -127,9 +122,8 @@ const updateClientService = async ({
     userSession,
     Id_Cliente,
     Id_Almacen,
-    IdOLEI,
     body
-}: updateClientParams) => {
+}: updateClientParams): Promise<{ client: Clientes }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
 
@@ -138,8 +132,7 @@ const updateClientService = async ({
 
     const updatedClient = await prisma.clientes.update({
         where: {
-            IdOLEI_Id_Almacen_Id_Cliente: {
-                IdOLEI,
+            Id_Almacen_Id_Cliente: {
                 Id_Almacen,
                 Id_Cliente
             }

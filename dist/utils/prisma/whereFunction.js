@@ -6,7 +6,8 @@ const buildWhereCondition = (filters, containsFields = []) => {
     for (const key in filters) {
         const value = filters[key];
         if (value !== undefined && value !== null) {
-            if (containsFields.includes(key) && typeof value === "string") {
+            if (containsFields.includes(key) &&
+                typeof value === "string") {
                 where[key] = { contains: value };
             }
             else {

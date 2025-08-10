@@ -95,8 +95,7 @@ const updateClientService = async ({ userSession, Id_Cliente, Id_Almacen, IdOLEI
     const data = (0, updateFunction_1.buildUpdate)(body);
     const updatedClient = await prisma.clientes.update({
         where: {
-            IdOLEI_Id_Almacen_Id_Cliente: {
-                IdOLEI,
+            Id_Almacen_Id_Cliente: {
                 Id_Almacen,
                 Id_Cliente
             }

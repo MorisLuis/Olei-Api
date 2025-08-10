@@ -7,7 +7,6 @@ const _1 = require(".");
 const prismaClients = new Map();
 function getPrismaClient(server, database) {
     const key = (0, _1.getPoolKey)(server, database);
-    console.log({ key });
     if (prismaClients.has(key)) {
         return prismaClients.get(key);
     }

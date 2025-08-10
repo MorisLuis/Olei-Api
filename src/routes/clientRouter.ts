@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getClientId, getClients, getTotalClients, searchClient, selectClient, updateClient } from "../controllers/clients/client";
+import { getClientId, getClients, getTotalClients, searchClient, selectClient, updateClient } from "../controllers/clients/client.controller";
 import { validateJWTWeb } from "../middleware/validateJWTWeb";
 
 

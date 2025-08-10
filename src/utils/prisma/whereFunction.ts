@@ -1,25 +1,25 @@
-
-
 export const buildWhereCondition = <
-    T extends Record<string, any>
+    T extends Record<string, string | number | boolean | object>
 >(
-    filters?: Partial<Record<keyof T, any>>,
-    containsFields: (keyof T)[] = []
+    filters?: Partial<T>,
+    containsFields: (Extract<keyof T, string>)[] = []
 ): Partial<T> => {
-    const where: Record<string, any> = {};
+    const where: Partial<T> = {};
 
     for (const key in filters) {
         const value = filters[key as keyof T];
 
         if (value !== undefined && value !== null) {
-            if (containsFields.includes(key as keyof T) && typeof value === "string") {
-                where[key] = { contains: value };
+            if (
+                containsFields.includes(key as Extract<keyof T, string>) &&
+                typeof value === "string"
+            ) {
+                where[key as keyof T] = { contains: value } as T[keyof T];
             } else {
-                where[key] = value;
+                where[key as keyof T] = value;
             }
         }
     }
 
-    return where as Partial<T>;
+    return where;
 };
-
