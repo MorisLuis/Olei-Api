@@ -25,4 +25,3 @@ export interface ClientInterface {
 }
 
 export type ClientOrderConditionType = 'Id_Cliente' | 'Nombre';
-export const ClientOrderCondition: ClientOrderConditionType[] = ['Id_Cliente', 'Nombre']

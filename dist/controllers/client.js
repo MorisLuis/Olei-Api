@@ -7,13 +7,11 @@ const generate_redis_1 = require("../helpers/generate-redis");
 const getClients = async (req, res, next) => {
     try {
         const { PageNumber, clientOrderCondition, searchTerm, searchId } = clientValidations_1.getClientsQuerySchema.parse(req.query);
+        const limit = 10;
+        const skip = (PageNumber - 1) * limit;
         const userSession = req.sessionWeb;
         const { clients, total } = await (0, clientsServices_1.getClientsService)({
-            userSession,
-            PageNumber: PageNumber,
-            OrderCondition: clientOrderCondition,
-            searchTerm,
-            searchId
+            skip, limit, userSession
         });
         return res.json({
             ok: true,

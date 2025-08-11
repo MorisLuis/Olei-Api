@@ -4,7 +4,7 @@ import config from "../config";
 let mainPool: sql.ConnectionPool | null = null;
 const connectionPools: Map<string, sql.ConnectionPool> = new Map(); // Mapa para almacenar las conexiones activas
 const MAX_CONNECTIONS = 10; // Límite de conexiones simultáneas
-const getPoolKey = (server: string, base: string) => `${server.trim()}-${base.trim()}`; // Función para generar una clave única por servidor y base de datos
+export const getPoolKey = (server: string, base: string) : string => `${server.trim()}-${base.trim()}`; // Función para generar una clave única por servidor y base de datos
 
 
 // Conexion App
@@ -51,6 +51,7 @@ export const dbConnection = async (server: string, base: string, user: string, p
 
 // Conexion Web
 export const dbConnectionWeb = async (server: string, base: string) : Promise<sql.ConnectionPool> => {
+
     // Get pool key
     const poolKey = getPoolKey(server, base);
 
@@ -93,6 +94,7 @@ export const dbConnectionWeb = async (server: string, base: string) : Promise<sq
 
 // Conexion App Main
 export const dbConnectionMain = async () : Promise<sql.ConnectionPool> => {
+
     if (!mainPool) {
         const dbConfig = {
             user: config.dbUser,

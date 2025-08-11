@@ -25,6 +25,7 @@ import emailRouter from "../routes/emailRouter";
 import reportsRouter from "../routes/reportsRouter";
 import almacenesRouter from "../routes/almacenesRouter";
 import statisticsRouter from "../routes/statisticsRouter";
+import abonosRouter from "../routes/abonosRouter";
 
 import { errorHandler } from "../middleware/errorHandler";
 import cookieParser from 'cookie-parser';  // Asegúrate de importar cookie-parser
@@ -52,6 +53,7 @@ class Server {
         reports: string
         almacenes: string,
         statistics: string,
+        abonos: string
     };
 
     constructor() {
@@ -75,7 +77,8 @@ class Server {
             email: "/api/email",
             reports: "/api/reports",
             almacenes: "/api/almacenes",
-            statistics: "/api/statistics"
+            statistics: "/api/statistics",
+            abonos: "/api/abonos"
         };
 
         void this.connectDB();
@@ -100,7 +103,7 @@ class Server {
             // Demos
             'https://oleiweb-git-demo2-morisluis-projects.vercel.app'
         ];
-    
+
         const corsOptions: CorsOptions = {
             origin: (origin: string | undefined, callback) => {
                 if (!origin || allowedOrigins.includes(origin)) {
@@ -111,14 +114,14 @@ class Server {
             },
             credentials: true,
         };
-        
+
         this.app.use(cors(corsOptions));
         this.app.use(express.json({ limit: '50mb' }));
         this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-        this.app.use(cookieParser());  // Agrega esta línea
+        this.app.use(cookieParser());
     }
-    
+
 
     private routes() {
         this.app.use(this.paths.product, productRouter);
@@ -139,6 +142,8 @@ class Server {
         this.app.use(this.paths.reports, reportsRouter);
         this.app.use(this.paths.almacenes, almacenesRouter);
         this.app.use(this.paths.statistics, statisticsRouter);
+        this.app.use(this.paths.abonos, abonosRouter);
+
     }
 
     public async closeConnections(): Promise<void> {

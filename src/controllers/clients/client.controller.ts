@@ -1,26 +1,38 @@
 import type { NextFunction, Request, Response } from 'express';
-import type { UserWebSessionInterface } from '../interface/user';
-import { getClientIdService, getClientsService, getTotalClientsService, searchClientService } from '../services/clients/clientsServices';
-import { getClientIdQuerySchema, getClientsQuerySchema, getClientsTotalQuerySchema, searchClientQuerySchema, selectClientBodySchema } from '../validations/clientValidations';
-import { updateWebSession } from '../helpers/generate-redis';
+import type { UserWebSessionInterface } from '../../interface/user';
+import { getClientIdService, getClientsService, getTotalClientsService, searchClientService, updateClientService } from '../../services/clients/clients.service';
+import { getClientIdQuerySchema, getClientsQuerySchema, getClientsTotalQuerySchema, searchClientQuerySchema, selectClientBodySchema } from './client.schema';
+import { updateWebSession } from '../../helpers/generate-redis';
+import { parsePrismaFilter } from '../../utils/prisma/parsePrismaFilter';
 
 const getClients = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const { PageNumber, clientOrderCondition, searchTerm, searchId } = getClientsQuerySchema.parse(req.query);
+        const {
+            PageNumber,
+            limit,
+            orderField,
+            orderDirection,
+            filterField,
+            filterValue
+        } = getClientsQuerySchema.parse(req.query);
+    
+        const skip = (PageNumber - 1) * limit;
         const userSession = req.sessionWeb;
+        const filters = parsePrismaFilter(filterField, filterValue)
 
-        const { clients, total } = await getClientsService({
+        const { clientes, total } = await getClientsService({
             userSession,
-            PageNumber: PageNumber,
-            OrderCondition: clientOrderCondition,
-            searchTerm,
-            searchId
+            orderField,
+            orderDirection,
+            skip,
+            limit,
+            filters
         });
 
         return res.json({
             ok: true,
-            clients,
+            clients: clientes,
             total
         });
     } catch (error) {
@@ -107,10 +119,35 @@ const searchClient = async (req: Request, res: Response, next: NextFunction): Pr
     }
 };
 
+const updateClient = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+
+    try {
+        const userSession = req.sessionWeb
+        const body = req.body;
+        const { id: Id_Cliente } = req.params
+        const { Id_Almacen } = req.query;
+
+        const { client } = await updateClientService({
+            userSession,
+            Id_Cliente: Number(Id_Cliente),
+            Id_Almacen: Number(Id_Almacen),
+            body
+        })
+
+        return res.json({
+            client
+        })
+
+    } catch (error) {
+        return next(error)
+    }
+};
+
 export {
     getClients,
     getClientId,
     selectClient,
     searchClient,
-    getTotalClients
+    getTotalClients,
+    updateClient
 }

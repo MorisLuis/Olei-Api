@@ -12,7 +12,8 @@ exports.getClientsQuerySchema = zod_1.z.object({
         .optional()
         .refine((val) => val === undefined || client_1.ClientOrderCondition.includes(val), { message: "sellsOrderCondition debe ser 'Nombre', 'Id_Cliente'" }),
     searchTerm: zod_1.z.preprocess((val) => (val === undefined ? '' : val), zod_1.z.string()),
-    searchId: zod_1.z.preprocess((val) => (val === '' ? undefined : val), zod_1.z.string().optional())
+    searchId: zod_1.z.preprocess((val) => (val === '' ? undefined : val), zod_1.z.string().optional()),
+    limit: zod_1.z.preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number())
 });
 exports.getClientsTotalQuerySchema = zod_1.z.object({
     searchTerm: zod_1.z.preprocess((val) => (val === undefined ? '' : val), zod_1.z.string())

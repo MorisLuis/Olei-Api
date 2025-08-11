@@ -3,37 +3,41 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchClientService = exports.getTotalClientsService = exports.getClientIdService = exports.getClientsService = void 0;
+exports.updateClientService = exports.searchClientService = exports.getTotalClientsService = exports.getClientIdService = exports.getClientsService = void 0;
+const mssql_1 = __importDefault(require("mssql"));
 const database_1 = require("../../database");
 const clients_1 = require("../../database/querys/clients");
 const CustomError_1 = require("../../errors/CustomError");
-const mssql_1 = __importDefault(require("mssql"));
-const getClientsService = async ({ PageNumber, userSession, OrderCondition, searchTerm, searchId }) => {
+const prismaConnection_1 = require("../../database/prismaConnection");
+const orderFunction_1 = require("../../utils/prisma/orderFunction");
+const whereFunction_1 = require("../../utils/prisma/whereFunction");
+const updateFunction_1 = require("../../utils/prisma/updateFunction");
+const getClientsService = async ({ skip, limit, userSession, clientOrderCondition, searchTerm, searchId }) => {
     const { ServidorSQL, BaseSQL } = userSession;
-    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
-    if (!pool) {
-        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
-    }
-    const clientsQuery = clients_1.clientsQuerys.getClients;
-    const totalClientsQuery = clients_1.clientsQuerys.getTotalClients;
-    const requestClients = pool.request()
-        .input('PageNumber', PageNumber)
-        .input('PageSize', 10)
-        .input('OrderCondition', OrderCondition)
-        .input('searchTerm', searchTerm)
-        .input('searchId', searchId)
-        .query(clientsQuery);
-    const requestTotal = pool.request()
-        .input('searchTerm', searchTerm)
-        .input('searchId', searchId)
-        .query(totalClientsQuery);
-    const [clientsResult, totalResult] = await Promise.all([
-        requestClients,
-        requestTotal
+    const prisma = (0, prismaConnection_1.getPrismaClient)(ServidorSQL, BaseSQL);
+    const where = (0, whereFunction_1.buildWhereCondition)({
+        Nombre: searchTerm,
+        Id_Cliente: searchId
+    }, ["Nombre"]);
+    const orderBy = (0, orderFunction_1.buildOrder)({ field: clientOrderCondition, direction: "asc" }, 'Id_Cliente');
+    const [clientes, totalClientes] = await Promise.all([
+        prisma.clientes.findMany({
+            where,
+            skip,
+            take: limit,
+            orderBy,
+            select: {
+                Nombre: true,
+                Id_Almacen: true,
+                Id_Cliente: true,
+                IdOLEI: true
+            }
+        }),
+        prisma.clientes.count({ where }),
     ]);
     return {
-        clients: clientsResult.recordset,
-        total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
+        clients: clientes,
+        total: totalClientes
     };
 };
 exports.getClientsService = getClientsService;
@@ -85,4 +89,22 @@ const searchClientService = async ({ userSession, term }) => {
     };
 };
 exports.searchClientService = searchClientService;
+const updateClientService = async ({ userSession, Id_Cliente, Id_Almacen, IdOLEI, body }) => {
+    const { ServidorSQL, BaseSQL } = userSession;
+    const prisma = (0, prismaConnection_1.getPrismaClient)(ServidorSQL, BaseSQL);
+    const data = (0, updateFunction_1.buildUpdate)(body);
+    const updatedClient = await prisma.clientes.update({
+        where: {
+            Id_Almacen_Id_Cliente: {
+                Id_Almacen,
+                Id_Cliente
+            }
+        },
+        data
+    });
+    return {
+        client: updatedClient
+    };
+};
+exports.updateClientService = updateClientService;
 //# sourceMappingURL=clientsServices.js.map
