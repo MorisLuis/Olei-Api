@@ -27,7 +27,9 @@ const getClientsService = async (params) => {
                 Nombre: true,
                 Id_Almacen: true,
                 Id_Cliente: true,
-                IdOLEI: true
+                IdOLEI: true,
+                Telefono1: true,
+                CorreoVtas: true
             }
         }),
         prisma.clientes.count({ where }),
