@@ -28,7 +28,7 @@ const getClients = async (req: Request, res: Response, next: NextFunction): Prom
             skip,
             limit,
             filters
-        });
+        })
 
         return res.json({
             ok: true,

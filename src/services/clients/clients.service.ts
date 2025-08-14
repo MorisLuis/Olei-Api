@@ -43,9 +43,15 @@ const getClientsService = async (params: getClientsParams): Promise<getClientsRe
                 Id_Cliente: true,
                 IdOLEI: true,
                 Telefono1: true,
-                CorreoVtas: true
+                CorreoVtas: true,
+                UsuarioSQL: true
             }
-        }),
+        }).then(rows =>
+            rows.map(({ UsuarioSQL, ...rest }) => ({
+                ...rest,
+                TelefonoWhatsapp: UsuarioSQL
+            }))
+        ),
         prisma.clientes.count({ where }),
     ]);
 
