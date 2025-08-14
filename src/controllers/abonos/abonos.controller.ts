@@ -20,7 +20,7 @@ const getAbonos = async (req: Request, res: Response, next: NextFunction): Promi
         const userSession = req.sessionWeb;
         const filters = parsePrismaFilter(filterField, filterValue)
 
-        const { abonos } = await getAbonosService({
+        const { abonos, total } = await getAbonosService({
             userSession,
             orderField,
             orderDirection,
@@ -30,7 +30,8 @@ const getAbonos = async (req: Request, res: Response, next: NextFunction): Promi
         })
 
         return res.json({
-            abonos
+            abonos,
+            total
         })
 
     } catch (error) {
