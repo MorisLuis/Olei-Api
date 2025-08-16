@@ -14,7 +14,7 @@ export const getAbonosQuerySchema = z .object({
             .refine((val) => val > 0 && val < 100, {
                 message: "limit debe ser un número positivo mayor que 0 y menor que 100",
             }),
-        orderField: z.enum(["Folio", "Fecha"]).optional().default("Folio"),
+        orderField: z.enum(["Folio", "Fecha", "Id_Cliente", "cliente.Nombre", "forma_de_pago.Nombre"]).optional().default("Folio"),
         orderDirection: z.enum(["asc", "desc"]).optional().default("asc"),
     
         filterField: z.string().optional(),

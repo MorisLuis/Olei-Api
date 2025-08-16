@@ -14,7 +14,7 @@ exports.getAbonosQuerySchema = zod_1.z.object({
         .refine((val) => val > 0 && val < 100, {
         message: "limit debe ser un número positivo mayor que 0 y menor que 100",
     }),
-    orderField: zod_1.z.enum(["Folio", "Fecha"]).optional().default("Folio"),
+    orderField: zod_1.z.enum(["Folio", "Fecha", "Id_Cliente", "cliente.Nombre", "forma_de_pago.Nombre"]).optional().default("Folio"),
     orderDirection: zod_1.z.enum(["asc", "desc"]).optional().default("asc"),
     filterField: zod_1.z.string().optional(),
     filterValue: zod_1.z.string().optional(),
