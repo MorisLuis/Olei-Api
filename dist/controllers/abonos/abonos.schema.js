@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAbonosQuerySchema = void 0;
+exports.getAbonoByIdQuerySchema = exports.getAbonoByIdParamsSchema = exports.getAbonosQuerySchema = void 0;
 const zod_1 = require("zod");
 const constants_1 = require("./constants");
 exports.getAbonosQuerySchema = zod_1.z.object({
@@ -53,5 +53,15 @@ exports.getAbonosQuerySchema = zod_1.z.object({
             }
         });
     }
+});
+exports.getAbonoByIdParamsSchema = zod_1.z.object({
+    folio: zod_1.z.preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number().refine((val) => val > 0, {
+        message: "Id_Cliente debe ser un número positivo mayor que 0",
+    }))
+});
+exports.getAbonoByIdQuerySchema = zod_1.z.object({
+    Id_Almacen: zod_1.z.preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number().refine((val) => val > 0, {
+        message: "Id_Almacen debe ser un número positivo mayor que 0",
+    }))
 });
 //# sourceMappingURL=abonos.schema.js.map

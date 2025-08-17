@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAbonos = void 0;
+exports.getAbonoById = exports.getAbonos = void 0;
 const abonos_service_1 = require("../../services/abonos/abonos.service");
 const abonos_schema_1 = require("./abonos.schema");
 const parsePrismaFilter_1 = require("../../utils/prisma/parsePrismaFilter");
@@ -28,4 +28,21 @@ const getAbonos = async (req, res, next) => {
     }
 };
 exports.getAbonos = getAbonos;
+const getAbonoById = async (req, res, next) => {
+    try {
+        const { folio: Folio } = abonos_schema_1.getAbonoByIdParamsSchema.parse(req.params);
+        const { Id_Almacen } = abonos_schema_1.getAbonoByIdQuerySchema.parse(req.query);
+        const userSession = req.sessionWeb;
+        const abono = await (0, abonos_service_1.getAbonoByIdService)({
+            userSession,
+            Id_Almacen,
+            Folio
+        });
+        return res.json(abono);
+    }
+    catch (error) {
+        return next(error);
+    }
+};
+exports.getAbonoById = getAbonoById;
 //# sourceMappingURL=abonos.controller.js.map

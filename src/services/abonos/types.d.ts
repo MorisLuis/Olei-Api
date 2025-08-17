@@ -12,12 +12,24 @@ interface getAbonosParams {
     filters?: FilterPrisma[]
 }
 
+interface getAbonoByIdParams { 
+    userSession: UserWebSessionInterface
+    Id_Almacen: number
+    Folio: number
+}
+
 interface getAbonosResponse {
     abonos: typeof abonos;
     total: number;
 }
 
+interface getAbonoByIdResponse {
+    abono: typeof abonos[0];
+}
+
 export type {
     getAbonosParams,
-    getAbonosResponse
+    getAbonoByIdParams,
+    getAbonosResponse,
+    getAbonoByIdResponse
 }

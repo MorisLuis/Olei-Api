@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { getPrismaClient } from "../../database/prismaConnection";
-import type { getAbonosParams, getAbonosResponse } from "./types";
+import type { getAbonoByIdParams, getAbonoByIdResponse, getAbonosParams, getAbonosResponse } from "./types";
 import { buildOrder } from "../../utils/prisma/orderFunction";
 import { buildFilters } from "../../utils/prisma/filterFunction";
 
@@ -58,3 +58,39 @@ export const getAbonosService = async (params: getAbonosParams): Promise<getAbon
         total: totalAbonos,
     };
 };
+
+export const getAbonoByIdService = async (params: getAbonoByIdParams): Promise<getAbonoByIdResponse> => {
+
+    const { userSession: { ServidorSQL, BaseSQL }, Id_Almacen, Folio } = params;
+    const prisma = getPrismaClient(ServidorSQL, BaseSQL);
+
+    const abono = await prisma.aBONOS.findUnique({
+        where: {
+            Id_Almacen_Folio: {
+                Id_Almacen,
+                Folio,
+            },
+        },
+        select: {
+            Folio: true,
+            Id_Almacen: true,
+            Id_Cliente: true,
+            Id_FormaPago: true,
+            Importe: true,
+            Fecha: true,
+            cliente: {
+                select: {
+                    Nombre: true,
+                },
+            },
+            forma_de_pago: {
+                select: {
+                    Nombre: true,
+                },
+            },
+        },
+    });
+
+    return { abono };
+
+}

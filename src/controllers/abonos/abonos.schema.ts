@@ -58,3 +58,15 @@ export const getAbonosQuerySchema = z .object({
             });
         }
     });
+
+export const getAbonoByIdParamsSchema = z.object({ 
+    folio: z.preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number().refine((val) => val > 0, {
+        message: "Id_Cliente debe ser un número positivo mayor que 0",
+    }))
+})
+
+export const getAbonoByIdQuerySchema = z.object({ 
+    Id_Almacen: z.preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number().refine((val) => val > 0, {
+        message: "Id_Almacen debe ser un número positivo mayor que 0",
+    }))
+})
