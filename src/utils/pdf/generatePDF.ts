@@ -157,8 +157,7 @@ const generatePDF = async (
         const fechaEntrega = sell.FechaExp ? formatDate(sell.FechaExp) : 'Sin Fecha de entrega';
         const saldo = `${formatCurrency(sell.Saldo)}`;
         const tipoDoc = formatTipoDoc(sell.TipoDoc);
-        const diasVencidos = sell.ExpiredDays ? sell.ExpiredDays : 'N/A';
-
+        const diasVencidos = sell.ExpiredDays ? Math.abs(sell.ExpiredDays) : 0;
         // Si no hay espacio, añadir nueva página
         if (y < 50) {
             addNewPage();
