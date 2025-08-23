@@ -104,7 +104,7 @@ const updateMeetingService = async (id, userSession, body) => {
     //START TRANSACTION
     const transaction = new mssql_1.default.Transaction(pool);
     await transaction.begin();
-    const { Fecha, Hour, HourEnd, Descripcion, TipoContacto, Comentarios } = body;
+    const { Fecha, Hour, HourEnd, Descripcion, TipoContacto, Comentarios, status } = body;
     if (TipoContacto && !meeting_1.validTipoContacto.includes(TipoContacto)) {
         throw new CustomError_1.ValidationError('No es valido el tipo de contacto');
     }
@@ -116,7 +116,8 @@ const updateMeetingService = async (id, userSession, body) => {
         .input('HourEnd', mssql_1.default.VarChar, HourEnd)
         .input('Descripcion', mssql_1.default.VarChar, Descripcion)
         .input('TipoContacto', mssql_1.default.Int, TipoContacto)
-        .input('Comentarios', mssql_1.default.VarChar, Comentarios);
+        .input('Comentarios', mssql_1.default.VarChar, Comentarios)
+        .input('status', mssql_1.default.Bit, status);
     const query = bitacora_1.bitacoraQuerys.updateMeeting;
     const result = await request.query(query);
     await transaction.commit();

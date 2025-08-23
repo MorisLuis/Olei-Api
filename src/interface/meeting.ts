@@ -9,6 +9,7 @@ export default interface MeetingInterface {
     Descripcion: string;
     TipoContacto: 0 | 1 | 2 | 3 | 4;
     Comentarios?: string;
+    status: boolean
 };
 
 export const validTipoContacto: Array<MeetingInterface['TipoContacto']> = [0, 1, 2, 3, 4];

@@ -15,7 +15,8 @@ export const bitacoraQuerys = {
                     B.Descripcion,
                     B.TipoContacto,
                     B.Hour,
-                    B.HourEnd
+                    B.HourEnd,
+                    B.status
                 FROM dbo.BITACORACRM B
                 JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = B.Id_Cliente AND C.Id_Almacen = B.Id_Almacen
                 WHERE (@FilterCliente = 0 OR (B.Id_Cliente = @Id_Cliente AND @FilterCliente = 1))
@@ -61,7 +62,8 @@ export const bitacoraQuerys = {
             B.Hour,
             B.HourEnd,
             B.Comentarios,
-            C.Nombre
+            C.Nombre,
+            B.status
         FROM [dbo].[BITACORACRM] B
         JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = B.Id_Cliente AND C.Id_Almacen = B.Id_Almacen
         WHERE Id_Bitacora = @Id_Bitacora
@@ -87,14 +89,16 @@ export const bitacoraQuerys = {
             [TipoContacto] = COALESCE(@TipoContacto, [TipoContacto]),
             [Hour] = COALESCE(@Hour, [Hour]),
             [HourEnd] = COALESCE(@HourEnd, [HourEnd]),
-            [Comentarios] = COALESCE(@Comentarios, [Comentarios])
+            [Comentarios] = COALESCE(@Comentarios, [Comentarios]),
+            [status] = COALESCE(@status, [status])
         OUTPUT 
             INSERTED.Id_Bitacora,
             INSERTED.Fecha,
             INSERTED.Descripcion,
             INSERTED.TipoContacto,
             INSERTED.Hour,
-            INSERTED.Comentarios
+            INSERTED.Comentarios,
+            INSERTED.status
         WHERE Id_Bitacora = @Id_Bitacora    
     `,
 

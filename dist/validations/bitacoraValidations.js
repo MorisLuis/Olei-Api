@@ -86,6 +86,7 @@ exports.updateBitacoraBodySchema = zod_1.z.object({
         .refine(val => val ? val.length <= 5 : true, { message: "Hour no puede tener más de 5 caracteres." }),
     Id_Almacen: zod_1.z.number().int().positive().optional(),
     Id_Cliente: zod_1.z.number().int().positive().optional(),
-    Comentarios: zod_1.z.string().optional()
+    Comentarios: zod_1.z.string().optional(),
+    status: zod_1.z.boolean().optional().default(true)
 });
 //# sourceMappingURL=bitacoraValidations.js.map

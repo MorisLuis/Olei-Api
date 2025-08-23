@@ -132,5 +132,6 @@ export const updateBitacoraBodySchema = z.object({
 
     Id_Almacen: z.number().int().positive().optional(),
     Id_Cliente: z.number().int().positive().optional(),
-    Comentarios: z.string().optional()
+    Comentarios: z.string().optional(),
+    status: z.boolean().optional().default(true)
 })

@@ -145,7 +145,6 @@ const updateMeetingService = async (
     body: MeetingInterface
 ): Promise<{ result: MeetingInterface }> => {
 
-
     if (!id) {
         throw new ValidationError('No se adjunto un Id_Bitacora valido o existente.');
     }
@@ -166,7 +165,8 @@ const updateMeetingService = async (
         HourEnd,
         Descripcion,
         TipoContacto,
-        Comentarios
+        Comentarios,
+        status
     } = body;
 
     if (TipoContacto && !validTipoContacto.includes(TipoContacto)) {
@@ -181,6 +181,7 @@ const updateMeetingService = async (
         .input('Descripcion', sql.VarChar, Descripcion)
         .input('TipoContacto', sql.Int, TipoContacto)
         .input('Comentarios', sql.VarChar, Comentarios)
+        .input('status', sql.Bit, status);
 
     const query = bitacoraQuerys.updateMeeting;
     const result = await request.query(query);
