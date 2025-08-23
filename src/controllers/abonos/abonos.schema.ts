@@ -19,6 +19,9 @@ export const getAbonosQuerySchema = z .object({
     
         filterField: z.string().optional(),
         filterValue: z.string().optional(),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+        exactlyDate: z.string().optional(),
     })
     .superRefine((data, ctx) => {
         // Si uno existe, el otro debe existir

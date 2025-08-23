@@ -4,11 +4,14 @@ exports.getAbonoByIdService = exports.getAbonosService = void 0;
 const prismaConnection_1 = require("../../database/prismaConnection");
 const orderFunction_1 = require("../../utils/prisma/orderFunction");
 const filterFunction_1 = require("../../utils/prisma/filterFunction");
+const appendDateRange_1 = require("../../utils/prisma/appendDateRange");
 const getAbonosService = async (params) => {
-    const { userSession: { ServidorSQL, BaseSQL }, orderField, orderDirection, skip, limit, filters = [], } = params;
+    const { userSession: { ServidorSQL, BaseSQL }, orderField, orderDirection, skip, limit, filters = [], startDate, endDate, exactlyDate } = params;
     const prisma = (0, prismaConnection_1.getPrismaClient)(ServidorSQL, BaseSQL);
     const orderBy = (0, orderFunction_1.buildOrder)({ field: orderField, direction: orderDirection }, 'Id_Cliente');
     const where = (0, filterFunction_1.buildFilters)(filters);
+    // Append date range if provided
+    (0, appendDateRange_1.appendDateFilter)(where, 'Fecha', startDate, endDate, exactlyDate);
     const [abonos, totalAbonos] = await Promise.all([
         prisma.aBONOS.findMany({
             skip,

@@ -18,6 +18,9 @@ exports.getAbonosQuerySchema = zod_1.z.object({
     orderDirection: zod_1.z.enum(["asc", "desc"]).optional().default("asc"),
     filterField: zod_1.z.string().optional(),
     filterValue: zod_1.z.string().optional(),
+    startDate: zod_1.z.string().optional(),
+    endDate: zod_1.z.string().optional(),
+    exactlyDate: zod_1.z.string().optional(),
 })
     .superRefine((data, ctx) => {
     // Si uno existe, el otro debe existir

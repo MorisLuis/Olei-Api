@@ -5,7 +5,10 @@ const zod_1 = require("zod");
 const sells_1 = require("../interface/sells");
 // getCobranza
 exports.getCobranzaQueryCountAndTotalSchema = zod_1.z.object({
-    termSearch: zod_1.z.string().optional().transform(val => val ?? '')
+    termSearch: zod_1.z.string().optional().transform(val => val ?? ''),
+    startDate: zod_1.z.string().optional(),
+    endDate: zod_1.z.string().optional(),
+    exactlyDate: zod_1.z.string().optional()
 });
 exports.getCobranzaQuerySchema = zod_1.z.object({
     PageNumber: zod_1.z.

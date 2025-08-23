@@ -1,9 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCobranzaWithTotalsService = exports.getCobranzaByClientCountAndTotalService = exports.getCobranzaByClientService = exports.getCobranzaCountAndTotalService = exports.getCobranzaService = void 0;
 const database_1 = require("../../database");
 const cobranza_1 = require("../../database/querys/cobranza");
 const CustomError_1 = require("../../errors/CustomError");
+const dayjs_1 = __importDefault(require("dayjs"));
 const getCobranzaService = async ({ userSession, SellsOrderCondition, PageSize = 10, PageNumber, termSearch }) => {
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
@@ -23,28 +27,41 @@ const getCobranzaService = async ({ userSession, SellsOrderCondition, PageSize =
     };
 };
 exports.getCobranzaService = getCobranzaService;
-const getCobranzaCountAndTotalService = async ({ userSession, termSearch }) => {
+const getCobranzaCountAndTotalService = async (params) => {
+    const { userSession, termSearch, startDate, endDate, exactlyDate } = params;
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
     }
-    ;
+    const normalizeDate = (date) => {
+        if (!date || date.trim() === '')
+            return null;
+        return (0, dayjs_1.default)(date).toDate();
+    };
+    const DateStart = normalizeDate(startDate);
+    const DateEnd = normalizeDate(endDate);
+    const DateExactly = normalizeDate(exactlyDate);
     const totalCobranzaQuery = cobranza_1.cobranzaQuery.getCobranzaTotal;
     const countCobranzaQuery = cobranza_1.cobranzaQuery.getCobranzaCount;
-    const requestTotal = await pool.request()
-        .input('nombre', termSearch)
-        .query(totalCobranzaQuery);
-    const requestCount = pool.request()
-        .input('nombre', termSearch)
-        .query(countCobranzaQuery);
-    const [countResult, totalResult] = await Promise.all([
-        requestCount,
-        requestTotal
+    // 🔹 Ejecutamos ambos queries en paralelo
+    const [totalResult, countResult] = await Promise.all([
+        pool.request()
+            .input('nombre', termSearch)
+            .input('DateStart', DateStart)
+            .input('DateEnd', DateEnd)
+            .input('DateExactly', DateExactly)
+            .query(totalCobranzaQuery),
+        pool.request()
+            .input('nombre', termSearch)
+            .input('DateStart', DateStart)
+            .input('DateEnd', DateEnd)
+            .input('DateExactly', DateExactly)
+            .query(countCobranzaQuery),
     ]);
     return {
         count: Number(countResult.recordset[0]?.TotalCount ?? 0),
-        total: totalResult.recordset[0]
+        total: totalResult.recordset[0],
     };
 };
 exports.getCobranzaCountAndTotalService = getCobranzaCountAndTotalService;

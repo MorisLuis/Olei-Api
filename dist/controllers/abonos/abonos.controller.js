@@ -6,7 +6,7 @@ const abonos_schema_1 = require("./abonos.schema");
 const parsePrismaFilter_1 = require("../../utils/prisma/parsePrismaFilter");
 const getAbonos = async (req, res, next) => {
     try {
-        const { PageNumber, limit, orderField, orderDirection, filterField, filterValue } = abonos_schema_1.getAbonosQuerySchema.parse(req.query);
+        const { PageNumber, limit, orderField, orderDirection, filterField, filterValue, startDate, endDate, exactlyDate } = abonos_schema_1.getAbonosQuerySchema.parse(req.query);
         const skip = (PageNumber - 1) * limit;
         const userSession = req.sessionWeb;
         const filters = (0, parsePrismaFilter_1.parsePrismaFilter)(filterField, filterValue);
@@ -16,7 +16,10 @@ const getAbonos = async (req, res, next) => {
             orderDirection,
             skip,
             limit,
-            filters
+            filters,
+            startDate,
+            endDate,
+            exactlyDate
         });
         return res.json({
             abonos,

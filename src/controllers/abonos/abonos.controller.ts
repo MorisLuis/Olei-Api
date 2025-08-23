@@ -13,12 +13,16 @@ const getAbonos = async (req: Request, res: Response, next: NextFunction): Promi
             orderField,
             orderDirection,
             filterField,
-            filterValue
+            filterValue,
+            startDate,
+            endDate,
+            exactlyDate
         } = getAbonosQuerySchema.parse(req.query);
 
         const skip = (PageNumber - 1) * limit;
         const userSession = req.sessionWeb;
         const filters = parsePrismaFilter(filterField, filterValue)
+
 
         const { abonos, total } = await getAbonosService({
             userSession,
@@ -26,7 +30,10 @@ const getAbonos = async (req: Request, res: Response, next: NextFunction): Promi
             orderDirection,
             skip,
             limit,
-            filters
+            filters,
+            startDate,
+            endDate,
+            exactlyDate
         })
 
         return res.json({

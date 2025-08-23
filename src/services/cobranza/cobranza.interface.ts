@@ -22,6 +22,9 @@ interface GetCobranzaParams {
 
 interface GetCobranzaWithSearchParams extends GetCobranzaParams {
     termSearch: string;
+    startDate?: string
+    endDate?: string
+    exactlyDate?: string
 }
 
 interface GetCobranzaByClientParams extends GetCobranzaParams {

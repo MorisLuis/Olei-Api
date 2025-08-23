@@ -5,7 +5,10 @@ import { CobranzaOrderCondition, SellsOrderByClientCondition, TipoDoc } from "..
 
 // getCobranza
 export const getCobranzaQueryCountAndTotalSchema = z.object({
-    termSearch: z.string().optional().transform(val => val ?? '')
+    termSearch: z.string().optional().transform(val => val ?? ''),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+    exactlyDate: z.string().optional()
 });
 
 export const getCobranzaQuerySchema = z.object({

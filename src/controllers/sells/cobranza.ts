@@ -29,13 +29,15 @@ const getCobranza = async (req: Request, res: Response, next: NextFunction): Pro
 
 const getCobranzaCountAndTotal = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
-        // Get session from REDIS.
-        const { termSearch } = getCobranzaQueryCountAndTotalSchema.parse(req.query);
+        const { termSearch, startDate, endDate, exactlyDate } = getCobranzaQueryCountAndTotalSchema.parse(req.query);
         const userSession = req.sessionWeb;
 
         const { count, total } = await getCobranzaCountAndTotalService({
             userSession,
-            termSearch
+            termSearch,
+            startDate,
+            endDate,
+            exactlyDate
         });
 
         return res.json({

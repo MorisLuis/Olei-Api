@@ -1,42 +1,31 @@
 import type { FilterPrisma } from "./types";
 
 interface FilterObject {
-    [key: string]: string | number;
+    [key: string]: string | number | any;
 }
 
-interface BuildFiltersResponse {
+
+export type BuildFiltersResponse = {
     AND?: FilterObject[];
+    OR?: FilterObject[];
+};
+
+export function buildFilters(filters: FilterPrisma[]): BuildFiltersResponse {
+    const andConditions = filters
+        .map(({ field, value }) => {
+            if (field.includes('.')) {
+                const [relation, relField] = field.split('.');
+                return isNaN(Number(value))
+                    ? { [relation]: { [relField]: { contains: value } } }
+                    : { [relation]: { [relField]: Number(value) } };
+            } else {
+                return isNaN(Number(value))
+                    ? { [field]: { contains: value } }
+                    : { [field]: Number(value) };
+            }
+        })
+        .filter(cond => Object.keys(cond).length > 0);
+
+    return { AND: andConditions }; // ✅ always array, any[] para TS
 }
 
-export function buildFilters(filters: FilterPrisma[]): BuildFiltersResponse | {} {
-    const andConditions = filters.map(({ field, value }) => {
-        if (field.includes('.')) {
-            const [relation, relField] = field.split('.');
-            if (!isNaN(Number(value))) {
-                return {
-                    [relation]: {
-                        [relField]: Number(value),
-                    },
-                };
-            }
-            return {
-                [relation]: {
-                    [relField]: {
-                        contains: value
-                    },
-                },
-            };
-        } else {
-            if (!isNaN(Number(value))) {
-                return { [field]: Number(value) };
-            }
-            return {
-                [field]: {
-                    contains: value
-                },
-            };
-        }
-    }).filter(cond => Object.keys(cond).length > 0);
-
-    return andConditions.length > 0 ? { AND: andConditions } : {};
-}

@@ -86,6 +86,9 @@ export const cobranzaQuery = {
         JOIN [dbo].[CONDVTAS] CD ON CD.Id_CondVta = V.Id_CondVta
         WHERE V.Saldo > 0
         AND V.Id_CondVta <> 1
+        AND (@DateExactly IS NULL OR CAST(Fecha AS DATE) = @DateExactly)
+        AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)
+        AND (@DateEnd IS NULL OR CAST(Fecha AS DATE) <= @DateEnd)
         AND (@nombre = '' OR LOWER(C.RazonSocial) LIKE LOWER(@nombre) + '%');
             
         -- Totales por cliente y almacén

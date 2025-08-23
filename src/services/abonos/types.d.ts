@@ -10,6 +10,9 @@ interface getAbonosParams {
     skip: number
     limit: number
     filters?: FilterPrisma[]
+    startDate?: string
+    endDate?: string
+    exactlyDate?: string
 }
 
 interface getAbonoByIdParams { 

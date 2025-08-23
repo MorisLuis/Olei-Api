@@ -3,7 +3,7 @@ import { getPrismaClient } from "../../database/prismaConnection";
 import type { getAbonoByIdParams, getAbonoByIdResponse, getAbonosParams, getAbonosResponse } from "./types";
 import { buildOrder } from "../../utils/prisma/orderFunction";
 import { buildFilters } from "../../utils/prisma/filterFunction";
-
+import { appendDateFilter } from "../../utils/prisma/appendDateRange";
 
 export const getAbonosService = async (params: getAbonosParams): Promise<getAbonosResponse> => {
 
@@ -14,6 +14,9 @@ export const getAbonosService = async (params: getAbonosParams): Promise<getAbon
         skip,
         limit,
         filters = [],
+        startDate,
+        endDate,
+        exactlyDate
     } = params;
 
     const prisma = getPrismaClient(ServidorSQL, BaseSQL);
@@ -24,6 +27,8 @@ export const getAbonosService = async (params: getAbonosParams): Promise<getAbon
     );
 
     const where = buildFilters(filters)
+    // Append date range if provided
+    appendDateFilter(where, 'Fecha', startDate, endDate, exactlyDate);
 
     const [abonos, totalAbonos] = await Promise.all([
         prisma.aBONOS.findMany({

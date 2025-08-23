@@ -3,6 +3,7 @@ import { cobranzaQuery } from "../../database/querys/cobranza";
 import { ValidationError } from "../../errors/CustomError";
 import type { SellsInterface } from "../../interface/sells";
 import type { GetCobranzaWithSearchParams, GetCobranzaByClientParams, GetCobranzaTotalResponse, CobranzaInterface, GetCobranzaTotalsResponse } from "./cobranza.interface";
+import dayjs from 'dayjs';
 
 
 const getCobranzaService = async ({
@@ -34,38 +35,51 @@ const getCobranzaService = async ({
 
 };
 
-const getCobranzaCountAndTotalService = async ({
-    userSession,
-    termSearch
-}: GetCobranzaWithSearchParams): Promise<{ count: number, total: GetCobranzaTotalResponse }> => {
 
+const getCobranzaCountAndTotalService = async (
+    params: GetCobranzaWithSearchParams
+): Promise<{ count: number; total: GetCobranzaTotalResponse }> => {
+    const { userSession, termSearch, startDate, endDate, exactlyDate } = params;
     const { ServidorSQL, BaseSQL } = userSession;
+
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
-    };
+    }
+
+    const normalizeDate = (date?: string) => {
+        if (!date || date.trim() === '') return null;
+        return dayjs(date).toDate();
+    }
+
+    const DateStart = normalizeDate(startDate);
+    const DateEnd = normalizeDate(endDate);
+    const DateExactly = normalizeDate(exactlyDate);
 
     const totalCobranzaQuery = cobranzaQuery.getCobranzaTotal;
     const countCobranzaQuery = cobranzaQuery.getCobranzaCount;
 
+    // 🔹 Ejecutamos ambos queries en paralelo
+    const [totalResult, countResult] = await Promise.all([
+        pool.request()
+            .input('nombre', termSearch)
+            .input('DateStart', DateStart)
+            .input('DateEnd', DateEnd)
+            .input('DateExactly', DateExactly)
+            .query(totalCobranzaQuery),
 
-    const requestTotal = await pool.request()
-        .input('nombre', termSearch)
-        .query(totalCobranzaQuery);
-
-    const requestCount = pool.request()
-        .input('nombre', termSearch)
-        .query(countCobranzaQuery);
-
-    const [countResult, totalResult] = await Promise.all([
-        requestCount,
-        requestTotal
+        pool.request()
+            .input('nombre', termSearch)
+            .input('DateStart', DateStart)
+            .input('DateEnd', DateEnd)
+            .input('DateExactly', DateExactly)
+            .query(countCobranzaQuery),
     ]);
 
     return {
         count: Number(countResult.recordset[0]?.TotalCount ?? 0),
-        total: totalResult.recordset[0]
-    }
+        total: totalResult.recordset[0],
+    };
 }
 
 const getCobranzaByClientService = async ({

@@ -27,12 +27,14 @@ const getCobranza = async (req, res, next) => {
 exports.getCobranza = getCobranza;
 const getCobranzaCountAndTotal = async (req, res, next) => {
     try {
-        // Get session from REDIS.
-        const { termSearch } = cobranzaValidations_1.getCobranzaQueryCountAndTotalSchema.parse(req.query);
+        const { termSearch, startDate, endDate, exactlyDate } = cobranzaValidations_1.getCobranzaQueryCountAndTotalSchema.parse(req.query);
         const userSession = req.sessionWeb;
         const { count, total } = await (0, cobranzaService_1.getCobranzaCountAndTotalService)({
             userSession,
-            termSearch
+            termSearch,
+            startDate,
+            endDate,
+            exactlyDate
         });
         return res.json({
             count,
