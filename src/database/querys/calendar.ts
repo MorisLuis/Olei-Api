@@ -36,7 +36,7 @@ export const celendarQuerys = {
             AND MONTH(Fecha) = @Mes;
     `,
 
-    getCalendarTasksDay: `
+    getCalendarTasksByDay: `
         SELECT
             Id_Cliente,
             Id_Bitacora,
@@ -49,7 +49,8 @@ export const celendarQuerys = {
             Hour,
             HourEnd
         FROM [dbo].[BITACORACRM]
-        WHERE CAST(Fecha AS DATE) = @FechaEspecifica AND (@Id_Cliente IS NULL OR Id_Cliente = @Id_Cliente)
+        WHERE CAST(Fecha AS DATE) = @FechaEspecifica 
+        AND (@Id_Cliente IS NULL OR Id_Cliente = @Id_Cliente)
 
         UNION ALL
 
@@ -61,17 +62,31 @@ export const celendarQuerys = {
             CONCAT(Id_Almacen, '-', TipoDoc, '-', TRIM(Serie), '-', Folio) AS Id_Sell,
             Fecha,
             CASE 
-        WHEN TipoDoc = 1 THEN 'Factura'
-        WHEN TipoDoc = 2 THEN 'Remision'
-        WHEN TipoDoc = 3 THEN 'Pedido'
-        ELSE 'Cotización'
-        END AS Titulo,
+                WHEN TipoDoc = 1 THEN 'Factura'
+                WHEN TipoDoc = 2 THEN 'Remision'
+                WHEN TipoDoc = 3 THEN 'Pedido'
+                ELSE 'Cotización'
+            END AS Titulo,
             'Ventas' AS TableType,
-            NULL AS Hour, -- Columna Hour no existe en Ventas, se usa NULL
+            NULL AS Hour,
             NULL AS HourEnd
-        -- Columna HourEnd no existe en Ventas, se usa NULL
         FROM [dbo].[VENTAS]
-        WHERE CAST(Fecha AS DATE) = @FechaEspecifica AND (@Id_Cliente IS NULL OR Id_Cliente = @Id_Cliente )
+        WHERE Fecha < DATEADD(DAY, 1, @FechaEspecifica) 
+        AND (@Id_Cliente IS NULL OR Id_Cliente = @Id_Cliente)
+        ORDER BY Fecha DESC
+        OFFSET (@Page - 1) * @limit ROWS
+        FETCH NEXT @limit ROWS ONLY;
+
+        SELECT COUNT(*) AS TotalBitacora
+        FROM [dbo].[BITACORACRM]
+        WHERE CAST(Fecha AS DATE) = @FechaEspecifica 
+        AND (@Id_Cliente IS NULL OR Id_Cliente = @Id_Cliente);
+
+        SELECT COUNT(*) AS TotalVentas
+        FROM [dbo].[VENTAS]
+        WHERE Fecha < DATEADD(DAY, 1, @FechaEspecifica) 
+        AND (@Id_Cliente IS NULL OR Id_Cliente = @Id_Cliente);
+
     `,
 
     getCalendarTasksMonthByClient: `

@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
-import { getCalendarTaskByDayService, getCalendarTaskByMonthAndClientService, getCalendarTaskByMonthService } from "../services/calendarService";
+import { getCalendarTaskByMonthAndClientService, getCalendarTaskByMonthService } from "../services/calendarService";
 import { getCalendarByMonthAndClientQuerySchema, getCalendarTaskByDayQuerySchema, getCalendarTaskByMonthQuerySchema } from "../validations/calendarValidations";
+import { getCalendarTaskByDayAndClientService } from "../services/calendar/getAllTasksByDay";
 
 
 const getCalendarTaskByMonth = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
@@ -27,17 +28,21 @@ const getCalendarTaskByDay = async (req: Request, res: Response, next: NextFunct
 
     /* Timeline */
     try {
-        const { Day, Id_Cliente } = getCalendarTaskByDayQuerySchema.parse(req.query);
+        const { Day, Id_Cliente, limit, PageNumber } = getCalendarTaskByDayQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
-        const tasks = await getCalendarTaskByDayService({
+        const { quotes, TotalBitacora, TotalVentas } = await getCalendarTaskByDayAndClientService({
             userSession,
             Day,
-            Id_Cliente
+            Id_Cliente,
+            PageNumber: PageNumber || 1,
+            limit: limit || 10
         });
 
         res.json({
-            tasks
+            tasks: quotes,
+            TotalBitacora,
+            TotalVentas
         });
     } catch (error) {
         return next(error);

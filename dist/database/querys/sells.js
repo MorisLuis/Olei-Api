@@ -206,7 +206,7 @@ exports.sellsQuery = {
                     AND (@DateEnd IS NULL OR CAST(Fecha AS DATE) <= @DateEnd)
             )
             SELECT 
-                SUM(Subtotal) AS SumaSubtotal, 
+                SUM(Subtotal) AS SumaSubtotal,  
                 SUM(Total) AS SumaTotal
             FROM VENTAS_CTE;
     `,

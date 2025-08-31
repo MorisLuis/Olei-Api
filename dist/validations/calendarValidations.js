@@ -13,6 +13,11 @@ exports.getCalendarTaskByMonthQuerySchema = zod_1.z.object({
         .refine((val) => /^(0[1-9]|1[0-2])$/.test(val), { message: 'Mes debe estar entre 01 y 12' })
 });
 exports.getCalendarTaskByDayQuerySchema = zod_1.z.object({
+    PageNumber: zod_1.z
+        .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number())
+        .refine((val) => val > 0 && val < 100, { message: "PageNumber debe ser un número positivo mayor que 0 y menor que 100" }).optional(),
+    limit: zod_1.z
+        .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), zod_1.z.number()).optional(),
     Day: zod_1.z
         .union([
         // Validación de string en formato 'YYYY-MM-DD' o 'DD-MM-YYYY'

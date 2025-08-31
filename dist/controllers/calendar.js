@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCalendarTaskByMonthAndClient = exports.getCalendarTaskByDay = exports.getCalendarTaskByMonth = void 0;
 const calendarService_1 = require("../services/calendarService");
 const calendarValidations_1 = require("../validations/calendarValidations");
+const getAllTasksByDay_1 = require("../services/calendar/getAllTasksByDay");
 const getCalendarTaskByMonth = async (req, res, next) => {
     try {
         const { Anio, Mes } = calendarValidations_1.getCalendarTaskByMonthQuerySchema.parse(req.query);
@@ -24,15 +25,19 @@ exports.getCalendarTaskByMonth = getCalendarTaskByMonth;
 const getCalendarTaskByDay = async (req, res, next) => {
     /* Timeline */
     try {
-        const { Day, Id_Cliente } = calendarValidations_1.getCalendarTaskByDayQuerySchema.parse(req.query);
+        const { Day, Id_Cliente, limit, PageNumber } = calendarValidations_1.getCalendarTaskByDayQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
-        const tasks = await (0, calendarService_1.getCalendarTaskByDayService)({
+        const { quotes, TotalBitacora, TotalVentas } = await (0, getAllTasksByDay_1.getCalendarTaskByDayAndClientService)({
             userSession,
             Day,
-            Id_Cliente
+            Id_Cliente,
+            PageNumber: PageNumber || 1,
+            limit: limit || 10
         });
         res.json({
-            tasks
+            tasks: quotes,
+            TotalBitacora,
+            TotalVentas
         });
     }
     catch (error) {

@@ -14,6 +14,11 @@ export const getCalendarTaskByMonthQuerySchema = z.object({
 
 
 export const getCalendarTaskByDayQuerySchema = z.object({
+    PageNumber: z
+        .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number())
+        .refine((val) => val > 0 && val < 100, { message: "PageNumber debe ser un número positivo mayor que 0 y menor que 100" }).optional(),
+    limit: z
+        .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()).optional(),
     Day: z
         .union([
             // Validación de string en formato 'YYYY-MM-DD' o 'DD-MM-YYYY'

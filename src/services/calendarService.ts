@@ -36,35 +36,6 @@ const getCalendarTaskByMonthService = async ({
 };
 
 
-interface getCalendarTaskByDayServiceInterface {
-    userSession: UserWebSessionInterface;
-    Day: string;
-    Id_Cliente: number | null
-}
-
-const getCalendarTaskByDayService = async ({
-    userSession,
-    Day,
-    Id_Cliente
-}: getCalendarTaskByDayServiceInterface)  : Promise<CalendarInterface[]> => {
-
-    const { ServidorSQL, BaseSQL } = userSession;
-    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
-
-    if (!pool) {
-        throw new ValidationError('Error al conectarse a base de datos principal');
-    };
-
-    let query = celendarQuerys.getCalendarTasksDay;
-    const request = await pool.request()
-        .input('FechaEspecifica', Day)
-        .input('Id_Cliente', Id_Cliente)
-        .query(query);
-
-    const quotes = request.recordset
-
-    return quotes
-};
 
 interface getCalendarByMonthAndClientServiceInterface {
     userSession: UserWebSessionInterface;
@@ -86,6 +57,7 @@ const getCalendarTaskByMonthAndClientService = async ({
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
+    
 
     let query = celendarQuerys.getCalendarTasksMonthByClient;
     const request = await pool.request()
@@ -102,6 +74,5 @@ const getCalendarTaskByMonthAndClientService = async ({
 
 export {
     getCalendarTaskByMonthService,
-    getCalendarTaskByDayService,
     getCalendarTaskByMonthAndClientService
 }
