@@ -55,23 +55,24 @@ export const celendarQuerys = {
         UNION ALL
 
         SELECT
-            Id_Cliente,
+            V.Id_Cliente,
             NULL AS Id_Bitacora,
             NULL AS Descripcion,
-            Folio,
-            CONCAT(Id_Almacen, '-', TipoDoc, '-', TRIM(Serie), '-', Folio) AS Id_Sell,
-            Fecha,
+            V.Folio,
+            CONCAT(V.Id_Almacen, '-', V.TipoDoc, '-', TRIM(V.Serie), '-', V.Folio) AS Id_Sell,
+            V.Fecha,
             CASE 
-                WHEN TipoDoc = 1 THEN 'Factura'
-                WHEN TipoDoc = 2 THEN 'Remision'
-                WHEN TipoDoc = 3 THEN 'Pedido'
+                WHEN V.TipoDoc = 1 THEN 'Factura'
+                WHEN V.TipoDoc = 2 THEN 'Remision'
+                WHEN V.TipoDoc = 3 THEN 'Pedido'
                 ELSE 'Cotización'
             END AS Titulo,
             'Ventas' AS TableType,
             NULL AS Hour,
             NULL AS HourEnd
-        FROM [dbo].[VENTAS]
-        WHERE Fecha < DATEADD(DAY, 1, @FechaEspecifica) 
+        FROM [dbo].[VENTAS] V
+        JOIN [dbo].[CONDVTAS] CD ON CD.Id_CondVta = V.Id_CondVta
+        WHERE DATEADD(DAY, CD.Dias, V.Fecha) < DATEADD(DAY, 1, @FechaEspecifica)
         AND (@Id_Cliente IS NULL OR Id_Cliente = @Id_Cliente)
         ORDER BY Fecha DESC
         OFFSET (@Page - 1) * @limit ROWS

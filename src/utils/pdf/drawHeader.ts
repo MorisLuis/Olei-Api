@@ -20,79 +20,64 @@ export const drawHeader = async ({
     pageHeight,
     marginLeft = 50,
     marginRight = 50,
-    imagePath = path.join(__dirname, '../../../public/Logo_horizontal2.png'),
-}: DrawHeaderImageOptions) : Promise<void> => {
-    // 1. Cargar y escalar imagen
-    const imageBytes = fs.readFileSync(imagePath);
-    const embeddedImage = await pdfDoc.embedPng(imageBytes);
+}: DrawHeaderImageOptions): Promise<void> => {
+    // 1. Configuración de texto "Company"
+    const helveticaFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    const maxImageWidth = pageWidth * 0.3;
-    const maxImageHeight = pageHeight * 0.1;
-    const { width: originalWidth, height: originalHeight } = embeddedImage;
-    const scale = Math.min(maxImageWidth / originalWidth, maxImageHeight / originalHeight);
+    const companyText = 'Company';
+    const fontSize = 20;
 
-    const imageWidth = originalWidth * scale;
-    const imageHeight = originalHeight * scale;
+    const textWidth = helveticaFont.widthOfTextAtSize(companyText, fontSize);
+    const textHeight = fontSize;
 
-    const imageX = marginLeft;
-    const imageY = pageHeight - imageHeight - 20;
+    const textX = marginLeft;
+    const textY = pageHeight - textHeight - 20;
 
-    // 2. Dibujar imagen
-    page.drawImage(embeddedImage, {
-        x: imageX,
-        y: imageY,
-        width: imageWidth,
-        height: imageHeight,
+    // 2. Dibujar texto "Company"
+    page.drawText(companyText, {
+        x: textX,
+        y: textY,
+        size: fontSize,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
     });
 
-    // 3. Borde opcional para debug
-    page.drawRectangle({
-        x: imageX,
-        y: imageY,
-        width: imageWidth,
-        height: imageHeight,
-        borderWidth: 1,
-        color: undefined,
-        borderColor: rgb(1, 0, 0),
-    });
-
-    // 4. Texto a la derecha alineado inferior con la imagen
-    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const helveticaBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    // 3. Texto a la derecha alineado inferior con "Company"
+    const helveticaRegularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
     const currentDate = new Date();
     const dateText = currentDate.toLocaleDateString('es-MX');
     const titleText = 'Relaciones de Documentos Pendientes de Pago';
 
-    const fontSize = 10;
+    const smallFontSize = 10;
     const lineSpacing = 2;
 
-    const dateTextWidth = helveticaFont.widthOfTextAtSize(dateText, fontSize);
-    const titleTextWidth = helveticaBoldFont.widthOfTextAtSize(titleText, fontSize);
+    const dateTextWidth = helveticaRegularFont.widthOfTextAtSize(dateText, smallFontSize);
+    const titleTextWidth = helveticaFont.widthOfTextAtSize(titleText, smallFontSize);
 
     const rightLimitX = pageWidth - marginRight;
     const dateTextX = rightLimitX - dateTextWidth;
     const titleTextX = rightLimitX - titleTextWidth;
 
-    // 🧠 Nuevo cálculo: alinear base del bloque de texto con la base del logo
-    const totalTextHeight = fontSize * 2 + lineSpacing;
-    const bottomAlignedY = imageY + totalTextHeight - fontSize;
+    // 🧠 Nuevo cálculo: alinear base del bloque de texto con la base del texto "Company"
+    const totalTextHeight = smallFontSize * 2 + lineSpacing;
+    const bottomAlignedY = textY + totalTextHeight - smallFontSize;
 
     // Línea 1 - Fecha (arriba)
     page.drawText(dateText, {
         x: dateTextX,
         y: bottomAlignedY,
-        size: fontSize,
-        font: helveticaFont,
+        size: smallFontSize,
+        font: helveticaRegularFont,
         color: rgb(0, 0, 0),
     });
 
     // Línea 2 - Título (abajo)
     page.drawText(titleText, {
         x: titleTextX,
-        y: bottomAlignedY - fontSize - lineSpacing,
-        size: fontSize,
-        font: helveticaBoldFont,
+        y: bottomAlignedY - smallFontSize - lineSpacing,
+        size: smallFontSize,
+        font: helveticaFont,
         color: rgb(0, 0, 0),
     });
 };

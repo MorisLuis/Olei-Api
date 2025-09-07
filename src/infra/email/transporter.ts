@@ -12,7 +12,7 @@ export interface Transporter {
     }
 };
 
-/* export const transportDefault: Transporter = {
+export const transportDefault: Transporter = {
     host: 'mail.oleisoftware.com.mx',
     port: 465,
     secure: true,
@@ -20,7 +20,7 @@ export interface Transporter {
         user: 'idaliahc@oleisoftware.com.mx', // Tu usuario SMTP
         pass: 'Anaregina24.', // Tu contraseña SMTP
     }
-}; */
+};
 
 /* idaliahc@oleisoftware.com.mx' */
 
