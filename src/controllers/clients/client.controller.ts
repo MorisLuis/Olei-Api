@@ -3,7 +3,6 @@ import type { UserWebSessionInterface } from '../../interface/user';
 import { getClientIdService, getClientsService, getTotalClientsService, searchClientService, updateClientService } from '../../services/clients/clients.service';
 import { getClientIdQuerySchema, getClientsQuerySchema, getClientsTotalQuerySchema, searchClientQuerySchema, selectClientBodySchema } from './client.schema';
 import { updateWebSession } from '../../helpers/generate-redis';
-import { parsePrismaFilter } from '../../utils/prisma/parsePrismaFilter';
 
 const getClients = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
@@ -13,21 +12,20 @@ const getClients = async (req: Request, res: Response, next: NextFunction): Prom
             limit,
             orderField,
             orderDirection,
-            filterField,
-            filterValue
+            Id_Cliente,
+            Nombre
         } = getClientsQuerySchema.parse(req.query);
     
-        const skip = (PageNumber - 1) * limit;
         const userSession = req.sessionWeb;
-        const filters = parsePrismaFilter(filterField, filterValue)
 
         const { clientes, total } = await getClientsService({
             userSession,
             orderField,
             orderDirection,
-            skip,
+            PageNumber,
             limit,
-            filters
+            Nombre,
+            Id_Cliente
         })
 
         return res.json({

@@ -7,7 +7,7 @@ export function appendDateFilter(
     startDate?: string,
     endDate?: string,
     exactlyDate?: string
-) {
+) : void {
     if (!startDate && !endDate && !exactlyDate) return;
 
     const dateFilter: { [key: string]: Record<string, unknown> } = { [field]: {} };

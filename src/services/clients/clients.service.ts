@@ -6,54 +6,43 @@ import { ValidationError } from "../../errors/CustomError";
 import type { ClientInterface } from "../../interface/client";
 import type { getClientsResponse, getClientIdInterface, getClientsParams, getTotalClientsServiceInterface, searchClientServiceInterface, updateClientParams } from "./types";
 import { getPrismaClient } from "../../database/prismaConnection";
-import type { Clientes, Prisma } from "@prisma/client";
-import { buildOrder } from "../../utils/prisma/orderFunction";
+import type { Clientes } from "@prisma/client";
 import { buildUpdate } from '../../utils/prisma/updateFunction';
-import { buildFilters } from '../../utils/prisma/filterFunction';
 
 const getClientsService = async (params: getClientsParams): Promise<getClientsResponse> => {
 
     const {
         userSession: { ServidorSQL, BaseSQL },
         orderField,
-        orderDirection,
-        skip,
+        PageNumber,
         limit,
-        filters = [],
+        Nombre,
+        Id_Cliente,
     } = params;
 
-    const prisma = getPrismaClient(ServidorSQL, BaseSQL);
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
+    if (!pool) {
+        throw new ValidationError('Error al conectarse a base de datos principal');
+    };
 
-    const orderBy = buildOrder<Prisma.ClientesOrderByWithRelationInput>(
-        { field: orderField, direction: orderDirection },
-        'Id_Cliente'
-    );
+    let query = clientsQuerys.getClients;
+    let queryTotal = clientsQuerys.getTotalClients;
+    
+    const totalRequest = await pool.request()
+        .input('Nombre', Nombre)
+        .input('Id_Cliente', Id_Cliente)
+        .query(queryTotal);
 
-    const where = buildFilters(filters)
+    const request = await pool.request()
+        .input('PageNumber', sql.Int, PageNumber)
+        .input('PageSize', sql.Int, limit)
+        .input('Nombre', sql.VarChar, Nombre === '' ? null : Nombre)
+        .input('Id_Cliente', sql.VarChar, Id_Cliente === '' ? null : Id_Cliente)
+        .input('OrderCondition', sql.VarChar, orderField)
+        .query(query);
 
-    const [clientes, totalClientes] = await Promise.all([
-        prisma.clientes.findMany({
-            skip,
-            take: limit,
-            orderBy,
-            where,
-            select: {
-                Nombre: true,
-                Id_Almacen: true,
-                Id_Cliente: true,
-                IdOLEI: true,
-                Telefono1: true,
-                CorreoVtas: true,
-                UsuarioSQL: true
-            }
-        }).then(rows =>
-            rows.map(({ UsuarioSQL, ...rest }) => ({
-                ...rest,
-                TelefonoWhatsapp: UsuarioSQL
-            }))
-        ),
-        prisma.clientes.count({ where }),
-    ]);
+    const clientes = request.recordset;
+    const totalClientes = totalRequest.recordset[0].TotalCount;
 
     return {
         clientes,

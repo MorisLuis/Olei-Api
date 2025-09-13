@@ -8,12 +8,12 @@ import type { FilterPrisma } from "../../utils/prisma/types";
 //PARAMS
 interface getClientsParams {
     userSession: UserWebSessionInterface
-    orderField: typeof Prisma.ClientesOrderByWithRelationInput
-    orderDirection: "asc" | "desc"
-
-    skip: number
+    orderField: 'Nombre' | 'Id_Cliente'
+    orderDirection?: "asc" | "desc"
+    PageNumber: number
     limit: number
-    filters?: FilterPrisma[]
+    Nombre?: string
+    Id_Cliente?: string
 };
 
 interface getClientIdInterface {
