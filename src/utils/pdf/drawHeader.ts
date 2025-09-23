@@ -11,6 +11,7 @@ interface DrawHeaderImageOptions {
     marginLeft?: number;
     marginRight?: number;
     imagePath?: string;
+    company?: string;
 }
 
 export const drawHeader = async ({
@@ -20,11 +21,12 @@ export const drawHeader = async ({
     pageHeight,
     marginLeft = 50,
     marginRight = 50,
+    company
 }: DrawHeaderImageOptions): Promise<void> => {
     // 1. Configuración de texto "Company"
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    const companyText = 'Company';
+    const companyText =  company?.trim() || 'Olei Software';
     const fontSize = 20;
 
     const textWidth = helveticaFont.widthOfTextAtSize(companyText, fontSize);

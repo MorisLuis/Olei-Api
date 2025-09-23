@@ -50,6 +50,7 @@ const sendEmailService = async ({
         replyTo: remitente
     };
 
+    
     const emailTransporterData: Transporter = {
         host: userEmailData.SMTPHost.trim(),
         port: userEmailData.SMTPPuerto,
@@ -88,7 +89,7 @@ const sendEmailWithPDFService = async ({
     nombreRemitente
 }: SendEmailWithPDFServiceParams): Promise<SendEmailResponse> => {
 
-    const { ServidorSQL, BaseSQL, Id_UsuarioOLEI } = userSession;
+    const { ServidorSQL, BaseSQL, Id_UsuarioOLEI, Nombre} = userSession;
 
     const { sells, brief } = await getAllCobranzaService({
         userSession,
@@ -105,7 +106,7 @@ const sendEmailWithPDFService = async ({
         DateStart: DateStart || null,
     });
 
-    const pdfBuffer = await generatePDF(sells, brief);
+    const pdfBuffer = await generatePDF(sells, brief, Nombre);
 
     const userEmailData = await getUserEmailConfig(Id_UsuarioOLEI, {
         ServidorSQL,

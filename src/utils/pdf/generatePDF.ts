@@ -9,7 +9,8 @@ import { truncateText } from './truncateText';
 
 const generatePDF = async (
     sells: SellsInterface[],
-    briefSells: GetCobranzaTotalResponse
+    briefSells: GetCobranzaTotalResponse,
+    company?: string
 ): Promise<Uint8Array> => {
     const pdfDoc = await PDFDocument.create();
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -57,7 +58,7 @@ const generatePDF = async (
 
     // Agregar la primera página
     let page = pdfDoc.addPage([pageWidth, pageHeight]);
-    await drawHeader({ page, pdfDoc, pageWidth, pageHeight });
+    await drawHeader({ page, pdfDoc, pageWidth, pageHeight, company });
 
     const logoBottomY = pageHeight - (pageHeight * 0.1) - 20; // 10% height + top margin
     let y = logoBottomY; // dejar 20 de espacio debajo del logo
