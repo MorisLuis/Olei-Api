@@ -70,13 +70,13 @@ const getAbonoDetails = async (req: Request, res: Response, next: NextFunction):
         const { folio } = req.params
         const { PageNumber } = req.query
 
-        const abonoDetails = await getAbonoDetailsService({
+        const {abonosDetails} = await getAbonoDetailsService({
             userSession: req.sessionWeb,
             PageNumber,
             folio
         });
 
-        return res.json(abonoDetails);
+        return res.json({abonosDetails});
 
     } catch (error) {
         return next(error)
