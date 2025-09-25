@@ -3,10 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handleTransporter = void 0;
+exports.handleTransporter = exports.transportDefault = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 ;
-/* export const transportDefault: Transporter = {
+exports.transportDefault = {
     host: 'mail.oleisoftware.com.mx',
     port: 465,
     secure: true,
@@ -14,7 +14,7 @@ const nodemailer_1 = __importDefault(require("nodemailer"));
         user: 'idaliahc@oleisoftware.com.mx', // Tu usuario SMTP
         pass: 'Anaregina24.', // Tu contraseña SMTP
     }
-}; */
+};
 /* idaliahc@oleisoftware.com.mx' */
 const handleTransporter = (values) => {
     return nodemailer_1.default.createTransport({

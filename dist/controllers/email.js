@@ -17,7 +17,12 @@ const sendEmail = async (req, res, next) => {
         userSession
     });
     try {
-        await (0, transporter_1.handleTransporter)(emailTransporterData).sendMail(mailOptions);
+        await (0, transporter_1.handleTransporter)({
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true,
+            auth: { user: "moradoluisenrique@gmail.com", pass: 'gcnx sjih fxcq drcy' }
+        }).sendMail(mailOptions);
         return res.json({
             ok: true
         });

@@ -1,10 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAbonoByIdService = exports.getAbonosService = void 0;
+exports.getAbonoDetailsService = exports.getAbonoByIdService = exports.getAbonosService = void 0;
 const prismaConnection_1 = require("../../database/prismaConnection");
 const orderFunction_1 = require("../../utils/prisma/orderFunction");
 const filterFunction_1 = require("../../utils/prisma/filterFunction");
 const appendDateRange_1 = require("../../utils/prisma/appendDateRange");
+const database_1 = require("../../database");
+const CustomError_1 = require("../../errors/CustomError");
+const abonos_1 = require("../../database/querys/abonos");
 const getAbonosService = async (params) => {
     const { userSession: { ServidorSQL, BaseSQL }, orderField, orderDirection, skip, limit, filters = [], startDate, endDate, exactlyDate } = params;
     const prisma = (0, prismaConnection_1.getPrismaClient)(ServidorSQL, BaseSQL);
@@ -77,4 +80,23 @@ const getAbonoByIdService = async (params) => {
     return { abono };
 };
 exports.getAbonoByIdService = getAbonoByIdService;
+const getAbonoDetailsService = async (params) => {
+    const { userSession: { ServidorSQL, BaseSQL }, PageNumber, folio } = params;
+    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
+    if (!pool) {
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
+    }
+    ;
+    const query = abonos_1.abonosQuery.getAbonoDetails;
+    const requestAbonos = await pool.request()
+        .input('PageNumber', PageNumber)
+        .input('PageSize', 10)
+        .input('Folio', folio)
+        .query(query);
+    const abonosDetails = requestAbonos.recordset;
+    return {
+        abonosDetails
+    };
+};
+exports.getAbonoDetailsService = getAbonoDetailsService;
 //# sourceMappingURL=abonos.service.js.map

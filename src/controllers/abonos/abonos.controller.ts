@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
-import { getAbonoByIdService, getAbonosService } from '../../services/abonos/abonos.service';
+import { getAbonoByIdService, getAbonoDetailsService, getAbonosService } from '../../services/abonos/abonos.service';
 import { getAbonoByIdParamsSchema, getAbonoByIdQuerySchema, getAbonosQuerySchema } from './abonos.schema';
 import { parsePrismaFilter } from '../../utils/prisma/parsePrismaFilter';
 
@@ -22,7 +22,6 @@ const getAbonos = async (req: Request, res: Response, next: NextFunction): Promi
         const skip = (PageNumber - 1) * limit;
         const userSession = req.sessionWeb;
         const filters = parsePrismaFilter(filterField, filterValue)
-
 
         const { abonos, total } = await getAbonosService({
             userSession,
@@ -65,7 +64,27 @@ const getAbonoById = async (req: Request, res: Response, next: NextFunction): Pr
     }
 }
 
+const getAbonoDetails = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+    
+    try {
+        const { folio } = req.params
+        const { PageNumber } = req.query
+
+        const abonoDetails = await getAbonoDetailsService({
+            userSession: req.sessionWeb,
+            PageNumber,
+            folio
+        });
+
+        return res.json(abonoDetails);
+
+    } catch (error) {
+        return next(error)
+    }
+}
+
 export {
     getAbonos,
-    getAbonoById
+    getAbonoById,
+    getAbonoDetails
 }

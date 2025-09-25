@@ -5,7 +5,7 @@ const currency_1 = require("../currency");
 const tipoDocFormat_1 = require("../tipoDocFormat");
 const drawHeader_1 = require("./drawHeader");
 const truncateText_1 = require("./truncateText");
-const generatePDF = async (sells, briefSells) => {
+const generatePDF = async (sells, briefSells, company) => {
     const pdfDoc = await pdf_lib_1.PDFDocument.create();
     const helveticaFont = await pdfDoc.embedFont(pdf_lib_1.StandardFonts.Helvetica);
     const helveticaBoldFont = await pdfDoc.embedFont(pdf_lib_1.StandardFonts.HelveticaBold);
@@ -45,7 +45,7 @@ const generatePDF = async (sells, briefSells) => {
     };
     // Agregar la primera página
     let page = pdfDoc.addPage([pageWidth, pageHeight]);
-    await (0, drawHeader_1.drawHeader)({ page, pdfDoc, pageWidth, pageHeight });
+    await (0, drawHeader_1.drawHeader)({ page, pdfDoc, pageWidth, pageHeight, company });
     const logoBottomY = pageHeight - (pageHeight * 0.1) - 20; // 10% height + top margin
     let y = logoBottomY; // dejar 20 de espacio debajo del logo
     // Cabecera de la tabla

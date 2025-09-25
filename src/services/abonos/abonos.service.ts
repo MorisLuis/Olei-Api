@@ -4,6 +4,9 @@ import type { getAbonoByIdParams, getAbonoByIdResponse, getAbonosParams, getAbon
 import { buildOrder } from "../../utils/prisma/orderFunction";
 import { buildFilters } from "../../utils/prisma/filterFunction";
 import { appendDateFilter } from "../../utils/prisma/appendDateRange";
+import { dbConnectionWeb } from "../../database";
+import { ValidationError } from "../../errors/CustomError";
+import { abonosQuery } from "../../database/querys/abonos";
 
 export const getAbonosService = async (params: getAbonosParams): Promise<getAbonosResponse> => {
 
@@ -98,4 +101,33 @@ export const getAbonoByIdService = async (params: getAbonoByIdParams): Promise<g
 
     return { abono };
 
+}
+
+export const getAbonoDetailsService = async (params: any): Promise<any> => {
+
+    const {
+        userSession: { ServidorSQL, BaseSQL },
+        PageNumber,
+        folio
+    } = params;
+
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
+
+    if (!pool) {
+        throw new ValidationError('Error al conectarse a base de datos principal');
+    };
+
+    const query = abonosQuery.getAbonoDetails;
+
+    const requestAbonos = await pool.request()
+        .input('PageNumber', PageNumber)
+        .input('PageSize', 10)
+        .input('Folio', folio)
+        .query(query);
+
+    const abonosDetails = requestAbonos.recordset
+
+    return {
+        abonosDetails
+    };
 }

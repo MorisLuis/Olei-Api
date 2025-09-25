@@ -9,35 +9,29 @@ const database_1 = require("../../database");
 const clients_1 = require("../../database/querys/clients");
 const CustomError_1 = require("../../errors/CustomError");
 const prismaConnection_1 = require("../../database/prismaConnection");
-const orderFunction_1 = require("../../utils/prisma/orderFunction");
 const updateFunction_1 = require("../../utils/prisma/updateFunction");
-const filterFunction_1 = require("../../utils/prisma/filterFunction");
 const getClientsService = async (params) => {
-    const { userSession: { ServidorSQL, BaseSQL }, orderField, orderDirection, skip, limit, filters = [], } = params;
-    const prisma = (0, prismaConnection_1.getPrismaClient)(ServidorSQL, BaseSQL);
-    const orderBy = (0, orderFunction_1.buildOrder)({ field: orderField, direction: orderDirection }, 'Id_Cliente');
-    const where = (0, filterFunction_1.buildFilters)(filters);
-    const [clientes, totalClientes] = await Promise.all([
-        prisma.clientes.findMany({
-            skip,
-            take: limit,
-            orderBy,
-            where,
-            select: {
-                Nombre: true,
-                Id_Almacen: true,
-                Id_Cliente: true,
-                IdOLEI: true,
-                Telefono1: true,
-                CorreoVtas: true,
-                UsuarioSQL: true
-            }
-        }).then(rows => rows.map(({ UsuarioSQL, ...rest }) => ({
-            ...rest,
-            TelefonoWhatsapp: UsuarioSQL
-        }))),
-        prisma.clientes.count({ where }),
-    ]);
+    const { userSession: { ServidorSQL, BaseSQL }, orderField, PageNumber, limit, Nombre, Id_Cliente, } = params;
+    const pool = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
+    if (!pool) {
+        throw new CustomError_1.ValidationError('Error al conectarse a base de datos principal');
+    }
+    ;
+    let query = clients_1.clientsQuerys.getClients;
+    let queryTotal = clients_1.clientsQuerys.getTotalClients;
+    const totalRequest = await pool.request()
+        .input('Nombre', Nombre)
+        .input('Id_Cliente', Id_Cliente)
+        .query(queryTotal);
+    const request = await pool.request()
+        .input('PageNumber', mssql_1.default.Int, PageNumber)
+        .input('PageSize', mssql_1.default.Int, limit)
+        .input('Nombre', mssql_1.default.VarChar, Nombre === '' ? null : Nombre)
+        .input('Id_Cliente', mssql_1.default.VarChar, Id_Cliente === '' ? null : Id_Cliente)
+        .input('OrderCondition', mssql_1.default.VarChar, orderField)
+        .query(query);
+    const clientes = request.recordset;
+    const totalClientes = totalRequest.recordset[0].TotalCount;
     return {
         clientes,
         total: totalClientes

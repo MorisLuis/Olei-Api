@@ -4,20 +4,18 @@ exports.updateClient = exports.getTotalClients = exports.searchClient = exports.
 const clients_service_1 = require("../../services/clients/clients.service");
 const client_schema_1 = require("./client.schema");
 const generate_redis_1 = require("../../helpers/generate-redis");
-const parsePrismaFilter_1 = require("../../utils/prisma/parsePrismaFilter");
 const getClients = async (req, res, next) => {
     try {
-        const { PageNumber, limit, orderField, orderDirection, filterField, filterValue } = client_schema_1.getClientsQuerySchema.parse(req.query);
-        const skip = (PageNumber - 1) * limit;
+        const { PageNumber, limit, orderField, orderDirection, Id_Cliente, Nombre } = client_schema_1.getClientsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
-        const filters = (0, parsePrismaFilter_1.parsePrismaFilter)(filterField, filterValue);
         const { clientes, total } = await (0, clients_service_1.getClientsService)({
             userSession,
             orderField,
             orderDirection,
-            skip,
+            PageNumber,
             limit,
-            filters
+            Nombre,
+            Id_Cliente
         });
         return res.json({
             ok: true,

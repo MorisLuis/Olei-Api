@@ -52,7 +52,7 @@ const sendEmailWithPDFService = async ({ userSession,
 Id_Cliente, Id_Almacen, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart, SellsOrderCondition, 
 // Email data
 destinatario, remitente, subject, text, nombreRemitente }) => {
-    const { ServidorSQL, BaseSQL, Id_UsuarioOLEI } = userSession;
+    const { ServidorSQL, BaseSQL, Id_UsuarioOLEI, Nombre } = userSession;
     const { sells, brief } = await (0, cobranza_utils_1.getAllCobranzaService)({
         userSession,
         PageSize: 10,
@@ -66,7 +66,7 @@ destinatario, remitente, subject, text, nombreRemitente }) => {
         DateExactly: DateExactly || null,
         DateStart: DateStart || null,
     });
-    const pdfBuffer = await (0, generatePDF_1.default)(sells, brief);
+    const pdfBuffer = await (0, generatePDF_1.default)(sells, brief, Nombre);
     const userEmailData = await getUserEmailConfig(Id_UsuarioOLEI, {
         ServidorSQL,
         BaseSQL
