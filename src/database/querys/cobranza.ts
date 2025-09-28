@@ -16,7 +16,7 @@ export const cobranzaQuery = {
         INSERT INTO @Ventas (Id_Cliente, Nombre, Id_Almacen, ExpiredDays, Saldo, CorreoVtas)
         SELECT
             V.Id_Cliente,
-            C.RazonSocial AS Nombre,
+            C.Nombre AS Nombre,
             V.Id_Almacen,
             DATEDIFF(DAY, GETDATE(), DATEADD(DAY, CD.Dias, V.Fecha)) AS ExpiredDays,
             V.Saldo,
@@ -26,7 +26,7 @@ export const cobranzaQuery = {
         JOIN [dbo].[CONDVTAS] CD ON CD.Id_CondVta = V.Id_CondVta
         WHERE V.Saldo > 0
         AND V.Id_CondVta <> 1
-        AND (@nombre = '' OR LOWER(C.RazonSocial) LIKE LOWER(@nombre) + '%');
+        AND (@nombre = '' OR LOWER(C.Nombre) LIKE LOWER(@nombre) + '%');
         
         -- Totales por cliente y almacén
         WITH Totales AS (
@@ -76,7 +76,7 @@ export const cobranzaQuery = {
         INSERT INTO @Ventas (Id_Cliente, Nombre, Id_Almacen, ExpiredDays, Saldo, CorreoVtas)
         SELECT
             V.Id_Cliente,
-            C.RazonSocial AS Nombre,
+            C.Nombre AS Nombre,
             V.Id_Almacen,
             DATEDIFF(DAY, GETDATE(), DATEADD(DAY, CD.Dias, V.Fecha)) AS ExpiredDays,
             V.Saldo,
@@ -89,7 +89,7 @@ export const cobranzaQuery = {
         AND (@DateExactly IS NULL OR CAST(Fecha AS DATE) = @DateExactly)
         AND (@DateStart IS NULL OR CAST(Fecha AS DATE) >= @DateStart)
         AND (@DateEnd IS NULL OR CAST(Fecha AS DATE) <= @DateEnd)
-        AND (@nombre = '' OR LOWER(C.RazonSocial) LIKE LOWER(@nombre) + '%');
+        AND (@nombre = '' OR LOWER(C.Nombre) LIKE LOWER(@nombre) + '%');
             
         -- Totales por cliente y almacén
         WITH Totales AS (
@@ -116,14 +116,14 @@ export const cobranzaQuery = {
         WITH VentasFiltradas AS (
             SELECT
                 V.Id_Cliente,
-                C.RazonSocial AS Nombre,
+                C.Nombre AS Nombre,
                 V.Id_Almacen
             FROM [dbo].[VENTAS] V
             JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = V.Id_Cliente AND C.Id_Almacen = V.Id_Almacen
             WHERE V.Saldo > 0
             AND V.FechaLiq >= CAST(GETDATE() AS DATE)
             AND V.Id_CondVta <> 1
-            AND (@nombre = '' OR LOWER(C.RazonSocial) LIKE LOWER(@nombre) + '%')
+            AND (@nombre = '' OR LOWER(C.Nombre) LIKE LOWER(@nombre) + '%')
         )
         SELECT COUNT(*) AS TotalCount
         FROM (
