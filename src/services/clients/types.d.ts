@@ -2,9 +2,6 @@ import type { Clientes } from "@prisma/client";
 import type { ClientInterface } from "../../interface/client";
 import type { UserWebSessionInterface } from "../../interface/user";
 
-import type { Prisma } from "@prisma/client";
-import type { FilterPrisma } from "../../utils/prisma/types";
-
 //PARAMS
 interface getClientsParams {
     userSession: UserWebSessionInterface

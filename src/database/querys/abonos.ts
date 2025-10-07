@@ -2,16 +2,16 @@ export const abonosQuery = {
 
     getAbonoDetails: `
         SELECT 
-            DA.Folio,
+            V.Folio,
             DA.TipoDoc,
             V.Fecha,
-            V.Saldo,
-            V.Total
+            DA.SaldoNuevo AS Saldo,
+            DA.SaldoRef AS Total
         FROM [dbo].[DETALLEABONOS] DA
         JOIN [dbo].[VENTAS] V 
-        ON V.Folio = DA.Folio 
+        ON V.Folio = DA.FolioRef 
         AND V.Id_Almacen = DA.Id_Almacen
-        WHERE V.Folio = @Folio
+        WHERE DA.Folio = @Folio
         ORDER BY V.Fecha DESC
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY;

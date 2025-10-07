@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import type { PDFPage, PDFDocument} from 'pdf-lib';
 import { rgb, StandardFonts } from 'pdf-lib';
 
@@ -29,7 +27,7 @@ export const drawHeader = async ({
     const companyText =  company?.trim() || 'Olei Software';
     const fontSize = 20;
 
-    const textWidth = helveticaFont.widthOfTextAtSize(companyText, fontSize);
+    //const textWidth = helveticaFont.widthOfTextAtSize(companyText, fontSize);
     const textHeight = fontSize;
 
     const textX = marginLeft;

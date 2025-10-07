@@ -2,7 +2,7 @@
 type DataReponse = Record<string, string | number | boolean | object>
 
 export function buildUpdate(
-    data: any,
+    data: DataReponse,
     allowedFields?: string[]
 ) : DataReponse {
     // Si se especifican campos permitidos, filtramos

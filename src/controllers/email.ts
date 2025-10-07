@@ -20,12 +20,14 @@ const sendEmail = async (req: Request, res: Response, next: NextFunction): Promi
     })
 
     try {
-        await handleTransporter({
+        /* await handleTransporter({
             host: "smtp.gmail.com",
             port: 465,
             secure: true,
             auth: { user: "moradoluisenrique@gmail.com", pass: 'gcnx sjih fxcq drcy' }
-        }).sendMail(mailOptions)
+        }).sendMail(mailOptions) */
+
+        await handleTransporter(emailTransporterData).sendMail(mailOptions)
 
         return res.json({
             ok: true

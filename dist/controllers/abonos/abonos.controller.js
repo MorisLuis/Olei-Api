@@ -52,12 +52,12 @@ const getAbonoDetails = async (req, res, next) => {
     try {
         const { folio } = req.params;
         const { PageNumber } = req.query;
-        const { abonosDetails } = await (0, abonos_service_1.getAbonoDetailsService)({
+        const { abonoDetails } = await (0, abonos_service_1.getAbonoDetailsService)({
             userSession: req.sessionWeb,
-            PageNumber,
+            PageNumber: Number(PageNumber) || 1,
             folio
         });
-        return res.json({ abonosDetails });
+        return res.json({ abonoDetails });
     }
     catch (error) {
         return next(error);

@@ -2,6 +2,14 @@ import type { Prisma } from "@prisma/client/extension"
 import type { UserWebSessionInterface } from "../../interface/user"
 import type { FilterPrisma } from "../../utils/prisma/types"
 
+export interface AbonoDetailsInterface {
+    Folio: number,
+    TipoDoc: number,
+    Fecha: Date,
+    Saldo: number,
+    Total: number,
+}
+
 interface getAbonosParams {
     userSession: UserWebSessionInterface
     orderField: Prisma.ABONOSOrderByWithRelationInput

@@ -1,3 +1,4 @@
+import type { IRecordSet } from "mssql";
 import { dbConnectionWeb } from "../../database";
 import { celendarQuerys } from "../../database/querys/calendar";
 import { ValidationError } from "../../errors/CustomError";
@@ -42,9 +43,9 @@ const getCalendarTaskByDayAndClientService = async ({
         .input('limit', limit)
         .query(query);
 
-    const quotes = request.recordset
-    const TotalBitacora = (request.recordsets as any)[1][0].TotalBitacora
-    const TotalVentas = (request.recordsets as any)[2][0].TotalVentas
+    const quotes = request.recordset;
+    const TotalBitacora = (request.recordsets as IRecordSet<any>[])[1][0].TotalBitacora;
+    const TotalVentas = (request.recordsets as IRecordSet<any>[])[2][0].TotalVentas;
 
     return {
         quotes,

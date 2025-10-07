@@ -65,18 +65,18 @@ const getAbonoById = async (req: Request, res: Response, next: NextFunction): Pr
 }
 
 const getAbonoDetails = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-    
+
     try {
         const { folio } = req.params
         const { PageNumber } = req.query
 
-        const {abonosDetails} = await getAbonoDetailsService({
+        const { abonoDetails } = await getAbonoDetailsService({
             userSession: req.sessionWeb,
-            PageNumber,
+            PageNumber : Number(PageNumber) || 1,
             folio
         });
 
-        return res.json({abonosDetails});
+        return res.json({ abonoDetails });
 
     } catch (error) {
         return next(error)

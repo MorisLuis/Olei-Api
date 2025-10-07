@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { getPrismaClient } from "../../database/prismaConnection";
-import type { getAbonoByIdParams, getAbonoByIdResponse, getAbonosParams, getAbonosResponse } from "./types";
+import type { AbonoDetailsInterface, getAbonoByIdParams, getAbonoByIdResponse, getAbonosParams, getAbonosResponse } from "./types";
 import { buildOrder } from "../../utils/prisma/orderFunction";
 import { buildFilters } from "../../utils/prisma/filterFunction";
 import { appendDateFilter } from "../../utils/prisma/appendDateRange";
@@ -103,7 +103,7 @@ export const getAbonoByIdService = async (params: getAbonoByIdParams): Promise<g
 
 }
 
-export const getAbonoDetailsService = async (params: any): Promise<any> => {
+export const getAbonoDetailsService = async (params: { userSession: { ServidorSQL: string; BaseSQL: string }; PageNumber: number; folio: string }): Promise<{ abonoDetails: AbonoDetailsInterface[] }> => {
 
     const {
         userSession: { ServidorSQL, BaseSQL },
@@ -125,9 +125,9 @@ export const getAbonoDetailsService = async (params: any): Promise<any> => {
         .input('Folio', folio)
         .query(query);
 
-    const abonosDetails = requestAbonos.recordset
+    const abonoDetails = requestAbonos.recordset
 
     return {
-        abonosDetails
+        abonoDetails
     };
 }

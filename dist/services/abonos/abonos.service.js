@@ -93,9 +93,9 @@ const getAbonoDetailsService = async (params) => {
         .input('PageSize', 10)
         .input('Folio', folio)
         .query(query);
-    const abonosDetails = requestAbonos.recordset;
+    const abonoDetails = requestAbonos.recordset;
     return {
-        abonosDetails
+        abonoDetails
     };
 };
 exports.getAbonoDetailsService = getAbonoDetailsService;

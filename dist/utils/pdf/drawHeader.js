@@ -7,7 +7,7 @@ const drawHeader = async ({ page, pdfDoc, pageWidth, pageHeight, marginLeft = 50
     const helveticaFont = await pdfDoc.embedFont(pdf_lib_1.StandardFonts.HelveticaBold);
     const companyText = company?.trim() || 'Olei Software';
     const fontSize = 20;
-    const textWidth = helveticaFont.widthOfTextAtSize(companyText, fontSize);
+    //const textWidth = helveticaFont.widthOfTextAtSize(companyText, fontSize);
     const textHeight = fontSize;
     const textX = marginLeft;
     const textY = pageHeight - textHeight - 20;
