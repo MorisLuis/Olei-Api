@@ -37,7 +37,8 @@ export const getMeetingsQuerySchema = z.object({
         .transform((val) => (val ? parseInt(val, 10) : 0)) // Convertimos a número
         .refine((val) => val >= 0, { message: "Id_Cliente debe ser un número positivo" }),
 
-    searchTerm: z.preprocess((val) => (val === '' ? undefined : val), z.string().optional())
+    searchTerm: z.preprocess((val) => (val === '' ? undefined : val), z.string().optional()),
+    status: z.union([z.string(), z.number()]).optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
 
 });
 

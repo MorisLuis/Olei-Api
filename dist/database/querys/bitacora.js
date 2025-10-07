@@ -22,6 +22,7 @@ exports.bitacoraQuerys = {
                 JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = B.Id_Cliente AND C.Id_Almacen = B.Id_Almacen
                 WHERE (@FilterCliente = 0 OR (B.Id_Cliente = @Id_Cliente AND @FilterCliente = 1))
                     AND (@FilterTipoContacto = 0 OR (TipoContacto = @TipoContacto AND @FilterTipoContacto = 1))
+                    AND (@status = 0 OR (B.status = @status AND @status = 1))
                     AND (C.Nombre LIKE '%' + ISNULL(@searchTerm, '') + '%')
             )
         SELECT *
@@ -48,6 +49,7 @@ exports.bitacoraQuerys = {
         WHERE
         (@FilterCliente = 0 OR (B.Id_Cliente = @Id_Cliente AND @FilterCliente = 1))
         AND (@FilterTipoContacto = 0 OR (TipoContacto = @TipoContacto AND @FilterTipoContacto = 1))
+        AND (@status = 0 OR (B.status = @status AND @status = 1))
         AND (C.Nombre LIKE '%' + ISNULL(@searchTerm, '') + '%')
     `,
     getMeetingById: `

@@ -15,6 +15,7 @@ interface getMeetingsServiceInterface {
     MeetingOrderCondition: MeetingOrderConditionType | string,
     FilterCliente: 0 | 1,
     searchTerm?: string
+    status: 0 | 1
 }
 
 const getMeetingsService = async ({
@@ -24,7 +25,8 @@ const getMeetingsService = async ({
     TipoContacto,
     MeetingOrderCondition,
     FilterCliente,
-    searchTerm
+    searchTerm,
+    status = 0
 }: getMeetingsServiceInterface): Promise<{ meetings: MeetingInterface[], total: number }> => {
 
 
@@ -52,6 +54,7 @@ const getMeetingsService = async ({
         .input('FilterTipoContacto', TipoContacto === 0 ? 0 : 1)
         .input('FilterCliente', FilterCliente)
         .input('searchTerm', searchTerm)
+        .input('status', status)
         .query(query);
 
     const requestTotal = await pool.request()
@@ -60,6 +63,7 @@ const getMeetingsService = async ({
         .input('FilterTipoContacto', TipoContacto === 0 ? 0 : 1)
         .input('FilterCliente', FilterCliente)
         .input('searchTerm', searchTerm)
+        .input('status', status)
         .query(totalMeetingsQuery);
 
     const [meetingsResult, totalResult] = await Promise.all([
