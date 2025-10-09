@@ -88,6 +88,7 @@ const getAbonoDetailsService = async (params) => {
     }
     ;
     const query = abonos_1.abonosQuery.getAbonoDetails;
+    console.log({ folio });
     const requestAbonos = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)

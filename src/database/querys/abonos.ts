@@ -5,8 +5,8 @@ export const abonosQuery = {
             V.Folio,
             DA.TipoDoc,
             V.Fecha,
-            DA.SaldoNuevo,
-            DA.SaldoRef
+            DA.SaldoNuevo AS Saldo,
+            DA.SaldoRef AS Total
         FROM [dbo].[DETALLEABONOS] DA
             JOIN [dbo].[VENTAS] V
             ON V.Folio = DA.FolioRef
