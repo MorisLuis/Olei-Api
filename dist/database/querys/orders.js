@@ -12,7 +12,7 @@ exports.orderQuerys = {
         WHERE  V.Folio = @folio
     `,
     getAllOrders: `
-        SELECT V.Folio, V.Piezas, V.Subtotal, V.Impuesto, V.Total, V.Fecha, V.Id_Cliente, C.Nombre as Cliente, VE.Nombre as Vendedor
+        SELECT V.Folio, V.Piezas, V.Subtotal, V.Impuesto, V.Total, V.Fecha, V.Id_Cliente, V.TipoDoc, C.Nombre as Cliente, VE.Nombre as Vendedor
         FROM [dbo].[VENTAS] AS V
         LEFT JOIN [dbo].[CLIENTES] AS C ON V.Id_Cliente = C.Id_Cliente AND V.Id_Almacen = C.Id_Almacen
         LEFT JOIN [dbo].[VENDEDORES] AS VE ON V.Id_Vendedor = VE.Id_Vendedor

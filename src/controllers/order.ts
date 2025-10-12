@@ -21,7 +21,7 @@ const getOrder = async (req: Request, res: Response, next: NextFunction): Promis
     }
 };
 
-const getAllOrders = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+const  getAllOrders = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const userSession = req.sessionWeb

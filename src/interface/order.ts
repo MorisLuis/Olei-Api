@@ -9,4 +9,5 @@ export default interface OrderInterface {
     Cliente?: string,
     Vendedor?: string,
     Folio?: string
+    TipoDoc?: number
 }
