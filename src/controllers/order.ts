@@ -21,7 +21,7 @@ const getOrder = async (req: Request, res: Response, next: NextFunction): Promis
     }
 };
 
-const  getAllOrders = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+const getAllOrders = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
         const userSession = req.sessionWeb
@@ -104,7 +104,7 @@ const postOrder = async (req: Request, res: Response, next: NextFunction): Promi
         const { sellsDetails, sellsData } = postOrderBodySchema.parse(req.body);
         const { Subtotal, Total } = sellsData ?? {}
 
-        const { folio } = await postOrderService({
+        const { folio, TipoDoc } = await postOrderService({
             sellsData,
             sellsDetails,
             userSession,
@@ -114,7 +114,8 @@ const postOrder = async (req: Request, res: Response, next: NextFunction): Promi
 
         return res.status(201).json({
             ok: true,
-            folio
+            folio,
+            TipoDoc
         });
 
     } catch (error) {

@@ -45,6 +45,7 @@ interface GetTotalOrderDetailsSellsParams {
 
 interface PostOrderServiceResponse {
     folio: string
+    TipoDoc: number
 };
 
 interface GetOrderServiceResponse {

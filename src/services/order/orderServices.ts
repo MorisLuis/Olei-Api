@@ -192,7 +192,8 @@ const postOrderService = async ({
     const folio = result.recordset[0].Folio
 
     return {
-        folio
+        folio,
+        TipoDoc: TipoDocOO
     }
 };
 

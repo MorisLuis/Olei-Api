@@ -88,7 +88,7 @@ const postOrder = async (req, res, next) => {
         const userSession = req.sessionWeb;
         const { sellsDetails, sellsData } = orderValidations_1.postOrderBodySchema.parse(req.body);
         const { Subtotal, Total } = sellsData ?? {};
-        const { folio } = await (0, orderServices_1.postOrderService)({
+        const { folio, TipoDoc } = await (0, orderServices_1.postOrderService)({
             sellsData,
             sellsDetails,
             userSession,
@@ -97,7 +97,8 @@ const postOrder = async (req, res, next) => {
         });
         return res.status(201).json({
             ok: true,
-            folio
+            folio,
+            TipoDoc
         });
     }
     catch (error) {

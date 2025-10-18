@@ -137,7 +137,8 @@ const postOrderService = async ({ userSession, Total, Subtotal, sellsDetails, se
     await transaction.commit();
     const folio = result.recordset[0].Folio;
     return {
-        folio
+        folio,
+        TipoDoc: TipoDocOO
     };
 };
 exports.postOrderService = postOrderService;
