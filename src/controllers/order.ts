@@ -119,6 +119,7 @@ const postOrder = async (req: Request, res: Response, next: NextFunction): Promi
         });
 
     } catch (error) {
+        console.log({error})
         return next(error);
     }
 };

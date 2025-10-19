@@ -90,6 +90,7 @@ const getOrderDetailsSells = async ({
         .query(query);
 
     const orderDetails = request.recordset
+
     const response: { orderDetails: SellsDetailsInterface[] } = { orderDetails };
 
     return response;
@@ -174,6 +175,7 @@ const postOrderService = async ({
     if (!Id_Cliente) {
         throw new ValidationError("Id Cliente necesario")
     }
+
 
     const result = await request
         .input('xmlDataSales', sql.Xml, xmlDataSales)

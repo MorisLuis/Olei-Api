@@ -32,7 +32,7 @@ exports.orderQuerys = {
             D.Precio,
             D.Cantidad,
             D.Importe,
-            D.Impuesto,
+            C.Impto AS Impuesto,
             D.Id_Marca,
             D.Id_Almacen,
             D.Id_ListaPrecios,
@@ -46,6 +46,7 @@ exports.orderQuerys = {
         INNER JOIN [dbo].[EXISTENCIAS] AS E ON D.Codigo = E.Codigo AND D.Id_Marca = E.Id_Marca AND D.Id_Almacen = E.Id_Almacen
         INNER JOIN [dbo].[MARCAS] AS F ON D.Id_Marca = F.Id_Marca
         INNER JOIN [dbo].[UNIDADES] AS U ON D.Id_Unidad = U.Id_Unidad
+        INNER JOIN [dbo].[COSTOS] AS C ON C.Codigo = D.Codigo
         WHERE Folio = @folio AND TipoDoc = @TipoDoc
         ORDER BY Folio DESC
         OFFSET (@PageNumber - 1) * @PageSize ROWS
