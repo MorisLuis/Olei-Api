@@ -14,6 +14,21 @@ export const celendarQuerys = {
         FROM [dbo].[BITACORACRM]
         WHERE YEAR(Fecha) = @Anio
             AND MONTH(Fecha) = @Mes
+    `,
+
+    /* getCalendarTasksMonth: `
+        SELECT
+            Id_Cliente,
+            Id_Bitacora,
+            Descripcion,
+            NULL AS Folio,
+            NULL AS Id_Sell,
+            Fecha,
+            Titulo,
+            'Bitacora' AS TableType
+        FROM [dbo].[BITACORACRM]
+        WHERE YEAR(Fecha) = @Anio
+            AND MONTH(Fecha) = @Mes
 
         UNION ALL
 
@@ -34,7 +49,7 @@ export const celendarQuerys = {
         FROM [dbo].[VENTAS]
         WHERE YEAR(Fecha) = @Anio
             AND MONTH(Fecha) = @Mes;
-    `,
+    `, */
 
     getCalendarTasksByDay: `
         SELECT
