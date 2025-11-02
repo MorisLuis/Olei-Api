@@ -27,10 +27,10 @@ const getClientsService = async (params: getClientsParams): Promise<getClientsRe
 
     let query = clientsQuerys.getClients;
     let queryTotal = clientsQuerys.getTotalClients;
-    
+
     const totalRequest = await pool.request()
-        .input('Nombre', Nombre)
-        .input('Id_Cliente', Id_Cliente)
+        .input('Nombre', sql.VarChar, Nombre === '' ? null : Nombre)
+        .input('Id_Cliente', sql.VarChar, Id_Cliente === '' ? null : Id_Cliente)
         .query(queryTotal);
 
     const request = await pool.request()
