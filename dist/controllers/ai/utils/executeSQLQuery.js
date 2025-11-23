@@ -7,7 +7,6 @@ async function executeSQLQuery(params) {
     const connection = await (0, database_1.dbConnectionWeb)(ServidorSQL, BaseSQL);
     const result = await connection.request().query(query);
     return result.recordset;
-    return [];
 }
 exports.executeSQLQuery = executeSQLQuery;
 //# sourceMappingURL=executeSQLQuery.js.map

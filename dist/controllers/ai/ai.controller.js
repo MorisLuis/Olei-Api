@@ -6,6 +6,7 @@ const sqlPrompt_service_1 = require("../../services/ai/sqlPrompt.service");
 const executeSQLQuery_1 = require("./utils/executeSQLQuery");
 const isSafeSQL_1 = require("./utils/isSafeSQL");
 const classifier_1 = require("./utils/classifier");
+const response_1 = require("../../helpers/response");
 const askAI = async (req, res) => {
     try {
         const { prompt } = req.body;
@@ -27,13 +28,7 @@ const askAI = async (req, res) => {
         const userSession = req.sessionWeb;
         const data = await (0, executeSQLQuery_1.executeSQLQuery)({ userSession, query: aiText });
         const headers = Object.keys(data[0] ? data[0] : {});
-        return res.json({
-            ok: true,
-            total: data.length,
-            data,
-            headers,
-            query: aiText
-        });
+        return (0, response_1.successResponse)(req, res, { type, query: aiText, headers }, "Consulta AI exitosa", 200, { totals: { show: data.length, total: data.length }, pages: { current: 1, totalPages: 1 } });
     }
     catch (error) {
         console.error("❌ Error en askAI:", error);
