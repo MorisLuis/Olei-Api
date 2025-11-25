@@ -32,7 +32,7 @@ const askAI = async (req, res) => {
     }
     catch (error) {
         console.error("❌ Error en askAI:", error);
-        return res.status(500).json({ error: "Error del servidor compa" });
+        return res.status(500).json({ error: `Error del servidor: ${error} ` });
     }
 };
 exports.askAI = askAI;
