@@ -20,8 +20,8 @@ const getClientsService = async (params) => {
     let query = clients_1.clientsQuerys.getClients;
     let queryTotal = clients_1.clientsQuerys.getTotalClients;
     const totalRequest = await pool.request()
-        .input('Nombre', Nombre)
-        .input('Id_Cliente', Id_Cliente)
+        .input('Nombre', mssql_1.default.VarChar, Nombre === '' ? null : Nombre)
+        .input('Id_Cliente', mssql_1.default.VarChar, Id_Cliente === '' ? null : Id_Cliente)
         .query(queryTotal);
     const request = await pool.request()
         .input('PageNumber', mssql_1.default.Int, PageNumber)

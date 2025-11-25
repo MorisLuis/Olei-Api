@@ -15,7 +15,6 @@ const loginWeb = async (req, res, next) => {
         };
         // Generar un ID de sesión único
         const sessionId = (0, uuid_1.v4)();
-        console.log({ sessionId });
         const token = (0, generate_jwt_1.generateAccessTokenWeb)(sessionId);
         const refreshToken = (0, generate_jwt_1.generateRefreshTokenWeb)(sessionId);
         // Guardar la sesión en Redis con expiración (1 hora)

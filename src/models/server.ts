@@ -26,6 +26,7 @@ import reportsRouter from "../routes/reportsRouter";
 import almacenesRouter from "../routes/almacenesRouter";
 import statisticsRouter from "../routes/statisticsRouter";
 import abonosRouter from "../routes/abonosRouter";
+import aiRouter from "../routes/aiRouter";
 
 import { errorHandler } from "../middleware/errorHandler";
 import cookieParser from 'cookie-parser';  // Asegúrate de importar cookie-parser
@@ -53,7 +54,8 @@ class Server {
         reports: string
         almacenes: string,
         statistics: string,
-        abonos: string
+        abonos: string,
+        aiRouter: string
     };
 
     constructor() {
@@ -78,7 +80,8 @@ class Server {
             reports: "/api/reports",
             almacenes: "/api/almacenes",
             statistics: "/api/statistics",
-            abonos: "/api/abonos"
+            abonos: "/api/abonos",
+            aiRouter: "/api/ai"
         };
 
         void this.connectDB();
@@ -143,6 +146,7 @@ class Server {
         this.app.use(this.paths.almacenes, almacenesRouter);
         this.app.use(this.paths.statistics, statisticsRouter);
         this.app.use(this.paths.abonos, abonosRouter);
+        this.app.use(this.paths.aiRouter, aiRouter);
 
     }
 

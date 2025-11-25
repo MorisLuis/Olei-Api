@@ -118,8 +118,6 @@ export const getAbonoDetailsService = async (params: { userSession: { ServidorSQ
     };
 
     const query = abonosQuery.getAbonoDetails;
-
-    console.log({folio})
     const requestAbonos = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
