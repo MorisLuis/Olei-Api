@@ -34,7 +34,7 @@ export function classifyAIResponse(text: string): AIResponseType {
     }
 
     // Si empieza con SELECT → se considera SQL válido
-    if (upper.startsWith("SELECT")) {
+    if (upper.startsWith("SELECT") || upper.startsWith("WITH")) {
         return "SQL";
     }
 
