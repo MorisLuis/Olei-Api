@@ -15,7 +15,7 @@ export const askAI = async (req: Request, res: Response) => {
         const type = classifyAIResponse(aiText);
 
         if (type !== "SQL") {
-            return errorResponse(res, aiText, 400);
+            return errorResponse(res, `Is not SQL: ${aiText}`, 400);
         }
 
         if (!isSafeSQL(aiText)) {
@@ -29,7 +29,7 @@ export const askAI = async (req: Request, res: Response) => {
         return successResponse(req, res, { data, type, query: aiText, headers }, "Consulta AI exitosa", 200, { totals: { show: data.length, total: data.length }, pages: { current: 1, totalPages: 1 } });
 
     } catch (error) {
-        return res.status(500).json({ error: "Error del servidor compa" });
+        return res.status(500).json({ error: `Error del servidor compa: ${error}` });
     }
 };
 
