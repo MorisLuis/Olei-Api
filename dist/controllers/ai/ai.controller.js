@@ -11,28 +11,22 @@ const askAI = async (req, res) => {
     try {
         const { prompt } = req.body;
         if (!prompt)
-            return res.status(400).json({ error: "Falta el prompt compa" });
+            return (0, response_1.errorResponse)(res, 'Falta el promtp', 400);
         const aiText = await (0, sqlPrompt_service_1.generateSQLFromPrompt)(prompt);
         const type = (0, classifier_1.classifyAIResponse)(aiText);
-        console.log("🤖 Respuesta de la IA:", { type, aiText });
         if (type !== "SQL") {
-            return res.json({
-                ok: false,
-                type,
-                message: aiText
-            });
+            return (0, response_1.errorResponse)(res, `Is not SQL: ${aiText}`, 400);
         }
         if (!(0, isSafeSQL_1.isSafeSQL)(aiText)) {
-            return res.status(400).json({ error: "Consulta SQL no segura" });
+            return (0, response_1.errorResponse)(res, 'Consulta SQL no segura', 400);
         }
         const userSession = req.sessionWeb;
         const data = await (0, executeSQLQuery_1.executeSQLQuery)({ userSession, query: aiText });
         const headers = Object.keys(data[0] ? data[0] : {});
-        return (0, response_1.successResponse)(req, res, { type, query: aiText, headers }, "Consulta AI exitosa", 200, { totals: { show: data.length, total: data.length }, pages: { current: 1, totalPages: 1 } });
+        return (0, response_1.successResponse)(req, res, { data, type, query: aiText, headers }, "Consulta AI exitosa", 200, { totals: { show: data.length, total: data.length }, pages: { current: 1, totalPages: 1 } });
     }
     catch (error) {
-        console.error("❌ Error en askAI:", error);
-        return res.status(500).json({ error: `Error del servidor: ${error} ` });
+        return res.status(500).json({ error: `Error del servidor compa: ${error}` });
     }
 };
 exports.askAI = askAI;
