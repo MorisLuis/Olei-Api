@@ -8,9 +8,6 @@ export function getRules() {
         - Nunca mezcles categorías (ventas, compras, existencias, clientes, cobranza).
 
         2) NO uses:
-        - UNION o UNION ALL
-        - CTEs (NINGÚN WITH …)
-        - Subconsultas
         - Filas sintéticas con NULLs
         - SELECT *
         - Procedimientos almacenados
