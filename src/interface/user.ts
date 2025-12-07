@@ -45,6 +45,9 @@ export interface UserWebSessionInterface {
     Vigencia: string,
     TipoDocOO: number,
 
+    InformesIAR: boolean,
+    InformesIAE: boolean,
+    InformesIAW: boolean,
 
     SwSinStock: boolean, 
     SwsinPrecio: boolean, 

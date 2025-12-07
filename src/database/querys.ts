@@ -20,9 +20,13 @@ export const querys = {
             UC.Nombre,
             UC.Vigencia,
             UC.UsuarioSQL,
-            UC.Id_ListPre
+            UC.Id_ListPre,
+            PU.InformesIAR,
+            PU.InformesIAE,
+            PU.InformesIAW
         FROM [OLEIDB1_CLIENTES].[dbo].[USUARIOSOOL] U
         JOIN [OLEIDB1_CLIENTES].[dbo].[CLIENTES] UC on U.Id_ClienteDBCLIENTES = UC.Id_Cliente
+        JOIN [OLEIDB1_CLIENTES].[dbo].[PERFILESUSUARIO] PU on PU.Id_Perfil = U.Id_Perfil
         WHERE U.Id_UsuarioOOL = @email
     `,
 
