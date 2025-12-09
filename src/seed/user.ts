@@ -23,7 +23,10 @@ const mockUserSession: UserWebSessionInterface = {
 
     SwSinStock: false,
     SwsinPrecio: true,
-    IsEmploye: true
+    IsEmploye: true,
+    InformesIAE: false,
+    InformesIAR: false,
+    InformesIAW : false
 };
 
 export {
