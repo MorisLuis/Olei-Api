@@ -20,7 +20,10 @@ const mockUserSession = {
     TipoDocOO: 2,
     SwSinStock: false,
     SwsinPrecio: true,
-    IsEmploye: true
+    IsEmploye: true,
+    InformesIAE: false,
+    InformesIAR: false,
+    InformesIAW: false
 };
 exports.mockUserSession = mockUserSession;
 //# sourceMappingURL=user.js.map

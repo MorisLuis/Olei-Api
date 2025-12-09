@@ -102,6 +102,118 @@ exports.whitelist = {
                 "DiasCredito"
             ],
         },
+        {
+            nombre: "View_Clientes",
+            description: "Información detallada de clientes; usar cuando el usuario solicita datos específicos de clientes.",
+            camposPermitidos: [
+                "Almacen",
+                "NumeroCliente",
+                "FechaAlta",
+                "NombreCliente",
+                "RazonSocial",
+                "RFC",
+                "Calle",
+                "NoExt",
+                "NoInt",
+                "Colonia",
+                "Ciudad",
+                "Estado",
+                "CodigoPostal",
+                "Telefono1",
+                "Telefono2",
+                "Correo",
+                "FormadePago",
+                "TipodeCliente",
+                "Vendedor",
+                "ListadePrecios",
+                "LimitedeCredito",
+                "DiasdeCredito",
+                "Descuento"
+            ]
+        },
+        {
+            nombre: "View_Cobranza",
+            description: "Información detallada de cobranza; usar cuando el usuario solicita datos específicos de cobranza o pagos.",
+            camposPermitidos: [
+                "Fecha",
+                "Folio",
+                "FechaOperacion",
+                "NumeroOperacion",
+                "Importe",
+                "NombreCliente",
+                "Paridad",
+                "Descripcion",
+                "EstadoAbono",
+                "FormaPago",
+                "Vendedor",
+                "Almacen",
+                "Usuario"
+            ]
+        },
+        {
+            nombre: "View_ComprasconProducto",
+            descripcion: "Detalle de productos por compra, útil cuando el usuario pide información con producto, marca o cantidad.",
+            camposPermitidos: [
+                "Folio",
+                "Fecha",
+                "TipoDocumento",
+                "NumeroProveedor",
+                "NombreProveedor",
+                "EstadoDocumento",
+                "CodigoProducto",
+                "CantidadDeProducto",
+                "Marca",
+                "Descripcion",
+                "PrecioProducto",
+                "ImporteProducto",
+                "Familia",
+                "Grupo",
+                "Usuario"
+            ],
+        },
+        {
+            nombre: "View_ComprasconTotales",
+            descripcion: "Totales por factura o compra; usar cuando el usuario pide resumen o totales.",
+            camposPermitidos: [
+                "Fecha",
+                "Folio",
+                "FolioProveedor",
+                "TipoDocumento",
+                "NumeroProveedor",
+                "NombreProveedor",
+                "Subtotal",
+                "Impuesto",
+                "Total",
+                "Saldo",
+                "EstadoDocumento",
+                "CantDescuento",
+                "Notas",
+                "DiasCredito",
+                "Usuario"
+            ]
+        },
+        {
+            nombre: "View_CuentasPorCobrar",
+            descripcion: "Información de cuentas por cobrar; usar cuando el usuario solicita datos sobre saldos pendientes de clientes.",
+            camposPermitidos: [
+                "Fecha",
+                "Serie",
+                "Folio",
+                "TipoDocumento",
+                "NumeroCliente",
+                "NombreCliente",
+                "Subtotal",
+                "Impuesto",
+                "Total",
+                "Saldo",
+                "EstadoDocumento",
+                "Vendedor",
+                "DiasCredito",
+                "FechaVencimiento",
+                "Almacen",
+                "Usuario"
+            ]
+        }
     ],
 };
 //# sourceMappingURL=index.js.map
