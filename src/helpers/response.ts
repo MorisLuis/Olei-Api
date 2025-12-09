@@ -1,5 +1,5 @@
-import { Response, Request } from "express"
-import { InfoSuccessResponse } from "./types"
+import type { Response, Request } from "express"
+import type { InfoSuccessResponse } from "./types"
 
 /**
  *
