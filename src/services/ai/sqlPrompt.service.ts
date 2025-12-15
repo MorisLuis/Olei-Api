@@ -1,5 +1,5 @@
-import { azureOpenAI } from "../../config/langchain.js";
-import { buildSQLPrompt } from "./utils/buildSQLPrompt.js";
+import { azureOpenAI } from "../../config/langchain";
+import { buildSQLPrompt } from "./utils/buildSQLPrompt";
 
 export async function generateSQLFromPrompt(prompt: string) {
     const finalPrompt = buildSQLPrompt(prompt);

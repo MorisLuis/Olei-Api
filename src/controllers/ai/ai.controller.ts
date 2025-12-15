@@ -38,8 +38,6 @@ export const askAI = async (req: Request, res: Response) => {
             60 * 10
         );
 
-        console.log({queryId})
-
         return successResponse(req, res, { data, type, headers, queryId }, "Consulta AI exitosa", 200, { totals: { show: data.length, total: data.length }, pages: { current: 1, totalPages: 1 } });
 
     } catch (error) {
@@ -78,10 +76,10 @@ export const exportToCSV = async (req: Request, res: Response) => {
 		const filePath = path.join(exportDir, `report-${Date.now()}.csv`);
 		fs.writeFileSync(filePath, csvData);
 
-        res.header('Content-Type', 'text/csv');
-        res.attachment('reporte.csv');
-
-        return successResponse(req, res, { ok: true }, "Reporte AI exitosa", 200);
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader("Content-Disposition", "attachment; filename=reporte.csv");
+        return res.status(200).send(csvData);
+        
 
     } catch (error) {
         return res.status(500).json({ error: `Error del servidor compa: ${error}` });
