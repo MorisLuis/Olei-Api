@@ -32,7 +32,6 @@ const askAI = async (req, res) => {
         const headers = Object.keys(data[0] ? data[0] : {});
         const queryId = (0, uuid_1.v4)();
         await redisClient_1.default.set(`agent:sql:${queryId}`, JSON.stringify({ sql: aiText }), "EX", 60 * 10);
-        console.log({ queryId });
         return (0, response_1.successResponse)(req, res, { data, type, headers, queryId }, "Consulta AI exitosa", 200, { totals: { show: data.length, total: data.length }, pages: { current: 1, totalPages: 1 } });
     }
     catch (error) {
@@ -68,9 +67,9 @@ const exportToCSV = async (req, res) => {
         }
         const filePath = path_1.default.join(exportDir, `report-${Date.now()}.csv`);
         fs_1.default.writeFileSync(filePath, csvData);
-        res.header('Content-Type', 'text/csv');
-        res.attachment('reporte.csv');
-        return (0, response_1.successResponse)(req, res, { ok: true }, "Reporte AI exitosa", 200);
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader("Content-Disposition", "attachment; filename=reporte.csv");
+        return res.status(200).send(csvData);
     }
     catch (error) {
         return res.status(500).json({ error: `Error del servidor compa: ${error}` });

@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateSQLFromPrompt = void 0;
-const langchain_js_1 = require("../../config/langchain.js");
-const buildSQLPrompt_js_1 = require("./utils/buildSQLPrompt.js");
+const langchain_1 = require("../../config/langchain");
+const buildSQLPrompt_1 = require("./utils/buildSQLPrompt");
 async function generateSQLFromPrompt(prompt) {
-    const finalPrompt = (0, buildSQLPrompt_js_1.buildSQLPrompt)(prompt);
-    const res = await langchain_js_1.azureOpenAI.invoke([
+    const finalPrompt = (0, buildSQLPrompt_1.buildSQLPrompt)(prompt);
+    const res = await langchain_1.azureOpenAI.invoke([
         { role: "system", content: "Eres un generador de consultas SQL seguras." },
         { role: "user", content: finalPrompt },
     ]);
