@@ -6,7 +6,6 @@ export const informesiaQuery = {
             ,[Categoria]
             ,[Descripcion]
             ,[PeticionUsuario]
-            ,[SQL]
         FROM [dbo].[INFORMESIA]
         ORDER BY [Id_InformeIA]
         OFFSET (@PageNumber - 1) * @PageSize ROWS

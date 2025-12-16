@@ -9,6 +9,17 @@ interface GetInformesiaParams {
     PageNumber: number;
 }
 
+const CATEGORIAS_MAP: Record<number, string> = {
+    1: 'General',
+    2: 'Compras',
+    3: 'Cobranza',
+    4: 'Ventas',
+    5: 'Cuentas por Cobrar',
+    6: 'Existencias e Inventario',
+    7: 'Catalogo Productos',
+    8: 'Catalogo Clientes'
+};
+
 export const getInformesiaService = async ({
     userSession,
     PageNumber
@@ -22,14 +33,33 @@ export const getInformesiaService = async ({
 
 
     const query = informesiaQuery.getInformesia;
-    const requestInformesIA = await pool.request()
+
+    const { recordset } = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
         .query(query);
 
-    const informesia = requestInformesIA.recordset
+    const agrupado = recordset.reduce((acc, item) => {
+        const categoriaId = item.Categoria;
+        const categoriaNombre = CATEGORIAS_MAP[categoriaId] ?? 'Sin categoría';
 
-    return informesia
+        if (!acc[categoriaId]) {
+            acc[categoriaId] = {
+                categoriaId,
+                categoriaNombre,
+                informes: []
+            };
+        }
+
+        acc[categoriaId].informes.push(item);
+        return acc;
+    }, {} as Record<number, {
+        categoriaId: number;
+        categoriaNombre: string;
+        informes: any[];
+    }>);
+
+    return Object.values(agrupado);
 }
 
 export const postInformesiaService = async ({
