@@ -1,4 +1,4 @@
-export function getRules() {
+export function getRules(): string {
     return `
         REGLAS ESTRICTAS DEL AGENTE SQL (OBLIGATORIAS):
 
