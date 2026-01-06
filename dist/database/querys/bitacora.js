@@ -70,15 +70,16 @@ exports.bitacoraQuerys = {
         WHERE Id_Bitacora = @Id_Bitacora
     `,
     insertMeeting: `
-        INSERT INTO [dbo].[BITACORACRM] (Id_Almacen, Id_Cliente, Fecha, Descripcion, TipoContacto, Hour, HourEnd, Comentarios)
+        INSERT INTO [dbo].[BITACORACRM] (Id_Almacen, Id_Cliente, Fecha, Descripcion, TipoContacto, Hour, HourEnd, Comentarios, status)
         OUTPUT 
             INSERTED.Id_Bitacora, 
             INSERTED.Id_Almacen,
             INSERTED.Id_Cliente,
             INSERTED.Fecha,
             INSERTED.Descripcion,
-            INSERTED.TipoContacto
-        VALUES (@Id_Almacen, @Id_Cliente, @Fecha, @Descripcion, @TipoContacto, @Hour, @HourEnd, @Comentarios)
+            INSERTED.TipoContacto,
+            INSERTED.status
+        VALUES (@Id_Almacen, @Id_Cliente, @Fecha, @Descripcion, @TipoContacto, @Hour, @HourEnd, @Comentarios, @status)
     `,
     updateMeeting: `
         UPDATE [dbo].[BITACORACRM]

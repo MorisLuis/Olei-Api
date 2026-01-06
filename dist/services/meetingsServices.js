@@ -156,6 +156,7 @@ const postMeetingService = async (userSession, body) => {
         .input('Descripcion', mssql_1.default.VarChar, Descripcion)
         .input('TipoContacto', mssql_1.default.Int, TipoContacto)
         .input('Comentarios', mssql_1.default.VarChar, Comentarios)
+        .input('status', mssql_1.default.Bit, 1)
         .query(query);
     await transaction.commit();
     //END TRANSACTION
