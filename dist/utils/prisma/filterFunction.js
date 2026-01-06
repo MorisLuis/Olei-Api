@@ -17,7 +17,7 @@ function buildFilters(filters) {
         }
     })
         .filter(cond => Object.keys(cond).length > 0);
-    return { AND: andConditions }; // ✅ always array, any[] para TS
+    return { AND: andConditions };
 }
 exports.buildFilters = buildFilters;
 //# sourceMappingURL=filterFunction.js.map

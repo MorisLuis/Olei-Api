@@ -31,7 +31,8 @@ const askAI = async (req, res) => {
         const data = await (0, executeSQLQuery_1.executeSQLQuery)({ userSession, query: aiText });
         const headers = Object.keys(data[0] ? data[0] : {});
         const queryId = (0, uuid_1.v4)();
-        await redisClient_1.default.set(`agent:sql:${queryId}`, JSON.stringify({ sql: aiText }), "EX", 60 * 10);
+        await redisClient_1.default.set(`agent:sql:${queryId}`, JSON.stringify({ sql: aiText, request: prompt }), "EX", 60 * 10);
+        console.log({ queryId });
         return (0, response_1.successResponse)(req, res, { data, type, headers, queryId }, "Consulta AI exitosa", 200, { totals: { show: data.length, total: data.length }, pages: { current: 1, totalPages: 1 } });
     }
     catch (error) {

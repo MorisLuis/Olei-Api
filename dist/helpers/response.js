@@ -28,7 +28,7 @@ exports.errorResponse = exports.successResponse = void 0;
  *   lang: string
  * }
  */
-const successResponse = (req, res, data, message = "Operation successful", status = 200, info) => {
+const successResponse = (_req, res, data, message = "Operation successful", status = 200, info) => {
     let next, previous;
     if (info) {
         next = info.pages.current + 1;

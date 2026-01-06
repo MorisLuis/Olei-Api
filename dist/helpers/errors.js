@@ -48,10 +48,9 @@ class MailError extends CustomError {
     }
 }
 exports.MailError = MailError;
-// Error de base de datos
 class DatabaseError extends CustomError {
     constructor(error) {
-        const message = error.parent?.message || error.message;
+        const message = error.parent?.message || error.message || 'Unknown database error';
         const code = error.parent?.code;
         const sql = error.parent?.sql;
         super(message, 500, "DATABASE_ERROR", undefined, code, sql);
