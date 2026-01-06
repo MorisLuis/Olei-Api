@@ -10,7 +10,7 @@ import { v4 } from 'uuid';
 import path from 'path';
 import fs from "fs";
 
-export const askAI = async (req: Request, res: Response) => {
+export const askAI = async (req: Request, res: Response): Promise<Response> => {
     try {
         const { prompt } = req.body;
         if (!prompt) return errorResponse(res, 'Falta el promtp', 400);
@@ -33,10 +33,12 @@ export const askAI = async (req: Request, res: Response) => {
         const queryId = v4();
         await redisClient.set(
             `agent:sql:${queryId}`,
-            JSON.stringify({ sql: aiText }),
+            JSON.stringify({ sql: aiText, request: prompt }),
             "EX",
             60 * 10
         );
+
+        console.log({ queryId });
 
         return successResponse(req, res, { data, type, headers, queryId }, "Consulta AI exitosa", 200, { totals: { show: data.length, total: data.length }, pages: { current: 1, totalPages: 1 } });
 
@@ -45,7 +47,7 @@ export const askAI = async (req: Request, res: Response) => {
     }
 };
 
-export const exportToCSV = async (req: Request, res: Response) => {
+export const exportToCSV = async (req: Request, res: Response): Promise<Response> => {
     try {
         const { queryId } = req.query;
         const record = await redisClient.get(`agent:sql:${queryId}`);
@@ -58,7 +60,7 @@ export const exportToCSV = async (req: Request, res: Response) => {
         const userSession = req.sessionWeb;
         const data = await executeSQLQuery({ userSession, query: sql });
         const headers = Object.keys(data[0] ? data[0] : {});
-        const csvRows = [];
+        const csvRows: string[] = [];
         csvRows.push(headers.join(','));
         for (const row of data) {
             const values = headers.map(header => {
