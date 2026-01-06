@@ -1,10 +1,10 @@
 import type { NextFunction, Request, Response } from 'express';
 import { successResponse } from "../../helpers/response";
 import { getInformesiaService, postInformesiaService } from "../../services/informesia/informesia.service";
-import { postInformesiaValidations } from '../../validations/informesiaValidations';
+import { postInformesiaParamsValidations, postInformesiaValidations } from '../../validations/informesiaValidations';
 
 
-export const getInformesia = async (req: Request, res: Response, next: NextFunction) => {
+export const getInformesia = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const userSession = req.sessionWeb;
         const { PageNumber } = req.query;
@@ -16,12 +16,13 @@ export const getInformesia = async (req: Request, res: Response, next: NextFunct
 }
 
 
-export const postInformesia = async (req: Request, res: Response, next: NextFunction) => {
+export const postInformesia = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const userSession = req.sessionWeb;
         const body = postInformesiaValidations.parse(req.body);
+        const { queryId } = postInformesiaParamsValidations.parse(req.query);
 
-        await postInformesiaService({ userSession, body });
+        await postInformesiaService({ userSession, body, queryId, res });
 
         return successResponse(req, res, { ok: true }, "Reporte AI exitosa", 201);
     } catch (error) {
