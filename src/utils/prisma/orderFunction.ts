@@ -1,5 +1,4 @@
-
-export function buildOrder<T extends Record<string, any>>(
+export function buildOrder<T extends Record<string, unknown>>(
     order: { field: string; direction: 'asc' | 'desc' },
     defaultField: keyof T
 ): T {

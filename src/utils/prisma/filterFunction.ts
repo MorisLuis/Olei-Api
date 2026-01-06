@@ -1,7 +1,7 @@
 import type { FilterPrisma } from "./types";
 
 interface FilterObject {
-    [key: string]: string | number | any;
+    [key: string]: string | number | Record<string, unknown>;
 }
 
 
@@ -26,6 +26,5 @@ export function buildFilters(filters: FilterPrisma[]): BuildFiltersResponse {
         })
         .filter(cond => Object.keys(cond).length > 0);
 
-    return { AND: andConditions }; // ✅ always array, any[] para TS
+    return { AND: andConditions };
 }
-
