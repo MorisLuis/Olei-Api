@@ -5,7 +5,7 @@ export class CustomError extends Error {
 	public resource?: string
 	public database_code?: string
 	public sql?: string
-	public errors?: any
+	public errors?: unknown
 	public uuid?: string
 
 	constructor(
@@ -62,9 +62,18 @@ export class MailError extends CustomError {
 }
 
 // Error de base de datos
+interface DatabaseErrorInput {
+	parent?: {
+		message?: string;
+		code?: string;
+		sql?: string;
+	};
+	message?: string;
+}
+
 export class DatabaseError extends CustomError {
-	constructor(error: any) {
-		const message = error.parent?.message || error.message
+	constructor(error: DatabaseErrorInput) {
+		const message = error.parent?.message || error.message || 'Unknown database error'
 		const code = error.parent?.code
 		const sql = error.parent?.sql
 
