@@ -30,13 +30,13 @@ import type { InfoSuccessResponse } from "./types"
  */
 
 export const successResponse = (
-    req: Request,
+    _req: Request,
     res: Response,
-    data: any,
+    data: unknown,
     message: string = "Operation successful",
     status: number = 200,
     info?: InfoSuccessResponse | undefined
-) => {
+): Response => {
     let next, previous
     if (info) {
         next = info.pages.current + 1
@@ -72,7 +72,7 @@ export const errorResponse = (
     errorMessage: string,
     status: number = 500,
     resource: string | undefined = undefined
-) => {
+): Response => {
     return res.status(status).json({
         success: false,
         error: {
