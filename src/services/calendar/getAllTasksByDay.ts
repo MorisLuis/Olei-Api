@@ -44,8 +44,8 @@ const getCalendarTaskByDayAndClientService = async ({
         .query(query);
 
     const quotes = request.recordset;
-    const TotalBitacora = (request.recordsets as IRecordSet<any>[])[1][0].TotalBitacora;
-    const TotalVentas = (request.recordsets as IRecordSet<any>[])[2][0].TotalVentas;
+    const TotalBitacora = (request.recordsets as IRecordSet<{ TotalBitacora: number }>[])[1][0].TotalBitacora;
+    const TotalVentas = (request.recordsets as IRecordSet<{ TotalVentas: number }>[])[2][0].TotalVentas;
 
     return {
         quotes,
@@ -53,6 +53,18 @@ const getCalendarTaskByDayAndClientService = async ({
         TotalVentas
     }
 };
+
+/* const groupedByDay = (tasks: Record<string, unknown>[]) => {
+	const grouped = tasks.reduce((acc: Record<string, unknown[]>, task: Record<string, unknown>) => {
+		const date = task.FechaInicio.toISOString().split('T')[0];
+		if (!acc[date]) {
+			acc[date] = [];
+		}
+		acc[date].push(task);
+		return acc;
+	}, {});
+	return Object.keys(grouped).map((date) => ({ date, tasks: grouped[date] }));
+}; */
 
 export {
     getCalendarTaskByDayAndClientService
