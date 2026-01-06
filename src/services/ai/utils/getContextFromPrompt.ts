@@ -1,4 +1,4 @@
-export function getContextFromPrompt(userPrompt: string) {
+export function getContextFromPrompt(userPrompt: string): string {
     const lower = userPrompt.toLowerCase();
 
     if (/(venta|factura|ticket)/.test(lower))
