@@ -27,6 +27,8 @@ export default [
         beforeEach: 'readonly',
         afterEach: 'readonly',
         afterAll: 'readonly',
+        fetch: 'readonly',
+        abonos: 'readonly',
       },
     },
     settings: {
@@ -79,5 +81,13 @@ export default [
       'src/test/**/*',
       'src/utils/test/**/*'
     ]
+  },
+  {
+    // Apply to all files: mark `process` as a readonly global to avoid no-undef
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+      },
+    },
   },
 ];
