@@ -1,4 +1,4 @@
-export function getContextPrediction(userPrompt: string) {
+export function getContextPrediction(userPrompt: string): string {
     if (!/(predic|proyecta|tendencia|estim)/i.test(userPrompt)) return "";
 
     return `
