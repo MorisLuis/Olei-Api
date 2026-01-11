@@ -1,1 +1,0 @@
-{"version":3,"file":"almacenesRouter.js","sourceRoot":"","sources":["../../src/routes/almacenesRouter.ts"],"names":[],"mappings":";;AAAA,qCAAiC;AACjC,wDAA8E;AAC9E,2DAAwD;AAGxD,MAAM,MAAM,GAAG,IAAA,gBAAM,GAAE,CAAC;AACxB,MAAM,CAAC,GAAG,CAAC,GAAG,EAAE,yBAAW,EAAE,wBAAY,CAAC,CAAA;AAC1C,MAAM,CAAC,GAAG,CAAC,SAAS,EAAE,yBAAW,EAAE,gCAAoB,CAAC,CAAA;AAExD,kBAAe,MAAM,CAAC"}

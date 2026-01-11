@@ -1,1 +1,0 @@
-{"version":3,"file":"aiRouter.js","sourceRoot":"","sources":["../../src/routes/aiRouter.ts"],"names":[],"mappings":";;AAAA,qCAAiC;AACjC,mEAAqE;AACrE,iEAA8D;AAG9D,MAAM,MAAM,GAAG,IAAA,gBAAM,GAAE,CAAC;AACxB,MAAM,CAAC,IAAI,CAAC,GAAG,EAAE,+BAAc,EAAE,qBAAK,CAAC,CAAA;AACvC,MAAM,CAAC,GAAG,CAAC,SAAS,EAAE,+BAAc,EAAE,2BAAW,CAAC,CAAA;AAElD,kBAAe,MAAM,CAAC"}
