@@ -204,8 +204,6 @@ const postMeetingService = async (userSession: UserWebSessionInterface, body: Me
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     };
-
-    //START TRANSACTION
     const transaction = new sql.Transaction(pool);
     await transaction.begin();
     const request = new sql.Request(transaction);
