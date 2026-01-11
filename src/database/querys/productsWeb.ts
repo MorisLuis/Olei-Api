@@ -38,10 +38,10 @@ export const productsWebQuerys = {
         WHERE RowNum BETWEEN (@page - 1) * @limit + 1 AND @page * @limit
         ORDER BY 
         CASE 
-            WHEN LOWER(Descripcion) LIKE LOWER(@nombre) + '%' THEN 0 -- Prioridad para coincidencia inicial
+            WHEN LOWER(Descripcion) LIKE LOWER(@nombre) + '%' THEN 0
             ELSE 1
         END,
-        Descripcion -- Luego orden alfabético
+        Descripcion
     `,
 
     // Get product by id.
