@@ -38,11 +38,10 @@ export const askAI = async (req: Request, res: Response): Promise<Response> => {
             60 * 10
         );
 
-        console.log({ queryId });
-
-        return successResponse(req, res, { data, type, headers, queryId }, "Consulta AI exitosa", 200, { totals: { show: data.length, total: data.length }, pages: { current: 1, totalPages: 1 } });
+        return successResponse(req, res, { data, headers, queryId, prompt }, "Consulta AI exitosa", 200, { totals: { show: data.length, total: data.length }, pages: { current: 1, totalPages: 1 } });
 
     } catch (error) {
+        console.log(error);
         return res.status(500).json({ error: `Error del servidor compa: ${error}` });
     }
 };
@@ -71,17 +70,17 @@ export const exportToCSV = async (req: Request, res: Response): Promise<Response
         }
         const csvData = csvRows.join('\n');
         const exportDir = path.join(process.cwd(), "tmp", "exports");
-		if (!fs.existsSync(exportDir)) {
-			fs.mkdirSync(exportDir, { recursive: true });
-		}
+        if (!fs.existsSync(exportDir)) {
+            fs.mkdirSync(exportDir, { recursive: true });
+        }
 
-		const filePath = path.join(exportDir, `report-${Date.now()}.csv`);
-		fs.writeFileSync(filePath, csvData);
+        const filePath = path.join(exportDir, `report-${Date.now()}.csv`);
+        fs.writeFileSync(filePath, csvData);
 
         res.setHeader("Content-Type", "text/csv");
         res.setHeader("Content-Disposition", "attachment; filename=reporte.csv");
         return res.status(200).send(csvData);
-        
+
 
     } catch (error) {
         return res.status(500).json({ error: `Error del servidor compa: ${error}` });
