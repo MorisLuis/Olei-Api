@@ -102,6 +102,7 @@ class Server {
 
     private middlewares(): void {
         const allowedOrigins: string[] = [
+            'https://www.oleicrm.com',
             'https://www.oleionline.com',
             'http://localhost:3000',
             'http://localhost:3001',
