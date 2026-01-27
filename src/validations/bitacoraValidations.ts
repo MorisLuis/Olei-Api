@@ -38,7 +38,10 @@ export const getMeetingsQuerySchema = z.object({
         .refine((val) => val >= 0, { message: "Id_Cliente debe ser un número positivo" }),
 
     searchTerm: z.preprocess((val) => (val === '' ? undefined : val), z.string().optional()),
-    status: z.union([z.string(), z.number()]).optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
+    status: z.union([z.string(), z.number()]).transform((val) => {
+        const num = Number(val);
+        return isNaN(num) ? -1 : num;
+    }).refine((val) => [-1, 0, 1, 2].includes(val), { message: "status debe ser -1, 0, 1 o 2" }),
 
 });
 

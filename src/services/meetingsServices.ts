@@ -15,7 +15,7 @@ interface getMeetingsServiceInterface {
     MeetingOrderCondition: MeetingOrderConditionType | string,
     FilterCliente: 0 | 1,
     searchTerm?: string
-    status: 0 | 1
+    status: number
 }
 
 const getMeetingsService = async ({
@@ -45,6 +45,9 @@ const getMeetingsService = async ({
     const query = bitacoraQuerys.getMeetings;
     const totalMeetingsQuery = bitacoraQuerys.getTotalMeetings;
 
+    // Adjust status for query, we have to adapted to frontend logic temporarily
+    const validStatus = status === 0 ? -1 : status === 1 ? 0 : status === 2 ? 1 : 0;
+
     const request = await pool.request()
         .input('PageNumber', PageNumber)
         .input('PageSize', 10)
@@ -54,7 +57,7 @@ const getMeetingsService = async ({
         .input('FilterTipoContacto', TipoContacto === 0 ? 0 : 1)
         .input('FilterCliente', FilterCliente)
         .input('searchTerm', searchTerm)
-        .input('status', status)
+        .input('status', validStatus)
         .query(query);
 
     const requestTotal = await pool.request()
@@ -63,7 +66,7 @@ const getMeetingsService = async ({
         .input('FilterTipoContacto', TipoContacto === 0 ? 0 : 1)
         .input('FilterCliente', FilterCliente)
         .input('searchTerm', searchTerm)
-        .input('status', status)
+        .input('status', validStatus)
         .query(totalMeetingsQuery);
 
     const [meetingsResult, totalResult] = await Promise.all([
