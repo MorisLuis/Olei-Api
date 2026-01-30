@@ -1,4 +1,4 @@
-export const whitelist = {
+export const whitelist: { vistas: { nombre: string; descripcion: string; camposPermitidos: string[]; orderBy?: string, categoria?: string }[] } = {
     vistas: [
         {
             nombre: "View_VentasConProducto",
@@ -102,7 +102,7 @@ export const whitelist = {
         },
         {
             nombre: "View_Clientes",
-            description: "Información detallada de clientes; usar cuando el usuario solicita datos específicos de clientes.",
+            descripcion: "Información detallada de clientes; usar cuando el usuario solicita datos específicos de clientes.",
             camposPermitidos: [
                 "Almacen",
                 "NumeroCliente",
@@ -131,7 +131,7 @@ export const whitelist = {
         },
         {
             nombre: "View_Cobranza",
-            description: "Información detallada de cobranza; usar cuando el usuario solicita datos específicos de cobranza o pagos.",
+            descripcion: "Información detallada de cobranza; usar cuando el usuario solicita datos específicos de cobranza o pagos.",
             camposPermitidos: [
                 "Fecha",
                 "Folio",
@@ -171,7 +171,7 @@ export const whitelist = {
         },
         {
             nombre: "View_ComprasconTotales",
-            descripcion: "Totales por factura o compra; usar cuando el usuario pide resumen o totales.",
+            descripcion: "Compras con solo Totales, ordenes de compra. No incluye campo FormaPago.",
             camposPermitidos: [
                 "Fecha",
                 "Folio",
@@ -209,8 +209,242 @@ export const whitelist = {
                 "DiasCredito",
                 "FechaVencimiento",
                 "Almacen",
+                "Usuario",
+                "TipoDocumentoOrigen",
+                "DocumentosOrigen",
+                "TipoDocumentoDestino",
+                "DocumentosDestino"
+
+            ]
+        },
+        {
+            nombre: "View_Productos",
+            descripcion: "Informacion del catalogo de productos, incluye Codigo, Descripcion, costo, Precio.",
+            categoria: "Productos",
+            camposPermitidos: [
+                "Codigo",
+                "Descripcion",
+                "Familia",
+                "Grupo",
+                "Marca",
+                "Observaciones",
+                "FechaAlta",
+                "UltimaEntrada",
+                "UltimaSalida",
+                "TipoProducto",
+                "EstadodeProducto",
+                "Unidad",
+                "Costo",
+                "Maximo",
+                "Minimo",
+                "Precio",
+                "Factor",
+                "ListaPrecios",
+                "Existencia"
+            ]
+        },
+        {
+            nombre: "View_VentasconProducto",
+            descripcion: "Detalle de ventas por producto, incluye Codigo, Descripcion, Cantidad, Precio, Importe.",
+            categoria: "Ventas.Detalle",
+            camposPermitidos: [
+                "Folio",
+                "TipoDocumento",
+                "NumeroCliente",
+                "NombreCliente",
+                "Fecha",
+                "Estado",
+                "CodigoProducto",
+                "CantidadDeProducto",
+                "Marca",
+                "Descripcion",
+                "PrecioProducto",
+                "CostoProducto",
+                "PrecioProductoOriginal",
+                "ImporteProducto",
+                "Vendedor",
+                "Familia",
+                "Grupo",
+                "Existencia",
+                "TipoDocumentoOrigen",
+                "DocumentosOrigen",
+                "TipoDocumentoDestino",
+                "DocumentosDestino",
+                "Usuario",
+                "Almacen"
+            ]
+        },
+        {
+            nombre: "View_VentasconTotales",
+            descripcion: "Totales por venta o factura, incluye Subtotal, Impuesto, Total, Saldo, FormaPago.",
+            categoria: "Ventas.Totales",
+            camposPermitidos: [
+                "Fecha",
+                "Serie",
+                "Folio",
+                "TipoDocumento",
+                "NumeroCliente",
+                "NombreCliente",
+                "Subtotal",
+                "Impuesto",
+                "Total",
+                "Saldo",
+                "EstadoDocumento",
+                "CantDescuento",
+                "Notas",
+                "FormaPago",
+                "Vendedor",
+                "DiasCredito",
+                "Almacen",
+                "TipoDocumentoOrigen",
+                "DocumentosOrigen",
+                "TipoDocumentoDestino",
+                "DocumentosDestino",
                 "Usuario"
             ]
+        },
+        {
+            nombre: "View_ExistenciasDeProductos",
+            descripcion: "Existencias de productos, Inventario de Productos, Tock de Productos, Existencias de Mercancias.",
+            categoria: "Existencia de Productos",
+            camposPermitidos: [
+                "Codigo",
+                "Descripcion",
+                "Familia",
+                "Grupo",
+                "Marca",
+                "FechaAlta",
+                "TipoDeProducto",
+                "EstadodelProducto",
+                "Unidad",
+                "Costo",
+                "MaximoEnInventario",
+                "MinimoenInventario",
+                "Precio",
+                "Existencia",
+                "Almacen"
+            ]
+        },
+        {
+            nombre: "View_AjustesDeInventario",
+            descripcion: "Movimientos de Inventario generados en modulo inventarios.",
+            categoria: "Movimientos de Inventario",
+            camposPermitidos: [
+                "Folio",
+                "Fecha",
+                "TipoDeMovimiento",
+                "EstadoMovimiento",
+                "CodigoProducto",
+                "CantidadDeProducto",
+                "Marca",
+                "DescripcionProducto",
+                "Familia",
+                "Grupo",
+                "Usuario"
+            ]
+        },
+        {
+            nombre: "View_Proveedores",
+            descripcion: "Informacion del catalogo de proveedores, incluye numero, nombre, domicilio, correo.",
+            categoria: "Proveedores",
+            camposPermitidos: [
+                "NumeroProveedor",
+                "FechaAlta",
+                "NombreProveedor",
+                "RFC",
+                "Calle",
+                "NoExt",
+                "NoInt",
+                "Colonia",
+                "Ciudad",
+                "Estado",
+                "CodigoPostal",
+                "Telefono1",
+                "Telefono2",
+                "Correo",
+                "TipodeProveedor",
+                "DiasdeCredito"
+            ]
+        },
+        {
+            nombre: "View_CuentasPorPagar",
+            descripcion: "Documentos de Compras a Credito como Facturas con saldo mayor que cero pendientes por pagar a Proveedores.",
+            categoria: "Cuentas por Pagar",
+            camposPermitidos: [
+                "Fecha",
+                "Serie",
+                "Folio",
+                "TipoDocumento",
+                "NumeroProveedor",
+                "NombreProveedor",
+                "Subtotal",
+                "Impuesto",
+                "Total",
+                "Saldo",
+                "EstadoDocumento",
+                "DiasCredito",
+                "FechaVencimiento",
+                "Almacen",
+                "Usuario"
+            ]
+        },
+        {
+            nombre: "View_Pagos",
+            descripcion: "Pagos a Proveedores de facturas de compra a credito o Gastos de la empresa.",
+            categoria: "Pagos a Proveedores o Gastos",
+            camposPermitidos: [
+                "Fecha",
+                "Folio",
+                "FechaOperacion",
+                "NumeroOperacion",
+                "Importe",
+                "NombreProveedor",
+                "Paridad",
+                "Descripcion",
+                "ConceptoPago",
+                "tipoGastoOperativo",
+                "EstadoPago",
+                "FormaPago",
+                "Almacen",
+                "Usuario"
+            ]
+        },
+        {
+            nombre: "View_GastosOperativos",
+            descripcion: "Gatos Operativos de la Empresa, como Luz, renta, sueldos, etc.",
+            categoria: "Gastos Operativos",
+            camposPermitidos: [
+                "Fecha",
+                "Folio",
+                "FechaOperacion",
+                "NumeroOperacion",
+                "Importe",
+                "NombreProveedor",
+                "Paridad",
+                "Descripcion",
+                "ConceptoPago",
+                "tipoGastoOperativo",
+                "EstadoPago",
+                "FormaPago",
+                "Almacen",
+                "Usuario"
+            ]
+        },
+        {
+            nombre: "View_ComponentesPorProducto",
+            descripcion: "Componenes de producto terminado, BOM, Lista de Materiales de PT.",
+            categoria: "Componentes de Produtos",
+            camposPermitidos: [
+                "CodigoProductoTerminado",
+                "ProductoTerminado",
+                "CodigoComponente",
+                "Componente",
+                "Marca",
+                "MarcaNombre",
+                "CantidadPorUnidad",
+                "Existencia"
+            ]
         }
+
     ],
 };
