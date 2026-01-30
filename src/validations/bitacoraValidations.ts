@@ -11,10 +11,11 @@ export const getMeetingsQuerySchema = z.object({
 
     meetingOrderCondition: z
         .string()
+        .optional()
         .refine(
             (val): val is MeetingOrderConditionType =>
                 val === undefined || MeetingOrderCondition.includes(val as MeetingOrderConditionType),
-            { message: "meetingOrderCondition debe ser 'Nombre', 'Saldo', 'Total'" }
+            { message: "meetingOrderCondition debe ser 'Cliente', 'Fecha', 'TipoContacto'" }
         ),
 
     FilterCliente: z.union([z.string(), z.number()]).optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
@@ -38,7 +39,7 @@ export const getMeetingsQuerySchema = z.object({
         .refine((val) => val >= 0, { message: "Id_Cliente debe ser un número positivo" }),
 
     searchTerm: z.preprocess((val) => (val === '' ? undefined : val), z.string().optional()),
-    status: z.union([z.string(), z.number()]).transform((val) => {
+    status: z.union([z.string(), z.number()]).optional().transform((val) => {
         const num = Number(val);
         return isNaN(num) ? -1 : num;
     }).refine((val) => [-1, 0, 1, 2].includes(val), { message: "status debe ser -1, 0, 1 o 2" }),

@@ -2,44 +2,36 @@
 export const bitacoraQuerys = {
 
     getMeetings: `
-        WITH
-            MEETINGS_CTE
-            AS
-            (
-                SELECT 
-                    B.Id_Bitacora,
-                    C.Nombre,
-                    B.Id_Almacen,
-                    B.Id_Cliente,
-                    B.Fecha,
-                    B.Descripcion,
-                    B.TipoContacto,
-                    B.Hour,
-                    B.HourEnd,
-                    B.status
-                FROM dbo.BITACORACRM B
-                JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = B.Id_Cliente AND C.Id_Almacen = B.Id_Almacen
-                WHERE (@FilterCliente = 0 OR (B.Id_Cliente = @Id_Cliente AND @FilterCliente = 1))
-                    AND (@FilterTipoContacto = 0 OR (TipoContacto = @TipoContacto AND @FilterTipoContacto = 1))
-                    AND (@status = -1 OR B.status = @status)
-                    AND (C.Nombre LIKE '%' + ISNULL(@searchTerm, '') + '%')
-            )
+        WITH MEETINGS_CTE AS
+        (
+            SELECT 
+                B.Id_Bitacora,
+                C.Nombre,
+                B.Id_Almacen,
+                B.Id_Cliente,
+                B.Fecha,
+                B.Descripcion,
+                B.TipoContacto,
+                B.Hour,
+                B.HourEnd,
+                B.status
+            FROM dbo.BITACORACRM B
+            JOIN dbo.CLIENTES C 
+                ON C.Id_Cliente = B.Id_Cliente 
+            AND C.Id_Almacen = B.Id_Almacen
+            WHERE (@FilterCliente = 0 OR (B.Id_Cliente = @Id_Cliente AND @FilterCliente = 1))
+            AND (@FilterTipoContacto = 0 OR (B.TipoContacto = @TipoContacto AND @FilterTipoContacto = 1))
+            AND (@status = -1 OR B.status = @status)
+            AND (C.Nombre LIKE '%' + ISNULL(@searchTerm, '') + '%')
+        )
         SELECT *
         FROM MEETINGS_CTE
-        ORDER BY 
-            CASE
-                WHEN @OrderCondition = 'Cliente' THEN Id_Cliente
-                WHEN @OrderCondition = 'Fecha' THEN Fecha
-                WHEN @OrderCondition = 'TipoContacto' THEN TipoContacto
-                END DESC,
-                CASE 
-                WHEN @OrderCondition = 'Cliente' THEN Fecha 
-                WHEN @OrderCondition = 'TipoContacto' THEN Fecha
-            END DESC,
-            Fecha DESC,
-            TipoContacto
+        ORDER BY
+            Fecha ASC,                                  -- SIEMPRE
+            CASE WHEN @OrderCondition = 'Cliente' THEN Id_Cliente END,
+            CASE WHEN @OrderCondition = 'TipoContacto' THEN TipoContacto END
         OFFSET (@PageNumber - 1) * @PageSize ROWS
-        FETCH NEXT @PageSize ROWS ONLY
+        FETCH NEXT @PageSize ROWS ONLY;
     `,
 
     getTotalMeetings: `
