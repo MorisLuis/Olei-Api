@@ -2,22 +2,7 @@ import type { IRecordSet } from "mssql";
 import { dbConnectionWeb } from "../../database";
 import { celendarQuerys } from "../../database/querys/calendar";
 import { ValidationError } from "../../errors/CustomError";
-import type { CalendarInterface } from "../../interface/calendar";
-import type { UserWebSessionInterface } from "../../interface/user";
-
-interface getCalendarTaskByDayServiceInterface {
-    userSession: UserWebSessionInterface;
-    Day: string;
-    Id_Cliente: number | null
-    PageNumber: number
-    limit: number
-}
-
-interface getCalendarTaskByDayAndClientResponse {
-    quotes: CalendarInterface[];
-    TotalBitacora: number;
-    TotalVentas: number;
-}
+import type { getCalendarTaskByDayAndClientResponse, getCalendarTaskByDayServiceInterface, TaskOfDay } from "./types";
 
 const getCalendarTaskByDayAndClientService = async ({
     userSession,
@@ -25,7 +10,7 @@ const getCalendarTaskByDayAndClientService = async ({
     Id_Cliente,
     PageNumber,
     limit
-}: getCalendarTaskByDayServiceInterface)  : Promise<getCalendarTaskByDayAndClientResponse> => {
+}: getCalendarTaskByDayServiceInterface): Promise<getCalendarTaskByDayAndClientResponse> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -43,28 +28,36 @@ const getCalendarTaskByDayAndClientService = async ({
         .input('limit', limit)
         .query(query);
 
-    const quotes = request.recordset;
+    const rawQuotes = request.recordset;
     const TotalBitacora = (request.recordsets as IRecordSet<{ TotalBitacora: number }>[])[1][0].TotalBitacora;
     const TotalVentas = (request.recordsets as IRecordSet<{ TotalVentas: number }>[])[2][0].TotalVentas;
 
+    const quotes: TaskOfDay[] = rawQuotes.map((quote) => {
+        const baseDate = new Date(quote.Fecha).toISOString().split('T')[0];
+        const startTime = quote.Hour || '00:00:00';
+        const endTime = quote.HourEnd || '23:59:59';
+
+        return {
+            id: quote.Id_Bitacora?.toString() || quote.Id_Sell?.toString() || '',
+            title: quote.Titulo || quote.Descripcion || '',
+            start: `${baseDate}T${startTime}`,
+            end: `${baseDate}T${endTime}`,
+            tableType: quote.TableType,
+            idCliente: quote.Id_Cliente,
+            descripcion: quote.Descripcion,
+            folio: quote.Folio,
+            extendedProps: {
+                Id_Bitacora: quote.Id_Bitacora,
+            }
+        };
+    });
+
     return {
-        quotes,
+        tasks: quotes,
         TotalBitacora,
         TotalVentas
     }
 };
-
-/* const groupedByDay = (tasks: Record<string, unknown>[]) => {
-	const grouped = tasks.reduce((acc: Record<string, unknown[]>, task: Record<string, unknown>) => {
-		const date = task.FechaInicio.toISOString().split('T')[0];
-		if (!acc[date]) {
-			acc[date] = [];
-		}
-		acc[date].push(task);
-		return acc;
-	}, {});
-	return Object.keys(grouped).map((date) => ({ date, tasks: grouped[date] }));
-}; */
 
 export {
     getCalendarTaskByDayAndClientService

@@ -31,7 +31,7 @@ const getCalendarTaskByDay = async (req: Request, res: Response, next: NextFunct
         const { Day, Id_Cliente, limit, PageNumber } = getCalendarTaskByDayQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
-        const { quotes, TotalBitacora, TotalVentas } = await getCalendarTaskByDayAndClientService({
+        const { tasks, TotalBitacora, TotalVentas } = await getCalendarTaskByDayAndClientService({
             userSession,
             Day,
             Id_Cliente,
@@ -40,7 +40,7 @@ const getCalendarTaskByDay = async (req: Request, res: Response, next: NextFunct
         });
 
         res.json({
-            tasks: quotes,
+            tasks,
             TotalBitacora,
             TotalVentas
         });

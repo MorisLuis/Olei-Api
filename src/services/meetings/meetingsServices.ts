@@ -1,22 +1,13 @@
-import { dbConnectionWeb } from "../database";
-import { bitacoraQuerys } from "../database/querys/bitacora";
-import { ValidationError } from "../errors/CustomError";
-import type { MeetingOrderConditionType } from "../interface/meeting";
-import type MeetingInterface from "../interface/meeting";
-import { validTipoContacto } from "../interface/meeting";
-import type { UserWebSessionInterface } from "../interface/user";
+import { dbConnectionWeb } from "../../database";
+import { bitacoraQuerys } from "../../database/querys/bitacora";
+import { ValidationError } from "../../errors/CustomError";
+import type MeetingInterface from "../../interface/meeting";
+import { validTipoContacto } from "../../interface/meeting";
+import type { UserWebSessionInterface } from "../../interface/user";
 import sql from 'mssql';
+import type { getMeetingsServiceInterface, getTotalMeetingsServiceInterface } from "./types";
 
-interface getMeetingsServiceInterface {
-    userSession: UserWebSessionInterface,
-    PageNumber: number,
-    Id_Cliente: number,
-    TipoContacto: number,
-    MeetingOrderCondition: MeetingOrderConditionType | string,
-    FilterCliente: 0 | 1,
-    searchTerm?: string
-    status: number
-}
+
 
 const getMeetingsService = async ({
     userSession,
@@ -26,7 +17,8 @@ const getMeetingsService = async ({
     MeetingOrderCondition,
     FilterCliente,
     searchTerm,
-    status = 0
+    status = 0,
+    PageSize = 10
 }: getMeetingsServiceInterface): Promise<{ meetings: MeetingInterface[], total: number }> => {
 
 
@@ -50,7 +42,6 @@ const getMeetingsService = async ({
 
     const request = await pool.request()
         .input('PageNumber', PageNumber)
-        .input('PageSize', 10)
         .input('Id_Cliente', Id_Cliente)
         .input('TipoContacto', TipoContacto)
         .input('OrderCondition', MeetingOrderCondition)
@@ -58,6 +49,7 @@ const getMeetingsService = async ({
         .input('FilterCliente', FilterCliente)
         .input('searchTerm', searchTerm)
         .input('status', validStatus)
+        .input('PageSize', PageSize)
         .query(query);
 
     const requestTotal = await pool.request()
@@ -78,15 +70,6 @@ const getMeetingsService = async ({
         meetings: meetingsResult.recordset,
         total: Number(totalResult.recordset[0]?.TotalCount ?? 0),
     };
-};
-
-
-interface getTotalMeetingsServiceInterface {
-    userSession: UserWebSessionInterface,
-    Id_Cliente: number,
-    TipoContacto: number,
-    FilterCliente: 0 | 1,
-    FilterTipoContacto: 0 | 1
 };
 
 const getTotalMeetingsService = async ({
@@ -125,7 +108,6 @@ const getTotalMeetingsService = async ({
 
     return total
 };
-
 
 const getMeetingByIdService = async (id: number, userSession: UserWebSessionInterface): Promise<MeetingInterface> => {
 
@@ -199,57 +181,6 @@ const updateMeetingService = async (
 
 };
 
-const postMeetingService = async (userSession: UserWebSessionInterface, body: MeetingInterface): Promise<{ result: MeetingInterface }> => {
-
-
-    const { ServidorSQL, BaseSQL } = userSession;
-    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
-    if (!pool) {
-        throw new ValidationError('Error al conectarse a base de datos principal');
-    };
-    const transaction = new sql.Transaction(pool);
-    await transaction.begin();
-    const request = new sql.Request(transaction);
-
-    const query = bitacoraQuerys.insertMeeting;
-
-    const {
-        Id_Almacen,
-        Id_Cliente,
-        Fecha,
-        Hour,
-        HourEnd,
-        Descripcion,
-        TipoContacto,
-        Comentarios
-    } = body;
-
-    if (!validTipoContacto.includes(TipoContacto)) {
-        throw new ValidationError('No es valido el tipo de contacto')
-    };
-
-    if (!Id_Cliente) {
-        throw new ValidationError('Es necesario el id de el cliente')
-    }
-
-    const result = await request
-        .input('Id_Almacen', sql.Int, Id_Almacen ?? 0)
-        .input('Id_Cliente', sql.Int, Id_Cliente)
-        .input('Fecha', sql.Date, Fecha)
-        .input('Hour', sql.VarChar, Hour)
-        .input('HourEnd', sql.VarChar, HourEnd)
-        .input('Descripcion', sql.VarChar, Descripcion)
-        .input('TipoContacto', sql.Int, TipoContacto)
-        .input('Comentarios', sql.VarChar, Comentarios)
-        .input('status', sql.Bit, 1)
-        .query(query);
-
-    await transaction.commit();
-    //END TRANSACTION
-
-    return { result: result.recordset[0] }
-};
-
 const deleteMeetingService = async (id: number, userSession: UserWebSessionInterface): Promise<{ result: MeetingInterface }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
@@ -278,6 +209,5 @@ export {
     getTotalMeetingsService,
     getMeetingByIdService,
     updateMeetingService,
-    postMeetingService,
     deleteMeetingService
 }

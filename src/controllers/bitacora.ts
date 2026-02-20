@@ -1,12 +1,13 @@
 import type { NextFunction, Request, Response } from "express";
-import { deleteMeetingService, getMeetingByIdService, getMeetingsService, getTotalMeetingsService, postMeetingService, updateMeetingService } from "../services/meetingsServices";
+import { deleteMeetingService, getMeetingByIdService, getMeetingsService, getTotalMeetingsService, updateMeetingService } from "../services/meetings/meetingsServices";
 import type MeetingInterface from "../interface/meeting";
 import { getMeetingByIdParmsSchema, getMeetingsQuerySchema, getTotalMeetingsQuerySchema, postBitacoraBodySchema, updateBitacoraBodySchema } from "../validations/bitacoraValidations";
+import { postMeetingService } from "../services/meetings/services/postMeetingService";
 
 const getMeetings = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const { PageNumber, meetingOrderCondition, FilterCliente, TipoContacto, Id_Cliente, searchTerm, status } = getMeetingsQuerySchema.parse(req.query);
+        const { PageNumber, meetingOrderCondition, FilterCliente, TipoContacto, Id_Cliente, searchTerm, status, PageSize } = getMeetingsQuerySchema.parse(req.query);
         const userSession = req.sessionWeb;
 
         const { meetings, total } = await getMeetingsService({
@@ -17,7 +18,8 @@ const getMeetings = async (req: Request, res: Response, next: NextFunction): Pro
             Id_Cliente: Id_Cliente ?? 0,
             FilterCliente: FilterCliente,
             searchTerm,
-            status
+            status,
+            PageSize
         });
 
         return res.json({
