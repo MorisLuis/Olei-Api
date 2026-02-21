@@ -1,10 +1,10 @@
+import dayjs from 'dayjs';
+
 import { dbConnectionWeb } from "../../database";
 import { cobranzaQuery } from "../../database/querys/cobranza";
 import { ValidationError } from "../../errors/CustomError";
 import type { SellsInterface } from "../../interface/sells";
 import type { GetCobranzaWithSearchParams, GetCobranzaByClientParams, GetCobranzaTotalResponse, CobranzaInterface, GetCobranzaTotalsResponse } from "./cobranza.interface";
-import dayjs from 'dayjs';
-
 
 const getCobranzaService = async ({
     userSession,
@@ -147,6 +147,7 @@ const getCobranzaByClientCountAndTotalService = async ({
 
     const countQuery = cobranzaQuery.getCobranzaByClientCount;
     const totalQuery = cobranzaQuery.getCobranzaByClientTotal;
+
 
     // Ejecutamos ambas consultas en paralelo
     const [countRequest, totalRequest] = await Promise.all([

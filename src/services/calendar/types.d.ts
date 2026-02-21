@@ -1,3 +1,4 @@
+import type { UserWebSessionInterface } from "../../interface/user";
 
 export interface getCalendarTaskByDayServiceInterface {
     userSession: UserWebSessionInterface;
