@@ -38,18 +38,19 @@ const getMeetingsService = async ({
     const totalMeetingsQuery = bitacoraQuerys.getTotalMeetings;
 
     // Adjust status for query, we have to adapted to frontend logic temporarily
-    const validStatus = status === 0 ? -1 : status === 1 ? 0 : status === 2 ? 1 : 0;
+    const validStatus = status === 2 ? 1 : 0;
 
     const request = await pool.request()
         .input('PageNumber', PageNumber)
+        .input('PageSize', PageSize)
+        .input('OrderCondition', MeetingOrderCondition)
+        
         .input('Id_Cliente', Id_Cliente)
         .input('TipoContacto', TipoContacto)
-        .input('OrderCondition', MeetingOrderCondition)
         .input('FilterTipoContacto', TipoContacto === 0 ? 0 : 1)
         .input('FilterCliente', FilterCliente)
         .input('searchTerm', searchTerm)
         .input('status', validStatus)
-        .input('PageSize', PageSize)
         .query(query);
 
     const requestTotal = await pool.request()
