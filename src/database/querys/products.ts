@@ -11,7 +11,8 @@ export const productsQuerys = {
             M.Id_Marca,
             TRIM(CT.CodBar) AS CodBar,
             TRIM(M.Nombre) AS Marca,
-            PR.Id_ListaPrecios
+            PR.Id_ListaPrecios,
+            PR.Precio
         FROM [dbo].[PRODUCTOS] P
             JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
             JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
@@ -43,7 +44,8 @@ export const productsQuerys = {
             M.Id_Marca,
             PR.Id_ListaPrecios,
             TRIM(CT.CodBar) AS CodBar,
-            TRIM(M.Nombre) AS Marca
+            TRIM(M.Nombre) AS Marca,
+            PR.Precio
         FROM [dbo].[PRODUCTOS] P
             JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
             JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
@@ -66,7 +68,8 @@ export const productsQuerys = {
             M.Id_Marca,
             PR.Id_ListaPrecios,
             TRIM(CT.CodBar) AS CodBar,
-            TRIM(M.Nombre) AS Marca
+            TRIM(M.Nombre) AS Marca,
+            PR.Precio
         FROM [dbo].[PRODUCTOS] P
             JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
             JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
