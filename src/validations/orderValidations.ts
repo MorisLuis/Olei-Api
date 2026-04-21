@@ -1,14 +1,12 @@
 import { z } from "zod";
 
-// Validación para SellsInterface
 export const SellsSchema = z.object({
-    UniqueKey: z.string().optional(),
+    UniqueKey: z.string().readonly().optional(),
     Total: z.number(),
     Subtotal: z.number(),
     Piezas: z.number().optional(),
 });
 
-// Validación para SellsDetailsInterface
 export const SellsDetailsSchema = z.object({
     Codigo: z.string(),
     Id_Marca: z.number(),
@@ -17,7 +15,6 @@ export const SellsDetailsSchema = z.object({
     Descripcion: z.string().nullable().optional()
 });
 
-// postOrder
 export const postOrderBodySchema = z.object({
     sellsData: SellsSchema,
     sellsDetails: z.array(SellsDetailsSchema)
