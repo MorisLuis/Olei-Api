@@ -125,7 +125,8 @@ export const productsQuerys = {
         WHERE 
             (P.Descripcion LIKE '%' + @searchTerm + '%' 
             OR P.SKU LIKE '%' + @searchTerm + '%'
-            OR P.Codigo LIKE '%' + @searchTerm + '%')
+            OR P.Codigo LIKE '%' + @searchTerm + '%'
+            OR C.CodBar LIKE '%' + @searchTerm + '%')
             AND E.Id_Almacen = @Id_Almacen 
             AND PR.Id_ListaPrecios = @Id_ListPre;
     `,
