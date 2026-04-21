@@ -2,6 +2,27 @@ import { z } from "zod";
 import type { SellsInterface, SellsOrderConditionByClientType, SellsOrderConditionType, typeTipoDoc } from '../interface/sells';
 import { SellsOrderByClientCondition, SellsOrderCondition, TipoDoc } from '../interface/sells';
 
+export const postSellSchema = z.object({
+    UniqueKey: z.string().optional(),
+    Total: z.number(),
+    Subtotal: z.number(),
+    Piezas: z.number().optional(),
+});
+
+export const postSellDetailsSchema = z.object({
+    Codigo: z.string(),
+    Id_Marca: z.number(),
+    Cantidad: z.number(),
+    Precio: z.number(),
+    Descripcion: z.string().nullable().optional()
+});
+
+export const postSellBodySchema = z.object({
+        Id_Cliente: z.number(),
+    sellsData: postSellSchema,
+    sellsDetails: z.array(postSellDetailsSchema)
+});
+
 // QUERY'S
 export const getSellsQuerySchema = z.object({
     PageNumber: z.

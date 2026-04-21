@@ -3,7 +3,81 @@ import { sellsQuery } from "../../database/querys/sells";
 import { ValidationError } from "../../errors/CustomError";
 import type { SellsInterface } from "../../interface/sells";
 import type { UserWebSessionInterface } from "../../interface/user";
-import type { GetSellsServiceParams, GetSellsTotalServiceResponse, GetSellsByClientPaginatedServiceParams, GetSellsPaignatedServiceParams, GetSellsByClientServiceParams } from "./sellsDocsServices.interface";
+import sql from 'mssql';
+import { numeroALetra } from "../../utils/numeroALetra";
+import { convertArrayToXml } from "../../utils/convertArrayToXml";
+import type { GetSellsServiceParams, GetSellsTotalServiceResponse, GetSellsByClientPaginatedServiceParams, GetSellsPaignatedServiceParams, GetSellsByClientServiceParams, PostSellServiceParams, PostSellServiceResponse } from "./sellsDocsServices.interface";
+
+
+const postSellService = async ({
+    userSession,
+    Total,
+    Subtotal,
+    sellsDetails,
+    sellsData,
+    Id_Cliente
+}: PostSellServiceParams): Promise<PostSellServiceResponse> => {
+
+    const { ServidorSQL, BaseSQL, Id_ListPre, Id_Almacen, TipoDocOO } = userSession;
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
+    if (!pool) {
+        throw new ValidationError('Error al conectarse a base de datos principal');
+    };
+
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+
+    try {
+        const request = new sql.Request(transaction);
+
+        const totalImpuesto = Total - Subtotal;
+        const cantLetra = numeroALetra(Total);
+
+        const xmlDataSales = convertArrayToXml(sellsData);
+        const xmlDataSalesDetails = convertArrayToXml(sellsDetails);
+
+        if (!xmlDataSales || !xmlDataSalesDetails) {
+            throw new ValidationError('No fue posible convertir la venta a XML');
+        }
+
+        if (!Id_Almacen) {
+            throw new ValidationError("Id Almacen necesario")
+        };
+
+        console.log({ Id_Cliente })
+
+        if (Id_Cliente === undefined || Id_Cliente === null) {
+            throw new ValidationError("Id Cliente necesario")
+        }
+
+        
+
+        const result = await request
+            .input('xmlDataSales', sql.Xml, xmlDataSales)
+            .input('xmlDataSalesDetails', sql.Xml, xmlDataSalesDetails)
+            .input('Id_Usuario', sql.Int, 1)
+            .input('Id_Almacen', sql.Int, Id_Almacen)
+            .input('Id_Cliente', sql.Int, Id_Cliente)
+            .input('Id_ListPre', sql.Int, Id_ListPre)
+            .input('TipoDoc', sql.Int, 1)
+            .input('CantLetra', sql.VarChar, cantLetra)
+            .input('TotalImpuesto', sql.Decimal, totalImpuesto)
+            .output('Folio', sql.Int)
+            .execute('fn_ExecuteSales');
+
+        await transaction.commit();
+
+        return {
+            folio: String(result.recordset[0]?.Folio ?? result.output.Folio ?? ''),
+            TipoDoc: TipoDocOO
+        };
+    } catch (error) {
+                console.log(error)
+
+        await transaction.rollback();
+        throw error;
+    }
+};
 
 
 const getSellsService = async ({
@@ -204,6 +278,7 @@ const getSellByIdService = async (
 };
 
 export {
+    postSellService,
     getSellsService,
     getSellsCountAndTotalService,
     getSellsByClientService,

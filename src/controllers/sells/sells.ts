@@ -1,6 +1,32 @@
 import type { NextFunction, Request, Response } from "express"
-import { getSellsService, getSellsByClientService, getSellByIdService, getSellsCountAndTotalService, getSellsByClientCountAndTotalService } from "../../services/sells/sellsDocsServices";
-import { getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getFolioParamsSchema, getSellsByClientQuerySchema, getSellsCountAndTotalQuerySchema, getSellsByClientCountAndTotalQuerySchema } from '../../validations/sellsValidations'
+import { getSellsService, getSellsByClientService, getSellByIdService, getSellsCountAndTotalService, getSellsByClientCountAndTotalService, postSellService } from "../../services/sells/sellsDocsServices";
+import { getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getFolioParamsSchema, getSellsByClientQuerySchema, getSellsCountAndTotalQuerySchema, getSellsByClientCountAndTotalQuerySchema, postSellBodySchema } from '../../validations/sellsValidations'
+
+const postSell = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+
+    try {
+        const userSession = req.sessionWeb;
+        const { sellsDetails, sellsData , Id_Cliente} = postSellBodySchema.parse(req.body);
+        const { Subtotal, Total } = sellsData;
+
+        const { folio, TipoDoc } = await postSellService({
+            sellsData,
+            sellsDetails,
+            userSession,
+            Subtotal,
+            Total,
+            Id_Cliente
+        });
+
+        return res.status(201).json({
+            ok: true,
+            folio,
+            TipoDoc
+        });
+    } catch (error) {
+        return next(error);
+    }
+};
 
 const getSells = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
@@ -137,6 +163,7 @@ const getSellById = async (req: Request, res: Response, next: NextFunction): Pro
 };
 
 export {
+    postSell,
     getSells,
     getSellsCountAndTotal,
     getSellsByClient,

@@ -1,5 +1,20 @@
-import type { SellsInterface, SellsOrderConditionType } from "../../interface/sells"
+import type { SellsDetailsInterface, SellsInterface, SellsOrderConditionType } from "../../interface/sells"
 import type { UserWebSessionInterface } from "../../interface/user"
+
+
+interface PostSellServiceParams {
+    userSession: UserWebSessionInterface,
+    Total: number,
+    Subtotal: number,
+    Id_Cliente: number,
+    sellsDetails: Partial<SellsDetailsInterface>[],
+    sellsData: Partial<SellsInterface>,
+};
+
+interface PostSellServiceResponse {
+    folio: string,
+    TipoDoc: number,
+};
 
 
 // PARAMS
@@ -46,6 +61,8 @@ interface  GetSellsTotalServiceResponse {
 
 
 export type {
+    PostSellServiceParams,
+
     // PARAMS
     GetSellsServiceParams,
     GetSellsPaignatedServiceParams,
@@ -53,5 +70,6 @@ export type {
     GetSellsByClientPaginatedServiceParams,
 
     // RESPONSE
+    PostSellServiceResponse,
     GetSellsTotalServiceResponse
 }
