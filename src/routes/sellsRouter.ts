@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getSellById, getSells, getSellsByClient, getSellsByClientCountAndTotal, getSellsCountAndTotal, postSell } from "../controllers/sells/sells";
+import { getSellById, getSellReportById, getSells, getSellsByClient, getSellsByClientCountAndTotal, getSellsCountAndTotal, postSell } from "../controllers/sells/sells";
 import { getCobranza, getCobranzaByClient, getCobranzaByClientCountAndTotal, getCobranzaCountAndTotal, getCobranzaWithTotals } from "../controllers/sells/cobranza";
 import { getSellsProducts, getSellsProductsCountAndTotal } from "../controllers/sells/productsSells";
 import { validateJWTWeb } from "../middleware/validateJWTWeb";
@@ -9,6 +9,7 @@ const router = Router();
 router.post("/", validateJWTWeb, postSell);
 router.get("/", validateJWTWeb, getSells);
 router.get("/totals", validateJWTWeb, getSellsCountAndTotal);
+router.get("/:folio/report", validateJWTWeb, getSellReportById);
 router.get("/:folio", validateJWTWeb, getSellById);
 router.get("/client/:client", validateJWTWeb, getSellsByClient);
 router.get("/client/totals/:client", validateJWTWeb, getSellsByClientCountAndTotal);

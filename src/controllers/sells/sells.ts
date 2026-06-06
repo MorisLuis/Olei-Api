@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express"
 import { getSellsService, getSellsByClientService, getSellByIdService, getSellsCountAndTotalService, getSellsByClientCountAndTotalService, postSellService } from "../../services/sells/sellsDocsServices";
+import { sellsReportService } from "../../services/sells/sellsReport.service";
 import { getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getFolioParamsSchema, getSellsByClientQuerySchema, getSellsCountAndTotalQuerySchema, getSellsByClientCountAndTotalQuerySchema, postSellBodySchema } from '../../validations/sellsValidations'
 
 const postSell = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
@@ -162,11 +163,40 @@ const getSellById = async (req: Request, res: Response, next: NextFunction): Pro
 
 };
 
+const getSellReportById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+    
+    try {
+        const userSession = req.sessionWeb;
+        const { folio } = getFolioParamsSchema.parse(req.params);
+        const mode = req.query.mode === 'blob' ? 'blob' : 'response';
+
+        const report = await sellsReportService(userSession, folio);
+
+        if (mode === 'blob') {
+            return res.json({
+                ok: true,
+                fileName: report.fileName,
+                mimeType: report.mimeType,
+                blob: report.blob,
+            });
+        }
+
+        res.setHeader('Content-Type', report.mimeType);
+        res.setHeader('Content-Disposition', `inline; filename="${report.fileName}"`);
+
+        return res.status(200).send(report.pdfBuffer);
+
+    } catch (error) {
+        return next(error);
+    }
+}
+
 export {
     postSell,
     getSells,
     getSellsCountAndTotal,
     getSellsByClient,
     getSellsByClientCountAndTotal,
-    getSellById
+    getSellById,
+    getSellReportById
 }
