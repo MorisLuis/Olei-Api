@@ -3,55 +3,54 @@ export const sellsQuery = {
 
     // Quote, Remission or Invoice.
     getSells: `
-        /* Filtra ventas primero */
-            WITH ventasFiltradas AS (
-                SELECT  Id_Almacen,
-                        Id_Cliente,
-                        TipoDoc,
-                        Serie,
-                        Folio,
-                        Subtotal,
-                        Total,
-                        Saldo,
-                        Fecha
-                FROM dbo.VENTAS
-                WHERE Saldo > 0 AND (  
-                        @dateExactly IS NOT NULL
-                        AND Fecha = @dateExactly OR @dateExactly IS NULL
-                        AND (@dateStart IS NULL OR Fecha >= @dateStart)
-                        AND (@dateEnd   IS NULL OR Fecha <  DATEADD(day,1,@dateEnd))
-                    )
-            ),
+        WITH ventasFiltradas AS (
+            SELECT  Id_Almacen,
+                    Id_Cliente,
+                    TipoDoc,
+                    Serie,
+                    Folio,
+                    Subtotal,
+                    Total,
+                    Saldo,
+                    Fecha
+            FROM dbo.VENTAS
+            WHERE Saldo > 0 AND (  
+                    @dateExactly IS NOT NULL
+                    AND Fecha = @dateExactly OR @dateExactly IS NULL
+                    AND (@dateStart IS NULL OR Fecha >= @dateStart)
+                    AND (@dateEnd   IS NULL OR Fecha <  DATEADD(day,1,@dateEnd))
+                )
+        ),
 
-            /* Agrupa por cliente */
-            cte_result AS (
-                SELECT
-                    MIN(CONCAT(v.Id_Almacen, '-', v.Id_Cliente, '-', v.TipoDoc, '-', TRIM(v.Serie), '-', v.Folio)) AS UniqueKey,
-                    c.Id_Cliente,
-                    v.Id_Almacen,
-                    MAX(c.Nombre) AS Nombre,
-                    SUM(v.Subtotal) AS Subtotal,
-                    SUM(v.Total) AS Total
-                FROM ventasFiltradas v
-                JOIN dbo.CLIENTES  c
-                    ON c.Id_Cliente = v.Id_Cliente
-                    AND c.Id_Almacen = v.Id_Almacen
-                WHERE   (@searchTerm = N'' OR c.Nombre LIKE N'%' + @searchTerm + N'%')
-                GROUP BY c.Id_Cliente, v.Id_Almacen
-            )
-            
-            
-            /* Pagina y ordena */
-            SELECT *
-            FROM   cte_result
-            ORDER BY
-                CASE WHEN @searchTerm <> N'' AND cte_result.Nombre LIKE @searchTerm + N'%' THEN 0 ELSE 1 END,
-                CASE @orderCondition WHEN 'Total'  THEN Total  END DESC,
-                CASE @orderCondition WHEN 'Nombre' THEN Nombre END,
-                Id_Cliente
-            OFFSET (@pageNumber - 1) * @pageSize ROWS
-            FETCH  NEXT @pageSize
-            ROWS ONLY;
+        cte_result AS (
+            SELECT
+                MIN(CONCAT(v.Id_Almacen, '-', v.Id_Cliente, '-', v.TipoDoc, '-', TRIM(v.Serie), '-', v.Folio)) AS UniqueKey,
+                c.Id_Cliente,
+                v.Id_Almacen,
+                MAX(c.Nombre) AS Nombre,
+                SUM(v.Subtotal) AS Subtotal,
+                SUM(v.Total) AS Total,
+                v.TipoDoc,
+                v.Serie,
+                v.Folio
+            FROM ventasFiltradas v
+            JOIN dbo.CLIENTES  c
+                ON c.Id_Cliente = v.Id_Cliente
+                AND c.Id_Almacen = v.Id_Almacen
+            WHERE   (@searchTerm = N'' OR c.Nombre LIKE N'%' + @searchTerm + N'%')
+            GROUP BY c.Id_Cliente, v.Id_Almacen, v.TipoDoc, v.Serie, v.Folio
+        )
+
+        SELECT *
+        FROM   cte_result
+        ORDER BY
+            CASE WHEN @searchTerm <> N'' AND cte_result.Nombre LIKE @searchTerm + N'%' THEN 0 ELSE 1 END,
+            CASE @orderCondition WHEN 'Total'  THEN Total  END DESC,
+            CASE @orderCondition WHEN 'Nombre' THEN Nombre END,
+            Id_Cliente
+        OFFSET (@pageNumber - 1) * @pageSize ROWS
+        FETCH  NEXT @pageSize
+        ROWS ONLY;
     `,
 
     getSellsTotal: `
