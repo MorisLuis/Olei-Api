@@ -79,43 +79,6 @@ const postSellService = async ({
     }
 };
 
-
-const getSellsService = async ({
-    userSession,
-    PageNumber,
-    sellsOrderCondition,
-    searchTerm,
-
-    DateEnd,
-    DateExactly,
-    DateStart
-}: GetSellsPaignatedServiceParams): Promise<{ sells: SellsInterface[] }> => {
-
-    const { ServidorSQL, BaseSQL } = userSession;
-    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
-
-    if (!pool) {
-        throw new ValidationError('Error al conectarse a base de datos principal');
-    };
-
-    const query = sellsQuery.getSells;
-
-    const requestSells = await pool.request()
-        .input('OrderCondition', sellsOrderCondition)
-        .input('PageNumber', PageNumber)
-        .input('PageSize', 10)
-        .input('searchTerm', searchTerm)
-        .input('DateStart', DateStart)
-        .input('DateEnd', DateEnd)
-        .input('DateExactly', DateExactly)
-        .query(query);
-
-    const sells = requestSells.recordset
-    return {
-        sells
-    };
-};
-
 const getSellsCountAndTotalService = async ({
     userSession,
     searchTerm,
@@ -276,6 +239,46 @@ const getSellByIdService = async (
 
     return sell
 };
+
+
+// TODO: This service has to be deprecated
+const getSellsService = async ({
+    userSession,
+    PageNumber,
+    sellsOrderCondition,
+    searchTerm,
+
+    DateEnd,
+    DateExactly,
+    DateStart
+}: GetSellsPaignatedServiceParams): Promise<{ sells: SellsInterface[] }> => {
+
+    const { ServidorSQL, BaseSQL } = userSession;
+    console.log({ userSession })
+    const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
+
+    if (!pool) {
+        throw new ValidationError('Error al conectarse a base de datos principal');
+    };
+
+    const query = sellsQuery.getSells;
+
+    const requestSells = await pool.request()
+        .input('OrderCondition', sellsOrderCondition)
+        .input('PageNumber', PageNumber)
+        .input('PageSize', 10)
+        .input('searchTerm', searchTerm)
+        .input('DateStart', DateStart)
+        .input('DateEnd', DateEnd)
+        .input('DateExactly', DateExactly)
+        .query(query);
+
+    const sells = requestSells.recordset
+    return {
+        sells
+    };
+};
+
 
 export {
     postSellService,
