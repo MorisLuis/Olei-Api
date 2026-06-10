@@ -15,10 +15,12 @@ const postSellService = async ({
     Subtotal,
     sellsDetails,
     sellsData,
-    Id_Cliente
+    Id_Cliente,
+    TipoDoc,
+    Id_Almacen
 }: PostSellServiceParams): Promise<PostSellServiceResponse> => {
 
-    const { ServidorSQL, BaseSQL, Id_ListPre, Id_Almacen, TipoDocOO } = userSession;
+    const { ServidorSQL, BaseSQL, Id_ListPre } = userSession;
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
@@ -44,13 +46,9 @@ const postSellService = async ({
             throw new ValidationError("Id Almacen necesario")
         };
 
-        console.log({ Id_Cliente })
-
         if (Id_Cliente === undefined || Id_Cliente === null) {
             throw new ValidationError("Id Cliente necesario")
         }
-
-        
 
         const result = await request
             .input('xmlDataSales', sql.Xml, xmlDataSales)
@@ -59,9 +57,10 @@ const postSellService = async ({
             .input('Id_Almacen', sql.Int, Id_Almacen)
             .input('Id_Cliente', sql.Int, Id_Cliente)
             .input('Id_ListPre', sql.Int, Id_ListPre)
-            .input('TipoDoc', sql.Int, 1)
+            .input('TipoDoc', sql.Int, TipoDoc)
             .input('CantLetra', sql.VarChar, cantLetra)
             .input('TotalImpuesto', sql.Decimal, totalImpuesto)
+            .input('Serie', sql.VarChar, '')
             .output('Folio', sql.Int)
             .execute('fn_ExecuteSales');
 
@@ -69,7 +68,7 @@ const postSellService = async ({
 
         return {
             folio: String(result.recordset[0]?.Folio ?? result.output.Folio ?? ''),
-            TipoDoc: TipoDocOO
+            TipoDoc: TipoDoc
         };
     } catch (error) {
                 console.log(error)
@@ -148,7 +147,7 @@ const getSellsByClientService = async ({
         .input('PageSize', 10)
         .input('Id_Cliente', Id_Cliente)
         .input('OrderCondition', SellsOrderCondition)
-        .input('FilterTipoDoc', TipoDoc == 0 ? 0 : 1)
+        .input('FilterTipoDoc', TipoDoc)
         .input('DateStart', DateStart)
         .input('DateEnd', DateEnd)
         .input('DateExactly', DateExactly)
@@ -185,7 +184,7 @@ const getSellsByClientCountAndTotalService = async ({
 
     const requestTotal = await pool.request()
         .input('Id_Cliente', Id_Cliente)
-        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
+        .input('FilterTipoDoc', TipoDoc)
         .input('DateStart', DateStart)
         .input('DateEnd', DateEnd)
         .input('DateExactly', DateExactly)
@@ -194,7 +193,7 @@ const getSellsByClientCountAndTotalService = async ({
 
     const requestCount = pool.request()
         .input('Id_Cliente', Id_Cliente)
-        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
+        .input('FilterTipoDoc', TipoDoc)
         .input('DateStart', DateStart)
         .input('DateEnd', DateEnd)
         .input('DateExactly', DateExactly)
@@ -254,7 +253,6 @@ const getSellsService = async ({
 }: GetSellsPaignatedServiceParams): Promise<{ sells: SellsInterface[] }> => {
 
     const { ServidorSQL, BaseSQL } = userSession;
-    console.log({ userSession })
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
     if (!pool) {
