@@ -168,9 +168,17 @@ const getSellReportById = async (req: Request, res: Response, next: NextFunction
     try {
         const userSession = req.sessionWeb;
         const { folio } = getFolioParamsSchema.parse(req.params);
+        const { Id_Almacen, TipoDoc, Id_Cliente, Serie } = req.query
         const mode = req.query.mode === 'blob' ? 'blob' : 'response';
 
-        const report = await sellsReportService(userSession, folio);
+        const report = await sellsReportService({
+            session: userSession,
+            Id_Almacen: Number(Id_Almacen),
+            TipoDoc: String(TipoDoc),
+            Id_Cliente: Number(Id_Cliente),
+            Folio: String(folio),
+            Serie: String(Serie)
+        });
 
         if (mode === 'blob') {
             return res.json({

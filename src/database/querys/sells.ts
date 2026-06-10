@@ -242,5 +242,11 @@ export const sellsQuery = {
         FROM dbo.VENTAS V
             JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = V.Id_Cliente AND C.Id_Almacen = V.Id_Almacen
         WHERE V.Id_Almacen = @Id_Almacen AND TipoDoc = @TipoDoc AND Serie = @Serie AND Folio = @Folio
+    `,
+
+    getSellReportById: `
+        SELECT *
+        FROM [dbo].[VENTAS]
+        WHERE  Id_Cliente = @Id_Cliente AND Folio = @Folio AND Id_Almacen = @Id_Almacen AND TipoDoc = @TipoDoc
     `
 }
