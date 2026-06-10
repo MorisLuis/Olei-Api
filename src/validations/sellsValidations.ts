@@ -18,9 +18,13 @@ export const postSellDetailsSchema = z.object({
 });
 
 export const postSellBodySchema = z.object({
-        Id_Cliente: z.number(),
+    Id_Cliente: z.number(),
+    Id_Almacen: z.number(),
     sellsData: postSellSchema,
-    sellsDetails: z.array(postSellDetailsSchema)
+    sellsDetails: z.array(postSellDetailsSchema),
+    TipoDoc: z.number().refine((val) => TipoDoc.includes(val as typeTipoDoc), {
+        message: "TipoDoc debe ser 1, 2 o 3"
+    }) 
 });
 
 // QUERY'S
