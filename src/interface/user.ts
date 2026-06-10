@@ -28,6 +28,7 @@ export interface UserWebSessionInterface {
     ServidorSQL: string,
     BaseSQL: string,
     UsuarioSQL: string,
+    PasswordSQL: string,
     
     Id_UsuarioOOL: string,
     Id_UsuarioOLEI: string,
