@@ -9,6 +9,8 @@ interface PostSellServiceParams {
     Id_Cliente: number,
     sellsDetails: Partial<SellsDetailsInterface>[],
     sellsData: Partial<SellsInterface>,
+    TipoDoc: number
+    Id_Almacen?: number,
 };
 
 interface PostSellServiceResponse {
