@@ -7,16 +7,18 @@ const postSell = async (req: Request, res: Response, next: NextFunction): Promis
 
     try {
         const userSession = req.sessionWeb;
-        const { sellsDetails, sellsData , Id_Cliente} = postSellBodySchema.parse(req.body);
+        const { sellsDetails, sellsData , Id_Cliente, TipoDoc, Id_Almacen } = postSellBodySchema.parse(req.body);
         const { Subtotal, Total } = sellsData;
 
-        const { folio, TipoDoc } = await postSellService({
+        const { folio } = await postSellService({
             sellsData,
             sellsDetails,
             userSession,
             Subtotal,
             Total,
-            Id_Cliente
+            Id_Cliente,
+            TipoDoc,
+            Id_Almacen
         });
 
         return res.status(201).json({
