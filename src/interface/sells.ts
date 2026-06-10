@@ -62,8 +62,8 @@ export interface SellsProductsInterface {
 }
 
 
-export type typeTipoDoc = 0 | 1 | 2;
-export const TipoDoc: typeTipoDoc[] = [0, 1, 2];
+export type typeTipoDoc = 1 | 2 | 3;
+export const TipoDoc: typeTipoDoc[] = [1, 2, 3];
 
 export type SellsOrderConditionType = 'Nombre' | 'Total';
 export const SellsOrderCondition: SellsOrderConditionType[] = ['Nombre', 'Total'];
