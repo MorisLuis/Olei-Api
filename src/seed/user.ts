@@ -4,6 +4,7 @@ const mockUserSession: UserWebSessionInterface = {
     ServidorSQL: 'FAKE_SERVER',
     BaseSQL: 'FAKE_DB',
     UsuarioSQL: 'fake_user',
+    PasswordSQL: 'fake_password',
 
     Id_UsuarioOOL: 'UOOL123',
     Id_UsuarioOLEI: 'UOLEI456',

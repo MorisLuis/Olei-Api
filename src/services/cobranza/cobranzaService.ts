@@ -110,7 +110,7 @@ const getCobranzaByClientService = async ({
         .input('PageNumber', PageNumber)
         .input('PageSize', PageSize)
         .input('OrderCondition', SellsOrderCondition)
-        .input('FilterTipoDoc', TipoDoc !== 0 ? 1 : 0)
+        .input('FilterTipoDoc', TipoDoc)
         .input('FilterExpired', FilterExpired)
         .input('FilterNotExpired', FilterNotExpired)
         .input('DateStart', DateStart)
@@ -152,7 +152,7 @@ const getCobranzaByClientCountAndTotalService = async ({
     // Ejecutamos ambas consultas en paralelo
     const [countRequest, totalRequest] = await Promise.all([
         pool.request()
-            .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
+            .input('FilterTipoDoc', TipoDoc)
             .input('FilterExpired', FilterExpired)
             .input('FilterNotExpired', FilterNotExpired)
             .input('DateStart', DateStart)
@@ -164,7 +164,7 @@ const getCobranzaByClientCountAndTotalService = async ({
             .query(countQuery),
 
         pool.request()
-            .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
+            .input('FilterTipoDoc', TipoDoc)
             .input('FilterExpired', FilterExpired)
             .input('FilterNotExpired', FilterNotExpired)
             .input('DateStart', DateStart)
@@ -203,7 +203,7 @@ const getCobranzaWithTotalsService = async ({
 
     const request = await pool.request()
         .input('Id_Cliente', Id_Cliente)
-        .input('FilterTipoDoc', TipoDoc === 0 ? 0 : 1)
+        .input('FilterTipoDoc', TipoDoc)
         .input('FilterExpired', FilterExpired)
         .input('FilterNotExpired', FilterNotExpired)
         .input('OrderCondition', SellsOrderCondition)
