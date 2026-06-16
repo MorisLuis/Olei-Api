@@ -23,7 +23,7 @@ export const postSellBodySchema = z.object({
     sellsData: postSellSchema,
     sellsDetails: z.array(postSellDetailsSchema),
     TipoDoc: z.number().refine((val) => TipoDoc.includes(val as typeTipoDoc), {
-        message: "TipoDoc debe ser 1, 2 o 3"
+        message: "TipoDoc debe ser 2, 3 o 4"
     }) 
 });
 
