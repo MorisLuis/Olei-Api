@@ -202,15 +202,16 @@ interface getProductsByStockServiceInterface {
     userSession: UserSessionInterface;
     PageSize?: number;
     PageNumber?: number;
-
     getTotal?: boolean;
+    Id_Almacen?: string | null;
 };
 
 const getProductsByStockService = async ({
     userSession,
     PageSize,
     PageNumber,
-    getTotal = false
+    getTotal = false,
+    Id_Almacen: Id_AlmacenParam
 }: getProductsByStockServiceInterface): Promise<{ products: ProductInterface[] | number }> => {
 
 
@@ -241,7 +242,7 @@ const getProductsByStockService = async ({
         .input('PageSize', PageSize)
         .input('PageNumber', PageNumber)
         .input('Id_ListaPrecios', Id_ListPre)
-        .input('Almacen', Id_Almacen)
+        .input('Almacen', Id_AlmacenParam ? Id_AlmacenParam : Id_Almacen)
         .query(query);
 
     let productsByStock
@@ -312,12 +313,14 @@ interface searchProductInventoryServiceInterface {
     searchTerm: string;
     // handle if we get products with codebas or not
     withCodebar: boolean
+    Id_Almacen?: string | null;
 }
 
 const searchProductByStockService = async ({
     userSession,
     searchTerm,
-    withCodebar
+    withCodebar,
+    Id_Almacen: Id_AlmacenParam
 }: searchProductInventoryServiceInterface): Promise<{ products: ProductInterface[] }> => {
 
     const { ServidorSQL, BaseSQL, Id_UsuarioOLEI, PasswordSQL, UsuarioSQL, Id_Almacen, Id_ListPre } = userSession;
@@ -338,7 +341,7 @@ const searchProductByStockService = async ({
     const result = await pool.request()
         .input("searchTerm", searchTerm)
         .input('Id_Usuario', Id_UsuarioOLEI)
-        .input('Id_Almacen', Id_Almacen)
+        .input('Id_Almacen', Id_AlmacenParam ? Id_AlmacenParam : Id_Almacen)
         .input('Id_ListPre', Id_ListPre)
         .query(query);
 
