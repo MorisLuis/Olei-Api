@@ -49,5 +49,7 @@ export const getInventoryQuerySchema = z.object({
 })
 
 export const searchProductInventoryQuerySchema = z.object({
-    searchTerm: z.string()
+    searchTerm: z.string(),
+    Id_Almacen: z.string().nullable().default(null),
+
 })

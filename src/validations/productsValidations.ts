@@ -73,11 +73,11 @@ export const getProductsByStockQuerySchema = z.object({
         preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
     PageSize: z.
         preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
+    Id_Almacen: z.string().nullable().default(null),
 });
 
 export const getProductByStockAndCodeBarSchema = z.object({
     CodBar: z.string().default(""),
     Codigo: z.string().default(""),
     SKU: z.string().default("")
-  });
-  
+});
