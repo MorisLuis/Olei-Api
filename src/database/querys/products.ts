@@ -113,6 +113,7 @@ export const productsQuerys = {
             P.Descripcion AS Descripcion,
             P.Codigo AS Codigo,
             P.SKU,
+            E.Id_Almacen,
             C.CodBar,
             M.Id_Marca,
             M.Nombre AS Marca,
