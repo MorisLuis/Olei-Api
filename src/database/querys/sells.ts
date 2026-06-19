@@ -19,6 +19,7 @@ export const sellsQuery = {
                     AND Fecha = @dateExactly OR @dateExactly IS NULL
                     AND (@dateStart IS NULL OR Fecha >= @dateStart)
                     AND (@dateEnd   IS NULL OR Fecha <  DATEADD(day,1,@dateEnd))
+                    AND TipoDoc IN (2, 3, 4)
                 )
         ),
 
