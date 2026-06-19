@@ -51,7 +51,7 @@ const getProducById = async (req: Request, res: Response, next: NextFunction): P
 const getProductsByStock = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const { PageNumber, PageSize } = getProductsByStockQuerySchema.parse(req.query);
+        const { PageNumber, PageSize, Id_Almacen } = getProductsByStockQuerySchema.parse(req.query);
         const userSession = req.session;
 
         if (!userSession) {
@@ -61,7 +61,8 @@ const getProductsByStock = async (req: Request, res: Response, next: NextFunctio
         const { products } = await getProductsByStockService({
             userSession,
             PageNumber,
-            PageSize
+            PageSize,
+            Id_Almacen
         });
 
         res.json({ products });
@@ -110,12 +111,13 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
 const searchProductInventory = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const { searchTerm } = searchProductInventoryQuerySchema.parse(req.query);
+        const { searchTerm, Id_Almacen } = searchProductInventoryQuerySchema.parse(req.query);
         const userSession = req.session;
         const { products } = await searchProductByStockService({
             userSession,
             searchTerm: searchTerm,
-            withCodebar: true
+            withCodebar: true,
+            Id_Almacen
         })
 
         return res.json({ products });
@@ -128,13 +130,14 @@ const searchProductInventory = async (req: Request, res: Response, next: NextFun
 const searchProductInventoryWithoutCodebar = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        const { searchTerm } = searchProductInventoryQuerySchema.parse(req.query);
+        const { searchTerm, Id_Almacen } = searchProductInventoryQuerySchema.parse(req.query);
 
         const userSession = req.session;
         const { products } = await searchProductByStockService({
             userSession,
             searchTerm: searchTerm,
-            withCodebar: false
+            withCodebar: false,
+            Id_Almacen
         })
 
         return res.json({ products });
