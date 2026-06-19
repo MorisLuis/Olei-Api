@@ -28,10 +28,8 @@ export const postMeetingService = async (
         const request = new sql.Request(transaction);
 
         validateMeetingInput(body);
-        console.log('Validated Input:', body);
 
         const normalizedDate = new Date(body.Fecha);
-        console.log('Normalized Date:', normalizedDate);
 
         const result = await request
             .input('Id_Almacen', sql.Int, body.Id_Almacen ?? null)
