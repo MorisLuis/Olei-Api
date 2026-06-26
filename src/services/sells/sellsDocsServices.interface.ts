@@ -55,8 +55,8 @@ interface GetSellsByClientPaginatedServiceParams extends GetSellsByClientService
 }
 
 // RESPONSE
-interface  GetSellsTotalServiceResponse {
-    count: number, 
+interface GetSellsTotalServiceResponse {
+    count: number,
     total: { SumaSubtotal: number, SumaTotal: number }
 }
 

@@ -31,9 +31,10 @@ const postSellService = async ({
 
     try {
         const request = new sql.Request(transaction);
-
         const totalImpuesto = Total - Subtotal;
         const cantLetra = numeroALetra(Total);
+        const Accion = TipoDoc === 2 ? 2 : 0
+        const Id_TipoMovInv = TipoDoc === 2 ? 2 : 0
 
         const xmlDataSales = convertArrayToXml(sellsData);
         const xmlDataSalesDetails = convertArrayToXml(sellsDetails);
@@ -61,6 +62,8 @@ const postSellService = async ({
             .input('CantLetra', sql.VarChar, cantLetra)
             .input('TotalImpuesto', sql.Decimal, totalImpuesto)
             .input('Serie', sql.VarChar, '')
+            .input('Accion', sql.Int, Accion)
+            .input('Id_TipoMovInv', sql.Int, Id_TipoMovInv)
             .output('Folio', sql.Int)
             .execute('fn_ExecuteSales');
 
@@ -71,7 +74,7 @@ const postSellService = async ({
             TipoDoc: TipoDoc
         };
     } catch (error) {
-                console.log(error)
+        console.log(error)
 
         await transaction.rollback();
         throw error;

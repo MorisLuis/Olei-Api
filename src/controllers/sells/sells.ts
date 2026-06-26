@@ -10,6 +10,7 @@ const postSell = async (req: Request, res: Response, next: NextFunction): Promis
         const { sellsDetails, sellsData , Id_Cliente, TipoDoc, Id_Almacen } = postSellBodySchema.parse(req.body);
         const { Subtotal, Total } = sellsData;
 
+
         const { folio } = await postSellService({
             sellsData,
             sellsDetails,
