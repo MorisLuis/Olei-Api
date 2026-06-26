@@ -12,7 +12,8 @@ export const getClientsQuerySchema = z.object({
     orderField: z.enum(['Nombre']).optional().default("Nombre"),
     Nombre: z.string().optional(),
     orderDirection: z.enum(['asc', 'desc']).optional().default("asc"),
-    Id_Cliente: z.string().optional()   
+    Id_Cliente: z.string().optional(),
+    Id_Almacen: z.string().optional(),
 })
 
 export const getClientsTotalQuerySchema = z.object({

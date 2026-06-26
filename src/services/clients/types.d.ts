@@ -11,6 +11,7 @@ interface getClientsParams {
     limit: number
     Nombre?: string
     Id_Cliente?: string
+    Id_Almacen?: string | number
 };
 
 interface getClientIdInterface {

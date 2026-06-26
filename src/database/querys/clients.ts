@@ -12,8 +12,9 @@ export const clientsQuerys = {
         FROM [dbo].[CLIENTES]
         WHERE (@Nombre IS NULL OR Nombre LIKE '%' + @Nombre + '%')
         AND (@Id_Cliente IS NULL OR Id_Cliente = @Id_Cliente)
+        AND (@Id_Almacen IS NULL OR Id_Almacen = @Id_Almacen)
         ORDER BY 
-        -- 👇 Solo prioriza los que empiecen con @Nombre si @Nombre no es vacío
+
         CASE 
             WHEN @Nombre <> '' AND LOWER(Nombre) LIKE LOWER(@Nombre) + '%' THEN 0
             WHEN @Nombre <> '' THEN 1
@@ -31,6 +32,7 @@ export const clientsQuerys = {
         FROM [dbo].[CLIENTES]
         WHERE (@Nombre IS NULL OR Nombre LIKE '%' + @Nombre + '%')
         AND (@Id_Cliente IS NULL OR Id_Cliente = @Id_Cliente)
+        AND (@Id_Almacen IS NULL OR Id_Almacen = @Id_Almacen);
     `,
 
     getClientId: ` 

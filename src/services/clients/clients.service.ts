@@ -18,6 +18,7 @@ const getClientsService = async (params: getClientsParams): Promise<getClientsRe
         limit,
         Nombre,
         Id_Cliente,
+        Id_Almacen
     } = params;
 
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
@@ -31,6 +32,7 @@ const getClientsService = async (params: getClientsParams): Promise<getClientsRe
     const totalRequest = await pool.request()
         .input('Nombre', sql.VarChar, Nombre === '' ? null : Nombre)
         .input('Id_Cliente', sql.VarChar, Id_Cliente === '' ? null : Id_Cliente)
+        .input('Id_Almacen', sql.Int, Id_Almacen === '' ? null : Id_Almacen)
         .query(queryTotal);
 
     const request = await pool.request()
@@ -38,6 +40,7 @@ const getClientsService = async (params: getClientsParams): Promise<getClientsRe
         .input('PageSize', sql.Int, limit)
         .input('Nombre', sql.VarChar, Nombre === '' ? null : Nombre)
         .input('Id_Cliente', sql.VarChar, Id_Cliente === '' ? null : Id_Cliente)
+        .input('Id_Almacen', sql.Int, Id_Almacen === '' ? null : Id_Almacen)
         .input('OrderCondition', sql.VarChar, orderField)
         .query(query);
 

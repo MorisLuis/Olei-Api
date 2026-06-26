@@ -13,7 +13,8 @@ const getClients = async (req: Request, res: Response, next: NextFunction): Prom
             orderField,
             orderDirection,
             Id_Cliente,
-            Nombre
+            Nombre,
+            Id_Almacen
         } = getClientsQuerySchema.parse(req.query);
     
         const userSession = req.sessionWeb;
@@ -25,7 +26,8 @@ const getClients = async (req: Request, res: Response, next: NextFunction): Prom
             PageNumber,
             limit,
             Nombre,
-            Id_Cliente
+            Id_Cliente,
+            Id_Almacen
         })
 
         return res.json({
