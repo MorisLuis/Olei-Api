@@ -11,7 +11,7 @@ const inventoryDetailsItemSchema = z.object({
         .positive({ message: "Id_Marca debe ser un número entero positivo" }),
     Diferencia: z
         .number()
-        .min(0, { message: "Diferencia debe ser un número mayor o igual a 0" }),
+        .optional(),
     SKU: z
         .string()
         .optional(),
