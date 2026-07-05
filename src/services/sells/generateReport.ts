@@ -17,8 +17,6 @@ const generateReportSells = async ({
     const { ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL } = session;
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
 
-    console.log({ Id_Almacen, TipoDoc, Serie, Folio, Id_Cliente });
-
     const query = sellsQuery.getSellById;
     const requestSell = await pool.request()
         .input('Id_Cliente', Id_Cliente)
