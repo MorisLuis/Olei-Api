@@ -38,6 +38,26 @@ export const sellsProductsQuery = {
         FETCH NEXT @PageSize ROWS ONLY;
     `,
 
+    getSellsDetailsByFolio: `
+        SELECT 
+            D.Id_Almacen,
+            D.TipoDoc,
+            D.Folio,
+            D.Partida,
+            D.Codigo,
+            D.Descripcion,
+            D.Cantidad,
+            D.Precio,
+            D.Importe,
+            D.Impuesto,
+            V.Fecha,
+            M.Nombre AS Marca
+        FROM dbo.DETALLEVENTAS D
+            JOIN dbo.VENTAS V ON V.Folio = D.Folio
+            JOIN dbo.MARCAS M ON M.Id_Marca = D.Id_Marca
+        WHERE D.Id_Almacen = @Id_Almacen AND D.TipoDoc = @TipoDoc AND D.Serie = @Serie AND D.Folio = @Folio
+    `,
+
     getSellsProductsTotals: `
         WITH 
         DETALLEVENTAS_CTE
