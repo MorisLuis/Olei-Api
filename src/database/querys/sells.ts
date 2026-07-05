@@ -230,6 +230,16 @@ export const sellsQuery = {
     getSellById: `
         SELECT
             C.Nombre,
+            C.Calle,
+            C.NoExt,
+            C.NoInt,
+            C.Colonia,
+            C.CodigoPost,
+            C.Telefono1,
+            C.CorreoVtas,
+
+            VD.Nombre AS Vendedor,
+
             V.Id_Cliente,
             V.Id_Almacen,
             V.TipoDoc,
@@ -244,12 +254,8 @@ export const sellsQuery = {
             V.Piezas
         FROM dbo.VENTAS V
             JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = V.Id_Cliente AND C.Id_Almacen = V.Id_Almacen
+            JOIN [dbo].[VENDEDORES] VD ON VD.Id_Vendedor = V.Id_Vendedor
         WHERE V.Id_Almacen = @Id_Almacen AND TipoDoc = @TipoDoc AND Serie = @Serie AND Folio = @Folio
     `,
 
-    getSellReportById: `
-        SELECT *
-        FROM [dbo].[VENTAS]
-        WHERE  Id_Cliente = @Id_Cliente AND Folio = @Folio AND Id_Almacen = @Id_Almacen AND TipoDoc = @TipoDoc
-    `
 }
