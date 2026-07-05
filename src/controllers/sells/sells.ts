@@ -179,8 +179,8 @@ const getSellReportById = async (req: Request, res: Response, next: NextFunction
             Id_Almacen: Number(Id_Almacen),
             TipoDoc: String(TipoDoc),
             Id_Cliente: Number(Id_Cliente),
-            Folio: String(folio),
-            Serie: String(Serie)
+            Folio: String(folio), 
+            Serie: Serie ? String(Serie) : ""
         });
 
         if (mode === 'blob') {
