@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express"
 import { getSellsService, getSellsByClientService, getSellByIdService, getSellsCountAndTotalService, getSellsByClientCountAndTotalService, postSellService } from "../../services/sells/sellsDocsServices";
-import { sellsReportService } from "../../services/sells/sellsReport.service";
+import { generateReportSells } from "../../services/sells/generateReport";
 import { getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getFolioParamsSchema, getSellsByClientQuerySchema, getSellsCountAndTotalQuerySchema, getSellsByClientCountAndTotalQuerySchema, postSellBodySchema } from '../../validations/sellsValidations'
 
 const postSell = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
@@ -174,7 +174,7 @@ const getSellReportById = async (req: Request, res: Response, next: NextFunction
         const { Id_Almacen, TipoDoc, Id_Cliente, Serie } = req.query
         const mode = req.query.mode === 'blob' ? 'blob' : 'response';
 
-        const report = await sellsReportService({
+        const report = await generateReportSells({
             session: userSession,
             Id_Almacen: Number(Id_Almacen),
             TipoDoc: String(TipoDoc),
