@@ -53,7 +53,7 @@ export const sellsProductsQuery = {
             V.Fecha,
             M.Nombre AS Marca
         FROM dbo.DETALLEVENTAS D
-            JOIN dbo.VENTAS V ON V.Folio = D.Folio
+            JOIN dbo.VENTAS V ON V.Folio = D.Folio AND V.TipoDoc = D.TipoDoc AND V.Id_Almacen = D.Id_Almacen
             JOIN dbo.MARCAS M ON M.Id_Marca = D.Id_Marca
         WHERE D.Id_Almacen = @Id_Almacen AND D.TipoDoc = @TipoDoc AND D.Serie = @Serie AND D.Folio = @Folio
     `,
