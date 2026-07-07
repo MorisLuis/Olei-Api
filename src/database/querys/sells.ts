@@ -240,6 +240,8 @@ export const sellsQuery = {
 
             VD.Nombre AS Vendedor,
 
+            TD.Nombre AS TipoDocNombre,
+
             V.Id_Cliente,
             V.Id_Almacen,
             V.TipoDoc,
@@ -255,7 +257,8 @@ export const sellsQuery = {
         FROM dbo.VENTAS V
             JOIN [dbo].[CLIENTES] C ON C.Id_Cliente = V.Id_Cliente AND C.Id_Almacen = V.Id_Almacen
             JOIN [dbo].[VENDEDORES] VD ON VD.Id_Vendedor = V.Id_Vendedor
-        WHERE V.Id_Almacen = @Id_Almacen AND TipoDoc = @TipoDoc AND Serie = @Serie AND Folio = @Folio
-    `,
+            JOIN [dbo].[TIPODOCS] TD ON TD.TipoDoc = @TipoDoc
+        WHERE V.Id_Almacen = @Id_Almacen AND V.TipoDoc = @TipoDoc AND V.Serie = @Serie AND V.Folio = @Folio
+        `,
 
 }
