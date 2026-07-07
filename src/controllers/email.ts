@@ -20,13 +20,6 @@ const sendEmail = async (req: Request, res: Response, next: NextFunction): Promi
     })
 
     try {
-        /* await handleTransporter({
-            host: "smtp.gmail.com",
-            port: 465,
-            secure: true,
-            auth: { user: "moradoluisenrique@gmail.com", pass: 'gcnx sjih fxcq drcy' }
-        }).sendMail(mailOptions) */
-
         await handleTransporter(emailTransporterData).sendMail(mailOptions)
 
         return res.json({
@@ -46,17 +39,13 @@ const sendEmail = async (req: Request, res: Response, next: NextFunction): Promi
  */
 
 const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-
-    const { destinatario, remitente, subject, text, nombreRemitente, Id_Almacen: Id_Almacen_Client } = emailCobranzaBodySchema.parse(req.body);
-
-    // Add the Id_Almacen_Client to te query, to comply with 'getCobranzaByClientQuerySchema' schema zod.
-    const queryRequest = { ...req.query, Id_Almacen: Id_Almacen_Client };
-    const { PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart, Id_Almacen } = getCobranzaByClientQuerySchema.parse(queryRequest);
-
-    const { client: Id_Cliente } = getClientParamsSchema.parse(req.params);
-    const userSession = req.sessionWeb;
-
     try {
+        const { destinatario, remitente, subject, text, nombreRemitente, Id_Almacen: Id_Almacen_Client } = emailCobranzaBodySchema.parse(req.body);
+        const queryRequest = { ...req.query, Id_Almacen: Id_Almacen_Client };
+        const { PageNumber, cobranzaOrderCondition, TipoDoc, FilterExpired, FilterNotExpired, DateEnd, DateExactly, DateStart, Id_Almacen } = getCobranzaByClientQuerySchema.parse(queryRequest);
+    
+        const { client: Id_Cliente } = getClientParamsSchema.parse(req.params);
+        const userSession = req.sessionWeb;
         const { mailOptions, emailTransporterData } = await sendEmailWithPDFService({
             Id_Cliente,
             Id_Almacen,

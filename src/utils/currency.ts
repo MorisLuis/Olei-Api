@@ -1,4 +1,4 @@
-export const formatCurrency = (value: number) : string => {
+export const formatCurrency = (value: number | string): string => {
     // Crear formateador
     const formatter = new Intl.NumberFormat('es-MX', {
         style: 'currency',
@@ -7,5 +7,5 @@ export const formatCurrency = (value: number) : string => {
         maximumFractionDigits: 2,
     });
 
-    return formatter.format(value); // $2,500.00
+    return formatter.format(Number(value)); // $2,500.00
 };

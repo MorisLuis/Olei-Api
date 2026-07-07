@@ -22,7 +22,6 @@ export const transportDefault: Transporter = {
     }
 };
 
-/* idaliahc@oleisoftware.com.mx' */
 
 const handleTransporter = (values: Transporter): nodemailer.Transporter<SMTPTransport.SentMessageInfo, SMTPTransport.Options> => {
     return nodemailer.createTransport({

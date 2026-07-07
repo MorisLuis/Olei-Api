@@ -1,42 +1,41 @@
+import { ZodError } from "zod";
+
 import type { NextFunction, Request, Response } from "express";
-import { handleErrorsEndpoint } from "../controllers/errors";
+import type { ErrorResponse } from "./types";
 
-interface ErrorResponse extends Error {
-  statusCode?: number;
-}
-
-const errorHandler = async (err: ErrorResponse, req: Request, res: Response, _next: NextFunction): Promise<void> => {
+const errorHandler = (
+  err: ErrorResponse,
+  req: Request,
+  res: Response,
+  _next: NextFunction
+): void => {
 
   void _next;
-  
-  const statusCode = err.statusCode || 500;
-  const message = err.message || 'Internal Server Error';
 
-  //const Id_Usuario = (await getUserIdFromRequest(req)) ?? "Sin Usuario";
+  if (err instanceof ZodError) {
+    const errors = err.issues.map(issue => ({
+      field: issue.path.join("."),
+      message: issue.message,
+      code: issue.code,
+    }));
 
-  console.error(`[ERROR] ${req.method} ${req.path} - ${message}`);
+    console.error(`[VALIDATION ERROR] ${req.method} ${req.path}`, errors);
 
-  // Omitir errores de "Token expirado o inválido: TokenExpiredError: jwt expired" por que es el error de refresh token
-  // Omitir errores de 'login'.
-  if (
-    !message.includes("Token expirado o inválido: TokenExpiredError: jwt expired") &&
-    req.path !== '/api/auth/login' &&
-    req.path !== '/api/auth/loginServer' &&
-    req.path !== '/api/auth/loginWeb'
-  ) {
-    try {
-      await handleErrorsEndpoint({
-        From: req.path,                    // Endpoint donde ocurrió el error
-        Message: message,                  // Mensaje de error
-        Id_Usuario: "",            // ID del usuario
-        Metodo: req.method,                // Método HTTP
-        code: statusCode.toString()        // Código de error convertido a string
-      });
-    } catch (loggingError) {
-      console.error('Error guardando log en la DB:', loggingError);
-    }
+    res.status(400).json({
+      ok: false,
+      message: "Validation failed",
+      errors,
+    });
+
+    return;
   }
 
+  const statusCode = err.statusCode || 500;
+  const message = statusCode >= 500 ? "Internal server error" : err.message;
+
+  //TODO: Stored the erro in the database for further analysis and debugging.
+
+  console.error(`[ERROR] ${req.method} ${req.path} - ${message}`);
   res.status(statusCode).json({ error: message });
 };
 
