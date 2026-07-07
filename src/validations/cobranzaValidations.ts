@@ -1,9 +1,52 @@
 import { z } from "zod";
-import type { CobranzaOrderConditionType, SellsInterface, SellsOrderConditionByClientType, typeTipoDoc } from "../interface/sells";
-import { CobranzaOrderCondition, SellsOrderByClientCondition, TipoDoc } from "../interface/sells";
+import type { CobranzaOrderConditionType, SellsInterface } from "../interface/sells";
+import { CobranzaOrderCondition } from "../interface/sells";
+import { booleanNumberFilterSchema, pageNumberSchema } from "./shared";
+
+//FIXME: Unify the TipoDocs constants
+export type typeTipoDoc =   1 | 2 | 3;
+export const TipoDoc: typeTipoDoc[] = [1, 2, 3];
+
+const idAlmacenSchema = z
+    .string()
+    .nonempty()
+    .transform((val) => parseInt(val, 10));
+
+const tipoDocSchema = z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val, 10) : 0))
+    .refine(
+        (val): val is SellsInterface["TipoDoc"] =>
+            TipoDoc.includes(val as typeTipoDoc),
+        { message: "TipoDoc debe ser 0, 1 o 2" }
+    );
+
+const optionalDateStringSchema = z.preprocess(
+    (val) => (val === "undefined" ? undefined : val),
+    z.string().optional()
+);
+
+const cobranzaOrderConditionSchema = z
+    .string()
+    .optional()
+    .refine(
+        (val): val is CobranzaOrderConditionType =>
+            val === undefined || CobranzaOrderCondition.includes(val as CobranzaOrderConditionType),
+        { message: "cobranzaOrderCondition debe ser 'Nombre', 'ExpiredDays', 'SaldoVencido', 'SaldoNoVencido', 'TotalSaldo'" }
+    );
+
+const cobranzaByClientBaseQuerySchema = z.object({
+    Id_Almacen: idAlmacenSchema,
+    TipoDoc: tipoDocSchema,
+    FilterExpired: booleanNumberFilterSchema,
+    FilterNotExpired: booleanNumberFilterSchema,
+    DateEnd: optionalDateStringSchema,
+    DateExactly: optionalDateStringSchema,
+    DateStart: optionalDateStringSchema,
+});
 
 
-// getCobranza
 export const getCobranzaQueryCountAndTotalSchema = z.object({
     termSearch: z.string().optional().transform(val => val ?? ''),
     startDate: z.string().optional(),
@@ -12,103 +55,15 @@ export const getCobranzaQueryCountAndTotalSchema = z.object({
 });
 
 export const getCobranzaQuerySchema = z.object({
-    PageNumber: z.
-        preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
-    cobranzaOrderCondition: z
-        .string()
-        .optional()
-        .refine(
-            (val): val is CobranzaOrderConditionType =>
-                val === undefined || CobranzaOrderCondition.includes(val as CobranzaOrderConditionType),
-            { message: "cobranzaOrderCondition debe ser 'Nombre', 'ExpiredDays', 'SaldoVencido', 'SaldoNoVencido', 'TotalSaldo'" }
-        ),
+    PageNumber: pageNumberSchema,
+    cobranzaOrderCondition: cobranzaOrderConditionSchema,
     termSearch: z.string().optional().transform(val => val ?? '')
 });
 
+export const getCobranzaByClientQuerySchema =
+    cobranzaByClientBaseQuerySchema.extend({
+        PageNumber: pageNumberSchema,
+        cobranzaOrderCondition: cobranzaOrderConditionSchema,
+    });
 
-export const getCobranzaByClientQuerySchema = z.object({
-    PageNumber: z.
-        preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
-    cobranzaOrderCondition: z
-        .string()
-        .optional()
-        .refine(
-            (val): val is SellsOrderConditionByClientType =>
-                val === undefined || SellsOrderByClientCondition.includes(val as SellsOrderConditionByClientType),
-            { message: "cobranzaOrderCondition debe ser 'TipoDoc', 'Folio', 'Fecha', 'FechaEntrega' o 'ExpiredDays'" }
-        ),
-    TipoDoc: z
-        .string()
-        .optional()
-        .transform((val) => (val ? parseInt(val, 10) : 0)) // Convierte a número
-        .refine(
-            (val): val is SellsInterface["TipoDoc"] => TipoDoc.includes(val as typeTipoDoc),
-            { message: "TipoDoc debe ser 0, 1 o 2" }
-        ),
-    FilterExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
-    FilterNotExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
-    DateEnd: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    DateExactly: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    DateStart: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    Id_Almacen: z.string().nonempty().transform((val) => (val ? parseInt(val, 10) : 0))
-})
-
-export const getCobranzaByClientCountAndTotalQuerySchema = z.object({
-    TipoDoc: z
-        .string()
-        .optional()
-        .transform((val) => (val ? parseInt(val, 10) : 0)) // Convierte a número
-        .refine(
-            (val): val is SellsInterface["TipoDoc"] => TipoDoc.includes(val as typeTipoDoc),
-            { message: "TipoDoc debe ser 0, 1 o 2" }
-        ),
-    FilterExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
-    FilterNotExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
-    DateEnd: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    DateExactly: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    DateStart: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    Id_Almacen: z.string().nonempty().transform((val) => (val ? parseInt(val, 10) : 0))
-})
-
-export const getTotalCobranzaQuerySchema = z.object({
-    FilterExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
-    FilterNotExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
-    TipoDoc: z
-        .string()
-        .optional()
-        .transform((val) => (val ? parseInt(val, 10) : 0)) // Convierte a número
-        .refine(
-            (val): val is SellsInterface["TipoDoc"] => TipoDoc.includes(val as typeTipoDoc),
-            { message: "TipoDoc debe ser 0, 1 o 2" }
-        ),
-    DateEnd: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    DateExactly: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    DateStart: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    )
-})
+export const getCobranzaByClientCountAndTotalQuerySchema = cobranzaByClientBaseQuerySchema;
