@@ -4,8 +4,8 @@ import { CobranzaOrderCondition } from "../interface/sells";
 import { booleanNumberFilterSchema, pageNumberSchema } from "./shared";
 
 //FIXME: Unify the TipoDocs constants
-export type typeTipoDoc =   1 | 2 | 3;
-export const TipoDoc: typeTipoDoc[] = [1, 2, 3];
+export type typeTipoDoc =   0 | 1 | 2 | 3;
+export const TipoDoc: typeTipoDoc[] = [0, 1, 2, 3];
 
 const idAlmacenSchema = z
     .string()
