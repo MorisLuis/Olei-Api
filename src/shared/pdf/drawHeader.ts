@@ -5,6 +5,7 @@ import type { DrawHeaderImageOptions } from './types';
 
 export const drawHeader = async ({
     title,
+    Folio,
     page,
     pdfDoc,
     pageWidth,
@@ -24,11 +25,13 @@ export const drawHeader = async ({
     const titleText = title?.trim() || 'Sin título';
 
     const rightLimitX = pageWidth - marginRight;
-    const rightBlockWidth = Math.min(220, pageWidth * 0.35);
+    const rightBlockWidth = Math.min(120, pageWidth * 0.35);
     const maxCompanyWidth = Math.max(80, pageWidth - marginLeft - marginRight - rightBlockWidth - 20);
+    const titleBadgePaddingX = 8;
+    const titleBadgePaddingY = 4;
 
     const safeCompanyText = truncateText(companyText, maxCompanyWidth, helveticaFont, companyFontSize);
-    const safeTitleText = truncateText(titleText, rightBlockWidth, helveticaFont, smallFontSize);
+    const safeTitleText = truncateText(titleText.toUpperCase(), rightBlockWidth - titleBadgePaddingX * 2, helveticaFont, smallFontSize);
 
     const textHeight = companyFontSize;
     const textX = marginLeft;
@@ -42,35 +45,52 @@ export const drawHeader = async ({
         color: rgb(0, 0, 0),
     });
 
-    const currentDate = new Date();
-    const dateText = currentDate.toLocaleDateString('es-MX');
-
-    const dateTextWidth = helveticaRegularFont.widthOfTextAtSize(dateText, smallFontSize);
     const titleTextWidth = helveticaFont.widthOfTextAtSize(safeTitleText, smallFontSize);
+    const titleBadgeHeight = smallFontSize + titleBadgePaddingY * 2;
+    const titleBadgeX = rightLimitX - rightBlockWidth;
+    const titleBadgeY = textY + smallFontSize - 2;
 
-    const dateTextX = rightLimitX - dateTextWidth;
-    const titleTextX = rightLimitX - titleTextWidth;
-
-    const totalTextHeight = smallFontSize * 2 + lineSpacing;
-    const bottomAlignedY = textY + totalTextHeight - smallFontSize;
-
-    page.drawText(dateText, {
-        x: dateTextX,
-        y: bottomAlignedY,
-        size: smallFontSize,
-        font: helveticaRegularFont,
+    page.drawRectangle({
+        x: titleBadgeX,
+        y: titleBadgeY,
+        width: rightBlockWidth,
+        height: titleBadgeHeight,
         color: rgb(0, 0, 0),
     });
 
     page.drawText(safeTitleText, {
-        x: titleTextX,
-        y: bottomAlignedY - smallFontSize - lineSpacing,
+        x: titleBadgeX + (rightBlockWidth - titleTextWidth) / 2,
+        y: titleBadgeY + titleBadgePaddingY,
         size: smallFontSize,
         font: helveticaFont,
-        color: rgb(0, 0, 0),
+        color: rgb(1, 1, 1),
     });
 
-    const dividerY = bottomAlignedY - smallFontSize - lineSpacing - 10;
+    let detailLineY = titleBadgeY - (smallFontSize + lineSpacing);
+
+    if (Folio) {
+        const folioTextWidth = helveticaFont.widthOfTextAtSize(Folio.toString(), smallFontSize + 2);
+        page.drawText(Folio.toString(), {
+            x: titleBadgeX + (rightBlockWidth - folioTextWidth) / 2,
+            y: detailLineY,
+            size: smallFontSize + 2,
+            font: helveticaFont,
+            color: rgb(0.85, 0, 0),
+        });
+    } else {
+        const currentDate = new Date();
+        const dateText = currentDate.toLocaleDateString('es-MX');
+        const dateTextWidth = helveticaRegularFont.widthOfTextAtSize(dateText, smallFontSize);
+        page.drawText(dateText, {
+            x: rightLimitX - dateTextWidth,
+            y: detailLineY,
+            size: smallFontSize,
+            font: helveticaRegularFont,
+            color: rgb(0, 0, 0),
+        });
+    }
+
+    const dividerY = detailLineY - 10;
     page.drawLine({
         start: { x: marginLeft, y: dividerY },
         end: { x: pageWidth - marginRight, y: dividerY },
