@@ -1,6 +1,57 @@
 import { z } from "zod";
-import type { SellsInterface, SellsOrderConditionByClientType, SellsOrderConditionType, typeTipoDoc } from '../interface/sells';
-import { SellsOrderByClientCondition, SellsOrderCondition, TipoDoc } from '../interface/sells';
+import type { SellsOrderConditionByClientType, SellsOrderConditionType } from '../interface/sells';
+import { SellsOrderByClientCondition, SellsOrderCondition, TipoDoc, type typeTipoDoc } from '../interface/sells';
+import { booleanNumberFilterSchema, pageNumberSchema } from "./shared";
+
+const tipoDocSchema = z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val, 10) : 0))
+    .refine(
+        (val): val is typeTipoDoc | 0 =>
+            val === 0 || TipoDoc.includes(val as typeTipoDoc),
+        { message: "TipoDoc debe ser 0, 2, 3 o 4" }
+    );
+
+const optionalDateStringSchema = z.preprocess(
+    (val) => (val === "undefined" ? undefined : val),
+    z.string().optional()
+);
+
+const sellsOrderConditionSchema = z
+    .string()
+    .optional()
+    .refine(
+        (val): val is SellsOrderConditionType =>
+            val === undefined || SellsOrderCondition.includes(val as SellsOrderConditionType),
+        { message: "sellsOrderCondition debe ser 'Nombre' o 'Total'" }
+    );
+
+const sellsOrderByClientConditionSchema = z
+    .string()
+    .optional()
+    .refine(
+        (val): val is SellsOrderConditionByClientType =>
+            val === undefined || SellsOrderByClientCondition.includes(val as SellsOrderConditionByClientType),
+        { message: "sellsOrderCondition debe ser 'TipoDoc', 'Folio', 'Fecha', 'FechaEntrega' o 'ExpiredDays'" }
+    );
+
+const sellsBaseQuerySchema = z.object({
+    searchTerm: z.preprocess((val) => (val === undefined ? '' : val), z.string()),
+    DateEnd: optionalDateStringSchema,
+    DateExactly: optionalDateStringSchema,
+    DateStart: optionalDateStringSchema
+});
+
+const sellsByClientBaseQuerySchema = z.object({
+    FilterExpired: booleanNumberFilterSchema,
+    FilterNotExpired: booleanNumberFilterSchema,
+    TipoDoc: tipoDocSchema,
+    DateEnd: optionalDateStringSchema,
+    DateExactly: optionalDateStringSchema,
+    DateStart: optionalDateStringSchema
+});
+
 
 export const postSellSchema = z.object({
     UniqueKey: z.string().optional(),
@@ -28,109 +79,19 @@ export const postSellBodySchema = z.object({
 });
 
 // QUERY'S
-export const getSellsQuerySchema = z.object({
-    PageNumber: z.
-        preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
-    sellsOrderCondition: z
-        .string()
-        .optional()
-        .refine(
-            (val): val is SellsOrderConditionType =>
-                val === undefined || SellsOrderCondition.includes(val as SellsOrderConditionType),
-            { message: "sellsOrderCondition debe ser 'Nombre', 'Total'" }
-        ),
-    searchTerm: z.preprocess((val) => (val === undefined ? '' : val), z.string()),
-    DateEnd: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    DateExactly: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    DateStart: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    )
+export const getSellsQuerySchema = sellsBaseQuerySchema.extend({
+    PageNumber: pageNumberSchema,
+    sellsOrderCondition: sellsOrderConditionSchema
 });
 
-export const getSellsCountAndTotalQuerySchema = z.object({
-    searchTerm: z.preprocess((val) => (val === undefined ? '' : val), z.string()),
-    DateEnd: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    DateExactly: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    DateStart: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    )
-});
+export const getSellsCountAndTotalQuerySchema = sellsBaseQuerySchema;
 
-export const getSellsByClientQuerySchema = z.object({
-    PageNumber: z.
-        preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
-    sellsOrderCondition: z
-        .string()
-        .refine(
-            (val): val is SellsOrderConditionByClientType =>
-                val === undefined || SellsOrderByClientCondition.includes(val as SellsOrderConditionByClientType),
-            { message: "sellsOrderCondition debe ser 'TipoDoc', 'Folio', 'Fecha', 'FechaEntrega' o 'ExpiredDays'" }
-        ),
-
-    FilterExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
-    FilterNotExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
-    TipoDoc: z
-        .string()
-        .optional()
-        .transform((val) => (val ? parseInt(val, 10) : 0)) // Convierte a número
-        .refine(
-            (val): val is SellsInterface["TipoDoc"] => TipoDoc.includes(val as typeTipoDoc),
-            { message: "TipoDoc debe ser 0, 1 o 2" }
-        ),
-    DateEnd: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    DateExactly: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    DateStart: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    )
+export const getSellsByClientQuerySchema = sellsByClientBaseQuerySchema.extend({
+    PageNumber: pageNumberSchema,
+    sellsOrderCondition: sellsOrderByClientConditionSchema
 })
 
-
-export const getSellsByClientCountAndTotalQuerySchema = z.object({
-
-    FilterExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
-    FilterNotExpired: z.string().optional().transform((val) => (val ? Number(val) === 1 ? 1 : 0 : 0)),
-    TipoDoc: z
-        .string()
-        .optional()
-        .transform((val) => (val ? parseInt(val, 10) : 0)) // Convierte a número
-        .refine(
-            (val): val is SellsInterface["TipoDoc"] => TipoDoc.includes(val as typeTipoDoc),
-            { message: "TipoDoc debe ser 0, 1 o 2" }
-        ),
-    DateEnd: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    DateExactly: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    ),
-    DateStart: z.preprocess(
-        (val) => (val === "undefined" ? undefined : val),
-        z.string().optional()
-    )
-})
+export const getSellsByClientCountAndTotalQuerySchema = sellsByClientBaseQuerySchema
 
 export const getSellByIdQuerySchema = z.object({
     Serie: z
@@ -138,14 +99,7 @@ export const getSellByIdQuerySchema = z.object({
         .transform((val) => (val === undefined ? "" : val)), // Transforma undefined a cadena vacía
     Id_Almacen: z
         .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number()),
-    TipoDoc: z
-        .string()
-        .optional()
-        .transform((val) => (val ? parseInt(val, 10) : 0)) // Convierte a número
-        .refine(
-            (val): val is SellsInterface["TipoDoc"] => TipoDoc.includes(val as typeTipoDoc),
-            { message: "TipoDoc debe ser 0, 1 o 2" }
-        )
+    TipoDoc: tipoDocSchema
 });
 
 
