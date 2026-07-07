@@ -27,7 +27,6 @@ const generateReportSells = async ({
         .query(query);
 
     const sell = requestSell.recordset[0];
-
     if (!sell) {
         throw new Error(`No se encontró la venta  con ID: ${Id_Cliente}`);
     }
@@ -60,7 +59,9 @@ const generateReportSells = async ({
             seller: sell.Vendedor,
             iva: sell.Impuesto,
             subtotal: sell.Subtotal,
-            total: sell.Total
+            total: sell.Total,
+            Folio: sell.Folio,
+            TipoDocNombre: sell.TipoDocNombre
         },
         sells: sellsData
     });
