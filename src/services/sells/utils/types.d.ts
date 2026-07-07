@@ -9,6 +9,8 @@ export interface sellsReportPdfParams {
         iva: string;
         subtotal: string;
         total: string;
+        Folio: string;
+        TipoDocNombre: string;
     },
     sells: {
         sku: string;
