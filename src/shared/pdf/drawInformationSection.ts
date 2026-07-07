@@ -45,7 +45,7 @@ export const drawInformationSection = async ({
 		y: headerY,
 		width: tableWidth,
 		height: headerHeight,
-		color: rgb(0.08, 0.43, 0.81),
+		color: rgb(0, 0, 0),
 	});
 
 	const safeHeaderTitle = truncateText(title.trim() || 'DATOS', tableWidth - 12, boldFont, headerFontSize);

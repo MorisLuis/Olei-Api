@@ -23,7 +23,7 @@ export const createSellsReportPdf = async ({ sellDetails, sells }: sellsReportPd
     let y = pageHeight - marginTop;
 
     const { y: headerBottomY } = await drawHeader({
-        title: 'Reporte de Venta',
+        title: sellDetails.TipoDocNombre,
         page,
         pdfDoc,
         pageWidth: 595.28,
@@ -31,6 +31,7 @@ export const createSellsReportPdf = async ({ sellDetails, sells }: sellsReportPd
         marginLeft,
         marginRight,
         company: sellDetails.name,
+        Folio: sellDetails.Folio.toString(),
     });
     y = headerBottomY;
 

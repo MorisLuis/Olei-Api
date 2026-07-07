@@ -2,6 +2,7 @@ import type { PDFDocument, PDFPage } from "pdf-lib";
 
 export  interface DrawHeaderImageOptions {
     title: string;
+	Folio: string;
 
     page: PDFPage;
     pdfDoc: PDFDocument;

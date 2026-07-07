@@ -62,7 +62,8 @@ export const drawDetailsTable = async ({
 	const widths = buildColumnWidths(columnCount, availableWidth, columnWidth, columnWidths);
 
 	const borderColor = rgb(0.75, 0.75, 0.75);
-	const headerBackground = rgb(0.08, 0.43, 0.81);
+	const headerBackground = rgb(0, 0, 0);
+
 	const resolvedPageHeight = pageHeight ?? page.getHeight();
 
 	let currentPage = page;

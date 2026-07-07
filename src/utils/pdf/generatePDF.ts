@@ -58,7 +58,7 @@ const generatePDF = async (
 
     // Agregar la primera página
     let page = pdfDoc.addPage([pageWidth, pageHeight]);
-    await drawHeader({ title: 'Relaciones de Documentos Pendientes de Pago', page, pdfDoc, pageWidth, pageHeight, company });
+    await drawHeader({ title: 'Relaciones de Documentos Pendientes de Pago', page, pdfDoc, pageWidth, pageHeight, company, Folio: `` });
 
     const logoBottomY = pageHeight - (pageHeight * 0.1) - 20; // 10% height + top margin
     let y = logoBottomY; // dejar 20 de espacio debajo del logo

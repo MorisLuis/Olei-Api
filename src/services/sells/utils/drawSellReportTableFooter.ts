@@ -55,7 +55,8 @@ export const drawSellReportTableFooter = async ({
 	}
 
 	const borderColor = rgb(0.75, 0.75, 0.75);
-	const blueHeader = rgb(0.08, 0.43, 0.81);
+	const blueHeader = 		 rgb(0, 0, 0);
+;
 
 	const rightX = marginLeft + leftPanelWidth;
 
@@ -81,7 +82,6 @@ export const drawSellReportTableFooter = async ({
 		color: rgb(1, 1, 1),
 	});
 
-	// Left panel body (spans 2 rows)
 	targetPage.drawRectangle({
 		x: marginLeft,
 		y: topY - totalHeight,
@@ -111,8 +111,7 @@ export const drawSellReportTableFooter = async ({
 			x: rightX + rightPanelWidth - labelWidth - 8,
 			y: cellY + (rowHeight - (textSize + 1)) / 2 + 1,
 			size: textSize + 1,
-			font: boldFont,
-			color: index === 2 ? rgb(0.82, 0.12, 0.12) : rgb(0.12, 0.12, 0.12),
+			font: boldFont
 		});
 	});
 
