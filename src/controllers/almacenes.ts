@@ -3,7 +3,7 @@ import { getAlmacenByIdService, getAlmacenesService } from "../services/almacene
 import { getAlmacenByIdQuerySchema } from "../validations/almacenValidations";
 import type { UserSessionInterface } from "../interface/user";
 import { NotFoundError, UnauthorizedError } from "../errors/CustomError";
-import { updateSession } from "../helpers/generate-redis";
+import { updateSession } from "../services/auth/database/session.service";
 
 const getAlmacenes = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 

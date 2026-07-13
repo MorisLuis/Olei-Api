@@ -1,27 +1,29 @@
 
 export interface UserSessionInterface {
+    // Client data
     ServidorSQL: string;
     BaseSQL: string;
     UsuarioSQL: string;
     PasswordSQL: string;
-
     IdUsuarioOLEI: string;
-    PasswordOLEI?: number;
-
+    PasswordOLEI?: string;
     RazonSocial: string;
-    SwImagenes: string | null;
-    Vigencia: string;
+    SwImagenes: boolean;
+    Vigencia: Date;
+
     from: 'web' | 'mobil' | 'crm',
     serverConected: boolean;
     userConected: boolean;
+    
+    Id_Almacen?: number;
+    TodosAlmacenes?: number;
+    Id_ListPre?: number;
+    SalidaSinExistencias?: number
+    AlmacenNombre?: string;
 
     Id_UsuarioOLEI?: string;
-    userRol?: string;
-    TodosAlmacenes?: number;
-    SalidaSinExistencias?: number
-    Id_Almacen?: number;
-    Id_ListPre?: number;
-    AlmacenNombre?: string;
+    userRol?: number;
+    Id_Perfil?: number;
 }
 
 export interface UserWebSessionInterface {
@@ -29,7 +31,7 @@ export interface UserWebSessionInterface {
     BaseSQL: string,
     UsuarioSQL: string,
     PasswordSQL: string,
-    
+
     Id_UsuarioOOL: string,
     Id_UsuarioOLEI: string,
     PasswordOOL: string,
@@ -55,43 +57,7 @@ export interface UserWebSessionInterface {
     IsEmploye?: boolean
 }
 
-// Interface result of: sp_AuthenticateAndGetMovement
-export interface UserAuthenticateAndGetMovementResultInterface {
-    Id_Perfil: string,
-    Id_Almacen: number,
-    TodosAlmacenes: number,
-    Id_ListPre: number,
-    InventarioW: number,
-    TraspasosW: number,
-    Descripcion: string,
-    Id_TipoMovInv: number,
-    Id_AlmDest: number,
-    Accion: number,
-    AlmacenNombre: string,
-    SalidaSinExistencias: number
-}
 
-// Interface result of query: authDatabase
-export interface authResultInterface {
-    IdOLEI: number,
-    PasswordOLEI: number,
-    IdUsuarioOLEI: string,
-    ServidorSQL: string,
-    BaseSQL: string,
-    UsuarioSQL: string,
-    PasswordSQL: string,
-    RazonSocial: string,
-    SwImagenes: string | null,
-    Vigencia: string,
-    Id_ListPre: number;
-
-    Id_UsuarioOLEI: string;
-}
-
-export type ValidationResult = {
-    Tipo: 'usuario' | 'contrasena';
-    Resultado: number;
-};
 
 export type MovementDetail = {
     Id_Perfil: number;

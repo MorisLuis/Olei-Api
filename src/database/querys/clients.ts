@@ -8,7 +8,8 @@ export const clientsQuerys = {
             Id_Almacen, 
             Nombre, 
             Telefono1, 
-            CorreoVtas
+            CorreoVtas,
+            RFC
         FROM [dbo].[CLIENTES]
         WHERE (@Nombre IS NULL OR Nombre LIKE '%' + @Nombre + '%')
         AND (@Id_Cliente IS NULL OR Id_Cliente = @Id_Cliente)
