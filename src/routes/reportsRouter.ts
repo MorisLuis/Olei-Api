@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { getExcellTest } from "../controllers/utils";
-import { validateJWT } from "../middleware/validateJWT";
+import { validateJWTClient } from "../middleware/validateJWT";
 
 const router = Router();
 
-router.get("/excell", validateJWT, getExcellTest);
+router.get("/excell", validateJWTClient, getExcellTest);
 
 
 export default router;

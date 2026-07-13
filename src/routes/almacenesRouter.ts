@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { getAlmacenes, updateAlmacenInRedis } from "../controllers/almacenes";
-import { validateJWT } from "../middleware/validateJWT";
+import { validateJWTClient } from "../middleware/validateJWT";
 
 
 const router = Router();
-router.get('/', validateJWT, getAlmacenes)
-router.get('/update', validateJWT, updateAlmacenInRedis)
+router.get('/', validateJWTClient, getAlmacenes)
+router.get('/update', validateJWTClient, updateAlmacenInRedis)
 
 export default router;

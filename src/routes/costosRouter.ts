@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { updateCostos } from "../controllers/costos";
-import { validateJWT } from "../middleware/validateJWT";
+import { validateJWTClient } from "../middleware/validateJWT";
 
 
 const router = Router();
-router.put('/', validateJWT, updateCostos)
+router.put('/', validateJWTClient, updateCostos)
 
 export default router;

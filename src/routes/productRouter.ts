@@ -11,7 +11,7 @@ import {
     
 } from "../controllers/products/products";
 import { getProducByIdWeb, getProducts, getTotalProducts, searchProduct } from "../controllers/products/productsWeb";
-import { validateJWT } from "../middleware/validateJWT";
+import { validateJWTClient } from "../middleware/validateJWT";
 import { validateJWTWeb } from "../middleware/validateJWTWeb";
 
 
@@ -24,12 +24,12 @@ router.get("/count", validateJWTWeb, getTotalProducts)
 router.get("/search", validateJWTWeb, searchProduct)
 
 // App endpoints
-router.get("/byStock", validateJWT, getProductsByStock);
-router.get("/byStockCount", validateJWT, getTotalOfProductsByStock);
-router.get("/byStockAndCodeBar", validateJWT, getProductByStockAndCodeBar);
+router.get("/byStock", validateJWTClient, getProductsByStock);
+router.get("/byStockCount", validateJWTClient, getTotalOfProductsByStock);
+router.get("/byStockAndCodeBar", validateJWTClient, getProductByStockAndCodeBar);
 
 // This enndpoint is used in WEB and APP to get product details.
-router.get("/:id", validateJWT, getProducById) // Verify > if a i used this endpoint.
+router.get("/:id", validateJWTClient, getProducById) // Verify > if a i used this endpoint.
 
 
 

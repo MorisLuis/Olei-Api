@@ -1,8 +1,11 @@
 import { Router } from "express";
-import { loginServer, login, logoutUser, logoutServer, refresh, refreshServer } from "../controllers/auth/auth";
+
+import { loginApp, logoutApp, refreshApp } from "../controllers/auth/client";
+import { loginServer, logoutServer, refreshServer } from "../controllers/auth/database";
 import { loginWeb, logout, renewWeb } from "../controllers/auth/authWeb";
-import { validateJWT, validateJWTokenServer, validateRefreshToken } from "../middleware/validateJWT";
+
 import { validateJWTWeb } from "../middleware/validateJWTWeb";
+import { validateJWTClient, validateJWTDatabase, validateRefreshToken } from "../middleware/validateJWT";
 
 const router = Router();
 
@@ -13,12 +16,12 @@ router.get("/logout", validateJWTWeb, logout);
 
 // App
 router.post("/loginServer", loginServer);
-router.post("/login", validateJWT, login);
+router.post("/login", validateJWTClient, loginApp);
 
-router.get('/logoutServer', validateJWT, logoutServer);
-router.get('/logoutUser', validateJWTokenServer, logoutUser);
+router.get('/logoutServer', validateJWTClient, logoutServer);
+router.get('/logoutUser', validateJWTDatabase, logoutApp);
 
-router.post('/refreshServer', validateJWT, refreshServer);
-router.post('/refresh', validateRefreshToken, refresh);
+router.post('/refreshServer', validateJWTClient, refreshServer);
+router.post('/refresh', validateRefreshToken, refreshApp);
 
 export default router;
