@@ -24,6 +24,8 @@ const errorHandler = (
     res.status(400).json({
       ok: false,
       message: "Validation failed",
+      statusCode: 400,
+      debugMessage: null,
       errors,
     });
 
@@ -31,12 +33,17 @@ const errorHandler = (
   }
 
   const statusCode = err.statusCode || 500;
-  const message = statusCode >= 500 ? "Internal server error" : err.message;
+  const message = err.message || "Internal server error";
+  const debugMessage = err.debugMessage ?? null;
 
   //TODO: Stored the erro in the database for further analysis and debugging.
 
   console.error(`[ERROR] ${req.method} ${req.path} - ${message}`);
-  res.status(statusCode).json({ error: message });
+  res.status(statusCode).json({
+    message,
+    statusCode,
+    debugMessage,
+  });
 };
 
 export { errorHandler };
