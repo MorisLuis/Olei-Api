@@ -2,7 +2,7 @@ import sql from "mssql";
 
 import { dbConnection } from "../../../database";
 import { UnauthorizedError, ValidationError } from "../../../errors/CustomError";
-import type { LoginAppParams, LoginAppResponse, LoginAppSessionFields, ValidationResult } from "./types";
+import type { LoginAppParams, LoginAppResponse, LoginAppSessionFields } from "./types";
 import type { UserSessionInterface } from "../../../interface/user";
 import { sanitizeServerSessionUser } from "../../../controllers/auth/utils/sessionResponse";
 import { updateSession } from "../database/session.service";
@@ -47,20 +47,10 @@ export const loginAppService = async ({
         .input('Password', sql.VarChar(50), password)
         .execute('sp_AuthenticateAndGetMovement');
 
-    const recordsets = Array.isArray(result.recordsets) ? result.recordsets : [];
-    const validations = (Array.isArray(recordsets[0]) ? recordsets[0] : []) as ValidationResult[];
-    const users = (Array.isArray(recordsets[1]) ? recordsets[1] : []) as LoginAppSessionFields[];
-    const userData = users[0];
+    const recordsets = (Array.isArray(result.recordset) ? result.recordset : [] ) as LoginAppSessionFields[];
+    const userData = recordsets[0];
 
-    const userValidation = validations.find(
-        validation => validation.Tipo === "usuario"
-    );
-
-    const passwordValidation = validations.find(
-        validation => validation.Tipo === "contrasena"
-    );
-
-    if ( !userValidation || !passwordValidation || !userData ) {
+    if ( !userData ) {
         throw new UnauthorizedError( "Respuesta inválida del autenticador");
     }
 
