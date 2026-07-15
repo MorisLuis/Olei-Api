@@ -85,21 +85,15 @@ describe('loginAppService', () => {
 
     it('returns sanitized user with tokens when credentials are valid', async () => {
         const authResult = {
-            recordsets: [
-                [
-                    { Tipo: 'usuario', Resultado: 1 },
-                    { Tipo: 'contrasena', Resultado: 1 },
-                ],
-                [
-                    {
-                        Id_Perfil: 2,
-                        TodosAlmacenes: 1,
-                        SalidaSinExistencias: 0,
-                        Id_Almacen: 7,
-                        AlmacenNombre: 'Main Warehouse',
-                        Id_ListPre: 10,
-                    },
-                ],
+            recordset: [
+                {
+                    Id_Perfil: 2,
+                    TodosAlmacenes: 1,
+                    SalidaSinExistencias: 0,
+                    Id_Almacen: 7,
+                    AlmacenNombre: 'Main Warehouse',
+                    Id_ListPre: 10,
+                },
             ],
         };
 
@@ -192,8 +186,8 @@ describe('loginAppService', () => {
         await expect(promise).rejects.toThrow('Error al conectarse a base de datos principal');
     });
 
-    it('throws UnauthorizedError when authenticator returns empty recordsets', async () => {
-        const { pool } = buildPool({ recordsets: [] });
+    it('throws UnauthorizedError when authenticator returns an empty recordset', async () => {
+        const { pool } = buildPool({ recordset: [] });
         mockDbConnection.mockResolvedValue(pool as never);
 
         const promise = loginAppService({
@@ -207,19 +201,9 @@ describe('loginAppService', () => {
         await expect(promise).rejects.toThrow('Respuesta inválida del autenticador');
     });
 
-    it('throws UnauthorizedError when usuario validation result is missing', async () => {
+    it('throws UnauthorizedError when recordset is not an array', async () => {
         const { pool } = buildPool({
-            recordsets: [
-                [{ Tipo: 'contrasena', Resultado: 1 }],
-                [{
-                    Id_Perfil: 2,
-                    TodosAlmacenes: 1,
-                    SalidaSinExistencias: 0,
-                    Id_Almacen: 7,
-                    AlmacenNombre: 'Main Warehouse',
-                    Id_ListPre: 10,
-                }],
-            ],
+            recordset: null,
         });
         mockDbConnection.mockResolvedValue(pool as never);
 
@@ -234,12 +218,9 @@ describe('loginAppService', () => {
         await expect(promise).rejects.toThrow('Respuesta inválida del autenticador');
     });
 
-    it('throws UnauthorizedError when user movement data is missing', async () => {
+    it('throws UnauthorizedError when recordset is undefined', async () => {
         const { pool } = buildPool({
-            recordsets: [[
-                { Tipo: 'usuario', Resultado: 1 },
-                { Tipo: 'contrasena', Resultado: 1 },
-            ]],
+            recordset: undefined,
         });
         mockDbConnection.mockResolvedValue(pool as never);
 
@@ -278,19 +259,15 @@ describe('loginAppService', () => {
 
     it('propagates session update failures', async () => {
         const { pool } = buildPool({
-            recordsets: [
-                [
-                    { Tipo: 'usuario', Resultado: 1 },
-                    { Tipo: 'contrasena', Resultado: 1 },
-                ],
-                [{
+            recordset: [
+                {
                     Id_Perfil: 2,
                     TodosAlmacenes: 1,
                     SalidaSinExistencias: 0,
                     Id_Almacen: 7,
                     AlmacenNombre: 'Main Warehouse',
                     Id_ListPre: 10,
-                }],
+                },
             ],
         });
         const redisError = new Error('redis unavailable');
@@ -310,19 +287,15 @@ describe('loginAppService', () => {
 
     it('propagates token generation failures', async () => {
         const { pool } = buildPool({
-            recordsets: [
-                [
-                    { Tipo: 'usuario', Resultado: 1 },
-                    { Tipo: 'contrasena', Resultado: 1 },
-                ],
-                [{
+            recordset: [
+                {
                     Id_Perfil: 2,
                     TodosAlmacenes: 1,
                     SalidaSinExistencias: 0,
                     Id_Almacen: 7,
                     AlmacenNombre: 'Main Warehouse',
                     Id_ListPre: 10,
-                }],
+                },
             ],
         });
 
@@ -340,5 +313,19 @@ describe('loginAppService', () => {
         });
 
         await expect(promise).rejects.toThrow(tokenError);
+    });
+
+    it('propagates database connection failures', async () => {
+        const dbError = new Error('database unavailable');
+        mockDbConnection.mockRejectedValue(dbError);
+
+        const promise = loginAppService({
+            sessionId: 'session-123',
+            session: baseSession,
+            Id_Usuario: 'app-user',
+            password: 'app-pass',
+        });
+
+        await expect(promise).rejects.toThrow(dbError);
     });
 });
