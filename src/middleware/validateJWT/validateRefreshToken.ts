@@ -6,6 +6,8 @@ import { AppError, UnauthorizedError } from '../../errors/CustomError';
 import redisClient from '../../config/redisClient';
 import type { UserSessionInterface } from '../../interface/user';
 import { buildVerifyOptions } from './utils';
+import { logoutAppService } from '../../services/auth/client/logoutApp.service';
+import { getRedisSession } from '../../services/auth/database/session.service';
 
 export const validateRefreshToken = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
 
@@ -51,6 +53,16 @@ export const validateRefreshToken = async (req: Request, _res: Response, next: N
 
     } catch (error) {
         if (error instanceof jwt.TokenExpiredError) {
+            try {
+                const decoded = jwt.decode(refreshToken) as JwtPayload;
+                if (decoded?.sessionId) {
+                    const session = await getRedisSession(decoded.sessionId);
+                    if (session) {
+                        await logoutAppService({ sessionId: decoded.sessionId, session });
+                    }
+                }
+            } catch { /* ignore cleanup errors */ }
+
             return next(new UnauthorizedError(
                 'REFRESH_TOKEN_EXPIRADO',
                 'Session is invalid or expired'
