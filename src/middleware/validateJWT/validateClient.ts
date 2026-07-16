@@ -7,6 +7,18 @@ import redisClient from '../../config/redisClient';
 import type { UserSessionInterface } from '../../interface/user';
 import { buildVerifyOptions, extractBearerToken } from './utils';
 
+/**
+ * @description Middleware function to validate JWT tokens for client requests. It checks for the presence of two tokens: a server token and a user token. 
+ * The server token is required for all requests, while the user token is optional. The middleware verifies both tokens against their respective secrets 
+ * and options, ensuring that the session ID in the user token matches the session ID in the server token. If any validation fails, it responds with 
+ * appropriate error messages.
+ * 
+ * @param req - The Express request object.
+ * @param _res - The Express response object (not used in this middleware).
+ * @param next - The next middleware function in the Express pipeline.
+ * @returns A promise that resolves when the middleware has completed its validation.
+ */
+
 export const validateJWTClient = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     const tokenServer = extractBearerToken(req.headers['x-server-token']);
     const token = extractBearerToken(req.headers['authorization']); 
@@ -50,7 +62,6 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
         req.sessionId = sessionId;
         req.session = session;
     } catch (error) {
-        console.log('JWT verification error:', error);
         if (error instanceof jwt.TokenExpiredError) {
             return next(new UnauthorizedError(
                 'TOKEN_EXPIRADO',
@@ -83,7 +94,6 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
                 ));
             }
         } catch (error) {
-            console.log('JWT verification error for user token:', error);
             if (error instanceof jwt.TokenExpiredError) {
                 return next(new UnauthorizedError(
                     'TOKEN_2_EXPIRADO',
