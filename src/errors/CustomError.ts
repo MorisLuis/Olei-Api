@@ -1,12 +1,14 @@
 class AppError extends Error {
     public statusCode: number;
     public debugMessage?: string;
+    public code?: string;
 
-    constructor(message: string, statusCode = 500, debugMessage?: string) {
-        console.log({message, statusCode, debugMessage});
+    constructor(message: string, statusCode = 500, debugMessage?: string, code?: string) {
+        console.log({message, statusCode, debugMessage, code });
         super(message);
         this.statusCode = statusCode;
         this.debugMessage = debugMessage;
+        this.code = code;
         Error.captureStackTrace(this, this.constructor);
     }
 }
@@ -25,8 +27,8 @@ class ValidationError extends AppError {
 }
 
 class UnauthorizedError extends AppError {
-    constructor(message = 'No autorizado', debugMessage?: string) {
-        super(message, 401, debugMessage);
+    constructor(message = 'No autorizado', debugMessage?: string, code?: string) {
+        super(message, 401, debugMessage, code);
     }
 }
 
