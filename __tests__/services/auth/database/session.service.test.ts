@@ -4,7 +4,7 @@ import {
     updateSession,
 } from '../../../../src/services/auth/database/session.service';
 import redisClient from '../../../../src/config/redisClient';
-import { AppError, NotFoundError } from '../../../../src/errors/CustomError';
+import { AppError, NotFoundError, UnauthorizedError } from '../../../../src/errors/CustomError';
 import type { UserSessionInterface } from '../../../../src/interface/user';
 
 jest.mock('../../../../src/config/redisClient', () => ({
@@ -58,7 +58,7 @@ describe('session.service', () => {
             mockRedisGet.mockResolvedValueOnce(null);
             const promise = getRedisSession('missing-session');
 
-            await expect(promise).rejects.toBeInstanceOf(NotFoundError);
+            await expect(promise).rejects.toBeInstanceOf(UnauthorizedError);
             await expect(promise).rejects.toHaveProperty(
                 'message',
                 'Sesión no encontrada en Redis',
@@ -143,7 +143,7 @@ describe('session.service', () => {
             const promise = updateSession('missing-session', { userConected: true });
 
             await expect(promise).rejects.toBeInstanceOf(
-                NotFoundError,
+                UnauthorizedError,
             );
             await expect(promise).rejects.toHaveProperty(
                 'message',
