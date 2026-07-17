@@ -1,5 +1,5 @@
 import redisClient from "../../../config/redisClient";
-import { AppError, NotFoundError } from "../../../errors/CustomError";
+import { AppError, NotFoundError, UnauthorizedError } from "../../../errors/CustomError";
 import { handleRedisError } from "../../../helpers/generate-redis";
 import type { UserSessionInterface } from "../../../interface/user";
 
@@ -24,7 +24,7 @@ export const getRedisSession = async (sessionId: string): Promise<UserSessionInt
         const key = buildSessionKey(sessionId);
         const sessionData = await redisClient.get(key);
         if (!sessionData) {
-            throw new NotFoundError('Sesión no encontrada en Redis');
+            throw new UnauthorizedError('Sesión no encontrada en Redis');
         }
         return JSON.parse(sessionData);
     } catch (error) {
