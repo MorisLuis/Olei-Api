@@ -28,7 +28,6 @@ export const logoutAppService = async (params: logoutAppParams): Promise<logoutA
     if (!pool) {
         throw new ValidationError('Error al conectarse a base de datos principal');
     }
-
     const query = usersQuery.updateUserSession
     await pool.request()
         .input('Id_Usuario', sql.VarChar(50), session.Id_UsuarioOLEI)
