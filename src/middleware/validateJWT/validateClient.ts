@@ -7,6 +7,7 @@ import { verifyTokenAndExtractSessionId, buildVerifyOptions, extractBearerToken}
 import { getSessionOrUnauthorized} from './session.helpers';
 import { getRedisSession } from '../../services/auth/database/session.service';
 import { logoutServerService } from '../../services/auth/database/logoutServer.service';
+import { AUTH_ERROR_CODES } from '../constants';
 
 /**
  * @description Middleware function to validate JWT tokens for client requests. It checks for the presence of two tokens: a server token and a user token. 
@@ -25,7 +26,7 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
     const token = extractBearerToken(req.headers['authorization']);
 
     if (!tokenServer) {
-        return next(new UnauthorizedError('SESSION_EXPIRADA', 'Session is invalid or expired / Token server is missing'));
+        return next(new UnauthorizedError('Session is invalid or expired / Token server is missing', '', AUTH_ERROR_CODES.SESSION_EXPIRADA));
     };
 
     if (!process.env.ACCESS_TOKEN_SEVER_SECRET) {
@@ -45,13 +46,13 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
             tokenServer,
             process.env.ACCESS_TOKEN_SEVER_SECRET,
             serverVerifyOptions,
-            'SESSION_EXPIRADA',
+            AUTH_ERROR_CODES.SESSION_EXPIRADA,
             'Session is invalid or expired / sessionId is missing'
         );
 
         const session = await getSessionOrUnauthorized(
             sessionId,
-            'SESSION_EXPIRADA',
+            AUTH_ERROR_CODES.SESSION_EXPIRADA,
             'Session is invalid or expired / session data not found'
         );
 
@@ -78,14 +79,16 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
             }
 
             return next(new UnauthorizedError(
-                'TOKEN_EXPIRADO',
-                'Session is invalid or expired / Token server has expired'
+                'Session is invalid or expired / Token server has expired',
+                error.message,
+                AUTH_ERROR_CODES.TOKEN_EXPIRADO,
             ));
         }
 
         return next(new UnauthorizedError(
-            'TOKEN_INVALIDO',
-            `JWT verification failed: ${error instanceof Error ? error.name : 'unknown_error'}`
+            `JWT verification failed: ${error instanceof Error ? error.name : 'unknown_error'}`,
+            error instanceof Error ? error.message : 'unknown_error',
+            AUTH_ERROR_CODES.TOKEN_INVALIDO,
         ));
 
     }
@@ -103,13 +106,13 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
                 token,
                 process.env.ACCESS_TOKEN_SECRET,
                 userVerifyOptions,
-                'TOKEN_2_INVALIDO',
+                AUTH_ERROR_CODES.TOKEN_CLIENTE_INVALIDO,
                 'Session is invalid or expired / sessionId mismatch'
             );
 
             if (!tokenSessionId || tokenSessionId !== sessionId) {
                 return next(new UnauthorizedError(
-                    'TOKEN_2_INVALIDO',
+                    AUTH_ERROR_CODES.TOKEN_CLIENTE_INVALIDO,
                     'Session is invalid or expired / sessionId mismatch'
                 ));
             }
@@ -122,13 +125,13 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
             if (error instanceof jwt.TokenExpiredError) {
 
                 return next(new UnauthorizedError(
-                    'TOKEN_2_EXPIRADO',
+                    AUTH_ERROR_CODES.TOKEN_CLIENTE_EXPIRADO,
                     'Session is invalid or expired / Token 2 has expired'
                 ));
             };
 
             return next(new UnauthorizedError(
-                'TOKEN_2_INVALIDO',
+                AUTH_ERROR_CODES.TOKEN_CLIENTE_INVALIDO,
                 'Session is invalid or expired / Token 2 verification failed'
             ));
 

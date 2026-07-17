@@ -7,14 +7,14 @@ import { logoutAppService } from '../../services/auth/client/logoutApp.service';
 import { getRedisSession } from '../../services/auth/database/session.service';
 import { verifyTokenAndExtractSessionId, buildVerifyOptions } from './token.helpers';
 import { getSessionOrUnauthorized} from './session.helpers';
+import { AUTH_ERROR_CODES } from '../constants';
 
 export const validateRefreshToken = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
 
     const refreshToken = req.body?.refreshToken;
 
     if (typeof refreshToken !== 'string' || !refreshToken.trim()) {
-        // REFRESH_TOKEN_EXPIRADO
-        return next(new UnauthorizedError('REFRESH_TOKEN_EXPIRADO', 'Session is invalid or expired'));
+        return next(new UnauthorizedError('Session is invalid or expired', '', AUTH_ERROR_CODES.REFRESH_TOKEN_EXPIRADO));
     };
 
     if (!process.env.REFRESH_TOKEN_SECRET) {
@@ -32,19 +32,18 @@ export const validateRefreshToken = async (req: Request, _res: Response, next: N
             refreshToken,
             process.env.REFRESH_TOKEN_SECRET,
             refreshVerifyOptions,
-            'SESSION_EXPIRADA',
+            AUTH_ERROR_CODES.SESSION_EXPIRADA,
             'Session is invalid or expired'
         );
 
         const session = await getSessionOrUnauthorized(
             sessionId,
-            'SESSION_EXPIRADA',
+            AUTH_ERROR_CODES.SESSION_EXPIRADA,
             'Session is invalid or expired'
         );
 
         if (!session.serverConected || !session.userConected) {
-            // REFRESH_TOKEN_EXPIRADO
-            return next(new UnauthorizedError('REFRESH_TOKEN_EXPIRADO', 'Session is invalid or expired'));
+            return next(new UnauthorizedError('Session is invalid or expired', '', AUTH_ERROR_CODES.REFRESH_TOKEN_EXPIRADO));
         };
 
         req.sessionId = sessionId;
@@ -68,13 +67,14 @@ export const validateRefreshToken = async (req: Request, _res: Response, next: N
             }
 
             return next(new UnauthorizedError(
-                'REFRESH_TOKEN_EXPIRADO',
-                'Session is invalid or expired'
+                'Session is invalid or expired',
+                error.message,
+                AUTH_ERROR_CODES.REFRESH_TOKEN_EXPIRADO
             ));
         }
 
         if (error instanceof jwt.JsonWebTokenError) {
-            return next(new UnauthorizedError('REFRESH_TOKEN_INVALIDO', 'Session is invalid or expired'));
+            return next(new UnauthorizedError('Session is invalid or expired', error.message, AUTH_ERROR_CODES.REFRESH_TOKEN_INVALIDO));
         }
 
         return next(new AppError('Error al validar el refresh token'));

@@ -7,13 +7,14 @@ import { verifyTokenAndExtractSessionId, buildVerifyOptions, extractBearerToken}
 import { getSessionOrUnauthorized} from './session.helpers';
 import { getRedisSession } from '../../services/auth/database/session.service';
 import { logoutServerService } from '../../services/auth/database/logoutServer.service';
+import { AUTH_ERROR_CODES } from '../constants';
 
 
 export const validateJWTDatabase = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     const tokenServer = extractBearerToken(req.headers['x-server-token']); // Token 1
 
     if (!tokenServer) {
-        return next(new UnauthorizedError('SESSION_EXPIRADA', 'Session is invalid or expired'));
+        return next(new UnauthorizedError('Session is invalid or expired', '', AUTH_ERROR_CODES.SESSION_EXPIRADA));
     };
 
     if (!process.env.ACCESS_TOKEN_SEVER_SECRET) {
@@ -33,13 +34,13 @@ export const validateJWTDatabase = async (req: Request, _res: Response, next: Ne
             tokenServer,
             process.env.ACCESS_TOKEN_SEVER_SECRET,
             serverVerifyOptions,
-            'SESSION_EXPIRADA',
+            AUTH_ERROR_CODES.SESSION_EXPIRADA,
             'Session is invalid or expired'
         );
 
         const session = await getSessionOrUnauthorized(
             sessionId,
-            'SESSION_EXPIRADA',
+            AUTH_ERROR_CODES.SESSION_EXPIRADA,
             'Session is invalid or expired'
         );
 
@@ -66,14 +67,16 @@ export const validateJWTDatabase = async (req: Request, _res: Response, next: Ne
             }
 
             return next(new UnauthorizedError(
-                'TOKEN_EXPIRADO',
-                'Session is invalid or expired'
+                'Session is invalid or expired',
+                error.message,
+                AUTH_ERROR_CODES.TOKEN_EXPIRADO,
             ));
         }
 
         return next(new UnauthorizedError(
-            'TOKEN_INVALIDO',
-            `JWT verification failed: ${error instanceof Error ? error.name : 'unknown_error'}`
+            `JWT verification failed: ${error instanceof Error ? error.name : 'unknown_error'}`,
+            error instanceof Error ? error.message : 'unknown_error',
+            AUTH_ERROR_CODES.TOKEN_INVALIDO,
         ));
 
     };
