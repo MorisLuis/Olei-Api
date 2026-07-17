@@ -190,7 +190,7 @@ process.on('SIGINT', async () => {
 });
 
 // Listeners globales para errores inesperados
-process.on('uncaughtException', (err) => {
+/* process.on('uncaughtException', (err) => {
     console.error('🔥 Uncaught Exception:', err);
     process.exit(1);
 });
@@ -198,4 +198,4 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (reason) => {
     console.error('💥 Unhandled Promise Rejection:', reason);
     process.exit(1);
-});
+}); */
