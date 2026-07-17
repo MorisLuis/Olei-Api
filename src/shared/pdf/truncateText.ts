@@ -11,7 +11,7 @@ import type { PDFFont } from "pdf-lib";
  * 
  * @example
  * const truncatedText = truncateText("This is a long text that needs to be truncated.", 100, myFont, 12);
- * console.log(truncatedText); // Output: "This is a long text..."
+ * Output: "This is a long text..."
  */
 
 export const truncateText = (text: string, maxWidth: number, font: PDFFont, fontSize: number): string => {
