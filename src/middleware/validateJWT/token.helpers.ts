@@ -64,7 +64,7 @@ export const verifyTokenAndExtractSessionId = (
     const sessionId = decoded.sessionId;
 
     if (!sessionId) {
-        throw new UnauthorizedError(errorCode, errorMessage);
+        throw new UnauthorizedError(errorMessage, errorMessage, errorCode);
     }
 
     return sessionId;
