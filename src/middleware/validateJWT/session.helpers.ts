@@ -21,6 +21,6 @@ export const getSessionOrUnauthorized = async (
     try {
         return await getRedisSession(sessionId);
     } catch {
-        throw new UnauthorizedError(errorCode, errorMessage);
+        throw new UnauthorizedError(errorMessage, errorMessage, errorCode);
     }
 };
