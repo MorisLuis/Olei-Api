@@ -1,7 +1,44 @@
+const stockAvailabilityCondition = `(@SalidaSinExistencias = 1 OR E.Existencia > 0)`;
+
+const baseProductsFromClause = `
+    FROM [dbo].[PRODUCTOS] P
+        INNER JOIN [dbo].[PRECIOS] PR
+            ON P.Codigo = PR.Codigo
+        INNER JOIN [dbo].[EXISTENCIAS] E
+            ON P.Codigo = E.Codigo
+            AND PR.Id_Marca = E.Id_Marca
+            AND ${stockAvailabilityCondition}
+        INNER JOIN [dbo].[MARCAS] M
+            ON PR.Id_Marca = M.Id_Marca
+        INNER JOIN [dbo].[COSTOS] C
+            ON P.Codigo = C.Codigo
+            AND PR.Id_Marca = C.Id_Marca
+`;
+
+const inventorySearchOrderByClause = `
+    ORDER BY
+        CASE
+            WHEN C.CodBar = @searchTerm THEN 0
+            WHEN P.Codigo = @searchTerm THEN 1
+            WHEN P.SKU = @searchTerm THEN 2
+            WHEN P.Descripcion LIKE @searchTerm + '%' THEN 3
+            ELSE 4
+        END,
+        P.Descripcion,
+        P.Codigo,
+        M.Nombre
+`;
+
 export const productsQuerys = {
 
+    /**
+     * @description Returns a paginated list of products for a warehouse and price list.
+     * 
+     * Business rules:
+     * - If @SalidaSinExistencias = 1, it will return all products regardless of stock.
+     * - If @SalidaSinExistencias = 0, it will return only products with stock greater than 0.
+     */
 
-    // Get Products by Stock. Pagination.
     getAllProductsByStock: `
         SELECT
             TRIM(P.Descripcion) AS Descripcion,
@@ -9,31 +46,43 @@ export const productsQuerys = {
             E.Existencia,
             E.Id_Almacen,
             M.Id_Marca,
-            TRIM(CT.CodBar) AS CodBar,
+            TRIM(C.CodBar) AS CodBar,
             TRIM(M.Nombre) AS Marca,
             PR.Id_ListaPrecios,
             PR.Precio
-        FROM [dbo].[PRODUCTOS] P
-            JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
-            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-            JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
-        WHERE PR.Id_ListaPrecios = @Id_ListaPrecios  AND E.Id_Almacen = @Almacen
+        ${baseProductsFromClause}
+        WHERE PR.Id_ListaPrecios = @Id_ListaPrecios  
+            AND E.Id_Almacen = @Id_Almacen
         ORDER BY P.Codigo
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY
     `,
 
+    /**
+     * @description Returns the total count of products for a warehouse and price list.
+     * 
+     * Business rules:
+     * - If @SalidaSinExistencias = 1, it will count all products regardless of stock.
+     * - If @SalidaSinExistencias = 0, it will count only products with stock greater than 0.
+     */
+
     getTotalOfAllProductsByStock: `
-        SELECT COUNT(*) AS TotalProductos
-        FROM [dbo].[PRODUCTOS] P
-            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-        WHERE PR.Id_ListaPrecios = @Id_ListaPrecios AND E.Id_Almacen = @Almacen;
+        SELECT 
+            COUNT(*) AS TotalProductos
+        ${baseProductsFromClause}
+        WHERE PR.Id_ListaPrecios = @Id_ListaPrecios 
+            AND E.Id_Almacen = @Id_Almacen;
     `,
 
-    // Get Product by Stock and CodeBar.
+
+    /**
+     * @description Returns products filtered by barcode, code, or SKU.
+     * 
+     * Business rules:
+     * - If @SalidaSinExistencias = 1, it will return all products regardless of stock.
+     * - If @SalidaSinExistencias = 0, it will return only products with stock greater than 0.
+     */
+
     getProductByStockAndCodeBar: `
         SELECT
             TRIM(P.Descripcion) AS Descripcion,
@@ -43,22 +92,30 @@ export const productsQuerys = {
             E.Id_Almacen,
             M.Id_Marca,
             PR.Id_ListaPrecios,
-            TRIM(CT.CodBar) AS CodBar,
+            TRIM(C.CodBar) AS CodBar,
             TRIM(M.Nombre) AS Marca,
             PR.Precio
-        FROM [dbo].[PRODUCTOS] P
-            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-            JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
-            WHERE PR.Id_ListaPrecios = @Id_ListaPrecios 
-            AND (@CodBar IS NULL OR NULLIF(TRIM(@CodBar), '') IS NULL OR TRIM(CT.CodBar) = @CodBar)
-            AND (@Codigo IS NULL OR NULLIF(TRIM(@Codigo), '') IS NULL OR TRIM(P.Codigo) = @Codigo)
-            AND (@SKU IS NULL OR NULLIF(TRIM(@SKU), '') IS NULL OR TRIM(P.SKU) = @SKU)
+        ${baseProductsFromClause}
+        WHERE PR.Id_ListaPrecios = @Id_ListaPrecios 
             AND E.Id_Almacen = @Id_Almacen
+            AND (
+                NULLIF(TRIM(@CodBar), '') IS NULL
+                OR TRIM(C.CodBar) = TRIM(@CodBar)
+            )
+            AND (
+                NULLIF(TRIM(@Codigo), '') IS NULL
+                OR TRIM(P.Codigo) = TRIM(@Codigo)
+            )
+            AND (
+                NULLIF(TRIM(@SKU), '') IS NULL
+                OR TRIM(P.SKU) = TRIM(@SKU)
+            );
     `,
 
-    //This is a double verification to 'UPC-A' and 'EAN-13' codebar.
+    /**
+     * @description Returns a product by barcode and supports barcodes with a leading verification digit.
+     */
+    
     getProductByStockAndCodeBarDV: `
         SELECT
             TRIM(P.Descripcion) AS Descripcion,
@@ -67,91 +124,78 @@ export const productsQuerys = {
             E.Id_Almacen,
             M.Id_Marca,
             PR.Id_ListaPrecios,
-            TRIM(CT.CodBar) AS CodBar,
+            TRIM(C.CodBar) AS CodBar,
             TRIM(M.Nombre) AS Marca,
             PR.Precio
-        FROM [dbo].[PRODUCTOS] P
-            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-            JOIN [dbo].[COSTOS] CT ON P.Codigo = CT.Codigo AND PR.Id_Marca = CT.Id_Marca
-        WHERE PR.Id_ListaPrecios = @Id_ListaPrecios AND E.Id_Almacen = @Id_Almacen
-            AND (TRIM(CT.CodBar) = @CodBar OR
-            TRIM(CT.CodBar) = SUBSTRING(@CodBar, 2, LEN(@CodBar) - 1))
+        ${baseProductsFromClause}
+        WHERE PR.Id_ListaPrecios = @Id_ListaPrecios 
+            AND E.Id_Almacen = @Id_Almacen
+            AND (
+                TRIM(C.CodBar) = TRIM(@CodBar)
+                OR (
+                    LEN(TRIM(ISNULL(@CodBar, ''))) > 1
+                    AND TRIM(C.CodBar) = RIGHT(TRIM(@CodBar), LEN(TRIM(@CodBar)) - 1)
+                )
+            );         
     `,
 
-    // Get number of products.
-    getTotalProducts: "SELECT COUNT(*) FROM [dbo].[CLIENTES]",
+    /**
+     * @description Searches products in inventory by description, SKU, code, or barcode.
+     *
+     * Business rules:
+     * - If @SalidaSinExistencias = 1, it returns all products regardless of stock.
+     * - If @SalidaSinExistencias = 0, it returns only products with stock greater than 0.
+     */
 
-    // SEARCH PRODUCTS.
-    getProductsBySearch: `
-        SELECT TOP(10)
-            TRIM(P.Descripcion) AS Descripcion
-        FROM [dbo].[PRODUCTOS] P
-            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-            JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
-            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-        WHERE LOWER(P.Descripcion) LIKE '%' + LOWER(@Descripcion) + '%'
-            AND PR.Id_ListaPrecios = @Id_ListaPrecios AND E.Id_Almacen = @Id_Almacen
-            AND LOWER(P.Codigo) LIKE '%' + LOWER(@Codigo) + '%'
-            AND LOWER(F.Nombre) LIKE '%' + LOWER(@familia) + '%'
-            AND LOWER(M.Nombre) LIKE '%' + LOWER(@marca) + '%'
-            AND (@SwSinStock = 0 OR E.Existencia > 0)
-            AND (@SwsinPrecio = 0 OR PR.Precio > 0)
-        ORDER BY
-        CASE 
-            WHEN LOWER(P.Descripcion) LIKE LOWER(@Descripcion) + '%' THEN 0 -- Prioridad para coincidencia inicial
-            ELSE 1
-        END,
-        P.Descripcion; -- Luego orden alfabético
-    `,
-
-    // Search products in inventory.
     getProductsBySearchInventory: `
-        SELECT TOP(10)
-            P.Descripcion AS Descripcion,
-            P.Codigo AS Codigo,
-            P.SKU,
+        SELECT TOP (10)
+            TRIM(P.Descripcion) AS Descripcion,
+            TRIM(P.Codigo) AS Codigo,
+            TRIM(P.SKU) AS SKU,
             E.Id_Almacen,
-            C.CodBar,
+            TRIM(C.CodBar) AS CodBar,
             M.Id_Marca,
-            M.Nombre AS Marca,
+            TRIM(M.Nombre) AS Marca,
             CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', E.Id_Almacen, '-', PR.Id_ListaPrecios) AS UniqueKey
-        FROM [dbo].[PRODUCTOS] P
-            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca 
-            JOIN [dbo].[COSTOS] C ON P.Codigo = C.Codigo AND PR.Id_Marca = C.Id_Marca
-        WHERE 
-            (P.Descripcion LIKE '%' + @searchTerm + '%' 
-            OR P.SKU LIKE '%' + @searchTerm + '%'
-            OR P.Codigo LIKE '%' + @searchTerm + '%'
-            OR C.CodBar LIKE '%' + @searchTerm + '%')
-            AND E.Id_Almacen = @Id_Almacen 
-            AND PR.Id_ListaPrecios = @Id_ListPre;
+        ${baseProductsFromClause}
+        WHERE  E.Id_Almacen = @Id_Almacen 
+            AND PR.Id_ListaPrecios = @Id_ListaPrecios  
+            AND (
+                P.Descripcion LIKE '%' + @searchTerm + '%'
+                OR P.SKU LIKE '%' + @searchTerm + '%'
+                OR P.Codigo LIKE '%' + @searchTerm + '%'
+                OR C.CodBar LIKE '%' + @searchTerm + '%'
+            )
+        ${inventorySearchOrderByClause};
     `,
-    // Search products without codebar.
+
+    /**
+     * @description Searches products in inventory by description, SKU, or code when barcode is missing.
+     *
+     * Business rules:
+     * - If @SalidaSinExistencias = 1, it returns all products regardless of stock.
+     * - If @SalidaSinExistencias = 0, it returns only products with stock greater than 0.
+     */
+
     getProductsBySearchInventoryWithoutCodebar: `
-        SELECT TOP(10)
-            P.Descripcion AS Descripcion,
-            P.Codigo AS Codigo,
-            P.SKU,
-            C.CodBar,
+        SELECT TOP (10)
+            TRIM(P.Descripcion) AS Descripcion,
+            TRIM(P.Codigo) AS Codigo,
+            TRIM(P.SKU) AS SKU,
+            E.Id_Almacen,
+            TRIM(C.CodBar) AS CodBar,
             M.Id_Marca,
-            M.Nombre AS Marca,
+            TRIM(M.Nombre) AS Marca,
             CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', E.Id_Almacen, '-', PR.Id_ListaPrecios) AS UniqueKey
-        FROM [dbo].[PRODUCTOS] P
-            JOIN [dbo].[PRECIOS] PR ON P.Codigo = PR.Codigo
-            JOIN [dbo].[EXISTENCIAS] E ON P.Codigo = E.Codigo AND PR.Id_Marca = E.Id_Marca
-            JOIN [dbo].[MARCAS] M ON PR.Id_Marca = M.Id_Marca
-            JOIN [dbo].[COSTOS] C ON P.Codigo = C.Codigo AND PR.Id_Marca = C.Id_Marca
-        WHERE 
-            (P.Descripcion LIKE '%' + @searchTerm + '%' 
-            OR P.SKU LIKE '%' + @searchTerm + '%'
-            OR P.Codigo LIKE '%' + @searchTerm + '%')
-            AND E.Id_Almacen = @Id_Almacen 
-            AND PR.Id_ListaPrecios = @Id_ListPre
-            AND (C.CodBar = '' OR C.CodBar IS NULL);
+        ${baseProductsFromClause}
+        WHERE E.Id_Almacen = @Id_Almacen
+            AND PR.Id_ListaPrecios = @Id_ListaPrecios
+            AND (
+                P.Descripcion LIKE '%' + @searchTerm + '%'
+                OR P.SKU LIKE '%' + @searchTerm + '%'
+                OR P.Codigo LIKE '%' + @searchTerm + '%'
+            )
+            AND NULLIF(TRIM(C.CodBar), '') IS NULL
+        ${inventorySearchOrderByClause};
     `,
 }
