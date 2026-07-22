@@ -5,6 +5,7 @@ import { getProductByStockAndCodeBarSchema, getProductsByStockQuerySchema } from
 import { getProductByStockAndCodeBarService, getProductsByStockService, searchProductByStockService } from '../../services/products/index';
 import { UnauthorizedError, ValidationError } from '../../errors/CustomError';
 import { searchProductInventoryQuerySchema } from '../../validations/inventoryValidations';
+import { productsQuerys } from '../../database/querys/products';
 
 const getProducById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
@@ -20,7 +21,7 @@ const getProducById = async (req: Request, res: Response, next: NextFunction): P
             throw new ValidationError('Error al conectarse a base de datos principal');
         }
 
-        let query = productsWebQuerys.getProducById
+        let query = productsQuerys.getProducById
 
         if (
             userSession.BaseSQL === 'OLEIDB1_ROSCO' ||
@@ -33,8 +34,8 @@ const getProducById = async (req: Request, res: Response, next: NextFunction): P
         const result = await pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)
-            .input("ListaPrecios", Id_ListPre)
-            .input("Almacen", Id_Almacen)
+            .input("Id_ListaPrecios", Id_ListPre)
+            .input("Id_Almacen", Id_Almacen)
             .input("baseSQL", BaseSQL)
             .query(query);
 
