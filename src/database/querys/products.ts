@@ -243,7 +243,13 @@ export const productsQuerys = {
                 AND P.Descripcion LIKE '%' + LTRIM(RTRIM(@searchTerm)) + '%'
         )
 
-        SELECT DISTINCT TOP (10)
+        -- Deduplicate by UniqueKey keeping the lowest priority per UniqueKey, then limit
+        , Ranked AS (
+            SELECT *, ROW_NUMBER() OVER (PARTITION BY UniqueKey ORDER BY priority) AS rn
+            FROM SearchUnion
+        )
+
+        SELECT TOP (10)
             Descripcion,
             Codigo,
             SKU,
@@ -253,7 +259,8 @@ export const productsQuerys = {
             Id_Marca,
             Marca,
             UniqueKey
-        FROM SearchUnion
+        FROM Ranked
+        WHERE rn = 1
         ORDER BY priority, Descripcion, Codigo, Marca;
     `,
 
@@ -318,7 +325,13 @@ export const productsQuerys = {
                 AND P.Descripcion LIKE '%' + LTRIM(RTRIM(@searchTerm)) + '%'
         )
 
-        SELECT DISTINCT TOP (10)
+        -- Deduplicate by UniqueKey keeping the lowest priority per UniqueKey, then limit
+        , Ranked AS (
+            SELECT *, ROW_NUMBER() OVER (PARTITION BY UniqueKey ORDER BY priority) AS rn
+            FROM SearchUnion
+        )
+
+        SELECT TOP (10)
             Descripcion,
             Codigo,
             SKU,
@@ -328,7 +341,8 @@ export const productsQuerys = {
             Id_Marca,
             Marca,
             UniqueKey
-        FROM SearchUnion
+        FROM Ranked
+        WHERE rn = 1
         ORDER BY priority, Descripcion, Codigo, Marca;
     `,
 }
