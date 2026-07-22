@@ -1,18 +1,17 @@
-const stockAvailabilityCondition = `(@SalidaSinExistencias = 1 OR E.Existencia > 0)`;
-
 const baseProductsFromClause = `
     FROM [dbo].[PRODUCTOS] P
         INNER JOIN [dbo].[PRECIOS] PR
-            ON P.Codigo = PR.Codigo
-        INNER JOIN [dbo].[EXISTENCIAS] E
-            ON P.Codigo = E.Codigo
-            AND PR.Id_Marca = E.Id_Marca
-            AND ${stockAvailabilityCondition}
+            ON  PR.Codigo = P.Codigo
+            AND PR.Id_ListaPrecios = @Id_ListaPrecios
+        LEFT JOIN [dbo].[EXISTENCIAS] E
+            ON E.Codigo = P.Codigo
+            AND E.Id_Marca = PR.Id_Marca
+            AND E.Id_Almacen = @Id_Almacen
         INNER JOIN [dbo].[MARCAS] M
-            ON PR.Id_Marca = M.Id_Marca
+            ON M.Id_Marca = PR.Id_Marca
         INNER JOIN [dbo].[COSTOS] C
-            ON P.Codigo = C.Codigo
-            AND PR.Id_Marca = C.Id_Marca
+            ON C.Codigo = P.Codigo
+            AND C.Id_Marca = PR.Id_Marca
 `;
 
 const inventorySearchOrderByClause = `
@@ -53,6 +52,10 @@ export const productsQuerys = {
         ${baseProductsFromClause}
         WHERE PR.Id_ListaPrecios = @Id_ListaPrecios  
             AND E.Id_Almacen = @Id_Almacen
+            AND (
+                @SalidaSinExistencias = 1
+                OR E.Existencia > 0
+            )
         ORDER BY P.Codigo
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY
@@ -71,7 +74,11 @@ export const productsQuerys = {
             COUNT(*) AS TotalProductos
         ${baseProductsFromClause}
         WHERE PR.Id_ListaPrecios = @Id_ListaPrecios 
-            AND E.Id_Almacen = @Id_Almacen;
+            AND E.Id_Almacen = @Id_Almacen
+            AND (
+                @SalidaSinExistencias = 1
+                OR E.Existencia > 0
+            );
     `,
 
 
@@ -98,6 +105,10 @@ export const productsQuerys = {
         ${baseProductsFromClause}
         WHERE PR.Id_ListaPrecios = @Id_ListaPrecios 
             AND E.Id_Almacen = @Id_Almacen
+            AND (
+                @SalidaSinExistencias = 1
+                OR E.Existencia > 0
+            )
             AND (
                 NULLIF(TRIM(@CodBar), '') IS NULL
                 OR TRIM(C.CodBar) = TRIM(@CodBar)
@@ -131,6 +142,10 @@ export const productsQuerys = {
         WHERE PR.Id_ListaPrecios = @Id_ListaPrecios 
             AND E.Id_Almacen = @Id_Almacen
             AND (
+                @SalidaSinExistencias = 1
+                OR E.Existencia > 0
+            )
+            AND (
                 TRIM(C.CodBar) = TRIM(@CodBar)
                 OR (
                     LEN(TRIM(ISNULL(@CodBar, ''))) > 1
@@ -153,13 +168,17 @@ export const productsQuerys = {
             TRIM(P.Codigo) AS Codigo,
             TRIM(P.SKU) AS SKU,
             E.Id_Almacen,
+            E.Existencia,
             TRIM(C.CodBar) AS CodBar,
             M.Id_Marca,
             TRIM(M.Nombre) AS Marca,
-            CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', E.Id_Almacen, '-', PR.Id_ListaPrecios) AS UniqueKey
+            CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', COALESCE(E.Id_Almacen, @Id_Almacen), '-', PR.Id_ListaPrecios) AS UniqueKey
         ${baseProductsFromClause}
-        WHERE  E.Id_Almacen = @Id_Almacen 
-            AND PR.Id_ListaPrecios = @Id_ListaPrecios  
+        WHERE
+            (
+                @SalidaSinExistencias = 1
+                OR E.Existencia > 0
+            )
             AND (
                 P.Descripcion LIKE '%' + @searchTerm + '%'
                 OR P.SKU LIKE '%' + @searchTerm + '%'
@@ -183,13 +202,17 @@ export const productsQuerys = {
             TRIM(P.Codigo) AS Codigo,
             TRIM(P.SKU) AS SKU,
             E.Id_Almacen,
+            E.Existencia,
             TRIM(C.CodBar) AS CodBar,
             M.Id_Marca,
             TRIM(M.Nombre) AS Marca,
-            CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', E.Id_Almacen, '-', PR.Id_ListaPrecios) AS UniqueKey
+            CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', COALESCE(E.Id_Almacen, @Id_Almacen), '-', PR.Id_ListaPrecios) AS UniqueKey
         ${baseProductsFromClause}
-        WHERE E.Id_Almacen = @Id_Almacen
-            AND PR.Id_ListaPrecios = @Id_ListaPrecios
+        WHERE
+            (
+                @SalidaSinExistencias = 1
+                OR E.Existencia > 0
+            )
             AND (
                 P.Descripcion LIKE '%' + @searchTerm + '%'
                 OR P.SKU LIKE '%' + @searchTerm + '%'
