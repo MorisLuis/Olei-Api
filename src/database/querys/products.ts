@@ -31,6 +31,43 @@ const inventorySearchOrderByClause = `
 export const productsQuerys = {
 
     /**
+     * @description Returns a product by its code and brand, including its price, stock, and image.
+     * 
+     * Business rules:
+     * - If @Marca is NULL, it will return the product regardless of its brand.
+     * - The image URL is constructed based on the baseSQL parameter and the product code.
+     * - The query joins multiple tables to retrieve all necessary information about the product.
+     */
+
+    getProducById: `
+        SELECT
+            TRIM(P.Descripcion) AS Descripcion,
+            E.Existencia,
+            TRIM(P.Codigo) AS Codigo,
+            E.Id_Almacen,
+            M.Id_Marca,
+            TRIM(C.CodBar) AS CodBar,
+            TRIM(M.Nombre) AS Marca,
+            PR.Id_ListaPrecios,
+            PR.Precio,
+            P.Id_Familia,
+            TRIM(F.Nombre) AS Familia,
+            TRIM(PR.Codigo) AS CodigoPrecio,
+            TRIM(E.Codigo) AS CodigoExistencia,
+            C.Impto AS Impuesto,
+            P.Observaciones,
+            'https://oleistorage.blob.core.windows.net/' +  LOWER(SUBSTRING(@baseSQL, CHARINDEX('_', @baseSQL) + 1, LEN(@baseSQL))) + '/' + TRIM(P.Codigo) + '.jpg' AS imagen
+            ${baseProductsFromClause}
+            JOIN [dbo].[FAMILIAS] F ON P.Id_Familia = F.Id_Familia
+        WHERE P.Codigo = @Codigo 
+        AND (
+            @Marca IS NULL
+            OR M.Nombre = @Marca
+        )
+        AND PR.Id_ListaPrecios = @Id_ListaPrecios
+    `,
+
+    /**
      * @description Returns a paginated list of products for a warehouse and price list.
      * 
      * Business rules:
@@ -51,7 +88,6 @@ export const productsQuerys = {
             PR.Precio
         ${baseProductsFromClause}
         WHERE PR.Id_ListaPrecios = @Id_ListaPrecios  
-            AND E.Id_Almacen = @Id_Almacen
             AND (
                 @SalidaSinExistencias = 1
                 OR E.Existencia > 0
@@ -74,7 +110,6 @@ export const productsQuerys = {
             COUNT(*) AS TotalProductos
         ${baseProductsFromClause}
         WHERE PR.Id_ListaPrecios = @Id_ListaPrecios 
-            AND E.Id_Almacen = @Id_Almacen
             AND (
                 @SalidaSinExistencias = 1
                 OR E.Existencia > 0
@@ -104,7 +139,6 @@ export const productsQuerys = {
             PR.Precio
         ${baseProductsFromClause}
         WHERE PR.Id_ListaPrecios = @Id_ListaPrecios 
-            AND E.Id_Almacen = @Id_Almacen
             AND (
                 @SalidaSinExistencias = 1
                 OR E.Existencia > 0
@@ -126,7 +160,7 @@ export const productsQuerys = {
     /**
      * @description Returns a product by barcode and supports barcodes with a leading verification digit.
      */
-    
+
     getProductByStockAndCodeBarDV: `
         SELECT
             TRIM(P.Descripcion) AS Descripcion,
