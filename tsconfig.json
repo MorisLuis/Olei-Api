@@ -25,5 +25,5 @@
     "noImplicitReturns": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "jest.config.js", "src/interface/**/*.d.ts"]
+  "include": ["src/**/*.ts", "jest.config.js", "src/interface/**/*.d.ts", "src/middleware/validateJWT/utils"]
 }

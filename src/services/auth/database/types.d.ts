@@ -25,3 +25,9 @@ type LoginDbSessionFields = Required<
         | "Id_ListPre"
     >
 >;
+
+
+export interface logoutServerParams {
+    sessionId: string;
+    session: UserSessionInterface;
+}

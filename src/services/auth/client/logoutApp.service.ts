@@ -1,5 +1,10 @@
+import sql from "mssql";
+
+import { dbConnection } from "../../../database";
+import { ValidationError } from "../../../errors/CustomError";
 import { updateSession } from "../database/session.service";
 import type { logoutAppParams, logoutAppResponse } from "./types";
+import { usersQuery } from "../../../database/querys/users";
 
 /**
  * @description Logs out the user by clearing the session data and updating the session in the database.
@@ -17,6 +22,16 @@ export const logoutAppService = async (params: logoutAppParams): Promise<logoutA
     if (!sessionId || !session) {
         throw new Error('Session ID or session data is missing');
     }
+
+    const { ServidorSQL, BaseSQL, PasswordSQL, UsuarioSQL } = session;
+    const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
+    if (!pool) {
+        throw new ValidationError('Error al conectarse a base de datos principal');
+    }
+    const query = usersQuery.updateUserSession
+    await pool.request()
+        .input('Id_Usuario', sql.VarChar(50), session.Id_UsuarioOLEI)
+        .query(query);
 
     const updatedSession = {
         ...session,

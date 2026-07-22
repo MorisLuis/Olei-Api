@@ -2,9 +2,10 @@ import type { NextFunction, Request, Response } from 'express'
 import { dbConnection } from '../../database';
 import { productsWebQuerys } from '../../database/querys/productsWeb';
 import { getProductByStockAndCodeBarSchema, getProductsByStockQuerySchema } from '../../validations/productsValidations';
-import { getProductByStockAndCodeBarService, getProductsByStockService, searchProductByStockService } from '../../services/productsServices';
+import { getProductByStockAndCodeBarService, getProductsByStockService, searchProductByStockService } from '../../services/products/index';
 import { UnauthorizedError, ValidationError } from '../../errors/CustomError';
 import { searchProductInventoryQuerySchema } from '../../validations/inventoryValidations';
+import { productsQuerys } from '../../database/querys/products';
 
 const getProducById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
@@ -20,7 +21,7 @@ const getProducById = async (req: Request, res: Response, next: NextFunction): P
             throw new ValidationError('Error al conectarse a base de datos principal');
         }
 
-        let query = productsWebQuerys.getProducById
+        let query = productsQuerys.getProducById
 
         if (
             userSession.BaseSQL === 'OLEIDB1_ROSCO' ||
@@ -33,8 +34,8 @@ const getProducById = async (req: Request, res: Response, next: NextFunction): P
         const result = await pool.request()
             .input("Codigo", id)
             .input("Marca", Marca)
-            .input("ListaPrecios", Id_ListPre)
-            .input("Almacen", Id_Almacen)
+            .input("Id_ListaPrecios", Id_ListPre)
+            .input("Id_Almacen", Id_Almacen)
             .input("baseSQL", BaseSQL)
             .query(query);
 
@@ -47,6 +48,13 @@ const getProducById = async (req: Request, res: Response, next: NextFunction): P
         next(error)
     }
 }
+
+
+/**
+ * @description Controller to get products by stock with pagination and optional total count.
+ * @route GET /products/byStock
+ * @client Mobile App
+ */
 
 const getProductsByStock = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
@@ -72,6 +80,12 @@ const getProductsByStock = async (req: Request, res: Response, next: NextFunctio
     }
 };
 
+/**
+ * @description Controller to get the total count of products by stock.
+ * @route GET /products/byStockCount
+ * @client Mobile App
+ */
+
 const getTotalOfProductsByStock = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const userSession = req.session;
@@ -87,6 +101,12 @@ const getTotalOfProductsByStock = async (req: Request, res: Response, next: Next
         next(error);
     }
 };
+
+/**
+ * @description Controller to get a product by stock and code bar.
+ * @route GET /products/byStockAndCodeBar
+ * @client Mobile App
+ */
 
 const getProductByStockAndCodeBar = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
@@ -108,6 +128,12 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
     }
 };
 
+/**
+ * @description Controller to search products in inventory ( products ) by search term.
+ * @route GET /inventory/search/product
+ * @client Mobile App
+ */
+
 const searchProductInventory = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -126,6 +152,13 @@ const searchProductInventory = async (req: Request, res: Response, next: NextFun
         return next(error);
     }
 };
+
+
+/**
+ * @description Controller to search products in inventory ( products ) without code bar.
+ * @route GET /inventory/search/product/withoutcodebar
+ * @client Mobile App
+ */
 
 const searchProductInventoryWithoutCodebar = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 

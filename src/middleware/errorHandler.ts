@@ -35,6 +35,7 @@ const errorHandler = (
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal server error";
   const debugMessage = err.debugMessage ?? null;
+  const code = err.code ?? null;
 
   //TODO: Stored the erro in the database for further analysis and debugging.
 
@@ -43,6 +44,7 @@ const errorHandler = (
     message,
     statusCode,
     debugMessage,
+    code
   });
 };
 

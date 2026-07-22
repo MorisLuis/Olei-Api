@@ -3,16 +3,30 @@ import jwt from 'jsonwebtoken';
 import type { JwtPayload } from 'jsonwebtoken';
 
 import { AppError, ForbiddenError, UnauthorizedError } from '../../errors/CustomError';
-import redisClient from '../../config/redisClient';
-import type { UserSessionInterface } from '../../interface/user';
-import { buildVerifyOptions, extractBearerToken } from './utils';
+import { verifyTokenAndExtractSessionId, buildVerifyOptions, extractBearerToken} from './token.helpers';
+import { getSessionOrUnauthorized} from './session.helpers';
+import { getRedisSession } from '../../services/auth/database/session.service';
+import { logoutServerService } from '../../services/auth/database/logoutServer.service';
+import { AUTH_ERROR_CODES } from '../constants';
+
+/**
+ * @description Middleware function to validate JWT tokens for client requests. It checks for the presence of two tokens: a server token and a user token. 
+ * The server token is required for all requests, while the user token is optional. The middleware verifies both tokens against their respective secrets 
+ * and options, ensuring that the session ID in the user token matches the session ID in the server token. If any validation fails, it responds with 
+ * appropriate error messages.
+ * 
+ * @param req - The Express request object.
+ * @param _res - The Express response object (not used in this middleware).
+ * @param next - The next middleware function in the Express pipeline.
+ * @returns A promise that resolves when the middleware has completed its validation.
+ */
 
 export const validateJWTClient = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     const tokenServer = extractBearerToken(req.headers['x-server-token']);
-    const token = extractBearerToken(req.headers['authorization']); 
+    const token = extractBearerToken(req.headers['authorization']);
 
     if (!tokenServer) {
-        return next(new UnauthorizedError('SESSION_EXPIRADA', 'Session is invalid or expired / Token 1 is missing'));
+        return next(new UnauthorizedError('Session is invalid or expired / Token server is missing', '', AUTH_ERROR_CODES.SESSION_EXPIRADA));
     };
 
     if (!process.env.ACCESS_TOKEN_SEVER_SECRET) {
@@ -28,20 +42,19 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
             process.env.JWT_SERVER_SUBJECT
         );
 
-        const decoded = jwt.verify(tokenServer, process.env.ACCESS_TOKEN_SEVER_SECRET, serverVerifyOptions) as JwtPayload;
-        sessionId = decoded.sessionId;
+        sessionId = verifyTokenAndExtractSessionId(
+            tokenServer,
+            process.env.ACCESS_TOKEN_SEVER_SECRET,
+            serverVerifyOptions,
+            AUTH_ERROR_CODES.SESSION_EXPIRADA,
+            'Session is invalid or expired / sessionId is missing'
+        );
 
-        if (!sessionId) return next(new UnauthorizedError('SESSION_EXPIRADA', 'Session is invalid or expired / sessionId is missing'));
-
-        const sessionDataRaw = await redisClient.get(`session:${sessionId}`);
-        if (!sessionDataRaw) return next(new UnauthorizedError('SESSION_EXPIRADA', 'Session is invalid or expired / session data not found'));
-
-        let session: UserSessionInterface;
-        try {
-            session = JSON.parse(sessionDataRaw) as UserSessionInterface;
-        } catch {
-            return next(new UnauthorizedError('SESSION_EXPIRADA', 'Session is invalid or expired / session data is corrupted'));
-        }
+        const session = await getSessionOrUnauthorized(
+            sessionId,
+            AUTH_ERROR_CODES.SESSION_EXPIRADA,
+            'Session is invalid or expired / session data not found'
+        );
 
         if (!session.serverConected) {
             return next(new ForbiddenError('Server connection required / server not connected'));
@@ -50,18 +63,34 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
         req.sessionId = sessionId;
         req.session = session;
     } catch (error) {
-        console.log('JWT verification error:', error);
+
+        if (error instanceof UnauthorizedError || error instanceof ForbiddenError) {
+            return next(error);
+        }
+
         if (error instanceof jwt.TokenExpiredError) {
+
+            const decoded = jwt.decode(tokenServer) as JwtPayload;
+            if (decoded?.sessionId) {
+                const session = await getRedisSession(decoded.sessionId);
+                if (session) {
+                    await logoutServerService({ sessionId: decoded.sessionId, session });
+                }
+            }
+
             return next(new UnauthorizedError(
-                'TOKEN_EXPIRADO',
-                'Session is invalid or expired / Token 1 has expired'
+                'Session is invalid or expired / Token server has expired',
+                error.message,
+                AUTH_ERROR_CODES.TOKEN_EXPIRADO,
             ));
         }
 
         return next(new UnauthorizedError(
-            'TOKEN_EXPIRADO',
-            `JWT verification failed: ${error instanceof Error ? error.name : 'unknown_error'}`
+            `JWT verification failed: ${error instanceof Error ? error.name : 'unknown_error'}`,
+            error instanceof Error ? error.message : 'unknown_error',
+            AUTH_ERROR_CODES.TOKEN_INVALIDO,
         ));
+
     }
 
     if (token) {
@@ -73,28 +102,39 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
                 process.env.JWT_ACCESS_SUBJECT
             );
 
-            const decodedUser = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, userVerifyOptions) as JwtPayload;
-            const tokenSessionId = decodedUser.sessionId;
+            const tokenSessionId = verifyTokenAndExtractSessionId(
+                token,
+                process.env.ACCESS_TOKEN_SECRET,
+                userVerifyOptions,
+                AUTH_ERROR_CODES.TOKEN_CLIENTE_INVALIDO,
+                'Session is invalid or expired / sessionId mismatch'
+            );
 
             if (!tokenSessionId || tokenSessionId !== sessionId) {
                 return next(new UnauthorizedError(
-                    'TOKEN_2_INVALIDO',
+                    AUTH_ERROR_CODES.TOKEN_CLIENTE_INVALIDO,
                     'Session is invalid or expired / sessionId mismatch'
                 ));
             }
         } catch (error) {
-            console.log('JWT verification error for user token:', error);
+
+            if (error instanceof UnauthorizedError) {
+                return next(error);
+            }
+
             if (error instanceof jwt.TokenExpiredError) {
+
                 return next(new UnauthorizedError(
-                    'TOKEN_2_EXPIRADO',
+                    AUTH_ERROR_CODES.TOKEN_CLIENTE_EXPIRADO,
                     'Session is invalid or expired / Token 2 has expired'
                 ));
             };
 
             return next(new UnauthorizedError(
-                'TOKEN_2_INVALIDO',
+                AUTH_ERROR_CODES.TOKEN_CLIENTE_INVALIDO,
                 'Session is invalid or expired / Token 2 verification failed'
             ));
+
         }
     }
 

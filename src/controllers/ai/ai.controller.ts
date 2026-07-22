@@ -41,7 +41,6 @@ export const askAI = async (req: Request, res: Response): Promise<Response> => {
         return successResponse(req, res, { data, headers, queryId, prompt }, "Consulta AI exitosa", 200, { totals: { show: data.length, total: data.length }, pages: { current: 1, totalPages: 1 } });
 
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ error: `Error del servidor compa: ${error}` });
     }
 };

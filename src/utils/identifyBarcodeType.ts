@@ -40,7 +40,6 @@ export const guessBarcodeType = (code: string) : boolean => {
     return false;
 };
 
-
 export const verifyIfIsEAN13 = (code: string)  : boolean=> {
 
     //EAN13
