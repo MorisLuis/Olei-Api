@@ -6,6 +6,7 @@ import { getProductWithImages, getProductsWithImage } from "../utils/checkImageE
 import { ValidationError } from "../errors/CustomError";
 import type ProductInterface from "../interface/product";
 import type { UserWebSessionInterface } from '../interface/user';
+import { productsQuerys } from '../database/querys/products';
 
 
 // Web endpoints
@@ -87,10 +88,10 @@ const getProducByIdWebService = async ({
     const result = await pool.request()
         .input("Codigo", codigo)
         .input("Marca", Marca)
-        .input("ListaPrecios", Id_ListPre)
-        .input("Almacen", Id_Almacen)
+        .input("Id_ListaPrecios", Id_ListPre)
+        .input("Id_Almacen", Id_Almacen)
         .input('baseSQL', sql.VarChar, BaseSQL || '')
-        .query(productsWebQuerys.getProducById);
+        .query(productsQuerys.getProducById);
 
     const productBefore = result?.recordset[0];
     const product = await getProductWithImages({
