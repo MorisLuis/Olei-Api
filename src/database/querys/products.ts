@@ -14,19 +14,7 @@ const baseProductsFromClause = `
             AND C.Id_Marca = PR.Id_Marca
 `;
 
-const inventorySearchOrderByClause = `
-    ORDER BY
-        CASE
-            WHEN C.CodBar = @searchTerm THEN 0
-            WHEN P.Codigo = @searchTerm THEN 1
-            WHEN P.SKU = @searchTerm THEN 2
-            WHEN P.Descripcion LIKE @searchTerm + '%' THEN 3
-            ELSE 4
-        END,
-        P.Descripcion,
-        P.Codigo,
-        M.Nombre
-`;
+// NOTE: ORDER BY CASE removed in favor of prioritized UNION searches below.
 
 export const productsQuerys = {
 
@@ -197,29 +185,76 @@ export const productsQuerys = {
      */
 
     getProductsBySearchInventory: `
-        SELECT TOP (10)
-            TRIM(P.Descripcion) AS Descripcion,
-            TRIM(P.Codigo) AS Codigo,
-            TRIM(P.SKU) AS SKU,
-            E.Id_Almacen,
-            E.Existencia,
-            TRIM(C.CodBar) AS CodBar,
-            M.Id_Marca,
-            TRIM(M.Nombre) AS Marca,
-            CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', COALESCE(E.Id_Almacen, @Id_Almacen), '-', PR.Id_ListaPrecios) AS UniqueKey
-        ${baseProductsFromClause}
-        WHERE
-            (
-                @SalidaSinExistencias = 1
-                OR E.Existencia > 0
-            )
-            AND (
-                P.Descripcion LIKE '%' + @searchTerm + '%'
-                OR P.SKU LIKE '%' + @searchTerm + '%'
-                OR P.Codigo LIKE '%' + @searchTerm + '%'
-                OR C.CodBar LIKE '%' + @searchTerm + '%'
-            )
-        ${inventorySearchOrderByClause};
+        -- Prioritized UNION search: exact CodBar, exact Codigo, exact SKU, prefix description, fallback contains/like
+        WITH SearchUnion AS (
+            SELECT
+                TRIM(P.Descripcion) AS Descripcion,
+                TRIM(P.Codigo) AS Codigo,
+                TRIM(P.SKU) AS SKU,
+                E.Id_Almacen,
+                E.Existencia,
+                TRIM(C.CodBar) AS CodBar,
+                M.Id_Marca,
+                TRIM(M.Nombre) AS Marca,
+                CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', COALESCE(E.Id_Almacen, @Id_Almacen), '-', PR.Id_ListaPrecios) AS UniqueKey,
+                0 AS priority
+            ${baseProductsFromClause}
+            WHERE (@SalidaSinExistencias = 1 OR E.Existencia > 0)
+                AND C.CodBar = LTRIM(RTRIM(@searchTerm))
+
+            UNION ALL
+
+            SELECT
+                TRIM(P.Descripcion), TRIM(P.Codigo), TRIM(P.SKU), E.Id_Almacen, E.Existencia, TRIM(C.CodBar), M.Id_Marca, TRIM(M.Nombre),
+                CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', COALESCE(E.Id_Almacen, @Id_Almacen), '-', PR.Id_ListaPrecios),
+                1 AS priority
+            ${baseProductsFromClause}
+            WHERE (@SalidaSinExistencias = 1 OR E.Existencia > 0)
+                AND P.Codigo = LTRIM(RTRIM(@searchTerm))
+
+            UNION ALL
+
+            SELECT
+                TRIM(P.Descripcion), TRIM(P.Codigo), TRIM(P.SKU), E.Id_Almacen, E.Existencia, TRIM(C.CodBar), M.Id_Marca, TRIM(M.Nombre),
+                CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', COALESCE(E.Id_Almacen, @Id_Almacen), '-', PR.Id_ListaPrecios),
+                2 AS priority
+            ${baseProductsFromClause}
+            WHERE (@SalidaSinExistencias = 1 OR E.Existencia > 0)
+                AND P.SKU = LTRIM(RTRIM(@searchTerm))
+
+            UNION ALL
+
+            SELECT
+                TRIM(P.Descripcion), TRIM(P.Codigo), TRIM(P.SKU), E.Id_Almacen, E.Existencia, TRIM(C.CodBar), M.Id_Marca, TRIM(M.Nombre),
+                CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', COALESCE(E.Id_Almacen, @Id_Almacen), '-', PR.Id_ListaPrecios),
+                3 AS priority
+            ${baseProductsFromClause}
+            WHERE (@SalidaSinExistencias = 1 OR E.Existencia > 0)
+                AND P.Descripcion LIKE LTRIM(RTRIM(@searchTerm)) + '%'
+
+            UNION ALL
+
+            SELECT
+                TRIM(P.Descripcion), TRIM(P.Codigo), TRIM(P.SKU), E.Id_Almacen, E.Existencia, TRIM(C.CodBar), M.Id_Marca, TRIM(M.Nombre),
+                CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', COALESCE(E.Id_Almacen, @Id_Almacen), '-', PR.Id_ListaPrecios),
+                4 AS priority
+            ${baseProductsFromClause}
+            WHERE (@SalidaSinExistencias = 1 OR E.Existencia > 0)
+                AND P.Descripcion LIKE '%' + LTRIM(RTRIM(@searchTerm)) + '%'
+        )
+
+        SELECT DISTINCT TOP (10)
+            Descripcion,
+            Codigo,
+            SKU,
+            Id_Almacen,
+            Existencia,
+            CodBar,
+            Id_Marca,
+            Marca,
+            UniqueKey
+        FROM SearchUnion
+        ORDER BY priority, Descripcion, Codigo, Marca;
     `,
 
     /**
@@ -231,28 +266,69 @@ export const productsQuerys = {
      */
 
     getProductsBySearchInventoryWithoutCodebar: `
-        SELECT TOP (10)
-            TRIM(P.Descripcion) AS Descripcion,
-            TRIM(P.Codigo) AS Codigo,
-            TRIM(P.SKU) AS SKU,
-            E.Id_Almacen,
-            E.Existencia,
-            TRIM(C.CodBar) AS CodBar,
-            M.Id_Marca,
-            TRIM(M.Nombre) AS Marca,
-            CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', COALESCE(E.Id_Almacen, @Id_Almacen), '-', PR.Id_ListaPrecios) AS UniqueKey
-        ${baseProductsFromClause}
-        WHERE
-            (
-                @SalidaSinExistencias = 1
-                OR E.Existencia > 0
-            )
-            AND (
-                P.Descripcion LIKE '%' + @searchTerm + '%'
-                OR P.SKU LIKE '%' + @searchTerm + '%'
-                OR P.Codigo LIKE '%' + @searchTerm + '%'
-            )
-            AND NULLIF(TRIM(C.CodBar), '') IS NULL
-        ${inventorySearchOrderByClause};
+        -- Prioritized UNION search for products without codbar values
+        WITH SearchUnion AS (
+            SELECT
+                TRIM(P.Descripcion) AS Descripcion,
+                TRIM(P.Codigo) AS Codigo,
+                TRIM(P.SKU) AS SKU,
+                E.Id_Almacen,
+                E.Existencia,
+                TRIM(C.CodBar) AS CodBar,
+                M.Id_Marca,
+                TRIM(M.Nombre) AS Marca,
+                CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', COALESCE(E.Id_Almacen, @Id_Almacen), '-', PR.Id_ListaPrecios) AS UniqueKey,
+                1 AS priority
+            ${baseProductsFromClause}
+            WHERE (@SalidaSinExistencias = 1 OR E.Existencia > 0)
+                AND NULLIF(LTRIM(RTRIM(C.CodBar)), '') IS NULL
+                AND P.Codigo = LTRIM(RTRIM(@searchTerm))
+
+            UNION ALL
+
+            SELECT
+                TRIM(P.Descripcion), TRIM(P.Codigo), TRIM(P.SKU), E.Id_Almacen, E.Existencia, TRIM(C.CodBar), M.Id_Marca, TRIM(M.Nombre),
+                CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', COALESCE(E.Id_Almacen, @Id_Almacen), '-', PR.Id_ListaPrecios),
+                2 AS priority
+            ${baseProductsFromClause}
+            WHERE (@SalidaSinExistencias = 1 OR E.Existencia > 0)
+                AND NULLIF(LTRIM(RTRIM(C.CodBar)), '') IS NULL
+                AND P.SKU = LTRIM(RTRIM(@searchTerm))
+
+            UNION ALL
+
+            SELECT
+                TRIM(P.Descripcion), TRIM(P.Codigo), TRIM(P.SKU), E.Id_Almacen, E.Existencia, TRIM(C.CodBar), M.Id_Marca, TRIM(M.Nombre),
+                CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', COALESCE(E.Id_Almacen, @Id_Almacen), '-', PR.Id_ListaPrecios),
+                3 AS priority
+            ${baseProductsFromClause}
+            WHERE (@SalidaSinExistencias = 1 OR E.Existencia > 0)
+                AND NULLIF(LTRIM(RTRIM(C.CodBar)), '') IS NULL
+                AND P.Descripcion LIKE LTRIM(RTRIM(@searchTerm)) + '%'
+
+            UNION ALL
+
+            SELECT
+                TRIM(P.Descripcion), TRIM(P.Codigo), TRIM(P.SKU), E.Id_Almacen, E.Existencia, TRIM(C.CodBar), M.Id_Marca, TRIM(M.Nombre),
+                CONCAT(TRIM(P.Codigo), '-', M.Id_Marca, '-', TRIM(M.Nombre), '-', COALESCE(E.Id_Almacen, @Id_Almacen), '-', PR.Id_ListaPrecios),
+                4 AS priority
+            ${baseProductsFromClause}
+            WHERE (@SalidaSinExistencias = 1 OR E.Existencia > 0)
+                AND NULLIF(LTRIM(RTRIM(C.CodBar)), '') IS NULL
+                AND P.Descripcion LIKE '%' + LTRIM(RTRIM(@searchTerm)) + '%'
+        )
+
+        SELECT DISTINCT TOP (10)
+            Descripcion,
+            Codigo,
+            SKU,
+            Id_Almacen,
+            Existencia,
+            CodBar,
+            Id_Marca,
+            Marca,
+            UniqueKey
+        FROM SearchUnion
+        ORDER BY priority, Descripcion, Codigo, Marca;
     `,
 }
