@@ -7,6 +7,7 @@ import type { UserSessionInterface } from "../../../interface/user";
 import { sanitizeServerSessionUser } from "../../../controllers/auth/utils/sessionResponse";
 import { updateSession } from "../database/session.service";
 import { generateAccessToken, generateRefreshToken } from "./token.service";
+import { normalizeDeviceId } from "./utils";
 
 /**
  * @description Handles the login process for the application:
@@ -43,11 +44,31 @@ export const loginAppService = async ({
         throw new ValidationError('Error al conectarse a base de datos principal');
     }
 
-    const result = await pool.request()
+    const Id_equipoNormalized = idEquipo ? normalizeDeviceId(idEquipo) : null;
+    const request = pool.request()
         .input('Id_Usuario', sql.VarChar(50), Id_Usuario)
-        .input('Password', sql.VarChar(50), password)
-        .input('idEquipo', sql.VarChar(50), idEquipo)
-        .execute('sp_AuthenticateAndGetMovement');
+        .input('Password', sql.VarChar(50), password);
+
+    if (Id_equipoNormalized) {
+        request.input('idEquipo', sql.VarChar(100), Id_equipoNormalized);
+    }
+
+    let result;
+    try {
+        result = await request.execute('sp_AuthenticateAndGetMovement');
+    } catch (err) {
+        if (Id_equipoNormalized) {
+            // Some versions of the stored procedure may not expect `idEquipo`.
+            // Retry without the optional parameter when we receive an error.
+            const fallbackRequest = pool.request()
+                .input('Id_Usuario', sql.VarChar(50), Id_Usuario)
+                .input('Password', sql.VarChar(50), password);
+
+            result = await fallbackRequest.execute('sp_AuthenticateAndGetMovement');
+        } else {
+            throw err;
+        }
+    }
 
     const recordsets = (Array.isArray(result.recordset) ? result.recordset : [] ) as LoginAppSessionFields[];
     const userData = recordsets[0];
