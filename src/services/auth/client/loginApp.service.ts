@@ -26,7 +26,8 @@ export const loginAppService = async ({
     sessionId,
     session,
     Id_Usuario,
-    password
+    password,
+    idEquipo
 }: LoginAppParams): Promise<LoginAppResponse> => {
 
     const normalizedUserId = Id_Usuario.trim();
@@ -45,6 +46,7 @@ export const loginAppService = async ({
     const result = await pool.request()
         .input('Id_Usuario', sql.VarChar(50), Id_Usuario)
         .input('Password', sql.VarChar(50), password)
+        .input('idEquipo', sql.VarChar(50), idEquipo)
         .execute('sp_AuthenticateAndGetMovement');
 
     const recordsets = (Array.isArray(result.recordset) ? result.recordset : [] ) as LoginAppSessionFields[];

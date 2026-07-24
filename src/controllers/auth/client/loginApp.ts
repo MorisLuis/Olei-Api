@@ -14,12 +14,13 @@ export const loginApp = async (req: Request, res: Response, next: NextFunction):
     try {
         const session = req.session;
         const sessionId = req.sessionId;
-        const { Id_Usuario, password } = loginAppBodySchema.parse(req.body);
+        const { Id_Usuario, password, idEquipo } = loginAppBodySchema.parse(req.body);
         const { user, token, refreshToken } = await loginAppService({
             Id_Usuario,
             password,
             session,
-            sessionId
+            sessionId,
+            idEquipo
         });
 
         successResponse(req, res, { user, token, refreshToken }, "Login successful", 200);

@@ -8,6 +8,7 @@ export const loginServerBodySchema = z.object({
 export const loginAppBodySchema = z.object({
     Id_Usuario: z.string().trim().min(1, 'Id_Usuario es requerido').max(50),
     password: z.string().trim().min(1, 'password es requerido').max(50),
+    idEquipo: z.string().trim().optional(),
 });
 
 export const refreshAppBodySchema = z.object({

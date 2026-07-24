@@ -5,6 +5,7 @@ export interface LoginAppParams {
     session: UserSessionInterface;
     Id_Usuario: string;
     password: string;
+    idEquipo?: string;
 };
 
 export interface LoginAppResponse {
