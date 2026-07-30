@@ -21,6 +21,7 @@ export interface UserSessionInterface {
     SalidaSinExistencias?: number
     AlmacenNombre?: string;
 
+    Id_Equipo?: string;
     Id_UsuarioOLEI?: string;
     userRol?: number;
     Id_Perfil?: number;
