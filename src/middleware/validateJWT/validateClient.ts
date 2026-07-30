@@ -3,11 +3,14 @@ import jwt from 'jsonwebtoken';
 import type { JwtPayload } from 'jsonwebtoken';
 
 import { AppError, ForbiddenError, UnauthorizedError } from '../../errors/CustomError';
-import { verifyTokenAndExtractSessionId, buildVerifyOptions, extractBearerToken} from './token.helpers';
-import { getSessionOrUnauthorized} from './session.helpers';
+import { verifyTokenAndExtractSessionId, buildVerifyOptions, extractBearerToken } from './token.helpers';
+import { getSessionOrUnauthorized } from './session.helpers';
 import { getRedisSession } from '../../services/auth/database/session.service';
 import { logoutServerService } from '../../services/auth/database/logoutServer.service';
+import { verifyUserDevice } from '../../services/auth/client/verifyUserDevice.service';
 import { AUTH_ERROR_CODES } from '../constants';
+import type { UserSessionInterface } from '../../interface/user';
+import { logoutAppService } from '../../services/auth/client/logoutApp.service';
 
 /**
  * @description Middleware function to validate JWT tokens for client requests. It checks for the presence of two tokens: a server token and a user token. 
@@ -34,6 +37,7 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
     };
 
     let sessionId: string;
+    let session: UserSessionInterface
 
     try {
         const serverVerifyOptions = buildVerifyOptions(
@@ -50,7 +54,7 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
             'Session is invalid or expired / sessionId is missing'
         );
 
-        const session = await getSessionOrUnauthorized(
+        session = await getSessionOrUnauthorized(
             sessionId,
             AUTH_ERROR_CODES.SESSION_EXPIRADA,
             'Session is invalid or expired / session data not found'
@@ -116,6 +120,24 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
                     'Session is invalid or expired / sessionId mismatch'
                 ));
             }
+
+            // Additional checks: verify user exists, is active, and device matches
+            try {
+                const valid = await verifyUserDevice(session);
+
+                if (!valid) {
+                    try {
+                        await logoutAppService({ sessionId, session });
+                    } catch (err) {
+                        console.error('Error running logoutAppService during client validation revoke:', err);
+                    }
+
+                    return next(new UnauthorizedError('Session revoked', '', 'SESSION_REVOKED'));
+                }
+            } catch {
+                return next(new AppError('Error validating user device and status'));
+            }
+
         } catch (error) {
 
             if (error instanceof UnauthorizedError) {
