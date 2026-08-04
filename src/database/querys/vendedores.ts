@@ -5,6 +5,7 @@ export const vendedoresQuery = {
             [Id_Vendedor],
             [Nombre]
         FROM [dbo].[VENDEDORES]
+        WHERE @Nombre = N'' OR [Nombre] LIKE N'%' + @Nombre + N'%'
         ORDER BY [Nombre], [Id_Vendedor]
         OFFSET (@PageNumber - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY;
@@ -12,7 +13,8 @@ export const vendedoresQuery = {
 
     getVendedoresCount: `
         SELECT COUNT(*) AS Total
-        FROM [dbo].[VENDEDORES];
+        FROM [dbo].[VENDEDORES]
+        WHERE @Nombre = N'' OR [Nombre] LIKE N'%' + @Nombre + N'%';
     `,
 
     getVendedorById: `

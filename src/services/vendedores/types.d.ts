@@ -5,6 +5,7 @@ export interface GetVendedoresParams {
     userSession: UserSessionInterface;
     PageNumber: number;
     PageSize: number;
+    Nombre: string;
 }
 
 export interface GetVendedoresResponse {

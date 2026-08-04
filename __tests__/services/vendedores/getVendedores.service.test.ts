@@ -11,11 +11,15 @@ jest.mock("../../../src/database", () => ({
 
 jest.mock("mssql", () => ({
     __esModule: true,
-    default: { Int: "Int" },
+    default: {
+        Int: "Int",
+        NVarChar: jest.fn((size: number) => `NVarChar(${size})`),
+    },
 }));
 
 describe("getVendedoresService", () => {
     const mockDbConnection = dbConnection as jest.MockedFunction<typeof dbConnection>;
+    const mockNVarChar = sql.NVarChar as jest.Mock;
     const userSession: UserSessionInterface = {
         ServidorSQL: "SERVER",
         BaseSQL: "DATABASE",
@@ -32,6 +36,7 @@ describe("getVendedoresService", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        mockNVarChar.mockImplementation((size: number) => `NVarChar(${size})`);
     });
 
     it("queries the requested page and matching total", async () => {
@@ -39,9 +44,10 @@ describe("getVendedoresService", () => {
         const dataQuery = jest.fn().mockResolvedValue({ recordset: vendedores });
         const dataInput = jest.fn().mockReturnThis();
         const countQuery = jest.fn().mockResolvedValue({ recordset: [{ Total: 21 }] });
+        const countInput = jest.fn().mockReturnThis();
         const request = jest.fn()
             .mockReturnValueOnce({ input: dataInput, query: dataQuery })
-            .mockReturnValueOnce({ query: countQuery });
+            .mockReturnValueOnce({ input: countInput, query: countQuery });
 
         mockDbConnection.mockResolvedValue({ request } as never);
 
@@ -49,11 +55,14 @@ describe("getVendedoresService", () => {
             userSession,
             PageNumber: 2,
             PageSize: 20,
+            Nombre: "Ana",
         });
 
         expect(mockDbConnection).toHaveBeenCalledWith("SERVER", "DATABASE", "USER", "PASSWORD");
         expect(dataInput).toHaveBeenCalledWith("PageNumber", sql.Int, 2);
         expect(dataInput).toHaveBeenCalledWith("PageSize", sql.Int, 20);
+        expect(dataInput).toHaveBeenCalledWith("Nombre", "NVarChar(100)", "Ana");
+        expect(countInput).toHaveBeenCalledWith("Nombre", "NVarChar(100)", "Ana");
         expect(dataQuery).toHaveBeenCalledWith(vendedoresQuery.getVendedores);
         expect(countQuery).toHaveBeenCalledWith(vendedoresQuery.getVendedoresCount);
         expect(result).toEqual({ vendedores, total: 21 });
@@ -63,7 +72,7 @@ describe("getVendedoresService", () => {
         mockDbConnection.mockResolvedValue(null as never);
 
         await expect(
-            getVendedoresService({ userSession, PageNumber: 1, PageSize: 20 }),
+            getVendedoresService({ userSession, PageNumber: 1, PageSize: 20, Nombre: "" }),
         ).rejects.toBeInstanceOf(ValidationError);
     });
 
@@ -72,14 +81,15 @@ describe("getVendedoresService", () => {
         const dataQuery = jest.fn().mockRejectedValue(error);
         const dataInput = jest.fn().mockReturnThis();
         const countQuery = jest.fn().mockResolvedValue({ recordset: [{ Total: 0 }] });
+        const countInput = jest.fn().mockReturnThis();
         const request = jest.fn()
             .mockReturnValueOnce({ input: dataInput, query: dataQuery })
-            .mockReturnValueOnce({ query: countQuery });
+            .mockReturnValueOnce({ input: countInput, query: countQuery });
 
         mockDbConnection.mockResolvedValue({ request } as never);
 
         await expect(
-            getVendedoresService({ userSession, PageNumber: 1, PageSize: 20 }),
+            getVendedoresService({ userSession, PageNumber: 1, PageSize: 20, Nombre: "Ana" }),
         ).rejects.toThrow(error);
     });
 });

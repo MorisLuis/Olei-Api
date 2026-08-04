@@ -39,6 +39,7 @@ describe("getVendedores controller", () => {
             userSession,
             PageNumber: 1,
             PageSize: 20,
+            Nombre: "",
         });
         expect(res.json).toHaveBeenCalledWith({
             success: true,
@@ -54,7 +55,7 @@ describe("getVendedores controller", () => {
 
     it("parses custom pagination values", async () => {
         const req = {
-            query: { PageNumber: "2", PageSize: "10" },
+            query: { PageNumber: "2", PageSize: "10", Nombre: "  Ana  " },
             session: userSession,
         } as unknown as Request;
         const res = createResponse();
@@ -68,6 +69,27 @@ describe("getVendedores controller", () => {
             userSession,
             PageNumber: 2,
             PageSize: 10,
+            Nombre: "Ana",
+        });
+    });
+
+    it("forwards an empty trimmed name when the search is blank", async () => {
+        const req = {
+            query: { Nombre: "   " },
+            session: userSession,
+        } as unknown as Request;
+        const res = createResponse();
+        const next = jest.fn() as NextFunction;
+
+        mockGetVendedoresService.mockResolvedValue({ vendedores: [], total: 0 });
+
+        await getVendedores(req, res, next);
+
+        expect(mockGetVendedoresService).toHaveBeenCalledWith({
+            userSession,
+            PageNumber: 1,
+            PageSize: 20,
+            Nombre: "",
         });
     });
 

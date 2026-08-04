@@ -13,6 +13,7 @@ export const getVendedoresService = async ({
     userSession,
     PageNumber,
     PageSize,
+    Nombre,
 }: GetVendedoresParams): Promise<GetVendedoresResponse> => {
     const { ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL } = userSession;
     const pool = await dbConnection(ServidorSQL, BaseSQL, UsuarioSQL, PasswordSQL);
@@ -24,8 +25,11 @@ export const getVendedoresService = async ({
     const vendedoresRequest = pool.request()
         .input("PageNumber", sql.Int, PageNumber)
         .input("PageSize", sql.Int, PageSize)
+        .input("Nombre", sql.NVarChar(100), Nombre)
         .query(vendedoresQuery.getVendedores);
-    const countRequest = pool.request().query(vendedoresQuery.getVendedoresCount);
+    const countRequest = pool.request()
+        .input("Nombre", sql.NVarChar(100), Nombre)
+        .query(vendedoresQuery.getVendedoresCount);
 
     const [vendedoresResult, countResult] = await Promise.all([
         vendedoresRequest,

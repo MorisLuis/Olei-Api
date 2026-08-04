@@ -9,11 +9,12 @@ export const getVendedores = async (
     next: NextFunction,
 ): Promise<Response | void> => {
     try {
-        const { PageNumber, PageSize } = getVendedoresQuerySchema.parse(req.query);
+        const { PageNumber, PageSize, Nombre } = getVendedoresQuerySchema.parse(req.query);
         const { vendedores, total } = await getVendedoresService({
             userSession: req.session,
             PageNumber,
             PageSize,
+            Nombre,
         });
 
         return successResponse(req, res, vendedores, "Operation successful", 200, {
