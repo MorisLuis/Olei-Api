@@ -29,6 +29,7 @@ import abonosRouter from "../routes/abonosRouter";
 import aiRouter from "../routes/aiRouter";
 import informesiaRouter from "../routes/informesiaRouter";
 import typeOfDocuments from "../routes/typeOfDocuments"
+import vendedoresRouter from "../routes/vendedoresRouter";
 
 import { errorHandler } from "../middleware/errorHandler";
 import cookieParser from 'cookie-parser';  // Asegúrate de importar cookie-parser
@@ -59,7 +60,8 @@ class Server {
         abonos: string,
         aiRouter: string,
         informesia: string,
-        typeOfDocuments: string
+        typeOfDocuments: string,
+        vendedores: string
     };
 
     constructor() {
@@ -87,7 +89,8 @@ class Server {
             abonos: "/api/abonos",
             aiRouter: "/api/ai",
             informesia: "/api/informesia",
-            typeOfDocuments: "/api/documents/types"
+            typeOfDocuments: "/api/documents/types",
+            vendedores: "/api/vendedores"
         };
 
         void this.connectDB();
@@ -156,6 +159,7 @@ class Server {
         this.app.use(this.paths.aiRouter, aiRouter);
         this.app.use(this.paths.informesia, informesiaRouter);
         this.app.use(this.paths.typeOfDocuments, typeOfDocuments)
+        this.app.use(this.paths.vendedores, vendedoresRouter);
 
     }
 
