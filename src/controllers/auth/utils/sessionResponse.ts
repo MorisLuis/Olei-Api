@@ -25,4 +25,5 @@ export const sanitizeServerSessionUser = (session: Partial<UserSessionInterface>
     SalidaSinExistencias: session.SalidaSinExistencias,
     Id_Almacen: session.Id_Almacen,
     AlmacenNombre: session.AlmacenNombre,
+    PermitirCambiarPrecio: session.PermitirCambiarPrecio,
 });

@@ -19,6 +19,7 @@ export interface UserSessionInterface {
     TodosAlmacenes?: number;
     Id_ListPre?: number;
     SalidaSinExistencias?: number
+    PermitirCambiarPrecio?: boolean;
     AlmacenNombre?: string;
 
     Id_Equipo?: string;
