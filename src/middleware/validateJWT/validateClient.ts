@@ -117,7 +117,8 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
             if (!tokenSessionId || tokenSessionId !== sessionId) {
                 return next(new UnauthorizedError(
                     AUTH_ERROR_CODES.TOKEN_CLIENTE_INVALIDO,
-                    'Session is invalid or expired / sessionId mismatch'
+                    'Session is invalid or expired / sessionId mismatch',
+                    AUTH_ERROR_CODES.TOKEN_CLIENTE_INVALIDO
                 ));
             }
 
@@ -148,13 +149,15 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
 
                 return next(new UnauthorizedError(
                     AUTH_ERROR_CODES.TOKEN_CLIENTE_EXPIRADO,
-                    'Session is invalid or expired / Token 2 has expired'
+                    'Session is invalid or expired / Token 2 has expired',
+                    AUTH_ERROR_CODES.TOKEN_CLIENTE_EXPIRADO
                 ));
             };
 
             return next(new UnauthorizedError(
                 AUTH_ERROR_CODES.TOKEN_CLIENTE_INVALIDO,
-                'Session is invalid or expired / Token 2 verification failed'
+                'Session is invalid or expired / Token 2 verification failed',
+                AUTH_ERROR_CODES.TOKEN_CLIENTE_INVALIDO
             ));
 
         }
