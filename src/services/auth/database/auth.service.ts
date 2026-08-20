@@ -1,13 +1,14 @@
 import { v4 } from 'uuid';
 import sql from "mssql";
 
-import { dbConnectionMain, querys } from "../../../database";
+import { dbConnectionMain } from "../../../database";
 import { UnauthorizedError, ValidationError } from "../../../errors/CustomError";
 import type { LoginDbParams, LoginDbResponse } from "./types";
 import { sanitizeServerSessionUser } from '../../../controllers/auth/utils/sessionResponse';
 import type { UserSessionInterface } from '../../../interface/user';
 import { generateRedisSession } from './session.service';
 import { generateAccessTokenServer } from './token.service';
+import { authWebQuery } from '../../../database/querys/authWeb';
 
 /**
  * @description Function to login to the database and return the user data:
@@ -39,7 +40,7 @@ export const loginDB = async ({
         throw new ValidationError('Error al conectarse a base de datos principal');
     }
 
-    const query_DB = querys.authDatabase;
+    const query_DB = authWebQuery.authDatabase;
     const resp = await mainPool
         .request()
         .input('IdUsuarioOLEI', sql.VarChar(50), IdUsuarioOLEI)
