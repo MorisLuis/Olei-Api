@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create Tests"
+  short_description: "Add focused tests using Olei API conventions"
+  default_prompt: "Use $create-tests to add focused tests for an existing Olei API component."
