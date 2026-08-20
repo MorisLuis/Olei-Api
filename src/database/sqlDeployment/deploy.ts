@@ -110,8 +110,3 @@ export const runDeploymentCli = async (args: string[]): Promise<void> => {
     printResults(results);
     process.exitCode = results.some(result => result.status === 'failed') ? 1 : 0;
 };
-
-runDeploymentCli(process.argv.slice(2)).catch(error => {
-    console.error(`Deployment failed: ${getDeploymentErrorMessage(error)}`);
-    process.exitCode = 1;
-});
