@@ -1,4 +1,5 @@
-import { dbConnectionWeb, querys } from "../database";
+import { dbConnectionWeb } from "../database";
+import { generalQuerys } from "../database/querys/general";
 import type { UserWebSessionInterface } from "../interface/user";
 
 interface searchServiceInterface {
@@ -16,7 +17,7 @@ const searchFamiliaService = async ({
 
     const result = await pool.request()
         .input('Nombre', searchTerm)
-        .query(querys.getFamilias);
+        .query(generalQuerys.getFamilias);
 
     const familias = result?.recordset;
 
@@ -37,7 +38,7 @@ const searchMarcaService = async ({
 
     const result = await pool.request()
         .input('Nombre', searchTerm)
-        .query(querys.getMarcas);
+        .query(generalQuerys.getMarcas);
 
     const marcas = result?.recordset;
 
@@ -58,7 +59,7 @@ const searchCodigoService = async ({
 
     const result = await pool.request()
         .input('Codigo', searchTerm)
-        .query(querys.getFolios);
+        .query(generalQuerys.getFolios);
 
     const codigos = result?.recordset;
 
