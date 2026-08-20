@@ -1,4 +1,3 @@
 export * from "./connection";
-export * from "./createTenantConfig";
-export * from "./getTenants";
+export * from "./sqlDeployment";
 export { querys } from "./querys";
