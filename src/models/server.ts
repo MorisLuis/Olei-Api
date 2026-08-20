@@ -4,7 +4,7 @@ import type { Application } from "express";
 import express from "express";
 import type { CorsOptions } from 'cors';
 import cors from 'cors';
-import { dbConnectionMain } from "../database/connection";
+import { closeAllDatabaseConnections, dbConnectionMain } from "../database/connection";
 
 // Rutas
 import productRouter from "../routes/productRouter";
@@ -164,7 +164,7 @@ class Server {
     }
 
     public async closeConnections(): Promise<void> {
-        await dbConnectionMain().then(pool => pool.close()).catch(() => { });
+        await closeAllDatabaseConnections();
         console.log('Conexión a la base de datos cerrada');
     }
 
@@ -182,24 +182,3 @@ class Server {
 }
 
 export default Server;
-
-// Exportar la instancia de Redis
-const server = new Server();
-
-// Listener para cerrar conexiones con SIGINT
-process.on('SIGINT', async () => {
-    console.log('❌ Cerrando conexiones...');
-    await server.closeConnections();
-    process.exit(0);
-});
-
-// Listeners globales para errores inesperados
-/* process.on('uncaughtException', (err) => {
-    console.error('🔥 Uncaught Exception:', err);
-    process.exit(1);
-});
-
-process.on('unhandledRejection', (reason) => {
-    console.error('💥 Unhandled Promise Rejection:', reason);
-    process.exit(1);
-}); */
