@@ -1,8 +1,11 @@
 import type { NextFunction, Request, Response } from 'express';
-import type { UserWebSessionInterface } from '../../interface/user';
-import { getClientIdService, getClientsService, getTotalClientsService, searchClientService, updateClientService } from '../../services/clients/clients.service';
+import { getClientIdService } from '../../services/clients/getClientById.service';
+import { getClientsService } from '../../services/clients/getClients.service';
+import { getTotalClientsService } from '../../services/clients/getTotalClients.service';
+import { searchClientService } from '../../services/clients/searchClient.service';
+import { selectClientService } from '../../services/clients/selectClient.service';
+import { updateClientService } from '../../services/clients/updateClient.service';
 import { getClientIdQuerySchema, getClientsQuerySchema, getClientsTotalQuerySchema, searchClientQuerySchema, selectClientBodySchema } from './client.schema';
-import { updateWebSession } from '../../helpers/generate-redis';
 
 const getClients = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
@@ -80,19 +83,7 @@ const selectClient = async (req: Request, res: Response, next: NextFunction): Pr
         const sessionId = req.sessionId;
         const { Id_Cliente, Id_Almacen, Id_ListPre } = selectClientBodySchema.parse(req.body);
 
-        const client: Partial<UserWebSessionInterface> = {
-            Id_Almacen: Id_Almacen,
-            Id_Cliente: Id_Cliente,
-            Id_ListPre: Id_ListPre,
-            IsEmploye: true
-        }
-
-        const datosDelUsuario: UserWebSessionInterface = {
-            ...userSession,
-            ...client
-        };
-
-        await updateWebSession(sessionId, datosDelUsuario)
+        await selectClientService({ sessionId, userSession, Id_Cliente, Id_Almacen, Id_ListPre });
 
         return res.json({
             ok: true
