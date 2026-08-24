@@ -7,17 +7,22 @@ import { clearTenantPoolEntries, getTenantPoolEntries } from './getOrCreatePool'
  * @returns A promise settled after every available pool has finished closing.
  */
 export const closeAllDatabaseConnections = async (): Promise<void> => {
+
     const entries = Array.from(getTenantPoolEntries().values()).flat();
     const pendingPools = entries.map(entry => entry.connecting).filter(
         (connection): connection is Promise<sql.ConnectionPool> => connection !== undefined,
     );
+
     const mainPoolConnection = getMainPoolConnection();
     if (mainPoolConnection) pendingPools.push(mainPoolConnection);
+
     const connectedPendingPools = (await Promise.allSettled(pendingPools))
         .filter((result): result is PromiseFulfilledResult<sql.ConnectionPool> => result.status === 'fulfilled')
         .map(result => result.value);
+
     const pools = entries.map(entry => entry.pool)
         .filter((pool): pool is sql.ConnectionPool => pool !== undefined);
+
     const mainPool = getMainPool();
     if (mainPool) pools.push(mainPool);
 

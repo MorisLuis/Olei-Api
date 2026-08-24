@@ -69,5 +69,6 @@ export const getOrCreatePool = async (
         console.error(`❌ Error al conectar con SQL Server (${server} - ${database})`);
         throw error;
     });
+
     return entry.connecting;
 };
