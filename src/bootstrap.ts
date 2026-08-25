@@ -1,10 +1,12 @@
 import { loadRuntimeConfig } from './config';
 import { createShutdown, registerShutdownSignals } from './lifecycle/shutdown';
-import Server from './models/server';
 import type { ApplicationServer } from './types';
 
 
-const createServer = (port: number): ApplicationServer => new Server(port);
+const createServer = async (port: number): Promise<ApplicationServer> => {
+    const { Server } = await import('./models/server.js');
+    return new Server(port);
+};
 
 const registerShutdown = (server: ApplicationServer, timeoutMs: number): void => {
     registerShutdownSignals(createShutdown(server, timeoutMs));
@@ -35,7 +37,7 @@ export const bootstrap = async (
 
     const runtimeConfig = dependencies.loadConfig();
 
-    const server = dependencies.createServer(runtimeConfig.port);
+    const server = await dependencies.createServer(runtimeConfig.port);
     await server.start();
 
     dependencies.registerShutdown(server, runtimeConfig.shutdownTimeoutMs);

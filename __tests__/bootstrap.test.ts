@@ -17,7 +17,7 @@ describe('bootstrap', () => {
         });
         const createServer = jest.fn(() => {
             events.push('construct');
-            return { start, stop };
+            return Promise.resolve({ start, stop });
         });
         const registerShutdown = jest.fn(() => {
             events.push('register-shutdown');
@@ -52,7 +52,7 @@ describe('bootstrap', () => {
         const registerShutdown = jest.fn();
         await expect(bootstrap({
             loadConfig: jest.fn(() => runtimeConfig),
-            createServer: jest.fn(() => ({ start, stop })),
+            createServer: jest.fn(() => Promise.resolve({ start, stop })),
             registerShutdown,
         })).rejects.toBe(startupError);
         expect(registerShutdown).not.toHaveBeenCalled();
