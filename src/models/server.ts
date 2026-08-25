@@ -37,6 +37,7 @@ import { errorHandler } from "../middleware/errorHandler";
 import cookieParser from 'cookie-parser';
 import type { ServerDependencies } from "./types";
 import { markNotReady, markReady } from '../services/health/health.service';
+import { logger } from '../helpers/logger';
 
 export const listen = async (app: Application, port: number): Promise<HttpServer> => new Promise((resolve, reject) => {
     const httpServer = app.listen(port);
@@ -210,7 +211,7 @@ class Server {
             await this.dependencies.connectRedis();
             this.httpServer = await this.dependencies.listen(this.app, this.port);
             markReady();
-            console.log("✅ Servidor corriendo en puerto " + this.port);
+            logger.info('server.started', { port: this.port });
         } catch (error) {
             markNotReady();
             try {
