@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express'
-import { dbConnectionWeb, querys } from '../database';
+import { dbConnectionWeb } from '../database';
+import { generalQuerys } from '../database/querys/general';
 
 const getTables = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void>  => {
 
@@ -10,13 +11,13 @@ const getTables = async (req: Request, res: Response, next: NextFunction) : Prom
         const { ServidorSQL, BaseSQL } = userSession;
         const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
 
-        const FamiliasResult = await pool?.request().query(querys.getFamilias);
+        const FamiliasResult = await pool?.request().query(generalQuerys.getFamilias);
         const Familias = FamiliasResult?.recordset.map(familia => familia.Nombre);
 
-        const MarcaResult = await pool?.request().query(querys.getMarcas);
+        const MarcaResult = await pool?.request().query(generalQuerys.getMarcas);
         const Marca = MarcaResult?.recordset.map(marca => marca.Nombre);
 
-        const FolioResult = await pool?.request().query(querys.getFolios);
+        const FolioResult = await pool?.request().query(generalQuerys.getFolios);
         const Folio = FolioResult?.recordset.map(folio => folio.Codigo);
 
         return res.json({

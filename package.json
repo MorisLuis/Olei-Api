@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
+    "db:deploy": "ts-node src/database/sqlDeployment/runDeployment.ts",
     "start": "node dist/index.js",
     "dev": "ts-node-dev src/index.ts",
     "test": "jest",
@@ -47,8 +48,6 @@
   "dependencies": {
     "@eslint/js": "^9.24.0",
     "@jest/types": "^29.6.3",
-    "@prisma/adapter-mssql": "^6.13.0",
-    "@prisma/client": "^6.13.0",
     "@types/node": "^22.14.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -66,7 +65,6 @@
     "nodemailer": "^6.10.0",
     "openai": "^6.8.1",
     "pdf-lib": "^1.17.1",
-    "prisma": "^6.13.0",
     "supertest": "^7.1.1",
     "uuid": "^9.0.1",
     "xmlbuilder": "^15.1.1",

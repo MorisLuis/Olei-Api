@@ -1,6 +1,11 @@
-import type { Prisma } from "@prisma/client/extension"
 import type { UserWebSessionInterface } from "../../interface/user"
-import type { FilterPrisma } from "../../utils/prisma/types"
+
+export type AbonoOrderField = "Folio" | "Fecha" | "Id_Cliente" | "cliente.Nombre" | "forma_de_pago.Nombre";
+export type OrderDirection = "asc" | "desc";
+export interface AbonoInterface {
+    Folio: number; Id_Almacen: number; Id_Cliente: number; Id_FormaPago: number; Importe: number; Fecha: Date;
+    cliente: { Nombre: string } | null; forma_de_pago: { Nombre: string } | null;
+}
 
 export interface AbonoDetailsInterface {
     Folio: number,
@@ -12,12 +17,13 @@ export interface AbonoDetailsInterface {
 
 interface getAbonosParams {
     userSession: UserWebSessionInterface
-    orderField: Prisma.ABONOSOrderByWithRelationInput
-    orderDirection: "asc" | "desc"
+    orderField: AbonoOrderField
+    orderDirection: OrderDirection
 
-    skip: number
+    PageNumber: number
     limit: number
-    filters?: FilterPrisma[]
+    filterField?: string
+    filterValue?: string
     startDate?: string
     endDate?: string
     exactlyDate?: string
@@ -29,18 +35,25 @@ interface getAbonoByIdParams {
     Folio: number
 }
 
+interface GetAbonoDetailsParams {
+    userSession: UserWebSessionInterface
+    PageNumber: number
+    folio: string
+}
+
 interface getAbonosResponse {
-    abonos: typeof abonos;
+    abonos: AbonoInterface[];
     total: number;
 }
 
 interface getAbonoByIdResponse {
-    abono: typeof abonos[0];
+    abono: AbonoInterface | null;
 }
 
 export type {
     getAbonosParams,
     getAbonoByIdParams,
     getAbonosResponse,
-    getAbonoByIdResponse
+    getAbonoByIdResponse,
+    GetAbonoDetailsParams
 }

@@ -61,9 +61,11 @@ const postSellService = async ({
             .input('TipoDoc', sql.Int, TipoDoc)
             .input('CantLetra', sql.VarChar, cantLetra)
             .input('TotalImpuesto', sql.Decimal, totalImpuesto)
-            .input('Serie', sql.VarChar, '')
             .input('Accion', sql.Int, Accion)
+            
+            .input('Serie', sql.VarChar, '')
             .input('Id_TipoMovInv', sql.Int, Id_TipoMovInv)
+            
             .output('Folio', sql.Int)
             .execute('fn_ExecuteSales');
 

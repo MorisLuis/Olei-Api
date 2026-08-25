@@ -1,7 +1,8 @@
 import moment from "moment";
-import { dbConnectionMain, querys } from "../database";
+import { dbConnectionMain } from "../database";
 import sql from 'mssql';
 import { ValidationError } from "../errors/CustomError";
+import { erroresQuerys } from "../database/querys/errores";
 
 export interface ErrorLogData {
     From?: string;
@@ -29,7 +30,7 @@ const errorsService = async (data: ErrorLogData) : Promise<void> => {
             .input('Fecha', sql.VarChar, fechaActualCDMX)
             .input('Metodo', sql.VarChar, data.Metodo || '')
             .input('code', sql.Int, data.code || '')
-            .query(querys.postError);
+            .query(erroresQuerys.postError);
 
         await transaction.commit();
     } catch (err) {

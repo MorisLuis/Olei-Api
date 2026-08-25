@@ -1,8 +1,9 @@
 import type { ConnectionPool } from "mssql";
-import { dbConnectionMain, querys } from "../database";
+import { dbConnectionMain } from "../database";
 import moment from "moment";
 import { NotFoundError, UnauthorizedError, ValidationError } from "../errors/CustomError";
 import type { UserWebSessionInterface } from "../interface/user";
+import { authWebQuery } from "../database/querys/authWeb";
 
 const loginWebService = async (email: string, password: string): Promise<UserWebSessionInterface> => {
     if (email === "" || password === "") {
@@ -36,7 +37,7 @@ const loginWebService = async (email: string, password: string): Promise<UserWeb
 // Utils
 const getUserByEmailWeb = async (mainPool: ConnectionPool, email: string): Promise<UserWebSessionInterface> => {
 
-    const query = querys.authWeb;
+    const query = authWebQuery.authWeb;
     const result = await mainPool.request().input('email', email).query(query);
     const user = result?.recordset[0]
 

@@ -1,4 +1,3 @@
-import type { Clientes } from "@prisma/client";
 import type { ClientInterface } from "../../interface/client";
 import type { UserWebSessionInterface } from "../../interface/user";
 
@@ -36,13 +35,13 @@ interface updateClientParams {
     userSession: UserWebSessionInterface;
     Id_Cliente: number,
     Id_Almacen: number,
-    body: Record<typeof ClientInterface, string | number | boolean>
+    body: Record<string, unknown>
 }
 
 // RESPONSE
 
 interface getClientsResponse {
-    clientes: typeof Clientes;
+    clientes: ClientInterface[];
     total: number;
 }
 
