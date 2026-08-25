@@ -2,6 +2,7 @@ import { EventEmitter } from 'node:events';
 import type { Server as HttpServer } from 'node:http';
 
 import Server from '../../src/models/server';
+import { isReady, markNotReady } from '../../src/services/health/health.service';
 
 const createDependencies = () => {
     const events: string[] = [];
@@ -35,6 +36,7 @@ describe('Server startup', () => {
     let consoleLogSpy: jest.SpyInstance;
 
     beforeEach(() => {
+        markNotReady();
         consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => undefined);
     });
 
@@ -50,6 +52,10 @@ describe('Server startup', () => {
 
         expect(events).toEqual(['database', 'redis', 'http']);
         expect(dependencies.listen).toHaveBeenCalledWith(server.app, 5001);
+        expect(isReady({
+            isDatabaseConnected: () => true,
+            isRedisReady: () => true,
+        })).toBe(true);
     });
 
     it('does not connect Redis or listen when SQL startup fails', async () => {
@@ -63,6 +69,10 @@ describe('Server startup', () => {
         expect(dependencies.connectRedis).not.toHaveBeenCalled();
         expect(dependencies.listen).not.toHaveBeenCalled();
         expect(events).toEqual(['abort-redis', 'close-database']);
+        expect(isReady({
+            isDatabaseConnected: () => true,
+            isRedisReady: () => true,
+        })).toBe(false);
     });
 
     it('cleans up SQL and Redis when Redis startup fails', async () => {

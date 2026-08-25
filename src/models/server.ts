@@ -32,10 +32,12 @@ import aiRouter from "../routes/aiRouter";
 import informesiaRouter from "../routes/informesiaRouter";
 import typeOfDocuments from "../routes/typeOfDocuments"
 import vendedoresRouter from "../routes/vendedoresRouter";
+import healthRouter from '../routes/healthRouter';
 
 import { errorHandler } from "../middleware/errorHandler";
 import cookieParser from 'cookie-parser';
 import type { ServerDependencies } from "./types";
+import { markNotReady, markReady } from '../services/health/health.service';
 
 export const listen = async (app: Application, port: number): Promise<HttpServer> => new Promise((resolve, reject) => {
     const httpServer = app.listen(port);
@@ -163,6 +165,7 @@ class Server {
     }
 
     private routes() {
+        this.app.use('/health', healthRouter);
         this.app.use(this.paths.product, productRouter);
         this.app.use(this.paths.auth, authRouter);
         this.app.use(this.paths.search, searchRouter);
@@ -195,12 +198,15 @@ class Server {
     }
 
     public async start(): Promise<void> {
+        markNotReady();
         try {
             await this.dependencies.connectDatabase();
             await this.dependencies.connectRedis();
             this.httpServer = await this.dependencies.listen(this.app, this.port);
+            markReady();
             console.log("✅ Servidor corriendo en puerto " + this.port);
         } catch (error) {
+            markNotReady();
             try {
                 this.dependencies.abortRedis();
             } catch {
