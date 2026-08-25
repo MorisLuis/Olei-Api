@@ -18,6 +18,10 @@ const createDependencies = () => {
         events.push('close-database');
         return Promise.resolve();
     });
+    const closeRedis = jest.fn(() => {
+        events.push('close-redis');
+        return Promise.resolve();
+    });
     const abortRedis = jest.fn(() => {
         events.push('abort-redis');
     });
@@ -25,9 +29,25 @@ const createDependencies = () => {
         events.push('http');
         return Promise.resolve(new EventEmitter() as HttpServer);
     });
+    const closeHttpServer = jest.fn(() => {
+        events.push('close-http');
+        return Promise.resolve();
+    });
+    const stopCleanupTimer = jest.fn(() => {
+        events.push('stop-timer');
+    });
 
     return {
-        dependencies: { connectDatabase, connectRedis, closeDatabase, abortRedis, listen },
+        dependencies: {
+            connectDatabase,
+            connectRedis,
+            closeDatabase,
+            closeRedis,
+            abortRedis,
+            listen,
+            closeHttpServer,
+            stopCleanupTimer,
+        },
         events,
     };
 };
