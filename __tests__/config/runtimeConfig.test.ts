@@ -51,9 +51,20 @@ describe('loadRuntimeConfig', () => {
 
         expect(result.nodeEnv).toBe('development');
         expect(result.port).toBe(5001);
+        expect(result.shutdownTimeoutMs).toBe(25_000);
         expect(result.redis.host).toBe('127.0.0.1');
         expect(result.redis.port).toBe(6379);
     });
+
+    it.each(['999', '120001', 'invalid'])(
+        'rejects invalid SHUTDOWN_TIMEOUT_MS value %s',
+        shutdownTimeoutMs => {
+            const environment = validEnvironment();
+            environment.SHUTDOWN_TIMEOUT_MS = shutdownTimeoutMs;
+
+            expect(() => loadRuntimeConfig(environment)).toThrow(RuntimeConfigError);
+        },
+    );
 
     it.each(['staging', 'production'] as const)(
         'requires REDIS_PASSWORD in %s',

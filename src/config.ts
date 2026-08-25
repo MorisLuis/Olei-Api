@@ -9,6 +9,7 @@ const optionalString = z.string().trim().min(1).optional();
 const runtimeEnvironmentSchema = z.object({
     NODE_ENV: z.enum(['development', 'test', 'staging', 'production']).default('development'),
     PORT: z.coerce.number().int().min(1).max(65_535).default(5001),
+    SHUTDOWN_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(120_000).default(25_000),
     DB_USER: requiredString,
     DB_PASSWORD: requiredString,
     DB_SERVER: z.string().trim().min(1),
@@ -46,6 +47,7 @@ const runtimeEnvironmentSchema = z.object({
 export interface RuntimeConfig {
     nodeEnv: 'development' | 'test' | 'staging' | 'production';
     port: number;
+    shutdownTimeoutMs: number;
     database: {
         user: string;
         password: string;
@@ -105,6 +107,7 @@ export const loadRuntimeConfig = (
     return {
         nodeEnv: values.NODE_ENV,
         port: values.PORT,
+        shutdownTimeoutMs: values.SHUTDOWN_TIMEOUT_MS,
         database: {
             user: values.DB_USER,
             password: values.DB_PASSWORD,
