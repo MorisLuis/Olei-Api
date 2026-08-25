@@ -12,25 +12,14 @@ export interface Transporter {
     }
 };
 
-export const transportDefault: Transporter = {
-    host: 'mail.oleisoftware.com.mx',
-    port: 465,
-    secure: true,
-    auth: {
-        user: 'idaliahc@oleisoftware.com.mx', // Tu usuario SMTP
-        pass: 'Anaregina24.', // Tu contraseña SMTP
-    }
-};
-
-
 const handleTransporter = (values: Transporter): nodemailer.Transporter<SMTPTransport.SentMessageInfo, SMTPTransport.Options> => {
     return nodemailer.createTransport({
         host: values.host,
         port: values.port,
         secure: values.secure,
         auth: {
-            user: values.auth.user, // Tu usuario SMTP
-            pass: values.auth.pass, // Tu contraseña SMTP
+            user: values.auth.user,
+            pass: values.auth.pass,
         },
     });
 }
