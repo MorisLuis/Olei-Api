@@ -78,7 +78,7 @@ const defaultDependencies: ServerDependencies = {
     listen,
 };
 
-class Server {
+export class Server {
     public app: Application;
     private readonly port: number;
     private readonly dependencies: ServerDependencies;
