@@ -24,4 +24,9 @@ export const abortRedisConnection = (): void => {
     if (redisClient.status !== 'end') redisClient.disconnect(false);
 };
 
+export const closeRedis = async (): Promise<void> => {
+    if (redisClient.status === 'wait' || redisClient.status === 'end') return;
+    await redisClient.quit();
+};
+
 export default redisClient;
