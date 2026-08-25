@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken';
+import { logger } from '../../helpers/logger';
 import type { JwtPayload } from 'jsonwebtoken';
 
 import { AppError, ForbiddenError, UnauthorizedError } from '../../errors/CustomError';
@@ -129,8 +130,8 @@ export const validateJWTClient = async (req: Request, _res: Response, next: Next
                 if (!valid) {
                     try {
                         await logoutAppService({ sessionId, session });
-                    } catch (err) {
-                        console.error('Error running logoutAppService during client validation revoke:', err);
+                    } catch {
+                        logger.error('auth.session_revoke_failed', { context: 'client_validation' });
                     }
 
                     return next(new UnauthorizedError('Session revoked', '', 'SESSION_REVOKED'));
