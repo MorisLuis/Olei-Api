@@ -1,6 +1,7 @@
 import type sql from 'mssql';
 import { clearMainPool, getMainPool, getMainPoolConnection } from './dbConnectionMain';
 import { clearTenantPoolEntries, getTenantPoolEntries } from './getOrCreatePool';
+import { logger } from '../../helpers/logger';
 
 /**
  * Closes and removes all tenant pools and the central-database pool.
@@ -34,6 +35,7 @@ export const closeAllDatabaseConnections = async (): Promise<void> => {
     );
 
     if (closeResults.some(result => result.status === 'rejected')) {
+        logger.error('database.pool_cleanup_failed');
         throw new Error('Database connection cleanup failed');
     }
 };
