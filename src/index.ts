@@ -1,8 +1,9 @@
 /// <reference path="./types/express-session.d.ts" />
 
 import { bootstrap } from './bootstrap';
+import { logger } from './helpers/logger';
 
 void bootstrap().catch(() => {
-    console.error('Application startup failed');
+    logger.error('application.startup_failed');
     process.exitCode = 1;
 });
