@@ -1,12 +1,11 @@
 // server.ts
-
 import type { Application } from "express";
 import express from "express";
 import type { Server as HttpServer } from 'node:http';
 import type { CorsOptions } from 'cors';
 import cors from 'cors';
-import { closeAllDatabaseConnections, dbConnectionMain } from "../database/connection";
-import { abortRedisConnection, connectRedis } from '../config/redisClient';
+import { closeAllDatabaseConnections, dbConnectionMain, stopDisconnectedPoolCleanup } from "../database/connection";
+import { abortRedisConnection, closeRedis, connectRedis } from '../config/redisClient';
 
 // Routers
 import productRouter from "../routes/productRouter";
@@ -57,13 +56,24 @@ export const listen = async (app: Application, port: number): Promise<HttpServer
 
     httpServer.once('error', onError);
     httpServer.once('listening', onListening);
+
+});
+
+export const closeHttpServer = async (httpServer: HttpServer): Promise<void> => new Promise((resolve, reject) => {
+    httpServer.close(error => {
+        if (error) reject(error);
+        else resolve();
+    });
 });
 
 const defaultDependencies: ServerDependencies = {
     connectDatabase: dbConnectionMain,
     connectRedis,
     closeDatabase: closeAllDatabaseConnections,
+    closeRedis,
     abortRedis: abortRedisConnection,
+    stopCleanupTimer: stopDisconnectedPoolCleanup,
+    closeHttpServer,
     listen,
 };
 
@@ -72,6 +82,7 @@ class Server {
     private readonly port: number;
     private readonly dependencies: ServerDependencies;
     private httpServer: HttpServer | null = null;
+    private stopPromise: Promise<void> | null = null;
 
     private paths: {
         product: string,
@@ -192,11 +203,6 @@ class Server {
 
     }
 
-    public async closeConnections(): Promise<void> {
-        await closeAllDatabaseConnections();
-        console.log('Conexión a la base de datos cerrada');
-    }
-
     public async start(): Promise<void> {
         markNotReady();
         try {
@@ -214,6 +220,39 @@ class Server {
             }
             await this.dependencies.closeDatabase().catch(() => undefined);
             throw error;
+        }
+    }
+
+    public stop(): Promise<void> {
+        if (this.stopPromise) return this.stopPromise;
+
+        markNotReady();
+        this.stopPromise = this.stopResources();
+        return this.stopPromise;
+    }
+
+    private async stopResources(): Promise<void> {
+        const httpServer = this.httpServer;
+        this.httpServer = null;
+
+        const results: Array<PromiseSettledResult<void>> = [];
+        if (httpServer) {
+            results.push(...await Promise.allSettled([this.dependencies.closeHttpServer(httpServer)]));
+        }
+
+        try {
+            this.dependencies.stopCleanupTimer();
+        } catch (error) {
+            results.push({ status: 'rejected', reason: error });
+        }
+
+        results.push(...await Promise.allSettled([
+            this.dependencies.closeDatabase(),
+            this.dependencies.closeRedis(),
+        ]));
+
+        if (results.some(result => result.status === 'rejected')) {
+            throw new Error('Application resource cleanup failed');
         }
     }
 
