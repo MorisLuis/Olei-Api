@@ -28,5 +28,12 @@ export const closeAllDatabaseConnections = async (): Promise<void> => {
 
     clearTenantPoolEntries();
     clearMainPool();
-    await Promise.allSettled([...new Set([...pools, ...connectedPendingPools])].map(pool => pool.close()));
+
+    const closeResults = await Promise.allSettled(
+        [...new Set([...pools, ...connectedPendingPools])].map(pool => pool.close()),
+    );
+
+    if (closeResults.some(result => result.status === 'rejected')) {
+        throw new Error('Database connection cleanup failed');
+    }
 };
