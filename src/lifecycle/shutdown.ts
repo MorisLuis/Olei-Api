@@ -1,5 +1,6 @@
 import { clearTimeout as clearNodeTimeout, setTimeout as setNodeTimeout } from 'node:timers';
 import type { ApplicationServer } from '../types';
+import { logger } from '../helpers/logger';
 
 interface ShutdownDependencies {
     scheduleTimeout: typeof scheduleTimeout;
@@ -47,10 +48,12 @@ export const createShutdown = (
     return () => {
         if (shutdownPromise) return shutdownPromise;
 
+        logger.info('shutdown.started');
         shutdownPromise = new Promise<void>((resolve, reject) => {
 
             const timeout = dependencies.scheduleTimeout(() => {
                 dependencies.setExitCode(1);
+                logger.error('shutdown.timed_out');
                 reject(new Error('Application shutdown timed out'));
                 dependencies.forceExit(1);
             }, timeoutMs);
@@ -60,10 +63,12 @@ export const createShutdown = (
             void application.stop().then(() => {
                 dependencies.cancelTimeout(timeout);
                 dependencies.setExitCode(0);
+                logger.info('shutdown.completed');
                 resolve();
             }).catch(() => {
                 dependencies.cancelTimeout(timeout);
                 dependencies.setExitCode(1);
+                logger.error('shutdown.failed');
                 reject(new Error('Application shutdown failed'));
             });
         });
