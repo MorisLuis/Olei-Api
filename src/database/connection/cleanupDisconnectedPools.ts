@@ -1,5 +1,6 @@
 import { clearInterval, setInterval } from 'node:timers';
 import { getTenantPoolEntries, removeTenantPoolEntry } from './getOrCreatePool';
+import { logger } from '../../helpers/logger';
 
 /**
  * Cleans up disconnected SQL Server pools from the tenant pool cache.
@@ -14,7 +15,7 @@ const cleanupDisconnectedPools = (): void => {
                 removeTenantPoolEntry(cacheKey, entry);
 
                 void entry.pool.close().catch(() => {
-                    console.error('Error closing a disconnected SQL Server pool');
+                    logger.error('database.disconnected_pool_cleanup_failed');
                 });
             }
         }
