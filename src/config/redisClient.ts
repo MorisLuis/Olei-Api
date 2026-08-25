@@ -1,4 +1,5 @@
 import Redis from 'ioredis';
+import { logger } from '../helpers/logger';
 
 const redisClient = new Redis({
     host: process.env.REDIS_HOST || '127.0.0.1',
@@ -7,8 +8,8 @@ const redisClient = new Redis({
     lazyConnect: true,
 });
 
-redisClient.on('connect', () => console.log('✅ Conectado a Redis'));
-redisClient.on('error', () => console.error('Redis connection error'));
+redisClient.on('connect', () => logger.info('redis.connected'));
+redisClient.on('error', () => logger.error('redis.connection_failed'));
 
 export const connectRedis = async (): Promise<void> => {
     if (redisClient.status === 'ready') return;
