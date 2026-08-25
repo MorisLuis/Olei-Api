@@ -8,7 +8,6 @@ import { numeroALetra } from "../../utils/numeroALetra";
 import { convertArrayToXml } from "../../utils/convertArrayToXml";
 import type { GetSellsServiceParams, GetSellsTotalServiceResponse, GetSellsByClientPaginatedServiceParams, GetSellsPaignatedServiceParams, GetSellsByClientServiceParams, PostSellServiceParams, PostSellServiceResponse } from "./sellsDocsServices.interface";
 
-
 const postSellService = async ({
     userSession,
     Total,
@@ -76,8 +75,6 @@ const postSellService = async ({
             TipoDoc: TipoDoc
         };
     } catch (error) {
-        console.log(error)
-
         await transaction.rollback();
         throw error;
     }
