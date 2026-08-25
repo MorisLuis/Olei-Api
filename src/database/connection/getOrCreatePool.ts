@@ -1,6 +1,7 @@
 import sql from 'mssql';
 import type { TenantPoolCredentials, TenantPoolEntry } from './types';
 import { normalizeDatabaseLocation } from './normalizeDatabaseLocation';
+import { logger } from '../../helpers/logger';
 
 const MAX_TENANT_POOLS = 10;
 const tenantPools = new Map<string, TenantPoolEntry[]>();
@@ -62,11 +63,11 @@ export const getOrCreatePool = async (
     entry.connecting = pool.connect().then(connectedPool => {
         entry.pool = connectedPool;
         entry.connecting = undefined;
-        console.log(`✅ Conectado a SQL Server: ${server}, DB: ${database}`);
+        logger.info('database.pool_connected', { context: credentials.authenticationContext });
         return connectedPool;
     }).catch(error => {
         removeTenantPoolEntry(cacheKey, entry);
-        console.error(`❌ Error al conectar con SQL Server (${server} - ${database})`);
+        logger.error('database.pool_connection_failed', { context: credentials.authenticationContext });
         throw error;
     });
 
