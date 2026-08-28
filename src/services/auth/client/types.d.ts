@@ -24,6 +24,7 @@ export type LoginAppSessionFields = Required<
         | "AlmacenNombre"
         | "SalidaSinExistencias"
         | "Id_Perfil"
+        | "PermitirCambiarPrecio"
     >
 >;
 

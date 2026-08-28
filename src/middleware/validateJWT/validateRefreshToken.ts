@@ -8,6 +8,7 @@ import { getRedisSession } from '../../services/auth/database/session.service';
 import { verifyTokenAndExtractSessionId, buildVerifyOptions } from './token.helpers';
 import { getSessionOrUnauthorized} from './session.helpers';
 import { AUTH_ERROR_CODES } from '../constants';
+import { verifyUserDevice } from '../../services/auth/client/verifyUserDevice.service';
 
 export const validateRefreshToken = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
 
@@ -45,6 +46,23 @@ export const validateRefreshToken = async (req: Request, _res: Response, next: N
         if (!session.serverConected || !session.userConected) {
             return next(new UnauthorizedError('Session is invalid or expired', '', AUTH_ERROR_CODES.REFRESH_TOKEN_EXPIRADO));
         };
+
+        // Additional checks: verify user exists, is active, and device matches
+        try {
+            const valid = await verifyUserDevice(session);
+
+            if (!valid) {
+                try {
+                    await logoutAppService({ sessionId, session });
+                } catch (err) {
+                    console.error('Error running logoutAppService during refresh validation revoke:', err);
+                }
+
+                return next(new UnauthorizedError('Session revoked', '', 'SESSION_REVOKED'));
+            }
+        } catch {
+            return next(new AppError('Error validating user device and status'));
+        }
 
         req.sessionId = sessionId;
         req.session = session;

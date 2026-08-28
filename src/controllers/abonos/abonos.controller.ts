@@ -1,7 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
-import { getAbonoByIdService, getAbonoDetailsService, getAbonosService } from '../../services/abonos/abonos.service';
+import { getAbonoByIdService } from '../../services/abonos/getAbonoById.service';
+import { getAbonoDetailsService } from '../../services/abonos/getAbonoDetails.service';
+import { getAbonosService } from '../../services/abonos/getAbonos.service';
 import { getAbonoByIdParamsSchema, getAbonoByIdQuerySchema, getAbonosQuerySchema } from './abonos.schema';
-import { parsePrismaFilter } from '../../utils/prisma/parsePrismaFilter';
 
 
 const getAbonos = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
@@ -19,17 +20,16 @@ const getAbonos = async (req: Request, res: Response, next: NextFunction): Promi
             exactlyDate
         } = getAbonosQuerySchema.parse(req.query);
 
-        const skip = (PageNumber - 1) * limit;
         const userSession = req.sessionWeb;
-        const filters = parsePrismaFilter(filterField, filterValue)
 
         const { abonos, total } = await getAbonosService({
             userSession,
             orderField,
             orderDirection,
-            skip,
+            PageNumber,
             limit,
-            filters,
+            filterField,
+            filterValue,
             startDate,
             endDate,
             exactlyDate

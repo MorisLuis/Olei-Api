@@ -1,5 +1,6 @@
 import { loginDB } from '../../../../src/services/auth/database/auth.service';
-import { dbConnectionMain, querys } from '../../../../src/database';
+import { dbConnectionMain } from '../../../../src/database';
+import { authWebQuery as querys } from "../../../../src/database/querys/authWeb";
 import { UnauthorizedError, ValidationError } from '../../../../src/errors/CustomError';
 import { sanitizeServerSessionUser } from '../../../../src/controllers/auth/utils/sessionResponse';
 import { generateRedisSession } from '../../../../src/services/auth/database/session.service';

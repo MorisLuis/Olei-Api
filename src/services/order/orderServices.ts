@@ -163,7 +163,8 @@ const postOrderService = async ({
 
     const TotalImpuesto = Total - Subtotal;
     const CantLetra = numeroALetra(Total);
-
+    const Accion = TipoDocOO === 2 ? 2 : 0
+    const Id_TipoMovInv = TipoDocOO === 2 ? 2 : 0
 
     const xmlDataSales = await convertArrayToXml(sellsData);
     const xmlDataSalesDetails = await convertArrayToXml(sellsDetails);
@@ -176,7 +177,6 @@ const postOrderService = async ({
         throw new ValidationError("Id Cliente necesario")
     }
 
-
     const result = await request
         .input('xmlDataSales', sql.Xml, xmlDataSales)
         .input('xmlDataSalesDetails', sql.Xml, xmlDataSalesDetails)
@@ -187,6 +187,10 @@ const postOrderService = async ({
         .input('TipoDoc', sql.Int, TipoDocOO)
         .input('CantLetra', sql.VarChar, CantLetra)
         .input('TotalImpuesto', sql.Decimal, TotalImpuesto)
+        .input('Accion', sql.Int, Accion)
+        .input('Serie', sql.VarChar, '')
+        .input('Id_TipoMovInv', sql.Int, Id_TipoMovInv)
+
         .output('Folio', sql.Int)
         .execute('fn_ExecuteSales');
 

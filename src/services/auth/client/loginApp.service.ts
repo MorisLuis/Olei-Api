@@ -87,6 +87,8 @@ export const loginAppService = async ({
         AlmacenNombre: userData.AlmacenNombre,
         serverConected: session.serverConected,
         userConected: true,
+        Id_Equipo: Id_equipoNormalized || undefined,
+        PermitirCambiarPrecio: userData.PermitirCambiarPrecio || false,
     };
 
     await updateSession(sessionId, datosDelUsuario);
