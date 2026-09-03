@@ -5,6 +5,13 @@ import type { UserSessionInterface } from "../interface/user";
 import { NotFoundError, UnauthorizedError } from "../errors/CustomError";
 import { updateSession } from "../services/auth/database/session.service";
 
+/**
+ * @description Lists warehouses available in the authenticated App tenant.
+ * @client App
+ * @router GET /api/almacenes
+ * @session Requires the App tenant session.
+ * @response JSON containing `almacenes`; database failures are forwarded to `next`.
+ */
 const getAlmacenes = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -20,6 +27,14 @@ const getAlmacenes = async (req: Request, res: Response, next: NextFunction): Pr
     }
 };
 
+/**
+ * @description Selects an App warehouse, verifies it in the tenant database, and persists it in the Redis session.
+ * @client App
+ * @router GET /api/almacenes/update
+ * @request Validated query parameter `Id_Almacen`.
+ * @session Requires the App session and session ID.
+ * @response JSON containing `almacen`; missing sessions, unknown warehouses, and dependency failures are forwarded to `next`.
+ */
 const updateAlmacenInRedis = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
