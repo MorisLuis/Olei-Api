@@ -2,6 +2,13 @@ import type { NextFunction, Request, Response } from 'express'
 import { dbConnection } from '../database';
 import sql from "mssql";
 
+/**
+ * @description Lists inventory movement types available to the authenticated App user.
+ * @client App
+ * @router GET /api/typeofmovements
+ * @session Requires the App tenant session and user identifier.
+ * @response JSON containing `TiposMovimiento`; database failures are forwarded to `next`.
+ */
 const getTypeofmovements = async (req: Request, res: Response, next: NextFunction): Promise<Response | void>   => {
     
     try {
