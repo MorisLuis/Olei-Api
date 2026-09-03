@@ -3,6 +3,12 @@ import { successResponse } from "../../helpers/response";
 import { getVendedorByIdService, getVendedoresService } from "../../services/vendedores";
 import { getVendedorByIdParamsSchema, getVendedoresQuerySchema } from "./vendedores.schema";
 
+/** @description Returns filtered and paginated sellers for the authenticated App tenant.
+ * @client App
+ * @router GET /api/vendedores
+ * @request Validated name and pagination query values; requires the App tenant session.
+ * @response Standard success response containing sellers and pagination metadata; failures are forwarded to `next`.
+ */
 export const getVendedores = async (
     req: Request,
     res: Response,
@@ -32,6 +38,12 @@ export const getVendedores = async (
     }
 };
 
+/** @description Returns one seller by identifier from the authenticated App tenant.
+ * @client App
+ * @router GET /api/vendedores/:id
+ * @request Validated `id` route parameter; requires the App tenant session.
+ * @response Standard success response containing the seller; not-found and service failures are forwarded to `next`.
+ */
 export const getVendedorById = async (
     req: Request,
     res: Response,
