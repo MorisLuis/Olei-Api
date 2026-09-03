@@ -4,6 +4,12 @@ import type MeetingInterface from "../interface/meeting";
 import { getMeetingByIdParmsSchema, getMeetingsQuerySchema, getTotalMeetingsQuerySchema, postBitacoraBodySchema, updateBitacoraBodySchema } from "../validations/bitacoraValidations";
 import { postMeetingService } from "../services/meetings/services/postMeetingService";
 
+/** @description Returns filtered and paginated CRM meetings with their total count.
+ * @client CRM
+ * @router GET /api/meetings
+ * @request Validated filters, search, ordering, status, and pagination; requires the CRM web tenant session.
+ * @response JSON containing `meetings` and `total`; failures are forwarded to `next`.
+ */
 const getMeetings = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -32,6 +38,12 @@ const getMeetings = async (req: Request, res: Response, next: NextFunction): Pro
 
 };
 
+/** @description Returns the total CRM meetings matching contact and client filters.
+ * @client CRM
+ * @router GET /api/meetings/total
+ * @request Validated query filters; requires the CRM web tenant session.
+ * @response JSON containing `total`; failures are forwarded to `next`.
+ */
 const getTotalMeetings = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const { TipoContacto, Id_Cliente, FilterCliente, FilterTipoContacto } = getTotalMeetingsQuerySchema.parse(req.query);
@@ -54,6 +66,12 @@ const getTotalMeetings = async (req: Request, res: Response, next: NextFunction)
     }
 };
 
+/** @description Returns one CRM meeting by identifier.
+ * @client CRM
+ * @router GET /api/meetings/:id
+ * @request Validated `id` route parameter; requires the CRM web tenant session.
+ * @response JSON containing `meeting`; failures are forwarded to `next`.
+ */
 const getMeetingById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -69,6 +87,12 @@ const getMeetingById = async (req: Request, res: Response, next: NextFunction): 
 
 };
 
+/** @description Updates one CRM meeting.
+ * @client CRM
+ * @router PUT /api/meetings/:id
+ * @request Validated `id` route parameter and meeting body; requires the CRM web tenant session.
+ * @response JSON with the service result; failures are forwarded to `next`.
+ */
 const updateMeeting = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -83,6 +107,12 @@ const updateMeeting = async (req: Request, res: Response, next: NextFunction): P
 
 };
 
+/** @description Creates a CRM meeting.
+ * @client CRM
+ * @router POST /api/meetings
+ * @request Validated meeting body; requires the CRM web tenant session.
+ * @response HTTP 201 JSON with the created meeting result; failures are forwarded to `next`.
+ */
 const postMeeting = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -96,6 +126,12 @@ const postMeeting = async (req: Request, res: Response, next: NextFunction): Pro
 
 };
 
+/** @description Deletes one CRM meeting.
+ * @client CRM
+ * @router DELETE /api/meetings/:id
+ * @request Validated `id` route parameter; requires the CRM web tenant session.
+ * @response JSON with the deletion result; failures are forwarded to `next`.
+ */
 const deleteMeeting = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
