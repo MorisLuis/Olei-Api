@@ -6,6 +6,12 @@ import { sendEmailService, sendEmailWithPDFService } from '../services/email/ema
 import { handleTransporter } from '../infra/email/transporter';
 
 
+/** @description Sends a CRM email using validated message data and the tenant's email configuration.
+ * @client CRM
+ * @router POST /api/email
+ * @request Validated recipient, sender, subject, and text body fields; requires the CRM web tenant session.
+ * @response JSON with the email service result; validation and delivery failures are forwarded to `next`.
+ */
 const sendEmail = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     const { destinatario, remitente, subject, text } = emailBodySchema.parse(req.body)
@@ -32,12 +38,13 @@ const sendEmail = async (req: Request, res: Response, next: NextFunction): Promi
 };
 
 
-/**
- * Controller to send a cobranza email with a PDF attachment.
- * Validates request body and query parameters using Zod schemas,
- * then triggers the email service and responds with JSON.
+/** 
+ * @description Sends a CRM receivables email with a generated PDF attachment.
+ * @client CRM
+ * @router POST /api/email/cobranza/pdf/:client and POST /api/email/cobranza/excell
+ * @request Validated message data plus route/query receivables context; requires the CRM web tenant session.
+ * @response JSON with the email service result; validation, report, and delivery failures are forwarded to `next`.
  */
-
 const sendEmailWithPDF = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const { destinatario, remitente, subject, text, nombreRemitente, Id_Almacen: Id_Almacen_Client } = emailCobranzaBodySchema.parse(req.body);
