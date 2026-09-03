@@ -3,6 +3,13 @@ import { getSellsService, getSellsByClientService, getSellByIdService, getSellsC
 import { generateReportSells } from "../../services/sells/generateReport";
 import { getClientParamsSchema, getSellsQuerySchema, getSellByIdQuerySchema, getFolioParamsSchema, getSellsByClientQuerySchema, getSellsCountAndTotalQuerySchema, getSellsByClientCountAndTotalQuerySchema, postSellBodySchema } from '../../validations/sellsValidations'
 
+/** 
+ * @description Creates a CRM sale from validated header and detail data.
+ * @client CRM
+ * @router POST /api/sells
+ * @request Validated sale body; requires the CRM web tenant session.
+ * @response HTTP 201 JSON containing `folio` and `TipoDoc`; failures are forwarded to `next`.
+ */
 const postSell = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -32,6 +39,13 @@ const postSell = async (req: Request, res: Response, next: NextFunction): Promis
     }
 };
 
+/** 
+ * @description Returns filtered and paginated CRM sales.
+ * @client CRM
+ * @router GET /api/sells
+ * @request Validated search, date, ordering, and pagination query values; requires the CRM web tenant session.
+ * @response JSON containing `sells`; failures are forwarded to `next`.
+ */
 const getSells = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -58,6 +72,13 @@ const getSells = async (req: Request, res: Response, next: NextFunction): Promis
 
 };
 
+/** 
+ * @description Returns the count and monetary total for filtered CRM sales.
+ * @client CRM
+ * @router GET /api/sells/totals
+ * @request Validated search and date filters; requires the CRM web tenant session.
+ * @response JSON containing `count` and `total`; failures are forwarded to `next`.
+ */
 const getSellsCountAndTotal = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -83,6 +104,13 @@ const getSellsCountAndTotal = async (req: Request, res: Response, next: NextFunc
     }
 }
 
+/** 
+ * @description Returns filtered and paginated CRM sales for one client.
+ * @client CRM
+ * @router GET /api/sells/client/:client
+ * @request Validated client route parameter and sale filters; requires the CRM web tenant session.
+ * @response JSON containing `sells`; failures are forwarded to `next`.
+ */
 const getSellsByClient = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -112,6 +140,13 @@ const getSellsByClient = async (req: Request, res: Response, next: NextFunction)
     }
 };
 
+/** 
+ * @description Returns the count and monetary total for one client's filtered CRM sales.
+ * @client CRM
+ * @router GET /api/sells/client/totals/:client
+ * @request Validated client route parameter and sale filters; requires the CRM web tenant session.
+ * @response JSON containing `count` and `total`; failures are forwarded to `next`.
+ */
 const getSellsByClientCountAndTotal = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -140,6 +175,13 @@ const getSellsByClientCountAndTotal = async (req: Request, res: Response, next: 
     }
 };
 
+/** 
+ * @description Returns one CRM sale by folio, series, warehouse, and document type.
+ * @client CRM
+ * @router GET /api/sells/:folio
+ * @request Validated `folio` route parameter and sale-identifying query values; requires the CRM web tenant session.
+ * @response JSON containing `sell`; failures are forwarded to `next`.
+ */
 const getSellById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -166,6 +208,14 @@ const getSellById = async (req: Request, res: Response, next: NextFunction): Pro
 
 };
 
+/** 
+ * @description Generates a CRM sale report as an inline PDF or a base64 blob response.
+ * @client CRM
+ * @router GET /api/sells/:folio/report
+ * @request Validated folio plus warehouse, document type, client, series, and optional `mode=blob` query values.
+ * @session Requires the CRM web tenant session.
+ * @response PDF bytes by default or JSON file metadata and `blob`; report failures are forwarded to `next`.
+ */
 const getSellReportById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     
     try {
