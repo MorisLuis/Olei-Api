@@ -1,3 +1,6 @@
+/**
+ * `getBanner` is CRM. `getExcellTest` is unclear because its App-protected routes conflict with its CRM session/connection.
+ */
 import type { Request, Response } from 'express';
 import { dbConnectionWeb } from '../database';
 import type { ConnectionPool } from 'mssql';
@@ -6,6 +9,13 @@ import { NotFoundError } from '../errors/CustomError';
 import type { SellsInterface } from '../interface/sells';
 import { cobranzaQuery } from '../database/querys/cobranza';
 
+/**
+ * @description Builds the tenant banner URL from the authenticated CRM database name.
+ * @client E-commerce
+ * @router GET /api/utils/banner
+ * @session Requires the E-commerce web session.
+ * @response JSON containing `banner`, falling back to `/Banner_olei.png` when a tenant path cannot be derived.
+ */
 const getBanner = (req: Request, res: Response) : Response | void => {
 
     const userSession = req.sessionWeb;
@@ -21,6 +31,13 @@ const getBanner = (req: Request, res: Response) : Response | void => {
 }
 
 
+/**
+ * @description Streams a generated Excel workbook containing batched receivables data.
+ * @client Unclear - both mounted routes use App authentication but this controller reads the CRM web session.
+ * @router GET /api/utils/excell and GET /api/reports/excell
+ * @session The current implementation requires `req.sessionWeb` and a web tenant connection.
+ * @response XLSX attachment named `datos.xlsx`; query and workbook failures are raised as `NotFoundError`.
+ */
 const getExcellTest = async (req: Request, res: Response) : Promise<Response | void> => {
 
     const userSession = req.sessionWeb;
@@ -117,7 +134,6 @@ const generateExcelStream = async (res: Response, data: SellsInterface[]) => {
     await workbook.xlsx.write(res);  // Se escribe directamente en la respuesta
     res.end();  // Terminamos la respuesta
 };
-
 
 export {
     getBanner,
