@@ -5,12 +5,16 @@ import { ValidationError } from "../../errors/CustomError";
 import type { AbonoDetailsInterface, GetAbonoDetailsParams } from "./types";
 
 /**
- * Returns the paginated sales documents applied to an abono.
- *
+ * @description Returns the paginated sales documents applied to an abono.
+ *  
+ * Consumer: CRM
+ * Current endpoint: `GET /api/abonos/details/:folio`
+ * 
  * @param params - Web tenant session, folio, and requested page number.
  * @returns The detail rows for the requested page.
  * @throws {ValidationError} When the tenant database connection is unavailable.
  */
+
 export const getAbonoDetailsService = async ({ userSession: { ServidorSQL, BaseSQL }, PageNumber, folio }: GetAbonoDetailsParams): Promise<{ abonoDetails: AbonoDetailsInterface[] }> => {
     const pool = await dbConnectionWeb(ServidorSQL, BaseSQL);
     if (!pool) throw new ValidationError("Error al conectarse a base de datos principal");

@@ -7,7 +7,10 @@ import { mapAbono } from "./utils";
 import type { AbonoRow } from "./utils";
 
 /**
- * Finds one abono by its warehouse and folio within the authenticated web tenant.
+ * @description Finds one abono by its warehouse and folio within the authenticated web tenant.
+ * 
+ * Consumer: CRM
+ * Current endpoint: `GET /api/abonos/:folio`
  *
  * @param params - Web tenant session and the validated compound identifier.
  * @returns An object containing the abono, or `null` when it does not exist.
