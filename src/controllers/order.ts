@@ -3,6 +3,13 @@ import { getAllOrdersParamsSchema, getOrderDetailsQuerrySchema, getOrderParamsSc
 import { getAllOrdersService, getOrderDetailsSells, getOrderService, getTotalOrderDetailsService, getTotalAllOrdersService, postOrderService } from "../services/order/orderServices";
 
 
+/** 
+ * @description Returns one CRM order by folio.
+ * @client CRM
+ * @router GET /api/order/:folio
+ * @request Validated folio and order query context; requires the CRM web tenant session.
+ * @response JSON containing `order`; failures are forwarded to `next`.
+ */
 const getOrder = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -21,6 +28,13 @@ const getOrder = async (req: Request, res: Response, next: NextFunction): Promis
     }
 };
 
+/** 
+ * @description Returns filtered and paginated CRM orders.
+ * @client CRM
+ * @router GET /api/order/all
+ * @request Validated filters, ordering, and pagination; requires the CRM web tenant session.
+ * @response JSON containing orders; failures are forwarded to `next`.
+ */
 const getAllOrders = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -40,6 +54,13 @@ const getAllOrders = async (req: Request, res: Response, next: NextFunction): Pr
     }
 };
 
+/** 
+ * @description Returns filtered and paginated CRM order detail rows.
+ * @client CRM
+ * @router GET /api/order/details
+ * @request Validated detail filters and pagination; requires the CRM web tenant session.
+ * @response JSON containing order details; failures are forwarded to `next`.
+ */
 const getOrderDetails = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -64,6 +85,13 @@ const getOrderDetails = async (req: Request, res: Response, next: NextFunction):
     }
 };
 
+/** 
+ * @description Returns the total CRM orders matching the query filters.
+ * @client CRM
+ * @router GET /api/order/all/count
+ * @request Validated order filters; requires the CRM web tenant session.
+ * @response JSON containing the total; failures are forwarded to `next`.
+ */
 const getTotalAllOrders = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -75,6 +103,13 @@ const getTotalAllOrders = async (req: Request, res: Response, next: NextFunction
     }
 };
 
+/**
+ * @description Returns the total CRM order detail rows matching the query filters.
+ * @client CRM
+ * @router GET /api/order/details/total
+ * @request Validated detail filters; requires the CRM web tenant session.
+ * @response JSON containing the total; failures are forwarded to `next`.
+ */
 const getTotalOrderDetails = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -96,10 +131,16 @@ const getTotalOrderDetails = async (req: Request, res: Response, next: NextFunct
     }
 };
 
+/** 
+ * @description Creates a CRM order from validated header and detail data.
+ * @client CRM
+ * @router POST /api/order
+ * @request Validated order body; requires the CRM web tenant session.
+ * @response HTTP 201 JSON containing the created folio; validation and transaction failures are forwarded to `next`.
+ */
 const postOrder = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
-        // Get session from REDIS.
         const userSession = req.sessionWeb
         const { sellsDetails, sellsData } = postOrderBodySchema.parse(req.body);
         const { Subtotal, Total } = sellsData ?? {}
