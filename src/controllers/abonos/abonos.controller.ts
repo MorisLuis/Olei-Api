@@ -5,6 +5,14 @@ import { getAbonosService } from '../../services/abonos/getAbonos.service';
 import { getAbonoByIdParamsSchema, getAbonoByIdQuerySchema, getAbonosQuerySchema } from './abonos.schema';
 
 
+
+/** @description Returns filtered, ordered, and paginated CRM abonos with their total count.
+ * @client CRM
+ * @router GET /api/abonos
+ * @request Validated filters, dates, ordering, and pagination from the query string.
+ * @session Requires the CRM web tenant session.
+ * @response JSON containing `abonos` and `total`; failures are forwarded to `next`.
+ */
 const getAbonos = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -45,6 +53,13 @@ const getAbonos = async (req: Request, res: Response, next: NextFunction): Promi
     }
 }
 
+/** @description Returns one CRM abono identified by folio and warehouse.
+ * @client CRM
+ * @router GET /api/abonos/:folio
+ * @request Validated `folio` route parameter and `Id_Almacen` query parameter.
+ * @session Requires the CRM web tenant session.
+ * @response JSON with the service result; failures are forwarded to `next`.
+ */
 const getAbonoById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const { folio: Folio } = getAbonoByIdParamsSchema.parse(req.params);
@@ -64,6 +79,13 @@ const getAbonoById = async (req: Request, res: Response, next: NextFunction): Pr
     }
 }
 
+/** @description Returns paginated detail rows for a CRM abono folio.
+ * @client CRM
+ * @router GET /api/abonos/details/:folio
+ * @request `folio` route parameter and optional `PageNumber` query parameter.
+ * @session Requires the CRM web tenant session.
+ * @response JSON containing `abonoDetails`; failures are forwarded to `next`. The current router order may shadow this route.
+ */
 const getAbonoDetails = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
