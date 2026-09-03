@@ -10,6 +10,12 @@ import { v4 } from 'uuid';
 import path from 'path';
 import fs from "fs";
 
+/** @description Converts a CRM prompt to read-only SQL, executes it, and caches the query for export.
+ * @client CRM
+ * @router POST /api/ai
+ * @request Body field `prompt`; requires the CRM web tenant session.
+ * @response Standard success response with data, headers, query ID, and pagination info; returns HTTP 400 for missing/unsafe/non-SQL input and HTTP 500 for unexpected failures.
+ */
 export const askAI = async (req: Request, res: Response): Promise<Response> => {
     try {
         const { prompt } = req.body;
@@ -45,6 +51,12 @@ export const askAI = async (req: Request, res: Response): Promise<Response> => {
     }
 };
 
+/** @description Re-executes a cached CRM AI query without pagination and returns its rows as CSV.
+ * @client CRM
+ * @router GET /api/ai/export
+ * @request Query parameter `queryId`; requires the CRM web tenant session.
+ * @response CSV attachment, HTTP 404 for an absent or expired query, or HTTP 500 for unexpected failures.
+ */
 export const exportToCSV = async (req: Request, res: Response): Promise<Response> => {
     try {
         const { queryId } = req.query;
