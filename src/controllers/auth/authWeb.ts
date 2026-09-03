@@ -5,6 +5,13 @@ import { generateAccessTokenWeb, generateRefreshTokenWeb } from '../../helpers/g
 import { v4 } from 'uuid';
 import { generateRedisSessionWeb, handleDeleteRedisSession } from '../../helpers/generate-redis';
 
+/**
+ * @description Authenticates a CRM user, creates a Redis web session, sets the refresh-token cookie, and returns the user and access token.
+ * @client CRM
+ * @router POST /api/auth/loginWeb
+ * @request Body fields `email` and `password`.
+ * @response JSON containing `user` and `token`; authentication, session, and token failures are forwarded to `next`.
+ */
 const loginWeb = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -43,6 +50,13 @@ const loginWeb = async (req: Request, res: Response, next: NextFunction): Promis
     }
 };
 
+/**
+ * @description Renews CRM access and refresh tokens and extends the authenticated Redis web session.
+ * @client CRM
+ * @router GET /api/auth/renewWeb
+ * @session Requires the CRM web session, session ID, and `refreshToken` cookie.
+ * @response JSON containing `user` and a new `token`, or HTTP 401 when the cookie is absent; other failures are forwarded to `next`.
+ */
 const renewWeb = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -80,6 +94,13 @@ const renewWeb = async (req: Request, res: Response, next: NextFunction): Promis
     }
 };
 
+/**
+ * @description Logs out the authenticated CRM user by deleting the Redis web session.
+ * @client CRM
+ * @router GET /api/auth/logout
+ * @session Requires the CRM session ID supplied by web authentication middleware.
+ * @response JSON `{ ok: true }`; session deletion failures are forwarded to `next`.
+ */
 const logout = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
