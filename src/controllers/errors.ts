@@ -3,6 +3,13 @@ import type { ErrorLogData} from '../services/errorService';
 import { errorsService } from '../services/errorService';
 import { AppError } from '../errors/CustomError';
 
+/** 
+ * @description Validates and stores a client-submitted error record in the central database.
+ * @client Unclear - this endpoint is unauthenticated and accepts a caller-provided `From` value.
+ * @router POST /api/errors
+ * @request Error metadata from the request body.
+ * @response JSON confirming storage or an error response produced by this controller.
+ */
 const handleErrors = async (req: Request, res: Response): Promise<Response | void> => {
 
     try {
