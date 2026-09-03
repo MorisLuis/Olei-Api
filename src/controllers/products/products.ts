@@ -1,3 +1,4 @@
+/** App product controllers; all mounted routes use the client JWT and App session. */
 import type { NextFunction, Request, Response } from 'express'
 import { dbConnection } from '../../database';
 import { productsWebQuerys } from '../../database/querys/productsWeb';
@@ -7,6 +8,14 @@ import { UnauthorizedError, ValidationError } from '../../errors/CustomError';
 import { searchProductInventoryQuerySchema } from '../../validations/inventoryValidations';
 import { productsQuerys } from '../../database/querys/products';
 
+/**
+ * @description Gets a product by identifier for the authenticated App warehouse and price list.
+ * @client App
+ * @router GET /api/product/:id
+ * @request Product `id` route parameter and optional `Marca` query value.
+ * @session Requires the App tenant session, selected warehouse, and price list.
+ * @response JSON containing `product`; connection and query failures are forwarded to `next`.
+ */
 const getProducById = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -52,8 +61,11 @@ const getProducById = async (req: Request, res: Response, next: NextFunction): P
 
 /**
  * @description Controller to get products by stock with pagination and optional total count.
- * @route GET /products/byStock
- * @client Mobile App
+ * @client App
+ * @router GET /api/product/byStock
+ * @request Validated `PageNumber`, `PageSize`, and optional `Id_Almacen` query values.
+ * @session Requires the App tenant session.
+ * @response JSON containing `products`; missing sessions, validation failures, and service failures are forwarded to `next`.
  */
 
 const getProductsByStock = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
@@ -82,8 +94,10 @@ const getProductsByStock = async (req: Request, res: Response, next: NextFunctio
 
 /**
  * @description Controller to get the total count of products by stock.
- * @route GET /products/byStockCount
- * @client Mobile App
+ * @client App
+ * @router GET /api/product/byStockCount
+ * @session Requires the App tenant session.
+ * @response JSON containing `total`; service failures are forwarded to `next`.
  */
 
 const getTotalOfProductsByStock = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
@@ -104,8 +118,11 @@ const getTotalOfProductsByStock = async (req: Request, res: Response, next: Next
 
 /**
  * @description Controller to get a product by stock and code bar.
- * @route GET /products/byStockAndCodeBar
- * @client Mobile App
+ * @client App
+ * @router GET /api/product/byStockAndCodeBar
+ * @request Validated `CodBar`, `Codigo`, and `SKU` query values.
+ * @session Requires the App tenant session.
+ * @response JSON containing `products`; validation and service failures are forwarded to `next`.
  */
 
 const getProductByStockAndCodeBar = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
@@ -130,8 +147,11 @@ const getProductByStockAndCodeBar = async (req: Request, res: Response, next: Ne
 
 /**
  * @description Controller to search products in inventory ( products ) by search term.
- * @route GET /inventory/search/product
- * @client Mobile App
+ * @client App
+ * @router GET /api/inventory/search/product
+ * @request Validated `searchTerm` and optional `Id_Almacen` query values.
+ * @session Requires the App tenant session.
+ * @response JSON containing barcode-bearing `products`; validation and service failures are forwarded to `next`.
  */
 
 const searchProductInventory = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
@@ -156,8 +176,11 @@ const searchProductInventory = async (req: Request, res: Response, next: NextFun
 
 /**
  * @description Controller to search products in inventory ( products ) without code bar.
- * @route GET /inventory/search/product/withoutcodebar
- * @client Mobile App
+ * @client App
+ * @router GET /api/inventory/search/product/withoutcodebar
+ * @request Validated `searchTerm` and optional `Id_Almacen` query values.
+ * @session Requires the App tenant session.
+ * @response JSON containing products without barcode matching; validation and service failures are forwarded to `next`.
  */
 
 const searchProductInventoryWithoutCodebar = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
