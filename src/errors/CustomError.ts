@@ -4,7 +4,6 @@ class AppError extends Error {
     public code?: string;
 
     constructor(message: string, statusCode = 500, debugMessage?: string, code?: string) {
-        console.log({message, statusCode, debugMessage, code });
         super(message);
         this.statusCode = statusCode;
         this.debugMessage = debugMessage;

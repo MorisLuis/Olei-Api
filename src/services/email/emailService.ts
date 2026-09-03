@@ -7,6 +7,7 @@ import generatePDF from "../../utils/pdf/generatePDF";
 import { getAllCobranzaService } from "../cobranza/cobranza.utils";
 import type { SendEmailResponse, MailOptionsInterface, SendEmailServiceParams, SendEmailWithPDFServiceParams } from "./email.interface";
 import { Buffer } from 'buffer';
+import { logger } from '../../helpers/logger';
 
 interface DBConfig {
     ServidorSQL: string;
@@ -162,8 +163,8 @@ const getUserEmailConfig = async (Id_UsuarioOLEI: string, dbConfig: DBConfig): P
         const pool = await dbConnectionWeb(dbConfig.ServidorSQL, dbConfig.BaseSQL);
         const userRequest = await pool.request().input('Id_Usuario', Id_UsuarioOLEI).query(EmailQuery.getUserEmailData);
         return userRequest.recordset[0];
-    } catch (error) {
-        console.error('Error fetching user email config:', error);
+    } catch {
+        logger.error('email.configuration_fetch_failed');
         throw new Error('Failed to get user email config');
     }
 };

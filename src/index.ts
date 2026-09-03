@@ -1,11 +1,9 @@
 /// <reference path="./types/express-session.d.ts" />
 
-import Server from "./models/server";
-import dotenv from "dotenv";
+import { bootstrap } from './bootstrap';
+import { logger } from './helpers/logger';
 
-dotenv.config()
-
-const server = new Server();
-server.listen();
-
-export default server;
+void bootstrap().catch(() => {
+    logger.error('application.startup_failed');
+    process.exitCode = 1;
+});

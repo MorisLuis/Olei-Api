@@ -24,8 +24,7 @@ export const convertArrayToXml = (data: XmlData | XmlData[]): string | undefined
     
         // Convertir el objeto XML a una cadena con formato
         return root.end({ pretty: true, indent: '    ', newline: '\n' });
-    } catch (error) {
-        console.error("Error converting to XML:", error);
+    } catch {
         return undefined;
     }
 };

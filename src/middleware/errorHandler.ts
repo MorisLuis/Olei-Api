@@ -2,6 +2,7 @@ import { ZodError } from "zod";
 
 import type { NextFunction, Request, Response } from "express";
 import type { ErrorResponse } from "./types";
+import { logger } from '../helpers/logger';
 
 const errorHandler = (
   err: ErrorResponse,
@@ -19,7 +20,12 @@ const errorHandler = (
       code: issue.code,
     }));
 
-    console.error(`[VALIDATION ERROR] ${req.method} ${req.path}`, errors);
+    logger.warn('http.validation_failed', {
+      method: req.method,
+      route: typeof req.route?.path === 'string' ? req.route.path : 'unmatched',
+      statusCode: 400,
+      issueCount: errors.length,
+    });
 
     res.status(400).json({
       ok: false,
@@ -39,7 +45,12 @@ const errorHandler = (
 
   //TODO: Stored the erro in the database for further analysis and debugging.
 
-  console.error(`[ERROR] ${req.method} ${req.path} - ${message}`);
+  logger.error('http.request_failed', {
+    method: req.method,
+    route: typeof req.route?.path === 'string' ? req.route.path : 'unmatched',
+    statusCode,
+    code,
+  });
   res.status(statusCode).json({
     message,
     statusCode,

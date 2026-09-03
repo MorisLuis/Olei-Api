@@ -1,12 +1,13 @@
 // server.ts
-
 import type { Application } from "express";
 import express from "express";
+import type { Server as HttpServer } from 'node:http';
 import type { CorsOptions } from 'cors';
 import cors from 'cors';
-import { closeAllDatabaseConnections, dbConnectionMain } from "../database/connection";
+import { closeAllDatabaseConnections, dbConnectionMain, stopDisconnectedPoolCleanup } from "../database/connection";
+import { abortRedisConnection, closeRedis, connectRedis } from '../config/redisClient';
 
-// Rutas
+// Routers
 import productRouter from "../routes/productRouter";
 import authRouter from "../routes/authRouter";
 import searchRouter from "../routes/searchRouter";
@@ -30,13 +31,59 @@ import aiRouter from "../routes/aiRouter";
 import informesiaRouter from "../routes/informesiaRouter";
 import typeOfDocuments from "../routes/typeOfDocuments"
 import vendedoresRouter from "../routes/vendedoresRouter";
+import healthRouter from '../routes/healthRouter';
 
 import { errorHandler } from "../middleware/errorHandler";
-import cookieParser from 'cookie-parser';  // Asegúrate de importar cookie-parser
+import cookieParser from 'cookie-parser';
+import type { ServerDependencies } from "./types";
+import { markNotReady, markReady } from '../services/health/health.service';
+import { logger } from '../helpers/logger';
 
-class Server {
+export const listen = async (app: Application, port: number): Promise<HttpServer> => new Promise((resolve, reject) => {
+    const httpServer = app.listen(port);
+
+    const removeStartupListeners = (): void => {
+        httpServer.off('error', onError);
+        httpServer.off('listening', onListening);
+    };
+    const onError = (error: Error): void => {
+        removeStartupListeners();
+        reject(error);
+    };
+    const onListening = (): void => {
+        removeStartupListeners();
+        resolve(httpServer);
+    };
+
+    httpServer.once('error', onError);
+    httpServer.once('listening', onListening);
+
+});
+
+export const closeHttpServer = async (httpServer: HttpServer): Promise<void> => new Promise((resolve, reject) => {
+    httpServer.close(error => {
+        if (error) reject(error);
+        else resolve();
+    });
+});
+
+const defaultDependencies: ServerDependencies = {
+    connectDatabase: dbConnectionMain,
+    connectRedis,
+    closeDatabase: closeAllDatabaseConnections,
+    closeRedis,
+    abortRedis: abortRedisConnection,
+    stopCleanupTimer: stopDisconnectedPoolCleanup,
+    closeHttpServer,
+    listen,
+};
+
+export class Server {
     public app: Application;
-    private port: string;
+    private readonly port: number;
+    private readonly dependencies: ServerDependencies;
+    private httpServer: HttpServer | null = null;
+    private stopPromise: Promise<void> | null = null;
 
     private paths: {
         product: string,
@@ -64,9 +111,10 @@ class Server {
         vendedores: string
     };
 
-    constructor() {
+    constructor(port: number, dependencies: ServerDependencies = defaultDependencies) {
         this.app = express();
-        this.port = process.env.PORT || "5001";
+        this.port = port;
+        this.dependencies = dependencies;
         this.paths = {
             product: "/api/product",
             auth: "/api/auth",
@@ -93,18 +141,11 @@ class Server {
             vendedores: "/api/vendedores"
         };
 
-        void this.connectDB();
         this.middlewares();
         this.routes();
 
         this.errorHandler();
     }
-
-    private async connectDB() {
-        await dbConnectionMain();
-    }
-
-
 
     private middlewares(): void {
         const allowedOrigins: string[] = [
@@ -135,8 +176,8 @@ class Server {
         this.app.use(cookieParser());
     }
 
-
     private routes() {
+        this.app.use('/health', healthRouter);
         this.app.use(this.paths.product, productRouter);
         this.app.use(this.paths.auth, authRouter);
         this.app.use(this.paths.search, searchRouter);
@@ -163,16 +204,57 @@ class Server {
 
     }
 
-    public async closeConnections(): Promise<void> {
-        await closeAllDatabaseConnections();
-        console.log('Conexión a la base de datos cerrada');
+    public async start(): Promise<void> {
+        markNotReady();
+        try {
+            await this.dependencies.connectDatabase();
+            await this.dependencies.connectRedis();
+            this.httpServer = await this.dependencies.listen(this.app, this.port);
+            markReady();
+            logger.info('server.started', { port: this.port });
+        } catch (error) {
+            markNotReady();
+            try {
+                this.dependencies.abortRedis();
+            } catch {
+                // Preserve the startup failure; shutdown logging is handled at the process boundary.
+            }
+            await this.dependencies.closeDatabase().catch(() => undefined);
+            throw error;
+        }
     }
 
+    public stop(): Promise<void> {
+        if (this.stopPromise) return this.stopPromise;
 
-    public listen(): void {
-        this.app.listen(this.port, () => {
-            console.log("✅ Servidor corriendo en puerto " + this.port);
-        });
+        markNotReady();
+        this.stopPromise = this.stopResources();
+        return this.stopPromise;
+    }
+
+    private async stopResources(): Promise<void> {
+        const httpServer = this.httpServer;
+        this.httpServer = null;
+
+        const results: Array<PromiseSettledResult<void>> = [];
+        if (httpServer) {
+            results.push(...await Promise.allSettled([this.dependencies.closeHttpServer(httpServer)]));
+        }
+
+        try {
+            this.dependencies.stopCleanupTimer();
+        } catch (error) {
+            results.push({ status: 'rejected', reason: error });
+        }
+
+        results.push(...await Promise.allSettled([
+            this.dependencies.closeDatabase(),
+            this.dependencies.closeRedis(),
+        ]));
+
+        if (results.some(result => result.status === 'rejected')) {
+            throw new Error('Application resource cleanup failed');
+        }
     }
 
     errorHandler(): void {

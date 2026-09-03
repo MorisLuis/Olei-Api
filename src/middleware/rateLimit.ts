@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { AppError } from '../errors/CustomError';
 import redisClient from '../config/redisClient';
+import { logger } from '../helpers/logger';
 
 const LOGIN_WINDOW_SECONDS = 15 * 60;
 const LOGIN_MAX_ATTEMPTS = 10;
@@ -34,8 +35,8 @@ export const loginAppRateLimit = async (req: Request, _res: Response, next: Next
         }
 
         return next();
-    } catch (error) {
-        console.warn(`[RATE_LIMIT] Unable to evaluate login limit: ${error instanceof Error ? error.name : 'unknown_error'}`);
+    } catch {
+        logger.warn('rate_limit.evaluation_failed');
         return next();
     }
 };

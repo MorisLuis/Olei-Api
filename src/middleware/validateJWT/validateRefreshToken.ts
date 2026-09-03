@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken';
+import { logger } from '../../helpers/logger';
 import type { JwtPayload } from 'jsonwebtoken';
 
 import { AppError, UnauthorizedError } from '../../errors/CustomError';
@@ -54,8 +55,8 @@ export const validateRefreshToken = async (req: Request, _res: Response, next: N
             if (!valid) {
                 try {
                     await logoutAppService({ sessionId, session });
-                } catch (err) {
-                    console.error('Error running logoutAppService during refresh validation revoke:', err);
+                } catch {
+                    logger.error('auth.session_revoke_failed', { context: 'refresh_validation' });
                 }
 
                 return next(new UnauthorizedError('Session revoked', '', 'SESSION_REVOKED'));

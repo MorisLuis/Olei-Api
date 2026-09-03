@@ -129,4 +129,11 @@ describe('database connections', () => {
         expect(tenant.close).toHaveBeenCalledTimes(1);
         expect(main.close).toHaveBeenCalledTimes(1);
     });
+
+    it('reports a pool close failure after attempting cleanup', async () => {
+        const tenant = await dbConnectionWeb('tenant', 'database');
+        (tenant as unknown as MockPool).close.mockRejectedValueOnce(new Error('close failed'));
+
+        await expect(closeAllDatabaseConnections()).rejects.toThrow('Database connection cleanup failed');
+    });
 });
