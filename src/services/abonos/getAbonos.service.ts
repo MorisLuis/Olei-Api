@@ -10,10 +10,6 @@ import type { AbonoRow } from "./utils";
 /**
  * @description Returns a filtered and paginated collection of abonos from the authenticated web tenant.
  * Date-only filters include the complete selected day, and `exactlyDate` takes precedence over a range.
- * 
- * Consumer: CRM
- * Current endpoint: `GET /api/abonos`
- *
  * @param params - Validated filters, ordering, pagination, and web tenant session.
  * @returns The matching abonos and the total number of records for the same filters.
  * @throws {ValidationError} When the tenant database connection is unavailable.

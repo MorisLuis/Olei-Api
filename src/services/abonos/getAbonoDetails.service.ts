@@ -6,10 +6,6 @@ import type { AbonoDetailsInterface, GetAbonoDetailsParams } from "./types";
 
 /**
  * @description Returns the paginated sales documents applied to an abono.
- *  
- * Consumer: CRM
- * Current endpoint: `GET /api/abonos/details/:folio`
- * 
  * @param params - Web tenant session, folio, and requested page number.
  * @returns The detail rows for the requested page.
  * @throws {ValidationError} When the tenant database connection is unavailable.
