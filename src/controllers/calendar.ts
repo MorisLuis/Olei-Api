@@ -4,6 +4,14 @@ import { getCalendarByMonthAndClientQuerySchema, getCalendarTaskByDayQuerySchema
 import { getCalendarTaskByDayAndClientService } from "../services/calendar/getAllTasksByDay";
 
 
+/** 
+ * @description Returns CRM calendar tasks for a requested month and year.
+ * @client CRM
+ * @router GET /api/calendar/month
+ * @request Validated month and year query values.
+ * @session Requires the CRM web tenant session.
+ * @response JSON containing calendar tasks; failures are forwarded to `next`.
+ */
 const getCalendarTaskByMonth = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -24,6 +32,14 @@ const getCalendarTaskByMonth = async (req: Request, res: Response, next: NextFun
     }
 };
 
+/** 
+ * @description Returns paginated CRM calendar tasks for a requested day and optional client.
+ * @client CRM
+ * @router GET /api/calendar/day
+ * @request Validated day, client, and pagination query values.
+ * @session Requires the CRM web tenant session.
+ * @response JSON containing tasks and pagination data; failures are forwarded to `next`.
+ */
 const getCalendarTaskByDay = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     /* Timeline */
@@ -51,6 +67,14 @@ const getCalendarTaskByDay = async (req: Request, res: Response, next: NextFunct
 
 };
 
+/** 
+ * @description Returns CRM calendar tasks for a requested month scoped to a client.
+ * @client CRM
+ * @router GET /api/calendar/monthAndClient
+ * @request Validated month, year, and client query values.
+ * @session Requires the CRM web tenant session.
+ * @response JSON containing calendar tasks; failures are forwarded to `next`.
+ */
 const getCalendarTaskByMonthAndClient = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
