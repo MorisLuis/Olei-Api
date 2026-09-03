@@ -4,6 +4,12 @@ import {  getSellsProductsCountAndTotalQuerySchema, getSellsProductsQuerySchema 
 import { getSellsProductsCountAndTotalService, getSellsProductsService } from "../../services/sellsProducts/sellsProducts";
 
 
+/** @description Returns filtered and paginated products included in CRM sales.
+ * @client CRM
+ * @router GET /api/sells/products/data
+ * @request Validated product, date, ordering, and pagination filters; requires the CRM web tenant session.
+ * @response JSON containing `sells`; failures are forwarded to `next`.
+ */
 const getSellsProducts = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -32,6 +38,12 @@ const getSellsProducts = async (req: Request, res: Response, next: NextFunction)
 
 };
 
+/** @description Returns count and totals for products included in filtered CRM sales.
+ * @client CRM
+ * @router GET /api/sells/products/totals
+ * @request Validated product and date filters; requires the CRM web tenant session.
+ * @response JSON containing `count` and `totals`; failures are forwarded to `next`.
+ */
 const getSellsProductsCountAndTotal = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
