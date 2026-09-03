@@ -38,7 +38,7 @@ const sendEmail = async (req: Request, res: Response, next: NextFunction): Promi
 };
 
 
-/** 
+/**
  * @description Sends a CRM receivables email with a generated PDF attachment.
  * @client CRM
  * @router POST /api/email/cobranza/pdf/:client and POST /api/email/cobranza/excell
