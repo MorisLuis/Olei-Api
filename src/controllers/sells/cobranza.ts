@@ -4,7 +4,13 @@ import { getCobranzaByClientCountAndTotalService, getCobranzaByClientService, ge
 import { getCobranzaQuerySchema, getCobranzaByClientQuerySchema, getCobranzaByClientCountAndTotalQuerySchema, getCobranzaQueryCountAndTotalSchema } from "../../validations/cobranzaValidations";
 
 
-/* Cobranza */
+/** 
+ * @description Returns filtered and paginated CRM receivables grouped by client.   
+ * @client CRM
+ * @router GET /api/sells/cobranza/clients
+ * @request Validated search, ordering, and pagination values; requires the CRM web tenant session.
+ * @response JSON containing `cobranza`; failures are forwarded to `next`.
+ */
 const getCobranza = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         // Get session from REDIS.
@@ -27,6 +33,13 @@ const getCobranza = async (req: Request, res: Response, next: NextFunction): Pro
     }
 };
 
+/** 
+ * @description Returns the client count and balance total for filtered CRM receivables.
+ * @client CRM
+ * @router GET /api/sells/cobranza/clients/totals
+ * @request Validated search filters; requires the CRM web tenant session.
+ * @response JSON containing `count` and `total`; failures are forwarded to `next`.
+ */
 const getCobranzaCountAndTotal = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const { termSearch, startDate, endDate, exactlyDate } = getCobranzaQueryCountAndTotalSchema.parse(req.query);
@@ -50,6 +63,13 @@ const getCobranzaCountAndTotal = async (req: Request, res: Response, next: NextF
     }
 };
 
+/** 
+ * @description Returns filtered and paginated CRM receivables for one client.
+ * @client CRM
+ * @router GET /api/sells/cobranza/:client
+ * @request Validated client route parameter and receivable filters; requires the CRM web tenant session.
+ * @response JSON containing `cobranza`; failures are forwarded to `next`.
+ */
 const getCobranzaByClient = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -79,6 +99,13 @@ const getCobranzaByClient = async (req: Request, res: Response, next: NextFuncti
     };
 };
 
+/** 
+ * @description Returns count and balance total for one client's filtered CRM receivables.
+ * @client CRM
+ * @router GET /api/sells/cobranza/totals/:client
+ * @request Validated client route parameter and receivable filters; requires the CRM web tenant session.
+ * @response JSON containing `count` and `total`; failures are forwarded to `next`.
+ */
 const getCobranzaByClientCountAndTotal = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
@@ -107,6 +134,13 @@ const getCobranzaByClientCountAndTotal = async (req: Request, res: Response, nex
     };
 };
 
+/** 
+ * @description Returns overdue, current, and total CRM receivable balances for one client.
+ * @client CRM
+ * @router GET /api/sells/cobranza/getCobranzaWithTotals/:client
+ * @request Validated client route parameter and receivable filters; requires the CRM web tenant session.
+ * @response JSON containing `SaldoVencido`, `SaldoNoVencido`, and `TotalSaldo`; failures are forwarded to `next`.
+ */
 const getCobranzaWithTotals = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
     try {
