@@ -2,10 +2,16 @@ import type { NextFunction, Request, Response } from 'express'
 import { dbConnectionWeb } from '../database';
 import { generalQuerys } from '../database/querys/general';
 
+/**
+ * @description Returns product-family, brand, and folio lookup values from a web tenant connection.
+ * @client E-commerce
+ * @router GET /api/tables
+ * @session The current implementation requires `req.sessionWeb` despite `validateJWTClient` on the route.
+ * @response JSON containing `Familias`, `Marca`, and `Folio`; database failures are forwarded to `next`.
+ */
 const getTables = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void>  => {
 
     try {
-        // Get session from REDIS.
         const userSession = req.sessionWeb
 
         const { ServidorSQL, BaseSQL } = userSession;
