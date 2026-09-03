@@ -6,15 +6,13 @@ import { refreshAppService } from '../../../services/auth/client/refreshApp.serv
 
 
 /**
- * @description Refreshes the access token and refresh token for the authenticated user.
- * Return the new access token, refresh token, and sanitized user information in the response.
- * The sanitized user is the session stored in login database and login app.
- * 
- * @route POST /auth/refresh
- * @access Public
+ * @description Refreshes App access and refresh tokens using the session established by refresh-token middleware.
+ * @client App
+ * @router POST /api/auth/refresh
+ * @request Validated body field `refreshToken`.
+ * @session Requires the App session and session ID resolved from the refresh token.
+ * @response Standard success response containing the sanitized `user`, `token`, and new `refreshToken`; missing-token and token-generation failures are forwarded to `next`.
  */
-
-
 export const refreshApp = (req: Request, res: Response, next: NextFunction): Response | void => {
     try {
         const session = req.session;
