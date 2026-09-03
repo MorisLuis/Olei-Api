@@ -5,6 +5,13 @@ import { successResponse } from "../../helpers/response";
 
 
 
+/**
+ * @description Lists document types from the authenticated App tenant database.
+ * @client App
+ * @router GET /api/documents/types
+ * @session Requires the App tenant session and connection credentials.
+ * @response Standard success response containing the document-type recordset; database failures are forwarded to `next`.
+ */
 const getTypeOfDocuments = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const session = req.session;
