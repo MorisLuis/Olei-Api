@@ -4,6 +4,13 @@ import { sanitizeServerSessionUser } from '../utils/sessionResponse';
 import { successResponse } from '../../../helpers/response';
 
 
+/**
+ * @description Issues a new App server access token for the current authenticated session.
+ * @client App
+ * @router POST /api/auth/refreshServer
+ * @session Requires the App session and session ID from client authentication middleware.
+ * @response Standard success response containing sanitized `user` data and `tokenServer`; token failures are forwarded to `next`.
+ */
 export const refreshServer = (req: Request, res: Response, next: NextFunction): void => {
 
     try {
