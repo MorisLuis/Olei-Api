@@ -1,9 +1,4 @@
 {
-  "github.copilot.chat.commitMessageGeneration.instructions": [
-    {
-      "text": "Always use Conventional Commits. Format: <type>(<scope>): <description>. Allowed types: feat, fix, refactor, test, docs, chore, ci, perf. Keep the type and scope lowercase. Use imperative mood, do not end with a period, keep the subject concise, and infer the scope from the staged changes."
-    }
-  ],
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
