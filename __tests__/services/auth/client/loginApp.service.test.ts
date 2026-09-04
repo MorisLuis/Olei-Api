@@ -349,6 +349,48 @@ describe('loginAppService', () => {
         await expect(promise).rejects.toThrow(executeError);
     });
 
+    it('documents the compatibility gap: any first SQL error with a device ID retries without the device parameter', async () => {
+        const firstError = new Error('single-session enforcement failed');
+        const firstRequest = {
+            input: jest.fn().mockReturnThis(),
+            execute: jest.fn().mockRejectedValue(firstError),
+        };
+        const fallbackRequest = {
+            input: jest.fn().mockReturnThis(),
+            execute: jest.fn().mockResolvedValue({
+                recordset: [{
+                    Id_Perfil: 2,
+                    TodosAlmacenes: 1,
+                    SalidaSinExistencias: 0,
+                    Id_Almacen: 7,
+                    AlmacenNombre: 'Main Warehouse',
+                    Id_ListPre: 10,
+                }],
+            }),
+        };
+        const request = jest.fn()
+            .mockReturnValueOnce(firstRequest)
+            .mockReturnValueOnce(fallbackRequest);
+        mockDbConnection.mockResolvedValue({ request } as never);
+
+        await expect(loginAppService({
+            sessionId: 'session-123',
+            session: baseSession,
+            Id_Usuario: 'app-user',
+            password: 'app-pass',
+            idEquipo: 'DEVICE-B',
+        })).resolves.toEqual(expect.objectContaining({
+            token: 'access-token-123',
+            refreshToken: 'refresh-token-123',
+        }));
+
+        expect(firstRequest.input).toHaveBeenCalledWith('idEquipo', 'VarChar(100)', expect.any(String));
+        expect(firstRequest.execute).toHaveBeenCalledWith('sp_AuthenticateAndGetMovement');
+        expect(fallbackRequest.input).not.toHaveBeenCalledWith('idEquipo', expect.anything(), expect.anything());
+        expect(fallbackRequest.execute).toHaveBeenCalledWith('sp_AuthenticateAndGetMovement');
+        expect(mockUpdateSession).toHaveBeenCalled();
+    });
+
     it('propagates session update failures', async () => {
         const { pool } = buildPool({
             recordset: [
