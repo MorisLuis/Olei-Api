@@ -52,8 +52,19 @@ export const loginDB = async ({
         throw new UnauthorizedError('Credenciales inválidas')
     }
 
-    if (result?.PasswordOLEI && result?.PasswordOLEI.trim() !== PasswordOLEI) {
+    if (typeof result.PasswordOLEI !== 'string' || result.PasswordOLEI.trim() !== PasswordOLEI) {
         throw new UnauthorizedError('Credenciales inválidas')
+    }
+
+    const requiredClientDatabaseConfig = [
+        result.ServidorSQL,
+        result.BaseSQL,
+        result.UsuarioSQL,
+        result.PasswordSQL,
+    ];
+
+    if (requiredClientDatabaseConfig.some(value => typeof value !== 'string' || !value.trim())) {
+        throw new ValidationError('Configuración de base de datos del cliente inválida');
     }
 
     const datosDelUsuario: UserSessionInterface = {
