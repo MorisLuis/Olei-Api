@@ -2,6 +2,8 @@ import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
 import { loginApp } from '../../../../src/controllers/auth/client/loginApp';
 import { loginAppService } from '../../../../src/services/auth/client/loginApp.service';
+import { RequestError } from 'mssql';
+import { AUTH_ERROR_CODES } from '../../../../src/middleware/constants';
 
 jest.mock('../../../../src/services/auth/client/loginApp.service', () => ({
     loginAppService: jest.fn(),
@@ -135,6 +137,32 @@ describe('loginApp controller', () => {
         expect(mockLoginAppService).toHaveBeenCalledTimes(1);
         expect(res.json).not.toHaveBeenCalled();
         expect(next).toHaveBeenCalledWith(serviceError);
+    });
+
+    it('maps the SQL single-session conflict to USER_ALREADY_LOGGED_IN', async () => {
+        const req = createReq({
+            body: {
+                Id_Usuario: 'app-user',
+                password: 'app-pass',
+                idEquipo: 'DEVICE-B',
+            },
+            session: baseSession,
+            sessionId: 'session-abc',
+        });
+        const res = createRes();
+        const next = jest.fn() as NextFunction;
+        const sqlError = new RequestError('user already active', 'EREQUEST');
+        Object.defineProperty(sqlError, 'number', { value: 50000 });
+        mockLoginAppService.mockRejectedValue(sqlError);
+
+        await loginApp(req, res, next);
+
+        expect(res.json).not.toHaveBeenCalled();
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({
+            message: 'This account is already logged in on another device.',
+            code: AUTH_ERROR_CODES.USER_ALREADY_LOGGED_IN,
+            statusCode: 401,
+        }));
     });
 
     it('passes unexpected errors from response construction to next', async () => {
