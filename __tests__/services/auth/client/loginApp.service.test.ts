@@ -184,6 +184,95 @@ describe('loginAppService', () => {
 
         await expect(promise).rejects.toBeInstanceOf(ValidationError);
         await expect(promise).rejects.toThrow('Error al conectarse a base de datos principal');
+        expect(mockUpdateSession).not.toHaveBeenCalled();
+        expect(mockGenerateAccessToken).not.toHaveBeenCalled();
+        expect(mockGenerateRefreshToken).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        ['ServidorSQL', 'MISSING-SERVER'],
+        ['BaseSQL', 'MISSING-DATABASE'],
+    ] as const)('handles an unavailable client configuration selected by %s', async (field, value) => {
+        const unavailableSession = {
+            ...baseSession,
+            [field]: value,
+        };
+        mockDbConnection.mockResolvedValue(null as never);
+
+        const promise = loginAppService({
+            sessionId: 'session-123',
+            session: unavailableSession,
+            Id_Usuario: 'app-user',
+            password: 'app-pass',
+        });
+
+        await expect(promise).rejects.toBeInstanceOf(ValidationError);
+        expect(mockDbConnection).toHaveBeenCalledWith(
+            unavailableSession.ServidorSQL,
+            unavailableSession.BaseSQL,
+            unavailableSession.UsuarioSQL,
+            unavailableSession.PasswordSQL,
+        );
+        expect(mockUpdateSession).not.toHaveBeenCalled();
+        expect(mockGenerateAccessToken).not.toHaveBeenCalled();
+        expect(mockGenerateRefreshToken).not.toHaveBeenCalled();
+    });
+
+    it('connects to the exact client database selected by the authenticated server session', async () => {
+        const selectedClientSession = {
+            ...baseSession,
+            ServidorSQL: 'CLIENT-SQL-42',
+            BaseSQL: 'OLEIDB1_CLIENT_42',
+            UsuarioSQL: 'CLIENT-LOGIN-42',
+            PasswordSQL: 'CLIENT-PASSWORD-42',
+        };
+        const authResult = {
+            recordset: [{
+                Id_Perfil: 4,
+                TodosAlmacenes: 0,
+                SalidaSinExistencias: 1,
+                Id_Almacen: 12,
+                AlmacenNombre: 'Warehouse 42',
+                Id_ListPre: 5,
+                PermitirCambiarPrecio: true,
+            }],
+        };
+        const { pool, input, execute } = buildPool(authResult);
+        mockDbConnection.mockResolvedValue(pool as never);
+
+        const result = await loginAppService({
+            sessionId: 'tenant-session-42',
+            session: selectedClientSession,
+            Id_Usuario: 'tenant-user',
+            password: 'tenant-password',
+        });
+
+        expect(mockDbConnection).toHaveBeenCalledTimes(1);
+        expect(mockDbConnection).toHaveBeenCalledWith(
+            'CLIENT-SQL-42',
+            'OLEIDB1_CLIENT_42',
+            'CLIENT-LOGIN-42',
+            'CLIENT-PASSWORD-42',
+        );
+        expect(input).toHaveBeenNthCalledWith(1, 'Id_Usuario', 'VarChar(50)', 'tenant-user');
+        expect(input).toHaveBeenNthCalledWith(2, 'Password', 'VarChar(50)', 'tenant-password');
+        expect(execute).toHaveBeenCalledWith('sp_AuthenticateAndGetMovement');
+        expect(mockUpdateSession).toHaveBeenCalledWith('tenant-session-42', expect.objectContaining({
+            ServidorSQL: 'CLIENT-SQL-42',
+            BaseSQL: 'OLEIDB1_CLIENT_42',
+            UsuarioSQL: 'CLIENT-LOGIN-42',
+            PasswordSQL: 'CLIENT-PASSWORD-42',
+            Id_UsuarioOLEI: 'tenant-user',
+            userRol: 4,
+            Id_Almacen: 12,
+            PermitirCambiarPrecio: true,
+            userConected: true,
+        }));
+        expect(result).toEqual({
+            user: { IdUsuarioOLEI: 'OLEI-001' },
+            token: 'access-token-123',
+            refreshToken: 'refresh-token-123',
+        });
     });
 
     it('throws UnauthorizedError when authenticator returns an empty recordset', async () => {
@@ -199,6 +288,9 @@ describe('loginAppService', () => {
 
         await expect(promise).rejects.toBeInstanceOf(UnauthorizedError);
         await expect(promise).rejects.toThrow('Respuesta inválida del autenticador');
+        expect(mockUpdateSession).not.toHaveBeenCalled();
+        expect(mockGenerateAccessToken).not.toHaveBeenCalled();
+        expect(mockGenerateRefreshToken).not.toHaveBeenCalled();
     });
 
     it('throws UnauthorizedError when recordset is not an array', async () => {
