@@ -88,6 +88,7 @@ describe('loginDB service', () => {
         });
 
         expect(mockDbConnectionMain).toHaveBeenCalledTimes(1);
+        expect(mockDbConnectionMain).toHaveBeenCalledWith();
         expect(request).toHaveBeenCalledTimes(1);
         expect(mockVarChar).toHaveBeenCalledWith(50);
         expect(input).toHaveBeenCalledWith('IdUsuarioOLEI', 'VarChar(50)', 'user01');
@@ -285,7 +286,7 @@ describe('loginDB service', () => {
         ).rejects.toThrow(dbError);
     });
 
-    it('returns user when PasswordOLEI is absent in result (edge case)', async () => {
+    it('rejects credentials when PasswordOLEI is absent from the authentication result', async () => {
         const dbUser = {
             IdUsuarioOLEI: 'user01',
             ServidorSQL: 'SERVER',
@@ -297,27 +298,86 @@ describe('loginDB service', () => {
             Vigencia: '2027-01-01',
             Id_ListPre: 3,
         };
-        const sanitizedUser = {
-            IdUsuarioOLEI: 'user01',
-            RazonSocial: 'CLIENTE',
-        };
-
         const query = jest.fn().mockResolvedValue({ recordset: [dbUser] });
         const input = jest.fn().mockReturnValue({ query });
         const request = jest.fn().mockReturnValue({ input });
 
         mockDbConnectionMain.mockResolvedValue({ request } as never);
-        mockSanitizeServerSessionUser.mockReturnValue(sanitizedUser as never);
-
-        const result = await loginDB({
+        await expect(loginDB({
             IdUsuarioOLEI: 'user01',
             PasswordOLEI: 'secret',
-        });
+        })).rejects.toBeInstanceOf(UnauthorizedError);
 
-        expect(result).toEqual({
-            user: sanitizedUser,
-            tokenServer: 'token-server-123',
-        });
+        expect(mockSanitizeServerSessionUser).not.toHaveBeenCalled();
+        expect(mockGenerateRedisSession).not.toHaveBeenCalled();
+        expect(mockGenerateAccessTokenServer).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        ['ServidorSQL', undefined],
+        ['ServidorSQL', '   '],
+        ['BaseSQL', undefined],
+        ['BaseSQL', '   '],
+    ])('rejects missing client database configuration: %s=%p', async (field, value) => {
+        const dbUser = {
+            IdUsuarioOLEI: 'user01',
+            PasswordOLEI: 'secret',
+            ServidorSQL: 'CLIENT-SERVER',
+            BaseSQL: 'CLIENT-DATABASE',
+            UsuarioSQL: 'CLIENT-USER',
+            PasswordSQL: 'CLIENT-PASSWORD',
+            RazonSocial: 'CLIENTE',
+            SwImagenes: true,
+            Vigencia: '2027-01-01',
+            Id_ListPre: 3,
+            [field]: value,
+        };
+        const query = jest.fn().mockResolvedValue({ recordset: [dbUser] });
+        const input = jest.fn().mockReturnValue({ query });
+        const request = jest.fn().mockReturnValue({ input });
+        mockDbConnectionMain.mockResolvedValue({ request } as never);
+
+        await expect(loginDB({
+            IdUsuarioOLEI: 'user01',
+            PasswordOLEI: 'secret',
+        })).rejects.toEqual(expect.objectContaining({
+            message: 'Configuración de base de datos del cliente inválida',
+            statusCode: 400,
+        }));
+
+        expect(mockGenerateRedisSession).not.toHaveBeenCalled();
+        expect(mockGenerateAccessTokenServer).not.toHaveBeenCalled();
+    });
+
+    it('stores the authenticated client database configuration for later App connections', async () => {
+        const dbUser = {
+            IdUsuarioOLEI: 'tenant-user',
+            PasswordOLEI: 'secret',
+            ServidorSQL: '  CLIENT-SERVER-42  ',
+            BaseSQL: '  CLIENT-DATABASE-42  ',
+            UsuarioSQL: '  CLIENT-USER-42  ',
+            PasswordSQL: '  CLIENT-PASSWORD-42  ',
+            RazonSocial: '  CLIENTE 42  ',
+            SwImagenes: false,
+            Vigencia: '2027-01-01',
+            Id_ListPre: 8,
+        };
+        const query = jest.fn().mockResolvedValue({ recordset: [dbUser] });
+        const input = jest.fn().mockReturnValue({ query });
+        const request = jest.fn().mockReturnValue({ input });
+        mockDbConnectionMain.mockResolvedValue({ request } as never);
+        mockSanitizeServerSessionUser.mockReturnValue({ IdUsuarioOLEI: 'tenant-user' } as never);
+
+        await loginDB({ IdUsuarioOLEI: 'tenant-user', PasswordOLEI: 'secret' });
+
+        expect(input).toHaveBeenCalledWith('IdUsuarioOLEI', 'VarChar(50)', 'tenant-user');
+        expect(mockGenerateRedisSession).toHaveBeenCalledWith('session-123', expect.objectContaining({
+            ServidorSQL: 'CLIENT-SERVER-42',
+            BaseSQL: 'CLIENT-DATABASE-42',
+            UsuarioSQL: 'CLIENT-USER-42',
+            PasswordSQL: 'CLIENT-PASSWORD-42',
+            IdUsuarioOLEI: 'tenant-user',
+        }));
     });
 
     it('propagates redis session errors', async () => {
