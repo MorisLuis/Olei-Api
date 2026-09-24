@@ -2,6 +2,7 @@ import sql from 'mssql';
 import type { TenantPoolCredentials, TenantPoolEntry } from './types';
 import { normalizeDatabaseLocation } from './normalizeDatabaseLocation';
 import { logger } from '../../helpers/logger';
+import config from '../../config';
 
 const MAX_TENANT_POOLS = 10;
 const tenantPools = new Map<string, TenantPoolEntry[]>();
@@ -57,7 +58,10 @@ export const getOrCreatePool = async (
         password: credentials.password,
         server,
         database,
-        options: { encrypt: true, trustServerCertificate: true },
+        options: {
+            encrypt: config.dbEncrypt,
+            trustServerCertificate: config.dbTrustServerCertificate,
+        },
     });
 
     entry.connecting = pool.connect().then(connectedPool => {
