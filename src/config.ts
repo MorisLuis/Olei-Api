@@ -5,6 +5,7 @@ config();
 
 const requiredString = z.string().refine(value => value.trim().length > 0);
 const optionalString = z.string().trim().min(1).optional();
+const optionalBoolean = z.enum(['true', 'false']).transform(value => value === 'true').optional();
 
 const runtimeEnvironmentSchema = z.object({
     NODE_ENV: z.enum(['development', 'test', 'staging', 'production']).default('development'),
@@ -14,9 +15,13 @@ const runtimeEnvironmentSchema = z.object({
     DB_PASSWORD: requiredString,
     DB_SERVER: z.string().trim().min(1),
     DB_DATABASE: z.string().trim().min(1),
+    DB_ENCRYPT: z.enum(['true', 'false']).transform(value => value === 'true').default('true'),
+    DB_TRUST_SERVER_CERTIFICATE: optionalBoolean,
     REDIS_HOST: z.string().trim().min(1).default('127.0.0.1'),
     REDIS_PORT: z.coerce.number().int().min(1).max(65_535).default(6379),
     REDIS_PASSWORD: optionalString,
+    REDIS_TLS_ENABLED: optionalBoolean,
+    REDIS_TLS_SERVERNAME: optionalString,
     ACCESS_TOKEN_SECRET: requiredString,
     ACCESS_TOKEN_SEVER_SECRET: requiredString,
     REFRESH_TOKEN_SECRET: requiredString,
@@ -34,12 +39,37 @@ const runtimeEnvironmentSchema = z.object({
     AZURE_OPENAI_API_DEPLOYMENT_NAME: z.string().trim().min(1),
     AZURE_OPENAI_API_VERSION: z.string().trim().min(1),
 }).superRefine((environment, context) => {
-    if ((environment.NODE_ENV === 'staging' || environment.NODE_ENV === 'production')
-        && !environment.REDIS_PASSWORD) {
+    const secureRuntime = environment.NODE_ENV === 'staging' || environment.NODE_ENV === 'production';
+
+    if (secureRuntime && !environment.REDIS_PASSWORD) {
         context.addIssue({
             code: z.ZodIssueCode.custom,
             message: 'Required outside development and test',
             path: ['REDIS_PASSWORD'],
+        });
+    }
+
+    if (secureRuntime && !environment.DB_ENCRYPT) {
+        context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Must be enabled outside development and test',
+            path: ['DB_ENCRYPT'],
+        });
+    }
+
+    if (secureRuntime && environment.DB_TRUST_SERVER_CERTIFICATE === true) {
+        context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Must be disabled outside development and test',
+            path: ['DB_TRUST_SERVER_CERTIFICATE'],
+        });
+    }
+
+    if (secureRuntime && environment.REDIS_TLS_ENABLED !== true) {
+        context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Must be enabled outside development and test',
+            path: ['REDIS_TLS_ENABLED'],
         });
     }
 });
@@ -53,11 +83,15 @@ export interface RuntimeConfig {
         password: string;
         server: string;
         database: string;
+        encrypt: boolean;
+        trustServerCertificate: boolean;
     };
     redis: {
         host: string;
         port: number;
         password?: string;
+        tlsEnabled: boolean;
+        tlsServername?: string;
     };
     auth: {
         accessTokenSecret: string;
@@ -103,6 +137,8 @@ export const loadRuntimeConfig = (
     }
 
     const values = result.data;
+    const secureRuntime = values.NODE_ENV === 'staging' || values.NODE_ENV === 'production';
+    const redisTlsEnabled = values.REDIS_TLS_ENABLED ?? false;
 
     return {
         nodeEnv: values.NODE_ENV,
@@ -113,11 +149,17 @@ export const loadRuntimeConfig = (
             password: values.DB_PASSWORD,
             server: values.DB_SERVER,
             database: values.DB_DATABASE,
+            encrypt: values.DB_ENCRYPT,
+            trustServerCertificate: values.DB_TRUST_SERVER_CERTIFICATE ?? !secureRuntime,
         },
         redis: {
             host: values.REDIS_HOST,
             port: values.REDIS_PORT,
             password: values.REDIS_PASSWORD,
+            tlsEnabled: redisTlsEnabled,
+            tlsServername: redisTlsEnabled
+                ? values.REDIS_TLS_SERVERNAME ?? values.REDIS_HOST
+                : undefined,
         },
         auth: {
             accessTokenSecret: values.ACCESS_TOKEN_SECRET,
@@ -142,10 +184,27 @@ export const loadRuntimeConfig = (
     };
 };
 
+const configuredNodeEnvironment = process.env.NODE_ENV ?? 'development';
+const configuredSecureRuntime = configuredNodeEnvironment === 'staging'
+    || configuredNodeEnvironment === 'production';
+const configuredRedisHost = process.env.REDIS_HOST || '127.0.0.1';
+const configuredRedisTlsEnabled = process.env.REDIS_TLS_ENABLED === 'true';
+
 export default {
     port: process.env.PORT || 5001,
     dbUser: process.env.DB_USER || "",
     dbPassword: process.env.DB_PASSWORD || "",
     dbServer: process.env.DB_SERVER || "",
     dbDatabase: process.env.DB_DATABASE || "",
+    dbEncrypt: process.env.DB_ENCRYPT !== 'false',
+    dbTrustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE
+        ? process.env.DB_TRUST_SERVER_CERTIFICATE === 'true'
+        : !configuredSecureRuntime,
+    redisHost: configuredRedisHost,
+    redisPort: Number(process.env.REDIS_PORT) || 6379,
+    redisPassword: process.env.REDIS_PASSWORD || undefined,
+    redisTlsEnabled: configuredRedisTlsEnabled,
+    redisTlsServername: configuredRedisTlsEnabled
+        ? process.env.REDIS_TLS_SERVERNAME || configuredRedisHost
+        : undefined,
 };
