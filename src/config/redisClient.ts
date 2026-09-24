@@ -1,12 +1,15 @@
 import Redis from 'ioredis';
+import config from '../config';
 import { logger } from '../helpers/logger';
+import { createRedisOptions } from './redisOptions';
 
-const redisClient = new Redis({
-    host: process.env.REDIS_HOST || '127.0.0.1',
-    port: Number(process.env.REDIS_PORT) || 6379,
-    password: process.env.REDIS_PASSWORD || undefined,
-    lazyConnect: true,
-});
+const redisClient = new Redis(createRedisOptions({
+    host: config.redisHost,
+    port: config.redisPort,
+    password: config.redisPassword,
+    tlsEnabled: config.redisTlsEnabled,
+    tlsServername: config.redisTlsServername,
+}));
 
 redisClient.on('connect', () => logger.info('redis.connected'));
 redisClient.on('error', () => logger.error('redis.connection_failed'));
