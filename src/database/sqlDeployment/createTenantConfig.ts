@@ -20,7 +20,7 @@ import type { TenantDatabase } from './types';
  *   database: 'TenantDB',
  *   options: {
  *     encrypt: true,
- *     trustServerCertificate: true
+ *     trustServerCertificate: false
  *   }
  * }
  * @param tenant - The tenant database configuration. 
@@ -33,7 +33,7 @@ export const createTenantConfig = (tenant: TenantDatabase): sql.config => ({
     server: tenant.server,
     database: tenant.database,
     options: {
-        encrypt: true,
-        trustServerCertificate: true
+        encrypt: config.dbEncrypt,
+        trustServerCertificate: config.dbTrustServerCertificate
     }
 });
