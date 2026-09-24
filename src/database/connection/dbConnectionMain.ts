@@ -32,7 +32,10 @@ export const dbConnectionMain = async (): Promise<sql.ConnectionPool> => {
         password: config.dbPassword,
         server,
         database,
-        options: { encrypt: true, trustServerCertificate: true },
+        options: {
+            encrypt: config.dbEncrypt,
+            trustServerCertificate: config.dbTrustServerCertificate,
+        },
     });
 
     mainPoolConnection = pool.connect().then(connectedPool => {
