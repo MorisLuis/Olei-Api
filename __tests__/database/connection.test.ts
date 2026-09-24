@@ -31,6 +31,8 @@ jest.mock('../../src/config', () => ({
         dbPassword: 'configured-password',
         dbServer: ' main-server ',
         dbDatabase: ' main-database ',
+        dbEncrypt: true,
+        dbTrustServerCertificate: false,
     },
 }));
 
@@ -68,6 +70,21 @@ describe('database connections', () => {
         await dbConnectionWeb('tenant', 'database');
 
         expect(poolInstances).toHaveLength(2);
+    });
+
+    it('applies encrypted, certificate-verified transport to main and tenant pools', async () => {
+        await dbConnectionMain();
+        await dbConnectionWeb('tenant', 'database');
+
+        expect(poolInstances).toHaveLength(2);
+        for (const pool of poolInstances) {
+            expect(pool.config).toMatchObject({
+                options: {
+                    encrypt: true,
+                    trustServerCertificate: false,
+                },
+            });
+        }
     });
 
     it('shares an in-flight connection between simultaneous requests', async () => {
