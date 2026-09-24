@@ -31,11 +31,15 @@ describe('loadRuntimeConfig', () => {
             database: expect.objectContaining({
                 server: 'db-server',
                 password: 'db-password',
+                encrypt: true,
+                trustServerCertificate: true,
             }),
             redis: {
                 host: 'redis-host',
                 port: 6379,
                 password: undefined,
+                tlsEnabled: false,
+                tlsServername: undefined,
             },
         }));
     });
@@ -87,10 +91,63 @@ describe('loadRuntimeConfig', () => {
         const environment = validEnvironment();
         environment.NODE_ENV = 'staging';
         environment.REDIS_PASSWORD = 'redis-password';
+        environment.REDIS_TLS_ENABLED = 'true';
+        environment.REDIS_TLS_SERVERNAME = 'redis.internal.example';
 
         const result = loadRuntimeConfig(environment);
 
-        expect(result.redis.password).toBe('redis-password');
+        expect(result.database).toEqual(expect.objectContaining({
+            encrypt: true,
+            trustServerCertificate: false,
+        }));
+        expect(result.redis).toEqual({
+            host: 'redis-host',
+            port: 6379,
+            password: 'redis-password',
+            tlsEnabled: true,
+            tlsServername: 'redis.internal.example',
+        });
+    });
+
+    it.each([
+        ['disabled SQL encryption', 'DB_ENCRYPT', 'false'],
+        ['trusted SQL Server certificate', 'DB_TRUST_SERVER_CERTIFICATE', 'true'],
+        ['disabled Redis TLS', 'REDIS_TLS_ENABLED', 'false'],
+    ])('rejects %s in staging', (_description, variable, value) => {
+        const environment = validEnvironment();
+        environment.NODE_ENV = 'staging';
+        environment.REDIS_PASSWORD = 'redis-password';
+        environment.REDIS_TLS_ENABLED = 'true';
+        environment[variable] = value;
+
+        expect(() => loadRuntimeConfig(environment)).toThrow(RuntimeConfigError);
+
+        try {
+            loadRuntimeConfig(environment);
+        } catch (error) {
+            expect((error as RuntimeConfigError).invalidVariables).toContain(variable);
+        }
+    });
+
+    it('requires Redis TLS to be explicit in production', () => {
+        const environment = validEnvironment();
+        environment.NODE_ENV = 'production';
+        environment.REDIS_PASSWORD = 'redis-password';
+
+        expect(() => loadRuntimeConfig(environment)).toThrow(RuntimeConfigError);
+
+        try {
+            loadRuntimeConfig(environment);
+        } catch (error) {
+            expect((error as RuntimeConfigError).invalidVariables).toContain('REDIS_TLS_ENABLED');
+        }
+    });
+
+    it.each(['TRUE', 'yes', '1'])('rejects invalid boolean value %s', value => {
+        const environment = validEnvironment();
+        environment.DB_ENCRYPT = value;
+
+        expect(() => loadRuntimeConfig(environment)).toThrow(RuntimeConfigError);
     });
 
     it.each([
