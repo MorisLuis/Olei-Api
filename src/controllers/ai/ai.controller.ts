@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { generateSQLFromPrompt } from '../../services/ai/sqlPrompt.service';
 import { executeSQLQuery } from './utils/executeSQLQuery';
 import { isSafeSQL } from './utils/isSafeSQL';
@@ -7,8 +7,7 @@ import { classifyAIResponse } from './utils/classifier';
 import { errorResponse, successResponse } from '../../helpers/response';
 import redisClient from '../../config/redisClient';
 import { v4 } from 'uuid';
-import path from 'path';
-import fs from "fs";
+import { exportQueryToDestination } from '../../services/ai/exportQuery.service';
 
 /** @description Converts a CRM prompt to read-only SQL, executes it, and caches the query for export.
  * @client CRM
@@ -57,44 +56,42 @@ export const askAI = async (req: Request, res: Response): Promise<Response> => {
  * @request Query parameter `queryId`; requires the CRM web tenant session.
  * @response CSV attachment, HTTP 404 for an absent or expired query, or HTTP 500 for unexpected failures.
  */
-export const exportToCSV = async (req: Request, res: Response): Promise<Response> => {
+export const exportToCSV = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const { queryId } = req.query;
+
         const record = await redisClient.get(`agent:sql:${queryId}`);
         if (!record) {
             return errorResponse(res, 'Consulta no encontrada o expirada', 404);
         }
+
         let { sql } = JSON.parse(record);
         sql = sql.replace(/\boffset\s+\d+\s+rows\s+fetch\s+next\s+\d+\s+rows\s+only\s*;?/i, '');
 
         const userSession = req.sessionWeb;
-        const data = await executeSQLQuery({ userSession, query: sql });
-        const headers = Object.keys(data[0] ? data[0] : {});
-        const csvRows: string[] = [];
-        csvRows.push(headers.join(','));
-        for (const row of data) {
-            const values = headers.map(header => {
-                const escaped = ('' + row[header]).replace(/"/g, '\\"');
-                return `"${escaped}"`;
-            });
-            csvRows.push(values.join(','));
-        }
-        const csvData = csvRows.join('\n');
-        const exportDir = path.join(process.cwd(), "tmp", "exports");
-        if (!fs.existsSync(exportDir)) {
-            fs.mkdirSync(exportDir, { recursive: true });
-        }
 
-        const filePath = path.join(exportDir, `report-${Date.now()}.csv`);
-        fs.writeFileSync(filePath, csvData);
+        res.status(200);
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader(
+            'Content-Disposition',
+            'attachment; filename=reporte.csv'
+        );
 
-        res.setHeader("Content-Type", "text/csv");
-        res.setHeader("Content-Disposition", "attachment; filename=reporte.csv");
-        return res.status(200).send(csvData);
-
+        await exportQueryToDestination(userSession, sql, res);
 
     } catch (error) {
-        return res.status(500).json({ error: `Error del servidor compa: ${error}` });
+        if (res.destroyed) {
+            return;
+        }
 
+        if (res.headersSent) {
+            res.destroy();
+            return;
+        }
+
+        res.removeHeader('Content-Type');
+        res.removeHeader('Content-Disposition');
+
+        return next(error);
     }
 }
