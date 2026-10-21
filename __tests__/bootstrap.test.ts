@@ -1,9 +1,36 @@
 import type { RuntimeConfig } from '../src/config';
 import { bootstrap } from '../src/bootstrap';
+import { loadRuntimeConfig } from '../src/config';
+import { Server } from '../src/models/server';
+import { registerShutdownSignals } from '../src/lifecycle/shutdown';
+
+jest.mock('../src/config', () => ({ loadRuntimeConfig: jest.fn() }));
+jest.mock('../src/models/server', () => ({ Server: jest.fn() }));
+jest.mock('../src/lifecycle/shutdown', () => ({
+    createShutdown: jest.fn(() => jest.fn()),
+    registerShutdownSignals: jest.fn(),
+}));
 
 const runtimeConfig = { port: 4321, shutdownTimeoutMs: 25_000 } as RuntimeConfig;
 
 describe('bootstrap', () => {
+    it('loads the default server module after validation and starts it', async () => {
+        jest.mocked(loadRuntimeConfig).mockReturnValue(runtimeConfig);
+        // eslint-disable-next-line no-unused-vars -- This is a TypeScript receiver annotation.
+        jest.mocked(Server).mockImplementation(function (this: Server) {
+            expect(loadRuntimeConfig).toHaveBeenCalledTimes(1);
+            this.start = jest.fn().mockResolvedValue(undefined);
+            this.stop = jest.fn();
+            return this;
+        });
+
+        const server = await bootstrap();
+
+        expect(loadRuntimeConfig).toHaveBeenCalledTimes(1);
+        expect(Server).toHaveBeenCalledWith(4321);
+        expect(server.start).toHaveBeenCalledTimes(1);
+        expect(registerShutdownSignals).toHaveBeenCalledTimes(1);
+    });
     it('validates configuration before constructing and starting the server', async () => {
         const events: string[] = [];
         const start = jest.fn(() => {
