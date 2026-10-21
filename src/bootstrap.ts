@@ -1,12 +1,16 @@
+/* global require */
 import { loadRuntimeConfig } from './config';
 import { createShutdown, registerShutdownSignals } from './lifecycle/shutdown';
 import type { ApplicationServer } from './types';
+import type * as ServerModule from './models/server';
 
 
-const createServer = async (port: number): Promise<ApplicationServer> => {
-    const { Server } = await import('./models/server.js');
+const createServer = (port: number): Promise<ApplicationServer> => Promise.resolve().then(() => {
+    // Defer loading until configuration is validated. Extensionless CommonJS
+    // resolution works with both ts-node-dev sources and compiled JavaScript.
+    const { Server }: typeof ServerModule = require('./models/server');
     return new Server(port);
-};
+});
 
 const registerShutdown = (server: ApplicationServer, timeoutMs: number): void => {
     registerShutdownSignals(createShutdown(server, timeoutMs));
