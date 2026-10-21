@@ -609,3 +609,132 @@ Source rollback consists only of reverting this documentation section. Reverting
 - No ECS execution role, application task role, secret injection, log group, network, ingress, or running task exists yet.
 - ECR storage continues until the exact image and repository are deleted.
 - Promotion must use the verified digest rather than rebuilding environment-specific images.
+
+## Milestone 5: AWS networking design
+
+### Status and scope
+
+Task 1 added and verified secure SQL Server and Redis transport configuration in the application. Task 2 defines the staging network before any infrastructure is created. No VPC, subnet, route table, internet gateway, NAT gateway, Elastic IP, load balancer, security group, ECS service, or task was created by these tasks, so they introduced no AWS infrastructure cost.
+
+The intended workload Region is `us-east-2`. The staging SQL Server, Redis service, and most users are in Mexico. This design keeps the previously selected Region for the learning deployment, but latency must be measured during the temporary live test. A Mexico Region may be evaluated later; it is not selected by this document.
+
+### Proposed staging topology
+
+The temporary learning environment uses this address plan:
+
+| Component | Address or placement |
+| --- | --- |
+| VPC | `10.20.0.0/16` |
+| Public subnet A | `10.20.0.0/24` in one Availability Zone |
+| Public subnet B | `10.20.1.0/24` in a different Availability Zone |
+| Private subnet A | `10.20.10.0/24` in the first Availability Zone |
+| Private subnet B | `10.20.11.0/24` in the second Availability Zone |
+| Application Load Balancer | Both public subnets |
+| NAT gateway and Elastic IP | Public subnet A only |
+| ECS Fargate tasks | Private subnets only |
+
+```text
+Restricted developer IP
+          |
+          v
+ Internet Gateway
+          |
+          v
+ Public ALB in two public subnets
+          |
+          | TCP 5001, allowed only by security-group reference
+          v
+ ECS Fargate task in a private subnet
+          |
+          v
+ Single NAT gateway + fixed Elastic IP
+          |
+          +--> approved staging SQL Server
+          +--> approved staging Redis service
+          +--> required HTTPS and approved SMTP destinations
+```
+
+Two public and two private subnets make the intended placement explicit and allow later multi-Availability-Zone scheduling. The single NAT gateway is a deliberate short-lived learning compromise to reduce cost. It is not highly available: failure of its Availability Zone or the gateway can remove outbound connectivity from tasks in both private subnets. A production design would normally evaluate one NAT gateway per active Availability Zone or private service endpoints based on availability and cost requirements.
+
+The published application image is Linux ARM64. Any future ECS task definition must select the ARM64 runtime architecture or publish a matching AMD64 image before deployment.
+
+### Routes and public-address behavior
+
+The public route table contains the VPC-local route plus `0.0.0.0/0` to an internet gateway. Both public subnets use this table.
+
+The private route table contains the VPC-local route plus `0.0.0.0/0` to the single NAT gateway. Both private subnets use this table. Fargate tasks do not receive public IP addresses. The NAT gateway translates their outbound connections so the external staging services see the NAT gateway's fixed Elastic IP.
+
+An Application Load Balancer distributes inbound HTTP requests; it does not provide the task's fixed outbound IP. The NAT gateway provides outbound translation; it does not accept unsolicited inbound internet connections or load-balance API requests.
+
+Default network ACLs are sufficient for the first controlled lab. Custom network ACLs add stateless rules and ephemeral-port complexity without replacing the stateful security groups. They should be introduced only for a specific additional control requirement.
+
+### Security-group and external firewall rules
+
+The first live test must use narrowly scoped rules:
+
+| Boundary | Authorized traffic |
+| --- | --- |
+| ALB inbound | Temporary HTTP access only from the operator's current public IP `/32`; production would require HTTPS and an approved certificate |
+| ALB outbound | TCP `5001` to the ECS task security group |
+| ECS task inbound | TCP `5001` from the ALB security group only |
+| ECS task outbound to SQL | Exact SQL Server port and approved destination IP range |
+| ECS task outbound to Redis | Exact Redis TLS port and approved destination IP range |
+| ECS task outbound to AWS/external HTTPS | TCP `443` as required for image pulls, AWS APIs, and approved application dependencies |
+| ECS task outbound to SMTP | Only the approved SMTP host and port if email is included in the test |
+| DNS | DNS resolution to the VPC resolver as required |
+
+Security groups can reference other security groups inside the VPC, but they cannot restrict arbitrary internet egress by domain name. If an external service exposes changing IP ranges, the live design must either document the justified broader rule, use a service-supported private connection, or omit that dependency from the lab. No database, Redis, or SMTP port should be opened broadly to `0.0.0.0/0`.
+
+The owner of each external staging service must authorize an allowlist entry for the NAT Elastic IP and the exact service port. Those external rules must be removed after the temporary lab. The API is not authorized to use production databases or production Redis during this exercise.
+
+### Encryption and credential boundaries
+
+Network reachability is not sufficient security. SQL Server and Redis credentials must be injected at runtime rather than placed in the image, task definition text, repository, or logs. Secret storage and task permissions are deferred to Milestone 6.
+
+For staging and production, the application now requires:
+
+- SQL Server encryption enabled.
+- SQL Server certificate trust bypass disabled.
+- Redis TLS enabled.
+- A Redis password present.
+
+The SQL Server certificate must chain to a trusted certificate authority and match the hostname used by the application. Redis must use its certificate hostname as the TLS server name when that differs from the connection endpoint. The live verification must fail closed rather than enabling certificate bypasses to make an invalid certificate work.
+
+### Temporary-lab cost boundary
+
+The live network has not yet been authorized or created. Its later run is constrained to a same-day learning exercise:
+
+- One Application Load Balancer, one NAT gateway, and one Fargate task.
+- Less than 1 GB of intentional data transfer.
+- Target duration of no more than four hours.
+- Planning target of approximately USD 0.50–1.00 for the exercise.
+- Stop and investigate before projected or observed incremental cost reaches USD 2.00.
+- Absolute project ceiling of USD 5.00; budget alerts are notifications, not automatic shutdown controls.
+
+Actual AWS pricing and taxes can change and must be checked immediately before creation. NAT gateway and load-balancer hourly charges continue while those resources exist, even if the application is idle. The existing ECR storage charge is separate from the temporary networking estimate.
+
+### Required live-test evidence
+
+A later authorized task must record, without exposing account identifiers, credentials, hostnames, or public IP addresses:
+
+1. The intended Identity Center profile, account, and `us-east-2` Region were verified.
+2. The external SQL Server and Redis owners approved the NAT IP, exact ports, certificate names, and connection limits.
+3. The ALB can reach the task health endpoint while the task itself has no public IP.
+4. The task can establish certificate-verified connections to approved staging SQL Server and Redis services.
+5. Unapproved inbound access is rejected.
+6. Resource tags and live costs are checked before and after the test.
+7. Every temporary resource and external allowlist rule is removed and absence is verified.
+
+### Cleanup boundary
+
+Before creation, the implementation task must prepare exact resource names and an ordered cleanup runbook. Cleanup must stop and remove ECS services and tasks first, then remove the load balancer resources, NAT gateway and Elastic IP, routes, subnets, security groups, internet gateway, and finally the VPC. External SQL Server and Redis firewall allowlist entries must also be removed. Dependency checks and AWS deletion delays must be handled explicitly; broad or wildcard deletion commands are prohibited.
+
+ECR, Identity Center, budgets, and account contacts are existing retained controls and are outside this temporary network cleanup boundary. Source rollback consists of reverting the Milestone 5 application and documentation changes; it cannot delete AWS resources and must never be treated as infrastructure cleanup.
+
+### Remaining decisions before Task 3
+
+- Confirm the current public operator IP only at creation time; do not store it in the repository.
+- Obtain the approved staging SQL Server and Redis destination ports, IP ranges, TLS hostnames, and connection limits from their owners.
+- Decide whether SMTP is necessary for the learning test; omit its network access if it is not being tested.
+- Check current `us-east-2` pricing immediately before authorization.
+- Define exact names, creation order, verification commands, cleanup commands, and stop conditions for the temporary lab.
