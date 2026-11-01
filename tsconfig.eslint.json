@@ -4,7 +4,8 @@
     "include": [
         "src",
         "__tests__",
-        "__mocks__"
+        "__mocks__",
+        "examples"
     ],
     "exclude": [
         "node_modules",
