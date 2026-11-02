@@ -6,6 +6,8 @@ export interface LogMetadata {
     statusCode?: number;
     code?: string | null;
     issueCount?: number;
+    jobId?: number;
+    threadId?: number;
 }
 
 type LogLevel = 'info' | 'warn' | 'error';
@@ -58,6 +60,8 @@ const write = (level: LogLevel, event: string, metadata: LogMetadata = {}): void
             ...(metadata.statusCode === undefined ? {} : { statusCode: metadata.statusCode }),
             ...(metadata.code === undefined ? {} : { code: metadata.code }),
             ...(metadata.issueCount === undefined ? {} : { issueCount: metadata.issueCount }),
+            ...(metadata.jobId === undefined ? {} : { jobId: metadata.jobId }),
+            ...(metadata.threadId === undefined ? {} : { threadId: metadata.threadId }),
         });
     } catch {
         output = JSON.stringify({
