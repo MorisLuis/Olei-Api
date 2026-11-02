@@ -3,6 +3,8 @@ import type { closeHttpServer, listen } from "./server";
 export interface ServerDependencies {
     connectDatabase: () => Promise<unknown>;
     connectRedis: () => Promise<void>;
+    startReportWorker: () => Promise<void>;
+    closeReportWorker: () => Promise<void>;
     closeDatabase: () => Promise<void>;
     closeRedis: () => Promise<void>;
     abortRedis: () => void;
