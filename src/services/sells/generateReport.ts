@@ -3,7 +3,8 @@ import type { SellReportParameters, SellReportServiceResponse } from './types';
 import { sellsProductsQuery } from '../../database/querys/sellsProducts';
 import { sellsQuery } from '../../database/querys/sells';
 import { formateDate } from '../../utils/formateDate';
-import { createSellsReportPdf } from './utils/createSellsReportPdf';
+import { sellReportWorkerManager } from './workers';
+import type { sellsReportPdfParams } from './utils/types';
 
 const generateReportSells = async ({
     Id_Almacen,
@@ -49,7 +50,7 @@ const generateReportSells = async ({
         subtotal: product.Importe
     }));
 
-    const { pdfBuffer, fileName } = await createSellsReportPdf({
+    const reportInput: sellsReportPdfParams = {
         sellDetails: {
             name: sell.Nombre.trim(),
             date: formateDate(sell.Fecha),
@@ -57,14 +58,16 @@ const generateReportSells = async ({
             phoneNumber: sell.Telefono1.trim(),
             email: sell.CorreoVtas.trim(),
             seller: sell.Vendedor,
-            iva: sell.Impuesto,
-            subtotal: sell.Subtotal,
-            total: sell.Total,
-            Folio: sell.Folio,
+            iva: String(sell.Impuesto),
+            subtotal: String(sell.Subtotal),
+            total: String(sell.Total),
+            Folio: String(sell.Folio),
             TipoDocNombre: sell.TipoDocNombre
         },
         sells: sellsData
-    });
+    };
+
+    const { pdfBuffer, fileName } = await sellReportWorkerManager.render(reportInput);
 
     return {
         pdfBuffer,
