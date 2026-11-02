@@ -1,3 +1,4 @@
+import { setImmediate } from 'node:timers';
 import { EventEmitter } from 'node:events';
 import type { Server as HttpServer } from 'node:http';
 
@@ -9,6 +10,11 @@ const createDependencies = () => {
     const dependencies = {
         connectDatabase: jest.fn(() => Promise.resolve()),
         connectRedis: jest.fn(() => Promise.resolve()),
+        startReportWorker: jest.fn(() => Promise.resolve()),
+        closeReportWorker: jest.fn(() => {
+            events.push('close-worker');
+            return Promise.resolve();
+        }),
         closeDatabase: jest.fn(() => {
             events.push('close-database');
             return Promise.resolve();
@@ -52,7 +58,7 @@ describe('Server shutdown', () => {
             isRedisReady: () => true,
         })).toBe(false);
         await stopping;
-        expect(events).toEqual(['close-http', 'stop-timer', 'close-database', 'close-redis']);
+        expect(events).toEqual(['close-http', 'close-worker', 'stop-timer', 'close-database', 'close-redis']);
     });
 
     it('waits for HTTP draining before dependency cleanup', async () => {
@@ -69,12 +75,35 @@ describe('Server shutdown', () => {
         await Promise.resolve();
 
         expect(events).toEqual(['close-http']);
+        expect(dependencies.closeReportWorker).not.toHaveBeenCalled();
         expect(dependencies.closeDatabase).not.toHaveBeenCalled();
         expect(dependencies.closeRedis).not.toHaveBeenCalled();
 
         finishHttpClose();
         await stopping;
-        expect(events).toEqual(['close-http', 'stop-timer', 'close-database', 'close-redis']);
+        expect(events).toEqual(['close-http', 'close-worker', 'stop-timer', 'close-database', 'close-redis']);
+    });
+
+    it('waits for report worker shutdown before closing database and Redis', async () => {
+        const { dependencies, events } = createDependencies();
+        let finishWorkerClose!: () => void;
+        dependencies.closeReportWorker.mockImplementation(() => new Promise(resolve => {
+            events.push('close-worker');
+            finishWorkerClose = resolve;
+        }));
+        const server = new Server(5001, dependencies);
+        await server.start();
+
+        const stopping = server.stop();
+        await new Promise<void>(resolve => { setImmediate(resolve); });
+
+        expect(events).toEqual(['close-http', 'close-worker']);
+        expect(dependencies.closeDatabase).not.toHaveBeenCalled();
+        expect(dependencies.closeRedis).not.toHaveBeenCalled();
+
+        finishWorkerClose();
+        await stopping;
+        expect(events).toEqual(['close-http', 'close-worker', 'stop-timer', 'close-database', 'close-redis']);
     });
 
     it('returns the same shutdown operation for repeated calls', async () => {
@@ -88,6 +117,7 @@ describe('Server shutdown', () => {
         expect(second).toBe(first);
         await first;
         expect(dependencies.closeHttpServer).toHaveBeenCalledTimes(1);
+        expect(dependencies.closeReportWorker).toHaveBeenCalledTimes(1);
         expect(dependencies.closeDatabase).toHaveBeenCalledTimes(1);
         expect(dependencies.closeRedis).toHaveBeenCalledTimes(1);
     });
@@ -98,6 +128,7 @@ describe('Server shutdown', () => {
         dependencies.stopCleanupTimer.mockImplementation(() => {
             throw new Error('timer close failed');
         });
+        dependencies.closeReportWorker.mockRejectedValue(new Error('worker close failed'));
         dependencies.closeDatabase.mockRejectedValue(new Error('sql close failed'));
         dependencies.closeRedis.mockRejectedValue(new Error('redis close failed'));
         const server = new Server(5001, dependencies);
@@ -106,6 +137,7 @@ describe('Server shutdown', () => {
         await expect(server.stop()).rejects.toThrow('Application resource cleanup failed');
 
         expect(dependencies.stopCleanupTimer).toHaveBeenCalledTimes(1);
+        expect(dependencies.closeReportWorker).toHaveBeenCalledTimes(1);
         expect(dependencies.closeDatabase).toHaveBeenCalledTimes(1);
         expect(dependencies.closeRedis).toHaveBeenCalledTimes(1);
     });

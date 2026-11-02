@@ -14,6 +14,14 @@ const createDependencies = () => {
         events.push('redis');
         return Promise.resolve();
     });
+    const startReportWorker = jest.fn(() => {
+        events.push('worker');
+        return Promise.resolve();
+    });
+    const closeReportWorker = jest.fn(() => {
+        events.push('close-worker');
+        return Promise.resolve();
+    });
     const closeDatabase = jest.fn(() => {
         events.push('close-database');
         return Promise.resolve();
@@ -41,6 +49,8 @@ const createDependencies = () => {
         dependencies: {
             connectDatabase,
             connectRedis,
+            startReportWorker,
+            closeReportWorker,
             closeDatabase,
             closeRedis,
             abortRedis,
@@ -64,13 +74,13 @@ describe('Server startup', () => {
         consoleLogSpy.mockRestore();
     });
 
-    it('connects SQL and Redis before opening the HTTP listener', async () => {
+    it('connects SQL, Redis and the report worker before opening the HTTP listener', async () => {
         const { dependencies, events } = createDependencies();
         const server = new Server(5001, dependencies);
 
         await server.start();
 
-        expect(events).toEqual(['database', 'redis', 'http']);
+        expect(events).toEqual(['database', 'redis', 'worker', 'http']);
         expect(dependencies.listen).toHaveBeenCalledWith(server.app, 5001);
         expect(isReady({
             isDatabaseConnected: () => true,
@@ -88,7 +98,7 @@ describe('Server startup', () => {
 
         expect(dependencies.connectRedis).not.toHaveBeenCalled();
         expect(dependencies.listen).not.toHaveBeenCalled();
-        expect(events).toEqual(['abort-redis', 'close-database']);
+        expect(events).toEqual(['abort-redis', 'close-database', 'close-worker']);
         expect(isReady({
             isDatabaseConnected: () => true,
             isRedisReady: () => true,
@@ -104,7 +114,25 @@ describe('Server startup', () => {
         await expect(server.start()).rejects.toBe(redisError);
 
         expect(dependencies.listen).not.toHaveBeenCalled();
-        expect(events).toEqual(['database', 'abort-redis', 'close-database']);
+        expect(events).toEqual(['database', 'abort-redis', 'close-database', 'close-worker']);
+    });
+
+    it('does not listen when worker startup fails and preserves that failure', async () => {
+        const { dependencies } = createDependencies();
+        const workerError = new Error('worker unavailable');
+        dependencies.startReportWorker.mockRejectedValue(workerError);
+        dependencies.closeReportWorker.mockRejectedValue(new Error('worker cleanup failed'));
+        const server = new Server(5001, dependencies);
+
+        await expect(server.start()).rejects.toBe(workerError);
+
+        expect(dependencies.listen).not.toHaveBeenCalled();
+        expect(dependencies.closeReportWorker).toHaveBeenCalledTimes(1);
+        expect(dependencies.closeDatabase).toHaveBeenCalledTimes(1);
+        expect(isReady({
+            isDatabaseConnected: () => true,
+            isRedisReady: () => true,
+        })).toBe(false);
     });
 
     it('cleans up dependencies when the HTTP listener fails', async () => {
@@ -115,7 +143,7 @@ describe('Server startup', () => {
 
         await expect(server.start()).rejects.toBe(listenError);
 
-        expect(events).toEqual(['database', 'redis', 'abort-redis', 'close-database']);
+        expect(events).toEqual(['database', 'redis', 'worker', 'abort-redis', 'close-database', 'close-worker']);
     });
 
     it('preserves the startup failure when rollback also fails', async () => {
@@ -126,11 +154,13 @@ describe('Server startup', () => {
             throw new Error('redis cleanup failed');
         });
         dependencies.closeDatabase.mockRejectedValue(new Error('sql cleanup failed'));
+        dependencies.closeReportWorker.mockRejectedValue(new Error('worker cleanup failed'));
         const server = new Server(5001, dependencies);
 
         await expect(server.start()).rejects.toBe(startupError);
 
         expect(dependencies.abortRedis).toHaveBeenCalledTimes(1);
         expect(dependencies.closeDatabase).toHaveBeenCalledTimes(1);
+        expect(dependencies.closeReportWorker).toHaveBeenCalledTimes(1);
     });
 });

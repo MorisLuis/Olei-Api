@@ -38,6 +38,7 @@ import cookieParser from 'cookie-parser';
 import type { ServerDependencies } from "./types";
 import { markNotReady, markReady } from '../services/health/health.service';
 import { logger } from '../helpers/logger';
+import { sellReportWorkerManager } from '../services/sells/workers';
 
 export const listen = async (app: Application, port: number): Promise<HttpServer> => new Promise((resolve, reject) => {
     const httpServer = app.listen(port);
@@ -70,6 +71,8 @@ export const closeHttpServer = async (httpServer: HttpServer): Promise<void> => 
 const defaultDependencies: ServerDependencies = {
     connectDatabase: dbConnectionMain,
     connectRedis,
+    startReportWorker: () => sellReportWorkerManager.start(),
+    closeReportWorker: () => sellReportWorkerManager.close(),
     closeDatabase: closeAllDatabaseConnections,
     closeRedis,
     abortRedis: abortRedisConnection,
@@ -209,6 +212,7 @@ export class Server {
         try {
             await this.dependencies.connectDatabase();
             await this.dependencies.connectRedis();
+            await this.dependencies.startReportWorker();
             this.httpServer = await this.dependencies.listen(this.app, this.port);
             markReady();
             logger.info('server.started', { port: this.port });
@@ -220,6 +224,7 @@ export class Server {
                 // Preserve the startup failure; shutdown logging is handled at the process boundary.
             }
             await this.dependencies.closeDatabase().catch(() => undefined);
+            await this.dependencies.closeReportWorker().catch(() => undefined);
             throw error;
         }
     }
@@ -240,6 +245,8 @@ export class Server {
         if (httpServer) {
             results.push(...await Promise.allSettled([this.dependencies.closeHttpServer(httpServer)]));
         }
+
+        results.push(...await Promise.allSettled([this.dependencies.closeReportWorker()]));
 
         try {
             this.dependencies.stopCleanupTimer();
